@@ -1,0 +1,5380 @@
+{
+  "state": "Wisconsin",
+  "election_cycle": "2026",
+  "primary_election_date": "August 11, 2026",
+  "general_election_date": "November 3, 2026",
+  "spring_primary_date": "February 17, 2026",
+  "spring_general_date": "April 7, 2026",
+  "filing_deadline": "June 1, 2026",
+  "primary_type": "Open Primary (voters do not need to be party members)",
+  "data_as_of": "July 17, 2026",
+  "data_sources": {
+    "ballotpedia": {
+      "name": "Ballotpedia",
+      "base_url": "https://ballotpedia.org",
+      "description": "Nonpartisan political encyclopedia covering candidates, races, and election data",
+      "used_for": [
+        "Candidate lists",
+        "Race overviews",
+        "Incumbent status",
+        "Party affiliation",
+        "State Assembly/Senate district data"
+      ]
+    },
+    "wuwm_voter_guide": {
+      "name": "WUWM 89.7 FM Milwaukee Public Radio — Voter Guide",
+      "base_url": "https://www.wuwm.com/voterguide",
+      "description": "Milwaukee-area public radio voter guide with candidate questionnaire responses",
+      "used_for": [
+        "Candidate bios",
+        "Occupation details",
+        "Key priorities",
+        "Notable endorsements",
+        "Candidate Q&A responses"
+      ]
+    },
+    "wisconsin_ethics_commission": {
+      "name": "Wisconsin Ethics Commission — Sunshine Campaign Finance",
+      "base_url": "https://campaignfinance.wi.gov",
+      "description": "Official Wisconsin state campaign finance reporting system. Contains all state-level candidate finance reports from July 2008 to present.",
+      "used_for": [
+        "State candidate campaign finance data",
+        "Contributions",
+        "Disbursements",
+        "PAC activity"
+      ],
+      "data_access": {
+        "web_portal": "https://campaignfinance.wi.gov/browse-data",
+        "registrants_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+        "transactions_search": "https://campaignfinance.wi.gov/browse-data/transactions",
+        "reports_search": "https://campaignfinance.wi.gov/browse-data/reports",
+        "csv_download": "Available via 'Download Results' button on any search — up to 100,000 rows per download",
+        "contact": "campaignfinance@wi.gov | (608) 266-8123",
+        "note": "No public REST API. Data is accessible via web portal with CSV export. Commercial use of data is prohibited under Wis. Stat. § 11.1304(12). Non-commercial research, journalism, and general information use is permitted."
+      }
+    },
+    "fec_openfec_api": {
+      "name": "Federal Election Commission — OpenFEC API",
+      "base_url": "https://api.open.fec.gov/v1",
+      "description": "Official FEC REST API for federal candidate and committee campaign finance data. Covers U.S. House and Senate candidates only (not state-level).",
+      "used_for": [
+        "U.S. House candidate finance totals",
+        "Individual contributions",
+        "Disbursements",
+        "Committee data",
+        "Independent expenditures"
+      ],
+      "data_access": {
+        "api_docs": "https://api.open.fec.gov/developers/",
+        "api_key_signup": "https://api.data.gov/signup/",
+        "demo_key": "DEMO_KEY (rate-limited: 1,000 calls/hour, 100 results/page)",
+        "production_key": "Register at https://api.data.gov/signup/ for 1,000 calls/hour",
+        "bulk_downloads": "https://www.fec.gov/data/browse-data/?tab=bulk-data",
+        "web_portal": "https://www.fec.gov/data/",
+        "note": "Free to use. Commercial restrictions apply to contributor lists. Wisconsin state candidates (Governor, AG, Assembly, Senate, etc.) are NOT in FEC data — use Wisconsin Ethics Commission Sunshine for those."
+      },
+      "key_endpoints": {
+        "candidates_list": "GET /v1/candidates/?state=WI&election_year=2026&office=H",
+        "candidate_detail": "GET /v1/candidate/{candidate_id}/",
+        "candidate_totals": "GET /v1/candidates/totals/?state=WI&election_year=2026&office=H",
+        "candidate_history": "GET /v1/candidate/{candidate_id}/history/",
+        "committee_totals": "GET /v1/committee/{committee_id}/totals/",
+        "receipts": "GET /v1/schedules/schedule_a/?contributor_state=WI&two_year_transaction_period=2026",
+        "disbursements": "GET /v1/schedules/schedule_b/?committee_id={committee_id}",
+        "independent_expenditures": "GET /v1/schedules/schedule_e/?candidate_id={candidate_id}",
+        "filings": "GET /v1/filings/?candidate_id={candidate_id}&form_type=F3"
+      },
+      "office_codes": {
+        "H": "U.S. House of Representatives",
+        "S": "U.S. Senate",
+        "P": "U.S. President",
+        "G": "Governor (state — not tracked by FEC)"
+      }
+    },
+    "fec_web_portal": {
+      "name": "FEC Data Portal",
+      "base_url": "https://www.fec.gov/data",
+      "description": "Web-based FEC data explorer for browsing candidates, committees, and filings",
+      "used_for": [
+        "Manual research",
+        "Candidate lookups",
+        "Committee lookups"
+      ],
+      "data_access": {
+        "wi_house_candidates": "https://www.fec.gov/data/candidates/house/?state=WI&election_year=2026&is_active_candidate=true",
+        "wi_senate_candidates": "https://www.fec.gov/data/candidates/senate/?state=WI&election_year=2026&is_active_candidate=true"
+      }
+    },
+    "pbs_wisconsin": {
+      "name": "PBS Wisconsin",
+      "base_url": "https://pbswisconsin.org",
+      "description": "Wisconsin public broadcasting news and election coverage",
+      "used_for": [
+        "Candidate background",
+        "Race context",
+        "Endorsements"
+      ]
+    },
+    "ap_news": {
+      "name": "Associated Press",
+      "base_url": "https://apnews.com",
+      "description": "Wire service election reporting",
+      "used_for": [
+        "Race ratings",
+        "Candidate news",
+        "Withdrawal confirmations"
+      ]
+    },
+    "milwaukee_journal_sentinel": {
+      "name": "Milwaukee Journal Sentinel",
+      "base_url": "https://www.jsonline.com",
+      "description": "Wisconsin's largest newspaper",
+      "used_for": [
+        "Candidate backgrounds",
+        "Endorsements",
+        "Campaign finance context"
+      ]
+    },
+    "wispolitics": {
+      "name": "WisPolitics.com",
+      "base_url": "https://www.wispolitics.com",
+      "description": "Wisconsin political news and analysis",
+      "used_for": [
+        "Race competitiveness analysis",
+        "Candidate news",
+        "Filing information"
+      ]
+    }
+  },
+  "races": [
+    {
+      "race_id": "WI-GOV-2026",
+      "office": "Governor of Wisconsin",
+      "level": "State Executive",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "incumbent": "Tony Evers (D) — not seeking re-election (term-limited)",
+      "race_rating": {
+        "Cook_Political_Report": "Toss-up",
+        "Sabatos_Crystal_Ball": "Toss-up",
+        "Inside_Elections": "Battleground Democratic"
+      },
+      "sources": [
+        {
+          "name": "Ballotpedia — Wisconsin Governor Election 2026",
+          "url": "https://ballotpedia.org/Wisconsin_gubernatorial_election,_2026"
+        },
+        {
+          "name": "WUWM Voter Guide — Governor",
+          "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+        },
+        {
+          "name": "PBS Wisconsin — Governor Race",
+          "url": "https://pbswisconsin.org/news-item/whos-running-for-wisconsin-governor-in-2026/"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "Wisconsin Ethics Commission — Sunshine",
+        "search_url": "https://campaignfinance.wi.gov/browse-data/registrants",
+        "instructions": "Search by candidate name under 'Registrant Type: State Candidate' to find their committee and finance reports",
+        "note": "Governor is a state office — not tracked by FEC. Use Wisconsin Sunshine only."
+      },
+      "primaries": {
+        "Democratic": {
+          "primary_date": "August 11, 2026",
+          "candidates": [
+            {
+              "name": "Joel Brennan",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Former Secretary of the Wisconsin Department of Administration",
+              "background": "Former Secretary of the Wisconsin Department of Administration (2019–2023) under Gov. Tony Evers; businessman and politician born 1970",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Joel_Brennan"
+                },
+                {
+                  "name": "Campaign Website",
+                  "url": "https://www.brennanforwi.com/"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Joel Brennan"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/Joel_Brennan_20260318_043347.jpeg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/joeltbrennan",
+                "facebook": "https://www.facebook.com/brennanforwi/",
+                "instagram": "https://www.instagram.com/brennanforwi/",
+                "youtube": "https://www.youtube.com/channel/UChjUd6kUgeiz-2ZXDmO-M9Q",
+                "campaign_website": "https://www.brennanforwi.com/"
+              }
+            },
+            {
+              "name": "David Crowley",
+              "party": "Democratic",
+              "status": "Withdrew — still on ballot",
+              "incumbent": false,
+              "current_occupation": "Milwaukee County Executive",
+              "background": "First Black man elected Milwaukee County Executive (since 2020); previously represented a Milwaukee district in the state Assembly",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/David_Crowley_(Wisconsin)"
+                },
+                {
+                  "name": "Milwaukee Journal Sentinel",
+                  "url": "https://www.jsonline.com/story/news/politics/elections/2026/06/01/david-crowley-drops-out-of-wisconsin-governor-race/"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "David Crowley"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/David_Crowley.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/DavidCCrowley",
+                "facebook": "https://www.facebook.com/CrowleyForWI",
+                "instagram": "https://www.instagram.com/crowleyforwi/",
+                "youtube": "https://www.youtube.com/@Crowley4Wisconsin",
+                "campaign_website": "https://www.crowleyforwi.com/"
+              }
+            },
+            {
+              "name": "Francesca Hong",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "State Representative",
+              "background": "Wisconsin State Assembly member representing District 76 (Madison, since 2021); former chef and restaurant owner; born November 4, 1988; first Asian American elected to Wisconsin Legislature; single mother",
+              "notes": "Republicans spending $2.2M in ads targeting Hong, suggesting they view her as their preferred opponent",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Francesca_Hong"
+                },
+                {
+                  "name": "Campaign Website",
+                  "url": "https://francescahong.com/"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Friends of Francesca Hong",
+                "sunshine_registrant_note": "Committee name: 'Friends of Francesca Hong'"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/Francesca_Hong_20230521_075010.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/FrancescaHongWI",
+                "facebook": "https://www.facebook.com/FrancescaHongWI/",
+                "instagram": "https://www.instagram.com/francescahongwi/",
+                "campaign_website": "https://francescahong.com/"
+              }
+            },
+            {
+              "name": "Brett Hulsey",
+              "party": "Democratic",
+              "status": "Withdrew — still on ballot",
+              "incumbent": false,
+              "current_occupation": "Small business owner (energy and environmental)",
+              "background": "Former state representative from Madison; former Dane County Board member; runs an energy and environmental small business",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Brett_Hulsey"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Brett Hulsey"
+              }
+            },
+            {
+              "name": "Tim Jacobson",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Unknown",
+              "background": "Registered with Wisconsin Ethics Commission; limited public information available",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Tim_Jacobson_(Wisconsin)"
+                },
+                {
+                  "name": "Wisconsin Ethics Commission",
+                  "url": "https://campaignfinance.wi.gov/browse-data/registrants"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Tim Jacobson"
+              }
+            },
+            {
+              "name": "Missy Hughes",
+              "party": "Democratic",
+              "status": "Withdrew — still on ballot",
+              "incumbent": false,
+              "current_occupation": "Former WEDC CEO",
+              "background": "Stepped down from leading the Wisconsin Economic Development Corporation to run for governor; previously an executive in the dairy industry",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Missy_Hughes"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Missy Hughes"
+              }
+            },
+            {
+              "name": "Sara Rodriguez",
+              "party": "Democratic",
+              "status": "Withdrew July 2026 — still on ballot",
+              "incumbent": false,
+              "current_occupation": "Lieutenant Governor",
+              "background": "Lieutenant Governor of Wisconsin under Gov. Tony Evers; formerly represented portions of Waukesha and Milwaukee counties in the state Assembly; registered nurse; withdrew citing campaign finance reporting issues",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Sara_Rodriguez"
+                },
+                {
+                  "name": "PBS Wisconsin",
+                  "url": "https://pbswisconsin.org/news-item/sara-rodriguez-drops-out-of-governors-race/"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Sara Rodriguez"
+              },
+              "photo_url": "https://run.imgix.net/98a95090-2bc5-43b6-ae07-49b29d81be74/24b6aa75-a644-4df1-8ab3-c9874cbaaa08/24b6aa75-a644-4df1-8ab3-c9874cbaaa08.png",
+              "photo_source": "Campaign website",
+              "social_media": {
+                "twitter_x": "https://x.com/saraforwi",
+                "facebook": "https://www.facebook.com/saraforwi/",
+                "instagram": "https://www.instagram.com/saraforwi/",
+                "campaign_website": "https://www.sararodriguez.com/"
+              }
+            },
+            {
+              "name": "Kelda Roys",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "State Senator",
+              "background": "Wisconsin State Senator representing District 26 (since 2021); attorney, small business owner, and former nonprofit executive; born June 24, 1979; previously served in the state Assembly; endorsed by WEAC (teachers union) and Lt. Gov. Mandela Barnes",
+              "key_priorities": [
+                "Standing up to Trump administration",
+                "Economic opportunity for all",
+                "Public education",
+                "Affordable housing",
+                "Reproductive freedom"
+              ],
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Kelda_Roys"
+                },
+                {
+                  "name": "Campaign Website",
+                  "url": "https://www.keldaroys.com/"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Kelda Roys"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/KHR-headshot-as-of-feb-2025-lite_20260625_190523_42508_1.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/keldahelenroys",
+                "facebook": "https://www.facebook.com/keldaroys/",
+                "instagram": "https://www.instagram.com/keldaroys/",
+                "campaign_website": "https://www.keldaroys.com/"
+              }
+            },
+            {
+              "name": "Zachary Roper",
+              "party": "Democratic",
+              "status": "Withdrew — still on ballot",
+              "incumbent": false,
+              "current_occupation": "College student",
+              "background": "Political science student at Carthage College; previously ran for Wisconsin State Assembly (District including Muskego); lost to Chuck Wichgers",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Zachary_Roper"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Zachary Roper"
+              }
+            },
+            {
+              "name": "Ryan Strnad",
+              "party": "Democratic",
+              "status": "Withdrew — still on ballot",
+              "incumbent": false,
+              "current_occupation": "Beer vendor (American Family Field)",
+              "background": "Lives in Mukwonago; left the Republican Party in 2001 to become a Democrat; running to improve the working class, healthcare, and education",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Ryan_Strnad"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Ryan Strnad"
+              }
+            }
+          ]
+        },
+        "Republican": {
+          "primary_date": "August 11, 2026",
+          "candidates": [
+            {
+              "name": "Tom Tiffany",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "U.S. Representative (WI-7)",
+              "background": "U.S. Representative for Wisconsin's 7th Congressional District (2020–present); former Wisconsin State Senator; endorsed by President Donald Trump (January 2026)",
+              "key_priorities": [
+                "Freeze property taxes",
+                "Eliminate Gov. Evers' 400-year revenue increase for schools",
+                "Cut regulations",
+                "Reduce housing/childcare/healthcare costs"
+              ],
+              "notes": "Trump endorsed Tiffany in January 2026",
+              "fec_candidate_id": "H0WI07101",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Tom_Tiffany"
+                },
+                {
+                  "name": "Campaign Website",
+                  "url": "https://tomtiffany.com/"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                },
+                {
+                  "name": "FEC Profile (as House candidate)",
+                  "url": "https://www.fec.gov/data/candidate/H0WI07101/"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Tiffany for Wisconsin",
+                "sunshine_registrant_note": "Committee name: 'Tiffany for Wisconsin'"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Tom_Tiffany.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/tomtiffanywi",
+                "facebook": "https://www.facebook.com/TomTiffanyWI",
+                "youtube": "https://www.youtube.com/channel/UCaOte_ojPfwzT0GA9seUjaA",
+                "campaign_website": "https://tomtiffany.com/"
+              }
+            },
+            {
+              "name": "Andy Manske",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Medical service tech",
+              "background": "Born in Milwaukee, raised in Franklin; has acknowledged having a 'very slim chance to win' against Tiffany; grassroots campaign",
+              "key_priorities": [
+                "Property tax reform for paid-off homeowners",
+                "AI to reduce government size",
+                "Marijuana legalization",
+                "High-speed rail"
+              ],
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Andrew_Manske"
+                },
+                {
+                  "name": "Campaign Website",
+                  "url": "https://andymanske4governor.com/"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Andy Manske"
+              },
+              "photo_url": "https://i0.wp.com/andymanske4governor.com/wp-content/uploads/2025/07/me.jpg",
+              "photo_source": "Campaign website",
+              "social_media": {
+                "twitter_x": "https://x.com/Andy_ManskeWI",
+                "facebook": "https://www.facebook.com/p/Andy-Manske-100074102976016/",
+                "campaign_website": "https://andymanske4governor.com/"
+              }
+            },
+            {
+              "name": "Josh Schoemann",
+              "party": "Republican",
+              "status": "Withdrew — still on ballot",
+              "incumbent": false,
+              "current_occupation": "Washington County Executive",
+              "background": "Washington County Executive; veteran; touts record of cutting taxes and reducing government staff",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Josh_Schoemann"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Josh Schoemann"
+              },
+              "photo_url": "https://cdnsm5-hosted.civiclive.com/UserFiles/Servers/Server_16227954/Image/theme/HomePage/JAS hp headshot.png",
+              "photo_source": "Official government page",
+              "social_media": {
+                "twitter_x": "https://x.com/JoshSchoemann",
+                "instagram": "https://www.instagram.com/joshschoemann/",
+                "campaign_website": "https://www.joshschoemann.com/"
+              }
+            }
+          ]
+        },
+        "Independent": {
+          "candidates": [
+            {
+              "name": "Oliver Carranza",
+              "party": "Independent",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Student (UW-Madison)",
+              "background": "UW-Madison student; running to challenge partisan gridlock; priorities include small businesses, manufacturing, healthcare costs, and public schools",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Oliver_Carranza"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Oliver Carranza"
+              },
+              "photo_url": "https://olivercarranza.com/img/Oliver_Vertical.jpg",
+              "photo_source": "Campaign website",
+              "social_media": {
+                "twitter_x": "https://x.com/CarranzaForGov",
+                "instagram": "https://www.instagram.com/carranzaforgov/",
+                "campaign_website": "https://olivercarranza.com/"
+              }
+            },
+            {
+              "name": "Crystal Harper",
+              "party": "Independent",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Unknown",
+              "background": "Limited public information available; active on social media",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Crystal_Harper_(Wisconsin)"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Crystal Harper"
+              }
+            },
+            {
+              "name": "Mike Kohn",
+              "party": "Independent",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Unknown",
+              "background": "Registered with Wisconsin Ethics Commission; limited public information available",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Mike_Kohn_(Wisconsin)"
+                },
+                {
+                  "name": "Wisconsin Ethics Commission",
+                  "url": "https://campaignfinance.wi.gov/browse-data/registrants"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Mike Kohn"
+              }
+            },
+            {
+              "name": "Korey Streich",
+              "party": "Independent",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Unknown",
+              "background": "Registered with Wisconsin Ethics Commission; limited public information available",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Korey_Streich"
+                },
+                {
+                  "name": "Wisconsin Ethics Commission",
+                  "url": "https://campaignfinance.wi.gov/browse-data/registrants"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Korey Streich"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "race_id": "WI-LTGOV-2026",
+      "office": "Lieutenant Governor of Wisconsin",
+      "level": "State Executive",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "notes": "Wisconsin holds separate gubernatorial and lieutenant gubernatorial primaries; nominees then run together on a single ticket in the general election.",
+      "sources": [
+        {
+          "name": "Ballotpedia — Wisconsin Lt. Governor Election 2026",
+          "url": "https://ballotpedia.org/Wisconsin_lieutenant_gubernatorial_election,_2026"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "Wisconsin Ethics Commission — Sunshine",
+        "search_url": "https://campaignfinance.wi.gov/browse-data/registrants",
+        "note": "Lt. Governor is a state office — use Wisconsin Sunshine only."
+      },
+      "primaries": {
+        "Democratic": {
+          "candidates": [
+            {
+              "name": "Sarah Godlewski",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Secretary of State (appointed)",
+              "background": "Former Wisconsin State Treasurer (2019–2023); appointed Secretary of State by Gov. Evers in 2023 after Doug La Follette's retirement; previously ran for U.S. Senate in 2022",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Sarah_Godlewski"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Sarah Godlewski"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/SarahGodlewski.png",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/SarahforWI",
+                "facebook": "https://www.facebook.com/SarahforWI/",
+                "instagram": "https://www.instagram.com/sarah.godlewski/",
+                "youtube": "https://www.youtube.com/c/SarahGodlewskiforWI/videos"
+              }
+            }
+          ]
+        },
+        "Republican": {
+          "candidates": [
+            {
+              "name": "Will Martin",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Will_Martin_(Wisconsin)"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Will Martin"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/Will_Martin.jpeg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/willmartinWI",
+                "facebook": "https://www.facebook.com/willmartinwi/",
+                "instagram": "https://www.instagram.com/willmartinwi/",
+                "campaign_website": "https://votewillmartin.com/"
+              }
+            },
+            {
+              "name": "David Varnam",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/David_Varnam"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "David Varnam"
+              }
+            }
+          ],
+          "withdrawn_or_disqualified": [
+            "Cyril Sablich (R)"
+          ]
+        }
+      }
+    },
+    {
+      "race_id": "WI-AG-2026",
+      "office": "Attorney General of Wisconsin",
+      "level": "State Executive",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "sources": [
+        {
+          "name": "Ballotpedia — Wisconsin Attorney General Election 2026",
+          "url": "https://ballotpedia.org/Wisconsin_Attorney_General_election,_2026"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "Wisconsin Ethics Commission — Sunshine",
+        "search_url": "https://campaignfinance.wi.gov/browse-data/registrants",
+        "note": "Attorney General is a state office — use Wisconsin Sunshine only."
+      },
+      "primaries": {
+        "Democratic": {
+          "candidates": [
+            {
+              "name": "Josh Kaul",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": true,
+              "current_occupation": "Incumbent Wisconsin Attorney General",
+              "background": "Incumbent Wisconsin Attorney General (since 2019); attorney; son of former U.S. Solicitor General Donald Verrilli",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Josh_Kaul"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Josh Kaul"
+              },
+              "photo_url": "https://images.squarespace-cdn.com/content/v1/62575ceda76ad474cf815b2f/253fdcff-f0e0-4b57-a152-021240e8c63f/headshot.jpg",
+              "photo_source": "Campaign website",
+              "social_media": {
+                "twitter_x": "https://x.com/JoshKaulWI",
+                "facebook": "https://www.facebook.com/JoshKaulWI/",
+                "instagram": "https://www.instagram.com/joshkaulwi/",
+                "campaign_website": "https://www.joshkaul.com/"
+              }
+            }
+          ]
+        },
+        "Republican": {
+          "candidates": [
+            {
+              "name": "Eric Toney",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Fond du Lac County District Attorney",
+              "background": "Fond du Lac County District Attorney; previously ran for Attorney General in 2022",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Eric_Toney"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Eric Toney"
+              },
+              "photo_url": "https://erictoney.com/wp-content/uploads/banner-toney.webp",
+              "photo_source": "Campaign website",
+              "social_media": {
+                "twitter_x": "https://x.com/EricJToney",
+                "facebook": "https://www.facebook.com/EricToneyWI/",
+                "instagram": "https://www.instagram.com/erictoney/",
+                "campaign_website": "https://erictoney.com/"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "race_id": "WI-SOS-2026",
+      "office": "Secretary of State of Wisconsin",
+      "level": "State Executive",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "notes": "Incumbent Sarah Godlewski stepped down to run for Lt. Governor. The Republican to receive the most votes in the primary will advance to the general election.",
+      "sources": [
+        {
+          "name": "Ballotpedia — Wisconsin Secretary of State Election 2026",
+          "url": "https://ballotpedia.org/Wisconsin_Secretary_of_State_election,_2026"
+        },
+        {
+          "name": "WUWM Voter Guide — Secretary of State",
+          "url": "https://www.wuwm.com/wisconsin-secretary-of-state-candidates-2026"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "Wisconsin Ethics Commission — Sunshine",
+        "search_url": "https://campaignfinance.wi.gov/browse-data/registrants",
+        "note": "Secretary of State is a state office — use Wisconsin Sunshine only."
+      },
+      "primaries": {
+        "Democratic": {
+          "candidates": [
+            {
+              "name": "JoCasta Zamarripa",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Milwaukee 8th District Alderperson",
+              "background": "Served a decade in the Wisconsin State Assembly (District 8, Milwaukee); currently in second term on the Milwaukee Common Council; led 'ICE Out of Milwaukee' effort; would be first out LGBTQ+ Constitutional Officer in Wisconsin",
+              "key_priorities": [
+                "Affordable childcare",
+                "Housing relief",
+                "Fully funded public schools",
+                "Protect Common School Fund",
+                "Freedom to vote"
+              ],
+              "notable_endorsements": [
+                "U.S. Senator Tammy Baldwin",
+                "U.S. Rep. Mark Pocan",
+                "LGBTQ+ Victory Fund",
+                "Wisconsin Working Families Party",
+                "Bricklayers and Allied Craftworkers Union",
+                "Milwaukee Mayor Cavalier Johnson",
+                "Green Bay Mayor Eric Genrich"
+              ],
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/JoCasta_Zamarripa"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-secretary-of-state-candidates-2026"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "JoCasta Zamarripa"
+              },
+              "photo_url": "https://images.squarespace-cdn.com/content/v1/689f5e5a05c4b24280cd6540/4032d04f-a2e7-4e1e-8029-d4d1b737d8f6/JoCasta+New+Headshot.jpg",
+              "photo_source": "Campaign website",
+              "social_media": {
+                "twitter_x": "https://x.com/VoteJoCasta",
+                "facebook": "https://www.facebook.com/votejocasta/",
+                "instagram": "https://www.instagram.com/votejocastawi/",
+                "campaign_website": "https://www.votejocasta.com/"
+              }
+            }
+          ]
+        },
+        "Republican": {
+          "candidates": [
+            {
+              "name": "Brayden Myer",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Small business owner",
+              "background": "UW-Green Bay graduate (Magna Cum Laude, finished in 2.25 years); former congressional staffer; Chapter Chair of Manitowoc County Moms for Liberty; founded Manitowoc County Patriots",
+              "key_priorities": [
+                "Free accessible public records website",
+                "Abolish Wisconsin Elections Commission; restore SOS oversight of elections",
+                "Hand-counted paper ballots only",
+                "Infrastructure-focused BCPL loans"
+              ],
+              "notable_endorsements": [
+                "Pro-Life Wisconsin Victory Fund PAC",
+                "Assemblyman Ron Tusler",
+                "Assemblyman David Steffan"
+              ],
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Brayden_Myer"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-secretary-of-state-candidates-2026"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Brayden Myer"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Brayden_Myer.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/Brayden_Myer",
+                "facebook": "https://www.facebook.com/braydenmyerforfreedom",
+                "instagram": "https://www.instagram.com/brayden.myer/"
+              }
+            },
+            {
+              "name": "Nathan Pollnow",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Beef farmer, auctioneer",
+              "background": "Second-generation beef farmer; avid hunter and auctioneer; did not respond to WUWM questionnaire",
+              "key_priorities": [
+                "Public registry of rules, pardons, and enacted laws — searchable and free",
+                "School trust funds serving all of Wisconsin",
+                "Open records transparency"
+              ],
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Nathan_Pollnow"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-secretary-of-state-candidates-2026"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Nathan Pollnow"
+              }
+            },
+            {
+              "name": "Jay Schroeder",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Real estate and stock investor",
+              "background": "Has studied election integrity issues for over 10 years; claims to have discussed Wisconsin election problems with President Trump at Mar-a-Lago",
+              "key_priorities": [
+                "Restore SOS control over elections",
+                "Paper ballots only; eliminate voting machines",
+                "Restrict mail-in voting and drop boxes",
+                "Proof of citizenship and ID requirement"
+              ],
+              "notable_endorsements": [
+                "Pro-Life Wisconsin",
+                "Assemblyman Dave Murphy"
+              ],
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Jay_Schroeder"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-secretary-of-state-candidates-2026"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Jay Schroeder"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/JaySchroeder.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/QbJaySchroeder",
+                "facebook": "https://www.facebook.com/JaySchroederWI/",
+                "youtube": "https://www.youtube.com/channel/UCmARmzD_VlediGtU6THdcRQ"
+              }
+            },
+            {
+              "name": "Cindy Werner",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Unknown",
+              "background": "Did not respond to WUWM questionnaire; no campaign website or readily available information; has a public Facebook page",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Cindy_Werner"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-secretary-of-state-candidates-2026"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Cindy Werner"
+              }
+            }
+          ]
+        },
+        "Green": {
+          "candidates": [
+            {
+              "name": "Pete Karas",
+              "party": "Wisconsin Green Party",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Retired music venue owner",
+              "background": "Former Racine city council member; retired music venue owner; running to break the two-party lock",
+              "key_priorities": [
+                "Ranked choice voting",
+                "Public campaign financing",
+                "Independent redistricting",
+                "Modernize public-records access",
+                "Reinstate Government Accountability Board for election oversight"
+              ],
+              "notable_endorsements": [
+                "Wisconsin Green Party",
+                "Independence Party",
+                "Pirate Party",
+                "Transhumanist Party",
+                "Dr. Jill Stein"
+              ],
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Pete_Karas"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-secretary-of-state-candidates-2026"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Pete Karas"
+              },
+              "photo_url": "https://wisconsinpublictv.s3.us-east-2.amazonaws.com/wp-content/uploads/2026/01/wisconsinvote2026-pete-karas.jpg",
+              "photo_source": "PBS Wisconsin",
+              "social_media": {
+                "twitter_x": "https://x.com/petekaras",
+                "facebook": "https://www.facebook.com/PeteForSOS/",
+                "instagram": "https://www.instagram.com/petekaras_wi_sos/",
+                "campaign_website": "https://www.petekaras.com/"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "race_id": "WI-TREAS-2026",
+      "office": "State Treasurer of Wisconsin",
+      "level": "State Executive",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "office_description": "Oversees state financial assets; manages $1.6 billion Common School Fund (distributes profits to public schools); chairs Board of Commissioners of Public Lands; manages unclaimed property program",
+      "sources": [
+        {
+          "name": "Ballotpedia — Wisconsin State Treasurer Election 2026",
+          "url": "https://ballotpedia.org/Wisconsin_Treasurer_election,_2026"
+        },
+        {
+          "name": "WUWM Voter Guide — State Treasurer",
+          "url": "https://www.wuwm.com/wisconsin-state-treasurer-candidates-2026"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "Wisconsin Ethics Commission — Sunshine",
+        "search_url": "https://campaignfinance.wi.gov/browse-data/registrants",
+        "note": "State Treasurer is a state office — use Wisconsin Sunshine only."
+      },
+      "primaries": {
+        "Democratic": {
+          "candidates": [
+            {
+              "name": "Dylan Ray Helmenstine",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Barista (left auditor role to campaign)",
+              "background": "Former auditor and financial analyst for Wisconsin Medicaid programs; Economics degree and Master's in Public Affairs; appointed by Gov. Evers to Teachers' Retirement Board; elected to school board and village board in rural Wisconsin",
+              "key_priorities": [
+                "Government transparency dashboard for state budget",
+                "Protect Common School Trust Fund from political interference",
+                "Transparency on voucher school tax diversion",
+                "Rebuild public trust in government"
+              ],
+              "notable_endorsements": [
+                "Citizen Action of Wisconsin",
+                "Fair Wisconsin",
+                "State Sen. Dianne Hesselbein",
+                "State Sen. Mark Spreitzer",
+                "State Sen. Tim Carpenter",
+                "State Sen. Melissa Ratcliff"
+              ],
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Dylan_Helmenstine"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-state-treasurer-candidates-2026"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Dylan Helmenstine"
+              },
+              "photo_url": "https://static.wixstatic.com/media/24aa3c_236929033f114c68bb709be267691cbc~mv2.jpg",
+              "photo_source": "Campaign website",
+              "social_media": {
+                "facebook": "https://www.facebook.com/p/Dylan-For-Wisconsin-61583220911265/",
+                "instagram": "https://www.instagram.com/dylanforwi/",
+                "youtube": "https://www.youtube.com/@dylanhelmenstine9390",
+                "campaign_website": "https://www.dylanforwisconsin.com/"
+              }
+            },
+            {
+              "name": "Yee Leng Xiong",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Executive Director at New Beginnings for Refugees; Marathon County Supervisor; D.C. Everest School Board Treasurer",
+              "background": "Born in Wausau to refugee parents who fled persecution; Marathon County District 19 Supervisor (since 2016); D.C. Everest Area School Board Treasurer (since 2014); former Village of Weston Trustee (2018–2022); only candidate in the race who has served as treasurer of a public body",
+              "key_priorities": [
+                "Protect and grow $1.3B Common School Fund",
+                "Support low-interest Trust Fund Loans for community infrastructure",
+                "Independent taxpayer watchdog role",
+                "Return unclaimed property to families",
+                "Expand financial literacy"
+              ],
+              "notable_endorsements": [
+                "Citizen Action of Wisconsin"
+              ],
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Yee_Leng_Xiong"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-state-treasurer-candidates-2026"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "Yee Leng Xiong"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/YeeLengXiong2026_2026-07-01_183510.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/yeeforwi",
+                "facebook": "https://www.facebook.com/yeeforwi/",
+                "instagram": "https://www.instagram.com/yeeforwi/",
+                "campaign_website": "https://www.yeeforwi.vote/"
+              }
+            }
+          ]
+        },
+        "Republican": {
+          "candidates": [
+            {
+              "name": "John Leiber",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": true,
+              "current_occupation": "Incumbent Wisconsin State Treasurer",
+              "background": "Incumbent Wisconsin State Treasurer (since 2023); oversaw record $73.5 million distribution from Common School Fund to public schools",
+              "key_priorities": [
+                "Continue smart fiscal management of Common School Fund",
+                "Focus on existing duties rather than expanding office powers",
+                "Record investment returns for schools"
+              ],
+              "notable_endorsements": [
+                "Cate Zueske (former State Treasurer)",
+                "State Senator Van Wanggaard",
+                "State Representative Dave Murphy"
+              ],
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/John_Leiber"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-state-treasurer-candidates-2026"
+                }
+              ],
+              "campaign_finance": {
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+                "search_term": "John Leiber"
+              },
+              "photo_url": "https://statetreasurer.wi.gov/PublishingImages/Pages/About/Treasurer/State%20Treasurer%20John%20Leiber%20x%20small.jpg",
+              "photo_source": "Official government page",
+              "social_media": {
+                "twitter_x": "https://x.com/WITreasurer",
+                "facebook": "https://www.facebook.com/LeiberForTreasurer/",
+                "campaign_website": "https://www.leiberfortreasurer.com/"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "race_id": "WI-SCOTUS-2026",
+      "office": "Wisconsin Supreme Court — Rebecca Bradley's Seat",
+      "level": "State Judicial",
+      "election_type": "Nonpartisan",
+      "primary_date": "February 17, 2026 (if needed)",
+      "general_date": "April 7, 2026",
+      "notes": "Wisconsin Supreme Court elections are nonpartisan. More than two candidates must file for a primary to be held. Term is 10 years.",
+      "sources": [
+        {
+          "name": "Ballotpedia — Wisconsin Supreme Court 2026",
+          "url": "https://ballotpedia.org/Wisconsin_Supreme_Court_election,_2026"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "Wisconsin Ethics Commission — Sunshine",
+        "search_url": "https://campaignfinance.wi.gov/browse-data/registrants",
+        "note": "Judicial candidates file as state candidates with the Wisconsin Ethics Commission."
+      },
+      "candidates": [
+        {
+          "name": "Chris Taylor",
+          "party": "Nonpartisan",
+          "status": "Active",
+          "incumbent": false,
+          "background": "Former Wisconsin State Assembly member representing District 76 (Madison); attorney",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Chris_Taylor_(Wisconsin)"
+            }
+          ],
+          "campaign_finance": {
+            "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants",
+            "search_term": "Chris Taylor"
+          },
+          "photo_url": "https://images.squarespace-cdn.com/content/v1/5b64a757b27e39e295fc4df9/364bcac7-3794-4b6b-bc09-f84aacaee967/Chris-Taylor-Headshot--Web.jpg",
+          "photo_source": "Campaign website",
+          "social_media": {
+            "twitter_x": "https://x.com/ChrisTaylorWI",
+            "facebook": "https://www.facebook.com/chrisforjustice/",
+            "instagram": "https://www.instagram.com/chrisforjustice/",
+            "campaign_website": "https://www.christaylorforjustice.com/"
+          }
+        }
+      ],
+      "seat_held_by": "Rebecca Bradley (appointed by Gov. Scott Walker in 2015)"
+    },
+    {
+      "race_id": "WI-US-HOUSE-D1-2026",
+      "office": "U.S. House of Representatives — Wisconsin District 1",
+      "level": "Federal",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "district_description": "Southeastern Wisconsin including Racine and Kenosha counties",
+      "sources": [
+        {
+          "name": "Ballotpedia — WI-1 2026",
+          "url": "https://ballotpedia.org/Wisconsin%27s_1st_Congressional_District_election,_2026"
+        },
+        {
+          "name": "FEC — WI House Candidates 2026",
+          "url": "https://www.fec.gov/data/candidates/house/?state=WI&election_year=2026&is_active_candidate=true"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "FEC OpenFEC API",
+        "api_endpoint": "https://api.open.fec.gov/v1/candidates/?state=WI&district=01&office=H&election_year=2026&api_key=YOUR_KEY",
+        "fec_web": "https://www.fec.gov/data/candidates/house/?state=WI&district=01&election_year=2026"
+      },
+      "primaries": {
+        "Republican": {
+          "candidates": [
+            {
+              "name": "Bryan Steil",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": true,
+              "current_occupation": "U.S. Representative",
+              "background": "Incumbent U.S. Representative for WI-1 (since 2019); attorney; former member of University of Wisconsin Board of Regents",
+              "fec_candidate_id": "H8WI01088",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Bryan_Steil"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H8WI01088/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H8WI01088",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H8WI01088/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H8WI01088/"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Steil_Official_Headshot.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/bryansteil",
+                "facebook": "https://www.facebook.com/bryansteil",
+                "instagram": "https://www.instagram.com/bryansteilwi",
+                "youtube": "https://www.youtube.com/@steilforwisconsin5557",
+                "campaign_website": "https://www.bryansteil.com/"
+              }
+            }
+          ]
+        },
+        "Democratic": {
+          "candidates": [],
+          "notes": "No Democratic candidates filed"
+        }
+      }
+    },
+    {
+      "race_id": "WI-US-HOUSE-D2-2026",
+      "office": "U.S. House of Representatives — Wisconsin District 2",
+      "level": "Federal",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "district_description": "South-central Wisconsin including Madison and Dane County",
+      "sources": [
+        {
+          "name": "Ballotpedia — WI-2 2026",
+          "url": "https://ballotpedia.org/Wisconsin%27s_2nd_Congressional_District_election,_2026"
+        },
+        {
+          "name": "FEC — WI-2 Candidates",
+          "url": "https://www.fec.gov/data/candidates/house/?state=WI&district=02&election_year=2026"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "FEC OpenFEC API",
+        "api_endpoint": "https://api.open.fec.gov/v1/candidates/?state=WI&district=02&office=H&election_year=2026&api_key=YOUR_KEY",
+        "fec_web": "https://www.fec.gov/data/candidates/house/?state=WI&district=02&election_year=2026"
+      },
+      "primaries": {
+        "Democratic": {
+          "candidates": [
+            {
+              "name": "Mark Pocan",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": true,
+              "current_occupation": "U.S. Representative",
+              "background": "Incumbent U.S. Representative for WI-2 (since 2013); co-chair of Congressional Progressive Caucus; former Wisconsin State Assembly member",
+              "fec_candidate_id": "H2WI02124",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Mark_Pocan"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H2WI02124/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H2WI02124",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H2WI02124/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H2WI02124/"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/400px-Mark_Pocan_official_photo.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/RepMarkPocan",
+                "campaign_website": "https://www.markpocan.com/"
+              }
+            },
+            {
+              "name": "Douglas Alexander",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": false,
+              "fec_candidate_id": "H2WI02199",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Douglas_Alexander_(Wisconsin)"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H2WI02199/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H2WI02199",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H2WI02199/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H2WI02199/"
+              }
+            }
+          ]
+        },
+        "Republican": {
+          "candidates": [],
+          "notes": "No Republican candidates filed"
+        }
+      }
+    },
+    {
+      "race_id": "WI-US-HOUSE-D3-2026",
+      "office": "U.S. House of Representatives — Wisconsin District 3",
+      "level": "Federal",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "district_description": "Western Wisconsin including La Crosse and Eau Claire areas",
+      "sources": [
+        {
+          "name": "Ballotpedia — WI-3 2026",
+          "url": "https://ballotpedia.org/Wisconsin%27s_3rd_Congressional_District_election,_2026"
+        },
+        {
+          "name": "FEC — WI-3 Candidates",
+          "url": "https://www.fec.gov/data/candidates/house/?state=WI&district=03&election_year=2026"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "FEC OpenFEC API",
+        "api_endpoint": "https://api.open.fec.gov/v1/candidates/?state=WI&district=03&office=H&election_year=2026&api_key=YOUR_KEY",
+        "fec_web": "https://www.fec.gov/data/candidates/house/?state=WI&district=03&election_year=2026"
+      },
+      "primaries": {
+        "Republican": {
+          "candidates": [
+            {
+              "name": "Derrick Van Orden",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": true,
+              "current_occupation": "U.S. Representative",
+              "background": "Incumbent U.S. Representative for WI-3 (since 2023); retired Navy SEAL; author",
+              "fec_candidate_id": "H0WI03175",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Derrick_Van_Orden"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H0WI03175/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H0WI03175",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H0WI03175/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H0WI03175/"
+              },
+              "photo_url": "https://vanorden.house.gov/sites/evo-subsites/vanorden.house.gov/files/styles/evo_image_full_width/public/evo-media-image/derrick-hearing-resize.png",
+              "photo_source": "Official government page",
+              "social_media": {
+                "twitter_x": "https://x.com/derrickvanorden",
+                "facebook": "https://www.facebook.com/derrickvanorden/",
+                "instagram": "https://www.instagram.com/derrickvanorden/",
+                "youtube": "https://www.youtube.com/@derrickvanorden8696",
+                "campaign_website": "https://www.derrickvanorden.com/"
+              }
+            }
+          ]
+        },
+        "Democratic": {
+          "candidates": [],
+          "notes": "No Democratic candidates filed"
+        }
+      }
+    },
+    {
+      "race_id": "WI-US-HOUSE-D4-2026",
+      "office": "U.S. House of Representatives — Wisconsin District 4",
+      "level": "Federal",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "district_description": "Milwaukee and surrounding urban areas",
+      "sources": [
+        {
+          "name": "Ballotpedia — WI-4 2026",
+          "url": "https://ballotpedia.org/Wisconsin%27s_4th_Congressional_District_election,_2026"
+        },
+        {
+          "name": "FEC — WI-4 Candidates",
+          "url": "https://www.fec.gov/data/candidates/house/?state=WI&district=04&election_year=2026"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "FEC OpenFEC API",
+        "api_endpoint": "https://api.open.fec.gov/v1/candidates/?state=WI&district=04&office=H&election_year=2026&api_key=YOUR_KEY",
+        "fec_web": "https://www.fec.gov/data/candidates/house/?state=WI&district=04&election_year=2026"
+      },
+      "primaries": {
+        "Democratic": {
+          "candidates": [
+            {
+              "name": "Gwen Moore",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": true,
+              "current_occupation": "U.S. Representative",
+              "background": "Incumbent U.S. Representative for WI-4 (since 2005); first African American elected to Congress from Wisconsin",
+              "fec_candidate_id": "H4WI04183",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Gwen_Moore"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H4WI04183/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H4WI04183",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H4WI04183/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H4WI04183/"
+              },
+              "photo_url": "https://gwenmoore.house.gov/uploadedphotos/mediumresolution/51177792-95eb-4d32-8352-239472c77282.jpg",
+              "photo_source": "Official government page",
+              "social_media": {
+                "twitter_x": "https://x.com/RepGwenMoore",
+                "facebook": "https://www.facebook.com/GwenMooreforCongress/",
+                "instagram": "https://www.instagram.com/repgwenmoore/",
+                "campaign_website": "https://www.gwenmoore.com/"
+              }
+            },
+            {
+              "name": "Amy Donahue",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": false,
+              "fec_candidate_id": "H6WI04071",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Amy_Donahue"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H6WI04071/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H6WI04071",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H6WI04071/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H6WI04071/"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/Amy_Donahue_20260407_023900.jpg",
+              "photo_source": "Ballotpedia"
+            }
+          ]
+        },
+        "Republican": {
+          "candidates": [],
+          "notes": "No Republican candidates filed"
+        }
+      }
+    },
+    {
+      "race_id": "WI-US-HOUSE-D5-2026",
+      "office": "U.S. House of Representatives — Wisconsin District 5",
+      "level": "Federal",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "district_description": "Western Milwaukee suburbs including Waukesha County",
+      "sources": [
+        {
+          "name": "Ballotpedia — WI-5 2026",
+          "url": "https://ballotpedia.org/Wisconsin%27s_5th_Congressional_District_election,_2026"
+        },
+        {
+          "name": "FEC — WI-5 Candidates",
+          "url": "https://www.fec.gov/data/candidates/house/?state=WI&district=05&election_year=2026"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "FEC OpenFEC API",
+        "api_endpoint": "https://api.open.fec.gov/v1/candidates/?state=WI&district=05&office=H&election_year=2026&api_key=YOUR_KEY",
+        "fec_web": "https://www.fec.gov/data/candidates/house/?state=WI&district=05&election_year=2026"
+      },
+      "primaries": {
+        "Republican": {
+          "candidates": [
+            {
+              "name": "Scott Fitzgerald",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": true,
+              "current_occupation": "U.S. Representative",
+              "background": "Incumbent U.S. Representative for WI-5 (since 2021); former Wisconsin State Senate Majority Leader",
+              "fec_candidate_id": "H0WI05113",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Scott_Fitzgerald"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H0WI05113/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H0WI05113",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H0WI05113/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H0WI05113/"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/ScottFitzgerald.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/RepFitzgerald",
+                "facebook": "https://www.facebook.com/CongressmanScottFitzgerald/",
+                "instagram": "https://www.instagram.com/repscottfitzgerald/",
+                "youtube": "https://www.youtube.com/@CongressmanFitzgerald",
+                "campaign_website": "https://www.scottfitzgerald.com/"
+              }
+            }
+          ]
+        },
+        "Democratic": {
+          "candidates": [],
+          "notes": "No Democratic candidates filed"
+        }
+      }
+    },
+    {
+      "race_id": "WI-US-HOUSE-D6-2026",
+      "office": "U.S. House of Representatives — Wisconsin District 6",
+      "level": "Federal",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "district_description": "East-central Wisconsin including Oshkosh, Fond du Lac, and Sheboygan",
+      "sources": [
+        {
+          "name": "Ballotpedia — WI-6 2026",
+          "url": "https://ballotpedia.org/Wisconsin%27s_6th_Congressional_District_election,_2026"
+        },
+        {
+          "name": "FEC — WI-6 Candidates",
+          "url": "https://www.fec.gov/data/candidates/house/?state=WI&district=06&election_year=2026"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "FEC OpenFEC API",
+        "api_endpoint": "https://api.open.fec.gov/v1/candidates/?state=WI&district=06&office=H&election_year=2026&api_key=YOUR_KEY",
+        "fec_web": "https://www.fec.gov/data/candidates/house/?state=WI&district=06&election_year=2026"
+      },
+      "primaries": {
+        "Republican": {
+          "candidates": [
+            {
+              "name": "Glenn Grothman",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": true,
+              "current_occupation": "U.S. Representative",
+              "background": "Incumbent U.S. Representative for WI-6 (since 2015); former Wisconsin State Senator",
+              "fec_candidate_id": "H4WI06048",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Glenn_Grothman"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H4WI06048/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H4WI06048",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H4WI06048/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H4WI06048/"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Glenn_Grothman.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/GrothmanforWI",
+                "facebook": "https://www.facebook.com/glenngrothman/",
+                "instagram": "https://www.instagram.com/grothmanforcongress/",
+                "youtube": "https://www.youtube.com/user/glenngrothman",
+                "campaign_website": "https://glenngrothman.com/"
+              }
+            }
+          ]
+        },
+        "Democratic": {
+          "candidates": [],
+          "notes": "No Democratic candidates filed"
+        }
+      }
+    },
+    {
+      "race_id": "WI-US-HOUSE-D7-2026",
+      "office": "U.S. House of Representatives — Wisconsin District 7",
+      "level": "Federal",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "district_description": "Northern Wisconsin — open seat as Tom Tiffany is running for Governor",
+      "notes": "Competitive Republican primary for open seat; Tom Tiffany (incumbent) is running for Governor. Jessi Ebben unsuccessfully challenged rivals' nomination papers in court.",
+      "sources": [
+        {
+          "name": "Ballotpedia — WI-7 2026",
+          "url": "https://ballotpedia.org/Wisconsin%27s_7th_Congressional_District_election,_2026"
+        },
+        {
+          "name": "FEC — WI-7 Candidates",
+          "url": "https://www.fec.gov/data/candidates/house/?state=WI&district=07&election_year=2026"
+        },
+        {
+          "name": "PBS Wisconsin — WI-7 Primary",
+          "url": "https://pbswisconsin.org/news-item/five-republicans-compete-for-open-seat-in-7th-congressional-district/"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "FEC OpenFEC API",
+        "api_endpoint": "https://api.open.fec.gov/v1/candidates/?state=WI&district=07&office=H&election_year=2026&api_key=YOUR_KEY",
+        "fec_web": "https://www.fec.gov/data/candidates/house/?state=WI&district=07&election_year=2026"
+      },
+      "primaries": {
+        "Republican": {
+          "candidates": [
+            {
+              "name": "Michael Alfonso",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "fec_candidate_id": "H6WI07223",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Michael_Alfonso"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H6WI07223/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H6WI07223",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H6WI07223/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H6WI07223/"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/alfonsomichael_2026-05-28_022242.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/MikeAlfonsoWI",
+                "facebook": "https://www.facebook.com/AlfonsoforCongress/",
+                "instagram": "https://www.instagram.com/michaelalfonsowi/",
+                "campaign_website": "https://www.alfonsoforcongress.com/"
+              }
+            },
+            {
+              "name": "Jessi Ebben",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "background": "Challenged rivals' nomination papers in court (unsuccessful); participated in July 2026 Rhinelander debate",
+              "fec_candidate_id": "H0WI03159",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Jessi_Ebben"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H0WI03159/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H0WI03159",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H0WI03159/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H0WI03159/"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/Jessi_Eben.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/JessiEbbenWI",
+                "facebook": "https://www.facebook.com/ebbenforwisconsin/",
+                "instagram": "https://www.instagram.com/jessi_ebben_wi/",
+                "youtube": "https://www.youtube.com/channel/UC0yCexqa220G5_F_zFmElEA",
+                "campaign_website": "https://www.jessiebben.com/"
+              }
+            },
+            {
+              "name": "Kevin Hermening",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "background": "Participated in July 2026 Rhinelander debate",
+              "fec_candidate_id": "H6WI07249",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Kevin_Hermening"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H6WI07249/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H6WI07249",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H6WI07249/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H6WI07249/"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/hermeningkevin_2026-05-28_022445.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/kevinforwi",
+                "facebook": "https://www.facebook.com/KevinForWI",
+                "instagram": "https://www.instagram.com/kevinforwi",
+                "youtube": "https://www.youtube.com/@KevinForWI",
+                "campaign_website": "https://www.hermeningforcongress.com/"
+              }
+            },
+            {
+              "name": "Donald Raihala",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Donald_Raihala"
+                },
+                {
+                  "name": "FEC — WI-7 Candidates",
+                  "url": "https://www.fec.gov/data/candidates/house/?state=WI&district=07&election_year=2026"
+                }
+              ],
+              "campaign_finance": {
+                "fec_web": "https://www.fec.gov/data/candidates/house/?state=WI&district=07&election_year=2026"
+              }
+            },
+            {
+              "name": "Niina Threlfall-Baum",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": false,
+              "background": "Participated in July 2026 Rhinelander debate",
+              "fec_candidate_id": "H6WI07256",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Niina_Threlfall-Baum"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H6WI07256/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H6WI07256",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H6WI07256/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H6WI07256/"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Niina_ThrelfallBaum_20260217_010351.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "facebook": "https://www.facebook.com/profile.php?id=61586937706592"
+              }
+            },
+            {
+              "name": "Cheryl Ann Runkel",
+              "party": "Republican",
+              "status": "Write-in",
+              "incumbent": false,
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Cheryl_Ann_Runkel"
+                }
+              ]
+            }
+          ]
+        },
+        "Democratic": {
+          "candidates": [],
+          "notes": "No Democratic candidates filed"
+        }
+      }
+    },
+    {
+      "race_id": "WI-US-HOUSE-D8-2026",
+      "office": "U.S. House of Representatives — Wisconsin District 8",
+      "level": "Federal",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "district_description": "Northeastern Wisconsin including Green Bay and Door County",
+      "sources": [
+        {
+          "name": "Ballotpedia — WI-8 2026",
+          "url": "https://ballotpedia.org/Wisconsin%27s_8th_Congressional_District_election,_2026"
+        },
+        {
+          "name": "FEC — WI-8 Candidates",
+          "url": "https://www.fec.gov/data/candidates/house/?state=WI&district=08&election_year=2026"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "FEC OpenFEC API",
+        "api_endpoint": "https://api.open.fec.gov/v1/candidates/?state=WI&district=08&office=H&election_year=2026&api_key=YOUR_KEY",
+        "fec_web": "https://www.fec.gov/data/candidates/house/?state=WI&district=08&election_year=2026"
+      },
+      "primaries": {
+        "Republican": {
+          "candidates": [
+            {
+              "name": "Tony Wied",
+              "party": "Republican",
+              "status": "Active",
+              "incumbent": true,
+              "current_occupation": "U.S. Representative",
+              "background": "Incumbent U.S. Representative for WI-8 (since 2025); former Brown County Clerk",
+              "fec_candidate_id": "H4WI08119",
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Tony_Wied"
+                },
+                {
+                  "name": "FEC Profile",
+                  "url": "https://www.fec.gov/data/candidate/H4WI08119/"
+                }
+              ],
+              "campaign_finance": {
+                "fec_candidate_id": "H4WI08119",
+                "fec_totals_api": "https://api.open.fec.gov/v1/candidates/H4WI08119/totals/?api_key=YOUR_KEY&cycle=2026",
+                "fec_profile": "https://www.fec.gov/data/candidate/H4WI08119/"
+              },
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Tony_Wied.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/TonyWied",
+                "facebook": "https://www.facebook.com/profile.php?id=61559139311009",
+                "instagram": "https://www.instagram.com/tonywiedforcongress",
+                "youtube": "https://www.youtube.com/@TonyWiedforCongress",
+                "campaign_website": "https://tonywiedforcongress.com/"
+              }
+            }
+          ]
+        },
+        "Democratic": {
+          "candidates": [],
+          "notes": "No Democratic candidates filed"
+        }
+      }
+    },
+    {
+      "race_id": "WI-STATE-SENATE-2026",
+      "office": "Wisconsin State Senate",
+      "level": "State Legislative",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "seats_up": 17,
+      "current_composition": {
+        "Democratic": 15,
+        "Republican": 18,
+        "Total": 33
+      },
+      "competitive_seats_to_watch": [
+        "District 5 (Brookfield)",
+        "District 17 (Spring Green)",
+        "District 21 (Racine)",
+        "District 31 (Eau Claire)"
+      ],
+      "notes": "Democrats need to win 3 of 4 competitive seats to gain Senate majority",
+      "sources": [
+        {
+          "name": "Ballotpedia — Wisconsin State Senate Elections 2026",
+          "url": "https://ballotpedia.org/Wisconsin_State_Senate_elections,_2026"
+        },
+        {
+          "name": "WUWM Voter Guide — State Senate",
+          "url": "https://www.wuwm.com/voterguide"
+        },
+        {
+          "name": "WisPolitics.com",
+          "url": "https://www.wispolitics.com"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "Wisconsin Ethics Commission — Sunshine",
+        "search_url": "https://campaignfinance.wi.gov/browse-data/registrants",
+        "instructions": "Search by candidate name under 'Registrant Type: State Candidate' to find their committee and finance reports",
+        "note": "All State Senate candidates are state-level — use Wisconsin Sunshine only."
+      },
+      "districts": [
+        {
+          "district": 1,
+          "district_description": "Northeastern Wisconsin",
+          "open_seat": true,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_1_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [],
+            "Republican": [
+              {
+                "name": "Katie Baney",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Katie_Baney"
+                  }
+                ]
+              },
+              {
+                "name": "Barbara Bittner",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Barbara_Bittner"
+                  }
+                ]
+              },
+              {
+                "name": "Nic Cravillion",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Nic_Cravillion"
+                  }
+                ]
+              },
+              {
+                "name": "Jacob VandenPlas",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Jacob_VandenPlas"
+                  }
+                ]
+              }
+            ],
+            "Other": [
+              {
+                "name": "Mark Becker",
+                "party": "Independent",
+                "general_election_only": true
+              }
+            ]
+          }
+        },
+        {
+          "district": 3,
+          "district_description": "Milwaukee area",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_3_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Tim Carpenter",
+                "incumbent": true,
+                "current_occupation": "State Senator",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Tim_Carpenter"
+                  }
+                ]
+              }
+            ],
+            "Republican": []
+          }
+        },
+        {
+          "district": 5,
+          "district_description": "Brookfield, Pewaukee, Elm Grove, most of Wauwatosa and West Allis, parts of Milwaukee and Waukesha",
+          "open_seat": true,
+          "competitive": true,
+          "notes": "Incumbent Rob Hutton not seeking re-election. One of four key swing seats for Senate majority.",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_5_election,_2026"
+            },
+            {
+              "name": "WUWM Voter Guide — Senate District 5",
+              "url": "https://www.wuwm.com/Wisconsin-State-Senate-District-5-candidates"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Robyn Vining",
+                "incumbent": false,
+                "current_occupation": "State Representative and professional photographer/small business owner",
+                "background": "State Assembly member; has championed expanding post-partum healthcare, Gail's Law (breast cancer screenings), mental healthcare access, affordable prescription drugs, and special education funding",
+                "notable_endorsements": [
+                  "U.S. Senator Tammy Baldwin",
+                  "SEIU",
+                  "Wisconsin Conservation Voters",
+                  "Emily's List",
+                  "OBGYN-PAC",
+                  "Professional Firefighters of Wisconsin",
+                  "UAW",
+                  "LiUNA",
+                  "IBEW Wisconsin"
+                ],
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Robyn_Vining"
+                  },
+                  {
+                    "name": "WUWM Voter Guide",
+                    "url": "https://www.wuwm.com/Wisconsin-State-Senate-District-5-candidates"
+                  }
+                ],
+                "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/RobynVining24.jpeg",
+                "photo_source": "Ballotpedia",
+                "social_media": {
+                  "twitter_x": "https://x.com/RepRobynVining",
+                  "facebook": "https://www.facebook.com/RobynForWI/",
+                  "instagram": "https://www.instagram.com/robynvining/",
+                  "youtube": "https://www.youtube.com/channel/UCRiTUFx0zmV6UUxAW8dc6JA",
+                  "campaign_website": "https://www.robynvining.com/"
+                }
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Mike Roberts",
+                "incumbent": false,
+                "current_occupation": "Physical Therapist and small business owner",
+                "background": "8th-generation Wisconsinite; physical therapist and small business owner; running on lower property taxes, education investment, and healthcare affordability",
+                "notable_endorsements": [
+                  "Milwaukee Police Association",
+                  "Waukesha County Police Chiefs Association",
+                  "Milwaukee Police Supervisors Organization",
+                  "Milwaukee Deputy Sheriffs' Association"
+                ],
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Mike_Roberts_(Wisconsin)"
+                  },
+                  {
+                    "name": "WUWM Voter Guide",
+                    "url": "https://www.wuwm.com/Wisconsin-State-Senate-District-5-candidates"
+                  }
+                ],
+                "photo_url": "https://cdn.prod.website-files.com/69642c73520ee5d4b1dc20f9/69643a0d7957c3401eae05e3_IMG_6271.JPG",
+                "photo_source": "Campaign website",
+                "social_media": {
+                  "facebook": "https://www.facebook.com/mikerobertswi/",
+                  "instagram": "https://www.instagram.com/mikerobertswi/",
+                  "campaign_website": "https://www.mikerobertsforwisconsin.com/"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "district": 7,
+          "district_description": "Milwaukee area",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_7_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Chris Larson",
+                "incumbent": true,
+                "current_occupation": "State Senator",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Chris_Larson"
+                  }
+                ],
+                "photo_url": "https://voteforlarson.org/wp-content/uploads/2022/08/home-page-chris-over-milwaukee-2.png",
+                "photo_source": "Campaign website",
+                "social_media": {
+                  "twitter_x": "https://x.com/SenChrisLarson",
+                  "facebook": "https://www.facebook.com/SenatorChrisLarson/",
+                  "instagram": "https://www.instagram.com/senchrislarson/",
+                  "campaign_website": "https://voteforlarson.org/"
+                }
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Mike Moeller",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Mike_Moeller_(Wisconsin)"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "district": 9,
+          "district_description": "Sheboygan/Ozaukee area",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_9_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [],
+            "Republican": [
+              {
+                "name": "Amy Binsfeld",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Amy_Binsfeld"
+                  }
+                ]
+              }
+            ],
+            "Other": [
+              {
+                "name": "Christian Ellis",
+                "party": "Independent",
+                "general_election_only": true
+              }
+            ]
+          }
+        },
+        {
+          "district": 11,
+          "district_description": "Walworth County, most of Kenosha County, southwest Racine County, parts of southeast Rock County",
+          "open_seat": true,
+          "notes": "Incumbent Steve Nass not seeking re-election.",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_11_election,_2026"
+            },
+            {
+              "name": "WUWM Voter Guide — Senate District 11",
+              "url": "https://www.wuwm.com/Wisconsin-State-Senate-District-11-candidates"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Steven J. Doelder",
+                "incumbent": false,
+                "current_occupation": "Retired",
+                "background": "Retired; background in science and problem solving",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Steven_Doelder"
+                  },
+                  {
+                    "name": "WUWM Voter Guide",
+                    "url": "https://www.wuwm.com/Wisconsin-State-Senate-District-11-candidates"
+                  }
+                ]
+              },
+              {
+                "name": "Adam Duda",
+                "incumbent": false,
+                "current_occupation": "Self-employed",
+                "background": "Immigrated from Poland at age 9; earned engineering and law degrees; running on social contract principles and public investment",
+                "key_priorities": [
+                  "Use state surplus to increase shared revenue and fund public schools",
+                  "Expand Homestead Tax Credit for seniors",
+                  "Affordable childcare",
+                  "Data centers must pay their fair share"
+                ],
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Adam_Duda"
+                  },
+                  {
+                    "name": "WUWM Voter Guide",
+                    "url": "https://www.wuwm.com/Wisconsin-State-Senate-District-11-candidates"
+                  }
+                ],
+                "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/adam-duda-headshot-ballotpedia_20260623_034209_42072_1.jpg",
+                "photo_source": "Ballotpedia",
+                "social_media": {
+                  "campaign_website": "https://www.dudaforwi.com/"
+                }
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Nick Polce",
+                "incumbent": false,
+                "current_occupation": "Military veteran, businessman",
+                "background": "Military veteran; running on accountability in Madison",
+                "key_priorities": [
+                  "Lower energy and healthcare costs",
+                  "Responsible budgeting"
+                ],
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Nick_Polce"
+                  },
+                  {
+                    "name": "WUWM Voter Guide",
+                    "url": "https://www.wuwm.com/Wisconsin-State-Senate-District-11-candidates"
+                  }
+                ],
+                "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/NickPolce.jpg",
+                "photo_source": "Ballotpedia",
+                "social_media": {
+                  "twitter_x": "https://x.com/nickpolceWI",
+                  "facebook": "https://www.facebook.com/nick.polce.71/",
+                  "campaign_website": "https://www.nickpolce.com/"
+                }
+              },
+              {
+                "name": "Ellen Schutt",
+                "incumbent": false,
+                "current_occupation": "Executive Director, Wisconsin FFA Foundation; farmer",
+                "background": "Former Assembly member (2023–2025); grew up on family farm; still farms alongside parents and siblings (cattle and crops); accountant",
+                "key_priorities": [
+                  "Public safety",
+                  "Lower taxes and responsible budgeting",
+                  "High-quality schools",
+                  "Empowering small businesses",
+                  "Defending life",
+                  "Honoring veterans"
+                ],
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Ellen_Schutt"
+                  },
+                  {
+                    "name": "WUWM Voter Guide",
+                    "url": "https://www.wuwm.com/Wisconsin-State-Senate-District-11-candidates"
+                  }
+                ],
+                "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/EllenSchutt.jpg",
+                "photo_source": "Ballotpedia",
+                "social_media": {
+                  "twitter_x": "https://x.com/ellenschutt",
+                  "facebook": "https://www.facebook.com/voteellenschutt/",
+                  "instagram": "https://www.instagram.com/ellenlschutt/",
+                  "youtube": "https://www.youtube.com/channel/UCVKm4JI4brHIV6LpjCzb1IQ",
+                  "campaign_website": "https://www.ellenschuttforsenate.com/"
+                }
+              },
+              {
+                "name": "Sandy Wiedmeyer",
+                "incumbent": false,
+                "current_occupation": "Unknown",
+                "background": "Former teacher; co-founded first Moms for Liberty chapter in Wisconsin; Chairwoman of Republican Party of Kenosha County (since 2023)",
+                "key_priorities": [
+                  "Small government, low taxes",
+                  "Overturn Gov. Evers' 400-year school funding veto",
+                  "Eliminate taxes on pensions and retirement income",
+                  "Pro-life",
+                  "Limit women's/girls' sports to biological females"
+                ],
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Sandy_Wiedmeyer"
+                  },
+                  {
+                    "name": "WUWM Voter Guide",
+                    "url": "https://www.wuwm.com/Wisconsin-State-Senate-District-11-candidates"
+                  }
+                ],
+                "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/Sandy_Wiedmeyer_20260308_014319.jpeg",
+                "photo_source": "Ballotpedia",
+                "social_media": {
+                  "twitter_x": "https://x.com/SandyWiedmeyer",
+                  "facebook": "https://www.facebook.com/WiedmeyerforWisconsin/",
+                  "campaign_website": "https://www.sandywiedmeyer.com/"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "district": 13,
+          "district_description": "Jefferson/Waukesha area",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_13_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Sasha Ripley",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Sasha_Ripley"
+                  }
+                ]
+              }
+            ],
+            "Republican": [
+              {
+                "name": "John Jagler",
+                "incumbent": true,
+                "current_occupation": "State Senator",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/John_Jagler"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "district": 15,
+          "district_description": "Janesville/Rock County area",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_15_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Mark Spreitzer",
+                "incumbent": true,
+                "current_occupation": "State Senator",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Mark_Spreitzer"
+                  }
+                ],
+                "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Mark-Spreitzer.jpg",
+                "photo_source": "Ballotpedia",
+                "social_media": {
+                  "twitter_x": "https://x.com/SenSpreitzer",
+                  "facebook": "https://www.facebook.com/SenSpreitzer",
+                  "instagram": "https://www.instagram.com/markforwi",
+                  "youtube": "https://www.youtube.com/@statesenatormarkspreitzer"
+                }
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Scott Fleming",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Scott_Fleming"
+                  }
+                ]
+              }
+            ],
+            "Other": [
+              {
+                "name": "Christopher Dean",
+                "party": "Serving People not a Party",
+                "general_election_only": true
+              }
+            ]
+          }
+        },
+        {
+          "district": 17,
+          "district_description": "Spring Green/Southwest Wisconsin area",
+          "competitive": true,
+          "notes": "One of four key swing seats for Senate majority.",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_17_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Corrine Hendrickson",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Corrine_Hendrickson"
+                  }
+                ]
+              },
+              {
+                "name": "Jenna Jacobson",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Jenna_Jacobson"
+                  }
+                ]
+              },
+              {
+                "name": "Lisa White",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Lisa_White_(Wisconsin)"
+                  }
+                ]
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Howard Marklein",
+                "incumbent": true,
+                "current_occupation": "State Senator",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Howard_Marklein"
+                  }
+                ],
+                "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Howard_Marklein1.jpg",
+                "photo_source": "Ballotpedia",
+                "social_media": {
+                  "twitter_x": "https://x.com/SenMarklein",
+                  "facebook": "https://www.facebook.com/SenMarklein/",
+                  "instagram": "https://www.instagram.com/senatormarklein/",
+                  "campaign_website": "https://www.howardmarklein.com/"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "district": 19,
+          "district_description": "Appleton/Fox Valley area",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_19_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Emily Tseffos",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Emily_Tseffos"
+                  }
+                ]
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Rachael Cabral-Guevara",
+                "incumbent": true,
+                "current_occupation": "State Senator",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Rachael_Cabral-Guevara"
+                  }
+                ],
+                "photo_url": "https://legis.wisconsin.gov/senate/19/cabral-guevara/media/1atdfgoj/molina-group.jpg",
+                "photo_source": "Official government page",
+                "social_media": {
+                  "twitter_x": "https://x.com/RCGforSenate",
+                  "facebook": "https://www.facebook.com/rachaelforsenate/",
+                  "instagram": "https://www.instagram.com/rachaelforsenate/",
+                  "campaign_website": "https://www.rachaelcabralguevara.com/"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "district": 21,
+          "district_description": "Racine area",
+          "open_seat": true,
+          "competitive": true,
+          "notes": "Incumbent Van Wanggaard did not make the ballot. One of four key swing seats for Senate majority.",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_21_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Trevor Jung",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Trevor_Jung"
+                  }
+                ]
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Jim Croft",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Jim_Croft"
+                  }
+                ]
+              }
+            ]
+          },
+          "did_not_make_ballot": [
+            "Van Wanggaard (R, incumbent)"
+          ]
+        },
+        {
+          "district": 23,
+          "district_description": "Chippewa Falls/Northern Wisconsin area",
+          "notes": "Incumbent Jesse James did not make ballot; Romaine Quinn (former Assembly member) is the Republican candidate.",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_23_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Jeff Foster",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Jeff_Foster_(Wisconsin)"
+                  }
+                ]
+              },
+              {
+                "name": "Richard Pulcher",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Richard_Pulcher"
+                  }
+                ]
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Romaine Quinn",
+                "incumbent": false,
+                "current_occupation": "Former State Assembly member",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Romaine_Quinn"
+                  }
+                ],
+                "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Romaine-Quinn.jpg",
+                "photo_source": "Ballotpedia",
+                "social_media": {
+                  "twitter_x": "https://x.com/SenRomaineQuinn",
+                  "facebook": "https://www.facebook.com/SenatorRomaineQuinn",
+                  "instagram": "https://www.instagram.com/romaine.quinn.3/",
+                  "campaign_website": "https://www.romainequinn.com/"
+                }
+              }
+            ]
+          },
+          "did_not_make_ballot": [
+            "Jesse James (R, incumbent)"
+          ]
+        },
+        {
+          "district": 25,
+          "district_description": "Manitowoc/Sheboygan area",
+          "open_seat": true,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_25_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Charly Ray",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Charly_Ray"
+                  }
+                ]
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Angie Sapik",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Angie_Sapik"
+                  }
+                ]
+              },
+              {
+                "name": "Erik Severson",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Erik_Severson"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "district": 27,
+          "district_description": "Madison/Dane County area",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_27_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Dianne Hesselbein",
+                "incumbent": true,
+                "current_occupation": "State Senator (Senate Minority Leader)",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Dianne_Hesselbein"
+                  }
+                ],
+                "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Dianne_Hesselbein.jpeg",
+                "photo_source": "Ballotpedia",
+                "social_media": {
+                  "twitter_x": "https://x.com/SenHesselbein",
+                  "facebook": "https://www.facebook.com/SenHesselbein",
+                  "instagram": "https://www.instagram.com/senhesselbein/"
+                }
+              }
+            ],
+            "Republican": []
+          }
+        },
+        {
+          "district": 29,
+          "district_description": "Wausau/Marathon County area",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_29_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Gillian Battino",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Gillian_Battino"
+                  }
+                ]
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Cory Tomczyk",
+                "incumbent": true,
+                "current_occupation": "State Senator",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Cory_Tomczyk"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "district": 31,
+          "district_description": "Eau Claire area",
+          "competitive": true,
+          "notes": "One of four key swing seats for Senate majority.",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_31_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Jeff Smith",
+                "incumbent": true,
+                "current_occupation": "State Senator",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Jeff_Smith_(Wisconsin)"
+                  }
+                ],
+                "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Jeff_Smith_20230521_075004.png",
+                "photo_source": "Ballotpedia",
+                "social_media": {
+                  "twitter_x": "https://twitter.com/jeffsmithdem",
+                  "facebook": "https://www.facebook.com/togetherwithjeff/",
+                  "instagram": "https://www.instagram.com/sensmithwi/",
+                  "campaign_website": "https://www.togetherwithjeff.com/"
+                }
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Michele Magadance Skinner",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Michele_Magadance_Skinner"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "district": 33,
+          "district_description": "Waukesha County area",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Senate_District_33_election,_2026"
+            }
+          ],
+          "primaries": {
+            "Democratic": [
+              {
+                "name": "Mike Van Someren",
+                "incumbent": false,
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Mike_Van_Someren"
+                  }
+                ]
+              }
+            ],
+            "Republican": [
+              {
+                "name": "Chris Kapenga",
+                "incumbent": true,
+                "current_occupation": "State Senator (Senate President)",
+                "sources": [
+                  {
+                    "name": "Ballotpedia",
+                    "url": "https://ballotpedia.org/Chris_Kapenga"
+                  }
+                ],
+                "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Chris_Kapenga.jpg",
+                "photo_source": "Ballotpedia",
+                "social_media": {
+                  "twitter_x": "https://x.com/SenatorKapenga",
+                  "facebook": "https://www.facebook.com/SenatorKapenga/",
+                  "campaign_website": "https://www.chriskapenga.com/"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "race_id": "WI-STATE-ASSEMBLY-2026",
+      "office": "Wisconsin State Assembly",
+      "level": "State Legislative",
+      "primary_date": "August 11, 2026",
+      "general_date": "November 3, 2026",
+      "seats_up": 99,
+      "current_composition": {
+        "Democratic": 45,
+        "Republican": 54,
+        "Total": 99
+      },
+      "notes": "Republicans likely to maintain Assembly majority. All 99 seats up for election.",
+      "sources": [
+        {
+          "name": "Ballotpedia — Wisconsin State Assembly Elections 2026",
+          "url": "https://ballotpedia.org/Wisconsin_State_Assembly_elections,_2026"
+        },
+        {
+          "name": "WUWM Voter Guide — State Assembly",
+          "url": "https://www.wuwm.com/voterguide"
+        },
+        {
+          "name": "WisPolitics.com",
+          "url": "https://www.wispolitics.com"
+        }
+      ],
+      "campaign_finance": {
+        "data_source": "Wisconsin Ethics Commission — Sunshine",
+        "search_url": "https://campaignfinance.wi.gov/browse-data/registrants",
+        "instructions": "Search by candidate name under 'Registrant Type: State Candidate' to find their committee and finance reports",
+        "note": "All State Assembly candidates are state-level — use Wisconsin Sunshine only."
+      },
+      "districts": [
+        {
+          "district": 1,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_1_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Renee Paplham",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Joel Kitchens",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 2,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_2_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Alicia Saunders",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Shae Sortwell",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 3,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_3_election,_2026"
+            }
+          ],
+          "Democratic": [],
+          "Republican": [
+            {
+              "name": "Ron Tusler",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 4,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_4_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Alexia Unertl",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "David Steffen",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 5,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_5_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Justin Schumacher",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Joy Goeben",
+              "incumbent": true
+            }
+          ],
+          "Other": [
+            {
+              "name": "David Schupbach",
+              "party": "Green",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 6,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_6_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Shirley Hinze",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Elijah Behnke",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 7,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_7_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Karen Kirsch",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Lee Whiting",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 8,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_8_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Sylvia Ortiz-Velez",
+              "incumbent": true,
+              "photo_url": "https://static.wixstatic.com/media/dad87d_09ab1a457346422db9ddeb640c547429~mv2.jpg/v1/fill/w_262,h_262,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/dad87d_09ab1a457346422db9ddeb640c547429~mv2.jpg",
+              "photo_source": "Campaign website",
+              "social_media": {
+                "facebook": "https://www.facebook.com/Reportizvelez/",
+                "instagram": "https://www.instagram.com/sylviaortizvelez/",
+                "campaign_website": "https://www.sylviaforwi.com/"
+              }
+            },
+            {
+              "name": "Ismael Luna",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Angel Sanchez",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 9,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_9_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Priscilla Prado",
+              "incumbent": true
+            },
+            {
+              "name": "Mimi Reza",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Samuel Guerrero",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 10,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_10_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Darrin Madison Jr.",
+              "incumbent": true
+            }
+          ],
+          "Republican": [],
+          "Other": [
+            {
+              "name": "Robert Longwell-Grice",
+              "party": "Green",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 11,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_11_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Sequanna Taylor",
+              "incumbent": true,
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/IMG_5830-min.JPG",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/TaylorSequanna",
+                "facebook": "https://www.facebook.com/Sequanna4Wisconsin/",
+                "instagram": "https://www.instagram.com/repsequannataylor/",
+                "campaign_website": "https://www.sequannataylor.com/"
+              }
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Shandowlyon Hendricks Reaves",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 12,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_12_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Russell Goodwin",
+              "incumbent": true
+            },
+            {
+              "name": "Jordan Roman",
+              "incumbent": false
+            }
+          ],
+          "Republican": []
+        },
+        {
+          "district": 13,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_13_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "David Sanchez",
+              "incumbent": false
+            },
+            {
+              "name": "Amy Zimmerman",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Mike Morgan",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 14,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_14_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Angelito Tenorio",
+              "incumbent": true,
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/100/100/Sep2720211220PM_104500298_AngelitoHeadshot.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/AngelitoForWI",
+                "facebook": "https://www.facebook.com/angelitoforwi",
+                "instagram": "https://www.instagram.com/angelitoforwi/",
+                "campaign_website": "https://www.angelitotenorio.com/"
+              }
+            }
+          ],
+          "Republican": [
+            {
+              "name": "AmyRose Murphy",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 15,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_15_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Stephen Tryon",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Adam Neylon",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 16,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_16_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Kalan Haywood",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Alciro Deacon",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 17,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_17_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Supreme Moore Omokunde",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Charlene Abughrin",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 18,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_18_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Margaret Arney",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Joel Richmond",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 19,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_19_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Ryan Clancy",
+              "incumbent": true,
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/RyanClancy.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/RyanClancyWI",
+                "facebook": "https://www.facebook.com/ryanmclancy/",
+                "youtube": "https://www.youtube.com/@RyanClancyWisconsin",
+                "campaign_website": "https://www.ryanclancy.com/"
+              }
+            },
+            {
+              "name": "Bridget Maniaci",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Yasmine Outlaw",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 20,
+          "district_description": "Cudahy, South Milwaukee, St. Francis, and parts of southern Milwaukee",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_20_election,_2026"
+            },
+            {
+              "name": "WUWM Voter Guide",
+              "url": "https://www.wuwm.com/wisconsin-assembly-district-20-candidates"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Christine M. Sinicki",
+              "incumbent": true,
+              "current_occupation": "Incumbent legislator",
+              "notable_endorsements": [
+                "Congresswoman Gwen Moore",
+                "Mayor Chevy Johnson",
+                "Saint Francis Mayor Ken Tutaj",
+                "WEAC",
+                "IBEW",
+                "Laborers",
+                "National Association of Social Workers",
+                "Wisconsin Professional Firefighters"
+              ],
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Christine_Sinicki"
+                },
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-assembly-district-20-candidates"
+                }
+              ],
+              "photo_url": "https://legis.wisconsin.gov/assembly/20/sinicki/media/g0lgbu5n/20250106-oath-of-office-book-101.jpg",
+              "photo_source": "Official government page",
+              "social_media": {
+                "twitter_x": "https://x.com/RepChrisSinicki",
+                "facebook": "https://www.facebook.com/RepChristineSinicki/",
+                "instagram": "https://www.instagram.com/rep.sinicki/"
+              }
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Kyle Cleary",
+              "incumbent": false,
+              "background": "Did not respond to WUWM questionnaire; no campaign website or social media page readily available",
+              "sources": [
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-assembly-district-20-candidates"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "district": 21,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_21_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Dan Bukiewicz",
+              "incumbent": false
+            },
+            {
+              "name": "David Liners",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Dylan Pfaffenbach",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 22,
+          "district_description": "Parts of Waukesha County",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_22_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Dana Glasstein",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Paul Melotik",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 23,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_23_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Deb Andraca",
+              "incumbent": true,
+              "photo_url": "https://legis.wisconsin.gov/assembly/23/andraca/media/02wnf34n/230802-rep-andraca-location-portraits-02-scaled.png",
+              "photo_source": "Official government page",
+              "social_media": {
+                "twitter_x": "https://x.com/RepAndraca",
+                "facebook": "https://www.facebook.com/RepAndraca",
+                "youtube": "https://www.youtube.com/@wirepresentativedebandraca8254",
+                "campaign_website": "https://www.debforwi.com/"
+              }
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Aleaner Pabonnie",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 24,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_24_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Matt Brown",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Daniel Knodl",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 25,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_25_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Christopher Able",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Paul Tittl",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 26,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_26_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Joe Sheehan",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "John Belanger",
+              "incumbent": false
+            },
+            {
+              "name": "James Brotz",
+              "incumbent": false
+            },
+            {
+              "name": "Tyler Schneekloth",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 27,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_27_election,_2026"
+            }
+          ],
+          "Democratic": [],
+          "Republican": [
+            {
+              "name": "Lindee Brill",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 28,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_28_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Robin Lillesve",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Rob Kreibich",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 29,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_29_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Chris Danou",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Treig Pronschinske",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 30,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_30_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Kevin Knoke",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Shannon Zimmerman",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 31,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_31_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "John Perryman",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Tyler August",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 32,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_32_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Greg Miller",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Amanda Nedweski",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 33,
+          "open_seat": true,
+          "notes": "Robin Vos (longtime Assembly Speaker) did not make ballot — open seat",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_33_election,_2026"
+            },
+            {
+              "name": "WisPolitics.com",
+              "url": "https://www.wispolitics.com"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Rick Bailey",
+              "incumbent": false
+            },
+            {
+              "name": "Maria Elena Bisabarros",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Rick Stacey",
+              "incumbent": false
+            },
+            {
+              "name": "Steve Wicklund",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 34,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_34_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Merlin Van Buren",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Rob Swearingen",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 35,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_35_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Elizabeth McCrank",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Calvin Callahan",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 36,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_36_election,_2026"
+            }
+          ],
+          "Democratic": [],
+          "Republican": [
+            {
+              "name": "Jeffrey Mursau",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 37,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_37_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "LaToya Bates",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Mark Born",
+              "incumbent": true
+            },
+            {
+              "name": "Steve Rydzewski",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 38,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_38_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Terri Wenkman",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "William Penterman",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 39,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_39_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Michael Skivington",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Alex Dallman",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 40,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_40_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Karen DeSanto",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Julie Helmer",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 41,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_41_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Zach Commons",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Tony Kurtz",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 42,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_42_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Maureen McCarville",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Keith Miller",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 43,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_43_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Brienne Brown",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Paul McGraw",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 44,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_44_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Ann Roe",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Ron Woodman",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 45,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_45_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Clinton Anderson",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Jocelyn Jordan",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 46,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_46_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Joan Fitzgerald",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "John Donohue",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 47,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_47_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Randy Udell",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Sandy Bakk",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 48,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_48_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Andrew Hysell",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Mark Kjorlie",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 49,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_49_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "John Rindy",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Travis Tranel",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 50,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_50_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Bryna Caves",
+              "incumbent": false
+            },
+            {
+              "name": "Josh Mittness",
+              "incumbent": false
+            },
+            {
+              "name": "Bill Oemichen",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Jon Aleckson",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 51,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_51_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Ben Gruber",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Todd Novak",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 52,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_52_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Lee Snodgrass",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Reive Pullen",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 53,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_53_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Becky Nichols",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "David Daniels",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 54,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_54_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Lori Palmeri",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Tim Paterson",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 55,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_55_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Alex Corrigan",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Nate Gustafson",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 56,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_56_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Grace Abitz",
+              "incumbent": false
+            },
+            {
+              "name": "Shawna Riley",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Anthony Phillips",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 57,
+          "open_seat": true,
+          "notes": "Kevin Petersen did not make ballot — open seat",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_57_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Joey Marschall",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Ed Delgado",
+              "incumbent": false
+            },
+            {
+              "name": "Kevin Krentz",
+              "incumbent": false
+            },
+            {
+              "name": "Bill Lorge",
+              "incumbent": false
+            },
+            {
+              "name": "Dylan Testin",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 58,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_58_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Dennis Degenhardt",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Chris Bossert",
+              "incumbent": false
+            },
+            {
+              "name": "Bernie Newman",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 59,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_59_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Jack Holzman",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Bradley Petersen",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 60,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_60_election,_2026"
+            }
+          ],
+          "Democratic": [],
+          "Republican": [
+            {
+              "name": "Marty Ryan",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 61,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_61_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Brian Bock",
+              "incumbent": false
+            },
+            {
+              "name": "Ben Brist",
+              "incumbent": false
+            },
+            {
+              "name": "Lawanda Chambers",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Robert Donovan",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 62,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_62_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Angelina Cruz",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Mike Bellagio",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 63,
+          "district_description": "Northeast Racine County and southwest Milwaukee County, including most of Franklin and parts of Oak Creek",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_63_election,_2026"
+            },
+            {
+              "name": "WUWM Voter Guide",
+              "url": "https://www.wuwm.com/voterguide"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Eddie Phanichkul",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Robert Wittke",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 64,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_64_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Tip McGuire",
+              "incumbent": true,
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Tip_McGuire.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/StateRepTip",
+                "facebook": "https://www.facebook.com/StateRepTip/",
+                "instagram": "https://www.instagram.com/tip4wi/",
+                "campaign_website": "https://www.tipmcguire.com/"
+              }
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Ed Hibsch",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 65,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_65_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Ben DeSmidt",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Valerie Kretchmer",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 66,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_66_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Greta Neubauer",
+              "incumbent": true,
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/gneubauer.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/RepGreta",
+                "facebook": "https://www.facebook.com/WIStateRepGretaNeubauer/",
+                "instagram": "https://www.instagram.com/repgreta/",
+                "campaign_website": "https://www.gretan.com/"
+              }
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Gina Cefalu Paulick",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 67,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_67_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Indiana Thompson",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "David Armstrong",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 68,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_68_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Elisha King",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Rob Summerfield",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 69,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_69_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Roger Halls",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Karen Hurd",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 70,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_70_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Stephanie Stuve Bodeen",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Nancy VanderMeer",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 71,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_71_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Vinnie Miresse",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Jeff Disher",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 72,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_72_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Christine Maltese",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Scott Krug",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 73,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_73_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Angela Stroud",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Frank Kostka",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 74,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_74_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Paul Johnson",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Chanz Green",
+              "incumbent": true
+            },
+            {
+              "name": "Scott Harbridge",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 75,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_75_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Keith Mogel",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Duke Tucker",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 76,
+          "open_seat": true,
+          "notes": "Francesca Hong vacated seat to run for Governor -- open seat with 5 Democratic candidates",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_76_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Isaia Ben-Ami",
+              "incumbent": false
+            },
+            {
+              "name": "Juliana Bennett",
+              "incumbent": false
+            },
+            {
+              "name": "Tony Castaneda",
+              "incumbent": false
+            },
+            {
+              "name": "Dina Nina Martinez-Rutherford",
+              "incumbent": false
+            },
+            {
+              "name": "Zoe Sullivan",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Nina Chat",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 77,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_77_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Renuka Mayadev",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Jane McCormick",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 78,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_78_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Shelia Stubbs",
+              "incumbent": true,
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/shelia_headshot.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/RepStubbs",
+                "facebook": "https://www.facebook.com/repstubbs/",
+                "instagram": "https://www.instagram.com/rep.stubbs/",
+                "campaign_website": "https://www.sheliastubbsforassembly.com/"
+              }
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Henry Johnson",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 79,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_79_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Lisa Subeck",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "John Fons",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 80,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_80_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Mike Bare",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Simran Arora",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 81,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_81_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Alex Joers",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Mark Maier",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 82,
+          "district_description": "Central Waukesha County, including most of the city of Waukesha",
+          "open_seat": true,
+          "notes": "Incumbent Scott Allen not seeking reelection after losing Waukesha mayoral bid",
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_82_election,_2026"
+            },
+            {
+              "name": "WUWM Voter Guide",
+              "url": "https://www.wuwm.com/wisconsin-state-assembly-district-82-candidates"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Rico Camacho",
+              "incumbent": false,
+              "current_occupation": "City Alder (Waukesha)",
+              "background": "Former teacher; city alderperson; running on education, family affordability, and community inclusion",
+              "notable_endorsements": [
+                "Voces De La Frontera",
+                "LIUNA",
+                "Jose Perez (Common Council President of Milwaukee)"
+              ],
+              "sources": [
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-state-assembly-district-82-candidates"
+                }
+              ],
+              "photo_url": "https://npr.brightspotcdn.com/dims4/default/9eae044/2147483647/strip/true/crop/1122x1122+0+0/resize/880x880!/quality/90/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2F3c%2Fec%2Fae56819b45b89f4251f3a39fc7c4%2Frico-camacho-facebook.jpg",
+              "photo_source": "WUWM / NPR",
+              "social_media": {
+                "facebook": "https://www.facebook.com/votericocamacho/",
+                "instagram": "https://www.instagram.com/camachoforwi/",
+                "youtube": "https://www.youtube.com/@honestandhumanproductions",
+                "campaign_website": "https://www.ricocamacho.com/"
+              }
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Bryson Reyes",
+              "incumbent": false,
+              "current_occupation": "Supply Chain Analyst",
+              "background": "Army veteran; works in manufacturing industry; running on lower taxes, deregulation, and workforce development",
+              "notable_endorsements": [
+                "Milwaukee Police Association",
+                "Waukesha Deputy Sheriff Labor Union",
+                "Wisconsin Realtors Association",
+                "Greater Milwaukee Association of Realtors",
+                "Wisconsin Young Republicans"
+              ],
+              "sources": [
+                {
+                  "name": "WUWM Voter Guide",
+                  "url": "https://www.wuwm.com/wisconsin-state-assembly-district-82-candidates"
+                }
+              ],
+              "photo_url": "https://static.wixstatic.com/media/0e04f6_de0b1166c477485db24de40ed0185c6b~mv2.jpg/v1/fill/w_450,h_600,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/0e04f6_de0b1166c477485db24de40ed0185c6b~mv2.jpg",
+              "photo_source": "Campaign website",
+              "social_media": {
+                "facebook": "https://www.facebook.com/p/Bryson-Reyes-for-State-Assembly-61572121265493/",
+                "campaign_website": "https://www.brysonforwisconsin.com/"
+              }
+            }
+          ]
+        },
+        {
+          "district": 83,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_83_election,_2026"
+            }
+          ],
+          "Democratic": [],
+          "Republican": [
+            {
+              "name": "Dave Maxey",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 84,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_84_election,_2026"
+            }
+          ],
+          "Democratic": [],
+          "Republican": [
+            {
+              "name": "Chuck Wichgers",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 85,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_85_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "John Kroll",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Patrick Snyder",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 86,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_86_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Andy Wuethrich",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "John Spiros",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 87,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_87_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Bob Look",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Brent Jacobson",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 88,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_88_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Brandy Tollefson",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Benjamin Franklin",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 89,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_89_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Ryan Spaude",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Bob Snyder",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 90,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_90_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Amaad Rivera-Wagner",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Jessica Henderson",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 91,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_91_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Jodi Emerson",
+              "incumbent": true,
+              "photo_url": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Jodi_Emerson.jpg",
+              "photo_source": "Ballotpedia",
+              "social_media": {
+                "twitter_x": "https://x.com/JodiRep",
+                "facebook": "https://www.facebook.com/repjodiemerson/",
+                "instagram": "https://www.instagram.com/emersonforassembly/",
+                "campaign_website": "https://www.emersonforassembly.com/"
+              }
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Bruce Stabenow",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 92,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_92_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Jeremiah Fredrickson",
+              "incumbent": false
+            },
+            {
+              "name": "Melvin Marin",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Clint Moses",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 93,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_93_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Christian Phelps",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Michael Ayala",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 94,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_94_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Steve Doyle",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Keith Purnell",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 95,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_95_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Jill Billings",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Cedric Schnitzler",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 96,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_96_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Tara Johnson",
+              "incumbent": true
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Jim Green",
+              "incumbent": false
+            }
+          ]
+        },
+        {
+          "district": 97,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_97_election,_2026"
+            }
+          ],
+          "Democratic": [],
+          "Republican": [
+            {
+              "name": "Cindi Duchow",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 98,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_98_election,_2026"
+            }
+          ],
+          "Democratic": [
+            {
+              "name": "Matt Philibert",
+              "incumbent": false
+            }
+          ],
+          "Republican": [
+            {
+              "name": "Jim Piwowarczyk",
+              "incumbent": true
+            }
+          ]
+        },
+        {
+          "district": 99,
+          "sources": [
+            {
+              "name": "Ballotpedia",
+              "url": "https://ballotpedia.org/Wisconsin_State_Assembly_District_99_election,_2026"
+            }
+          ],
+          "Democratic": [],
+          "Republican": [
+            {
+              "name": "Barbara Dittrich",
+              "incumbent": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "voting_information": {
+    "primary_date": "August 11, 2026",
+    "polls_open": "7:00 AM",
+    "polls_close": "8:00 PM",
+    "timezone": "Central Time (CT)",
+    "voter_registration": {
+      "in_person": "August 11, 2026 (same-day registration available)",
+      "by_mail": "Postmarked by July 22, 2026",
+      "online": "July 22, 2026"
+    },
+    "absentee_ballot_request_deadline": {
+      "in_person": "August 9, 2026",
+      "by_mail": "Received by August 6, 2026",
+      "online": "August 6, 2026"
+    },
+    "absentee_ballot_return_deadline": {
+      "in_person": "August 11, 2026",
+      "by_mail": "Received by August 11, 2026"
+    },
+    "early_voting": {
+      "available": true,
+      "start_date": "July 28, 2026",
+      "end_date": "August 9, 2026"
+    },
+    "voter_id_required": true,
+    "photo_id_required": true,
+    "official_voter_info": "https://myvote.wi.gov",
+    "official_wuwm_voter_guide": "https://www.wuwm.com/voterguide",
+    "sources": [
+      {
+        "name": "MyVote Wisconsin",
+        "url": "https://myvote.wi.gov"
+      },
+      {
+        "name": "Wisconsin Elections Commission",
+        "url": "https://elections.wi.gov"
+      }
+    ]
+  }
+}
