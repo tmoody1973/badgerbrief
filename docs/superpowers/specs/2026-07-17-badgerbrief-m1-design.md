@@ -78,7 +78,7 @@ State: manual CSV download from campaignfinance.wi.gov → `pnpm import:sunshine
 run after each filing deadline (next: July 29 pre-primary).
 
 ### Ads (Meta, M1)
-- `ads` — Meta ad archive ID, page/committee, candidate ref (with match confidence), creative text/link, first/last seen, status, spend range, impression range, funding entity, ad snapshot URL
+- `ads` — platform (`meta` in M1; `google` added in M2), platform ad ID, page/committee, candidate ref (with match confidence), creative text/link, first/last seen, status, spend range, impression range, funding entity, ad snapshot URL
 - `ad_metrics_daily` — per-ad daily spend/impression range snapshots for the timeline view
 
 Sync: Meta Ad Library API cron (daily; hourly in the final week before the primary)
