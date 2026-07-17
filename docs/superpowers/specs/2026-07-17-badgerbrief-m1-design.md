@@ -28,6 +28,7 @@ layer for the November 3 general.
 | Ad tracker | **Meta in M1** (launch differentiator); Google deferred to M2/M3 | Meta Ad Library has a real API with political-ad archive; Google Transparency Center has no public API (scrape/third-party only) and would put the milestone at risk. **Blocker to start immediately: Meta developer app + political-ad identity confirmation can take days** |
 | Brief rendering | **Generative UI via OpenUI** (`@openuidev/react-lang`), composition-only | Agent composes approved components by entity ID; facts come from published data at render time (§7) |
 | SEO/AEO | First-class requirement | Public pages SSR/ISR with JSON-LD; being cited by AI answer engines is the growth strategy (§8) |
+| Agent observability & evals | **Arize** (OTel/OpenInference tracing + LLM-as-judge evaluators) | Every agent run traced; trust-critical behaviors (citation faithfulness, neutrality, official-source-first) evaluated continuously and pre-deploy (§10a) |
 | Auth | Clerk, personal accounts only; roles via metadata | Clerk Organizations deferred to M3 (solo editorial team) |
 
 ## 1. Architecture
@@ -240,6 +241,44 @@ Pre-launch manual verification (from the PRD):
 - A generated brief contains only reviewed, source-linked content
 - Sampled ad records match their Meta Ad Library entries (sponsor, spend range, dates)
 - JSON-LD passes Google Rich Results Test
+
+## 10a. Agent observability & evals (Arize)
+
+The agents are the trust surface, so they get production-grade observability from
+day one — this is also the core learning payoff of the project.
+
+**Tracing.** All LLM calls run through the Vercel AI SDK inside Convex actions;
+enable AI SDK telemetry and export via OpenTelemetry (OpenInference conventions)
+to Arize. Every agent run — prompts, tool calls, retrievals, outputs, latency,
+token cost — becomes an inspectable trace. Conventions:
+- One Arize project for the app; spans tagged with `agent.name`
+  (voter-help / brief / research / editorial-qa)
+- Agent threads map to Arize sessions (session id = thread id); user id tagged
+  for signed-in surfaces
+- `review_tasks` and `voter_briefs` records store their originating trace id, so
+  any published summary or brief links back to the exact run that produced it
+  (use the arize-link skill to deep-link traces from the admin dashboard)
+
+**Evaluators (LLM-as-judge + code checks), run continuously on sampled
+production traces and as pre-deploy experiments:**
+- *Citation faithfulness* — is every factual claim in an answer/draft supported
+  by its cited source excerpt?
+- *Neutrality* — does output avoid endorsement, persuasion framing, or loaded
+  language? (maps to the PRD's non-partisan policy)
+- *Official-source-first* — do procedural voting answers cite official sources
+  or hand off to MyVote?
+- *Refusal correctness* — does Voter Help decline legal advice and disclose
+  uncertainty when data is thin?
+- Code evaluators: OpenUI Lang output parses against the library schema; every
+  entity ID referenced in a brief exists in published tables
+
+**Golden dataset.** A fixture set of voter questions ("how do I vote absentee in
+Milwaukee?", "who's running for governor?") and brief-generation inputs with known
+correct properties. Every agent prompt/instruction change runs as an Arize
+experiment against this dataset before deploy; regressions block the change.
+
+**Alerting.** Eval-score drops or elevated failure rates write to `alerts` and
+surface on the admin dashboard alongside editorial flags.
 
 ## 11. Out of scope for M1
 
