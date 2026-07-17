@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+/* BadgerBrief Wisconsin civic palette — spec: docs/superpowers/specs/2026-07-17-badgerbrief-m1-design.md */
+:root {
+  --background: #fff7ed; /* bb-cream */
+  --foreground: #1c1b1a; /* bb-charcoal */
+  --card: #ffffff; /* bb-paper */
+  --card-foreground: #1c1b1a;
+  --primary: #c5050c; /* bb-cardinal */
+  --primary-foreground: #ffffff;
+  --secondary: #f6e7b2; /* bb-butter */
+  --secondary-foreground: #1c1b1a;
+  --muted: #d8cec1; /* bb-stone */
+  --muted-foreground: #4a4742;
+  --accent: #1f5d8b; /* bb-lake */
+  --accent-foreground: #ffffff;
+  --destructive: #8f0b13; /* bb-deep-red */
+  --destructive-foreground: #ffffff;
+  --success: #2f5d3a; /* bb-pine */
+  --warning: #f4bd15; /* bb-alert */
+  --border: #1c1b1a;
+  --ring: #c5050c;
+  --shadow-brutal: 4px 4px 0px #1c1b1a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --shadow-brutal: var(--shadow-brutal);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
