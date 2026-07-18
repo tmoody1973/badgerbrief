@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAction, useMutation, useQuery } from "convex/react";
+import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Button } from "@/components/retroui/Button";
@@ -12,13 +12,17 @@ type QueueRows = NonNullable<ReturnType<typeof useQueue>>;
 type QueueRow = QueueRows[number];
 type AuditRows = NonNullable<ReturnType<typeof useAudit>>;
 
+// Admin-gated queries throw for unauthenticated callers, and the Convex client
+// starts unauthenticated while Clerk exchanges the JWT — skip until authed.
 function useQueue() {
-  return useQuery(api.adminQueue.list, {});
+  const { isAuthenticated } = useConvexAuth();
+  return useQuery(api.adminQueue.list, isAuthenticated ? {} : "skip");
 }
 function useAudit(refTable: string | undefined, refId: string | undefined) {
+  const { isAuthenticated } = useConvexAuth();
   return useQuery(
     api.audit.forRecord,
-    refTable && refId ? { refTable, refId } : "skip",
+    isAuthenticated && refTable && refId ? { refTable, refId } : "skip",
   );
 }
 
@@ -341,7 +345,8 @@ const SEVERITY_STYLES: Record<string, string> = {
 };
 
 function AlertsSection() {
-  const rows = useQuery(api.adminQueue.alerts, {});
+  const { isAuthenticated } = useConvexAuth();
+  const rows = useQuery(api.adminQueue.alerts, isAuthenticated ? {} : "skip");
   const resolveAlert = useMutation(api.adminQueue.resolveAlert);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
