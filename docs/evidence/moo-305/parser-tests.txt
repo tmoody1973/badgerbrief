@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 /Users/tarikmoody/Documents/Projects/badgerbrief
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  13:12:39
+   Duration  375ms (transform 78ms, setup 0ms, import 226ms, tests 8ms, environment 0ms)
+

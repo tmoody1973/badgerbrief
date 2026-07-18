@@ -70,8 +70,9 @@ body {
 }
 
 @media print {
-  header,
-  footer,
+  /* site chrome only — headers inside main (e.g. the brief masthead) still print */
+  body > header,
+  body > footer,
   nav {
     display: none !important;
   }
