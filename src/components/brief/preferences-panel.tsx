@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { relevantRaces, type Districts } from "@/lib/districts";
@@ -21,6 +22,7 @@ export function PreferencesPanel() {
   const issueSlugs = useQuery(api.public.listIssueSlugs, {});
   const savePrefs = useMutation(api.preferences.savePrefs);
   const generate = useMutation(api.briefs.generate);
+  const [generateError, setGenerateError] = useState<string | null>(null);
 
   if (!isAuthenticated || prefs === undefined || races === undefined) return null;
 
@@ -101,11 +103,21 @@ export function PreferencesPanel() {
           </fieldset>
           <button
             type="button"
-            onClick={() => void generate({}).catch(() => {})}
+            onClick={() => {
+              setGenerateError(null);
+              void generate({}).catch(() =>
+                setGenerateError("Couldn't start your brief — try again."),
+              );
+            }}
             className="mt-5 border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)] press"
           >
             Generate my brief
           </button>
+          {generateError && (
+            <p role="alert" className="mt-3 border-2 border-border bg-warning p-3 text-sm font-bold">
+              {generateError}
+            </p>
+          )}
         </>
       )}
     </section>

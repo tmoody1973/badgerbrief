@@ -13,6 +13,7 @@ export function BriefLoader() {
   const history = useQuery(api.briefs.listMine, {});
   const generate = useMutation(api.briefs.generate);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [generateError, setGenerateError] = useState<string | null>(null);
 
   // Print contract (spec §5): drill-downs print expanded.
   useEffect(() => {
@@ -73,11 +74,21 @@ export function BriefLoader() {
         <p className="font-bold">{latest.error ?? "Brief generation failed."}</p>
         <button
           type="button"
-          onClick={() => void generate({}).catch(() => {})}
+          onClick={() => {
+            setGenerateError(null);
+            void generate({}).catch(() =>
+              setGenerateError("Couldn't start your brief — try again."),
+            );
+          }}
           className="mt-3 border-2 border-border bg-primary px-3 py-1.5 font-bold text-primary-foreground shadow-[var(--shadow-brutal)] press"
         >
           Try again
         </button>
+        {generateError && (
+          <p role="alert" className="mt-3 border-2 border-border bg-warning p-3 text-sm font-bold">
+            {generateError}
+          </p>
+        )}
       </div>
     );
   }
