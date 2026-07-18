@@ -25,7 +25,7 @@ layer for the November 3 general.
 | Agent runtime | **Convex-native** (`@convex-dev/agent` + `@convex-dev/workflow`), not Vercel Eve | Agents live beside the data; tools are typed calls to our own Convex functions; one backend, one deploy; best learning-to-plumbing ratio |
 | Monitor "agent" | Plain Convex cron jobs, no LLM loop | It's scheduled fetching + diffing; an agent adds nothing |
 | State campaign finance | Manual Sunshine CSV download → import script | No public API; scraping their internal backend is fragile and legally gray. Non-commercial use only per Wis. Stat. § 11.1304(12) — visible footer disclosure required |
-| Ad tracker | **Meta in M1** (launch differentiator); Google in M2 | Meta Ad Library has a real API with political-ad archive; **blocker: Meta developer app + political-ad identity confirmation takes 1–3 business days** (applied 2026-07-17). Google has no Transparency Center API, but publishes political ads as the free public BigQuery dataset `google_political_ads` — no application or verification needed, so it can safely wait for M2 |
+| Ad tracker | **Meta AND Google in M1** (scope change 2026-07-17) | Meta Ad Library has a real API with political-ad archive; **blocker: Meta developer app + political-ad identity confirmation takes 1–3 business days** (applied 2026-07-17). Google has no Transparency Center API, but publishes political ads as the free public BigQuery dataset `google_political_ads` — no application or verification needed, so it lands in M1 as the unblocked ad source (spend trends, lagged) while Meta verification clears |
 | Brief rendering | **Generative UI via OpenUI** (`@openuidev/react-lang`), composition-only | Agent composes approved components by entity ID; facts come from published data at render time (§7) |
 | SEO/AEO | First-class requirement | Public pages SSR/ISR with JSON-LD; being cited by AI answer engines is the growth strategy (§8) |
 | Agent observability & evals | **Arize** (OTel/OpenInference tracing + LLM-as-judge evaluators) | Every agent run traced; trust-critical behaviors (citation faithfulness, neutrality, official-source-first) evaluated continuously and pre-deploy (§10a) |
@@ -78,7 +78,7 @@ State: manual CSV download from campaignfinance.wi.gov → `pnpm import:sunshine
 run after each filing deadline (next: July 29 pre-primary).
 
 ### Ads (Meta, M1)
-- `ads` — platform (`meta` in M1; `google` added in M2), platform ad ID, page/committee, candidate ref (with match confidence), creative text/link, first/last seen, status, spend range, impression range, funding entity, ad snapshot URL
+- `ads` — platform (`meta` and `google`, both M1), platform ad ID, page/committee, candidate ref (with match confidence), creative text/link, first/last seen, status, spend range, impression range, funding entity, ad snapshot URL
 - `ad_metrics_daily` — per-ad daily spend/impression range snapshots for the timeline view
 
 Sync: Meta Ad Library API cron (daily; hourly in the final week before the primary)
@@ -282,19 +282,18 @@ surface on the admin dashboard alongside editorial flags.
 
 ## 11. Out of scope for M1
 
-Google political ads adapter (M2 — see §12; BigQuery public dataset, no
-lead-time blocker), ad-message clustering,
-polling module, SMS/email reminders, semantic related content, audio/multilingual,
+SMS/email reminders, semantic related content, audio/multilingual,
 Clerk Organizations / partner workspaces, county/municipal races, Oxylabs,
 automated Sunshine scraping, PDF service (browser print covers M1).
 
 ## 12. Later milestones
 
-- **M2 (Sept–Oct, for Nov 3 general):** general-election data, Google political
-  ads adapter, ad-message clustering, polling module + methodology labels,
-  reminders, semantic related content, brief invalidation/refresh triggers
+- **M2 (Sept–Oct, for Nov 3 general):** general-election data, reminders,
+  semantic related content, brief invalidation/refresh triggers.
+  *(Scope change 2026-07-17: Google political ads adapter, ad-message
+  clustering, and polling module + methodology labels moved INTO M1.)*
 
-  *Google political ads adapter (specified):* weekly cron queries the public
+  *Google political ads adapter (specified; now M1):* weekly cron queries the public
   BigQuery dataset `google_political_ads` (advertiser spend, weekly spend by
   geography, creative stats for US election ads) filtered to Wisconsin
   advertisers/candidates, normalized into the same `ads` / `ad_metrics_daily`
@@ -304,5 +303,5 @@ automated Sunshine scraping, PDF service (browser print covers M1).
   trends, not same-day creative monitoring), so Meta remains the real-time
   source and Google the spend-trend source. Ad→candidate matching follows the
   same confidence-threshold + review-queue rule as Meta.
-- **M3 (post-election):** Google ads adapter, multilingual/audio briefs, partner
+- **M3 (post-election):** multilingual/audio briefs, partner
   workspaces (Clerk Orgs), county/municipal expansion, analytics warehouse if needed
