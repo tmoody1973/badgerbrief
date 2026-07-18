@@ -34,5 +34,6 @@ describe("qa contract", () => {
     expect(p).toContain("We will expand BadgerCare to every family.");
     expect(p).toContain("unsupported");
     expect(p).toContain("neutral");
+    expect(p).toContain("untrusted");
   });
 });

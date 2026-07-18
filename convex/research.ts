@@ -127,10 +127,22 @@ export const run = internalAction({
 
     const allTargets: { slug: string; name: string; raceId: string; url: string }[] =
       await ctx.runQuery(internal.researchQueries.listResearchTargets, {});
-    const scoped = candidateSlugs
-      ? allTargets.filter((t) => candidateSlugs.includes(t.slug))
-      : allTargets;
-    const targets = scoped.slice(0, limit ?? DEFAULT_LIMIT);
+
+    let targets: typeof allTargets;
+    if (candidateSlugs) {
+      // Explicit slugs bypass rotation — caller picked the order.
+      targets = allTargets.filter((t) => candidateSlugs.includes(t.slug)).slice(0, limit ?? DEFAULT_LIMIT);
+    } else {
+      // Rotate least-recently-fetched-first so candidates past DEFAULT_LIMIT
+      // in the stable order aren't starved forever by a fixed slice.
+      // Never-fetched targets (absent from the map) sort first.
+      const lastFetchAt = await ctx.runQuery(internal.researchQueries.latestFetchTimestamps, {
+        urls: allTargets.map((t) => t.url),
+      });
+      targets = [...allTargets]
+        .sort((a, b) => (lastFetchAt[a.url] ?? 0) - (lastFetchAt[b.url] ?? 0))
+        .slice(0, limit ?? DEFAULT_LIMIT);
+    }
 
     const summaries: CandidateSummary[] = [];
 
@@ -153,21 +165,37 @@ export const run = internalAction({
       }
 
       const hash = createHash("sha256").update(fetched.markdown).digest("hex");
-      await ctx.runMutation(internal.researchQueries.recordFetch, {
-        url: target.url,
-        status: "ok",
-        httpStatus: fetched.httpStatus,
-        contentHash: hash,
-      });
 
       if (hash === prevHash && !force) {
+        // Unchanged: bump fetchedAt (rotation) but don't touch the extraction
+        // hash trap — nothing to extract, nothing to overwrite.
+        await ctx.runMutation(internal.researchQueries.recordFetch, {
+          url: target.url,
+          status: "ok",
+          httpStatus: fetched.httpStatus,
+          contentHash: hash,
+        });
         console.log(`research-agent: content unchanged for ${target.slug}, skipping LLM`);
         summaries.push({ slug: target.slug, status: "unchanged" });
         continue;
       }
 
+      // Content actually drifted (not just a first-ever fetch or a forced
+      // rerun of the same content) — alert now since the daily hash write
+      // below would otherwise hide this from sourceChangeSweep's next pass.
+      if (prevHash && hash !== prevHash) {
+        await ctx.runMutation(internal.monitorQueries.insertAlert, {
+          kind: "source_change",
+          severity: "info",
+          message: `content hash changed for ${target.url}`,
+        });
+      }
+
       // Isolate extraction/save failures per candidate: one reliably-broken
       // page must not abort the run and starve the targets sliced behind it.
+      // Record the new hash only on SUCCESS — an extraction failure here
+      // must leave prevHash pointing at the old content, or the next run
+      // sees "unchanged" and skips this content version forever.
       try {
         const prompt = buildExtractionPrompt(target.name, target.url, fetched.markdown);
         const extractOnce = () =>
@@ -240,10 +268,29 @@ export const run = internalAction({
           },
         );
 
+        // Only now record the new hash — extraction succeeded, so this
+        // content version is fully processed.
+        await ctx.runMutation(internal.researchQueries.recordFetch, {
+          url: target.url,
+          status: "ok",
+          httpStatus: fetched.httpStatus,
+          contentHash: hash,
+        });
+
         summaries.push({ slug: target.slug, status: "extracted", ...counts });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         console.error(`research-agent: extraction failed for ${target.slug}: ${message}`);
+        // Leave the last OK hash pointing at the OLD content: recording an
+        // error here (no contentHash) means the next run's prevHash is
+        // unchanged, so this content version is retried instead of being
+        // permanently skipped as "unchanged".
+        await ctx.runMutation(internal.researchQueries.recordFetch, {
+          url: target.url,
+          status: "error",
+          httpStatus: fetched.httpStatus,
+          error: message,
+        });
         summaries.push({ slug: target.slug, status: "extraction_error", error: message });
         continue;
       }

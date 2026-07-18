@@ -102,6 +102,7 @@ export const runForTask = action({
         issueSlug: draft.issueSlug,
         stance: draft.stance,
         summary: draft.summary,
+        evidenceExcerpt: draft.evidenceExcerpt,
       });
       const prior: Doc<"candidate_positions_published"> | null = await ctx.runQuery(
         internal.qaQueries.getPriorPublished,

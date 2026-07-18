@@ -56,6 +56,19 @@ export const sourceChangeSweep = internalAction({
 
         const hash = createHash("sha256").update(fetched.markdown).digest("hex");
 
+        // Baseline (no prior hash) or unchanged or changed — always record
+        // the fetch so latestFetchHash reflects this run next time. Record
+        // BEFORE alerting: if this write fails, prevHash stays stale and
+        // we'd otherwise re-alert on the same drift every day until it
+        // succeeds; alerting after a successful write means a failed alert
+        // insert is a one-time miss, not a daily repeat.
+        await ctx.runMutation(internal.researchQueries.recordFetch, {
+          url: target.url,
+          status: "ok",
+          httpStatus: fetched.httpStatus,
+          contentHash: hash,
+        });
+
         if (prevHash && hash !== prevHash) {
           await ctx.runMutation(internal.monitorQueries.insertAlert, {
             kind: "source_change",
@@ -63,15 +76,6 @@ export const sourceChangeSweep = internalAction({
             message: `content hash changed for ${target.url}`,
           });
         }
-
-        // Baseline (no prior hash) or unchanged or changed — always record
-        // the fetch so latestFetchHash reflects this run next time.
-        await ctx.runMutation(internal.researchQueries.recordFetch, {
-          url: target.url,
-          status: "ok",
-          httpStatus: fetched.httpStatus,
-          contentHash: hash,
-        });
       } catch (err) {
         console.error(
           `monitor: source-change sweep failed for ${target.url}: ${

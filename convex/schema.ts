@@ -246,6 +246,7 @@ export default defineSchema({
     summary: v.string(),
     confidence: v.number(),
     sources: v.array(sourceLink),
+    evidenceExcerpt: v.optional(v.string()),
     reviewStatus: reviewStatus,
     reviewerNote: v.optional(v.string()),
     extractedAt: v.number(),

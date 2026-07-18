@@ -37,6 +37,29 @@ export const latestFetchHash = internalQuery({
   },
 });
 
+/**
+ * Piece 2b: last-fetch timestamp per URL, any status — used to rotate research
+ * targets least-recently-fetched-first so candidates past DEFAULT_LIMIT
+ * aren't starved forever by a stable slice. Never-fetched URLs are simply
+ * absent from the returned map (caller treats that as "oldest").
+ */
+export const latestFetchTimestamps = internalQuery({
+  args: { urls: v.array(v.string()) },
+  handler: async (ctx, { urls }) => {
+    const result: Record<string, number> = {};
+    for (const url of urls) {
+      const rows = await ctx.db
+        .query("source_fetch_logs")
+        .withIndex("by_url", (q) => q.eq("url", url))
+        .collect();
+      if (rows.length > 0) {
+        result[url] = rows.reduce((max, row) => Math.max(max, row.fetchedAt), 0);
+      }
+    }
+    return result;
+  },
+});
+
 /** Piece 3: log every fetch attempt (success or failure). */
 export const recordFetch = internalMutation({
   args: {
@@ -89,6 +112,7 @@ export const saveExtraction = internalMutation({
           summary: position.summary,
           confidence: position.confidence,
           sources,
+          evidenceExcerpt: position.evidenceExcerpt,
           extractedAt: Date.now(),
           traceId,
         });
@@ -102,6 +126,7 @@ export const saveExtraction = internalMutation({
           summary: position.summary,
           confidence: position.confidence,
           sources,
+          evidenceExcerpt: position.evidenceExcerpt,
           reviewStatus: "pending",
           extractedAt: Date.now(),
           traceId,

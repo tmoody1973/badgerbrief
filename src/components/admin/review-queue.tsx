@@ -292,6 +292,16 @@ function TaskDetail({ row }: { row: QueueRow }) {
               </li>
             ))}
           </ul>
+          {row.kind === "position" && row.draft.evidenceExcerpt && (
+            <div>
+              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Evidence excerpt
+              </p>
+              <blockquote className="mt-1 border-l-4 border-border bg-muted p-2 text-sm italic">
+                {row.draft.evidenceExcerpt}
+              </blockquote>
+            </div>
+          )}
         </div>
 
         <div>
