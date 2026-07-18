@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BriefLoader } from "@/components/brief/loader";
+import { PreferencesPanel } from "@/components/brief/preferences-panel";
 
 export const metadata: Metadata = {
   title: "Your primary brief",
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
 export default function BriefPage() {
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
+      <PreferencesPanel />
       <BriefLoader />
     </main>
   );
