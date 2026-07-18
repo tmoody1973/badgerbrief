@@ -62,12 +62,16 @@ function ensureTelemetry(): NodeTracerProvider | null {
 
 const tracer = () => trace.getTracer("badgerbrief-agents");
 
-type FetchResult =
+export type FetchResult =
   | { ok: true; markdown: string; httpStatus: number }
   | { ok: false; httpStatus?: number; error: string };
 
-/** Firecrawl v2 scrape — plain fetch, no SDK (Global Constraints). */
-async function fetchFirecrawlMarkdown(url: string): Promise<FetchResult> {
+/**
+ * Firecrawl v2 scrape — plain fetch, no SDK (Global Constraints).
+ * Exported for reuse by convex/qa.ts (also "use node"; plain fn export/import
+ * between two "use node" modules is fine — only queries/mutations can't live here).
+ */
+export async function fetchFirecrawlMarkdown(url: string): Promise<FetchResult> {
   try {
     const res = await fetch("https://api.firecrawl.dev/v2/scrape", {
       method: "POST",
