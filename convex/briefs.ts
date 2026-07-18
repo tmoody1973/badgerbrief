@@ -91,7 +91,9 @@ export const assembleContext = internalQuery({
       .query("user_preferences")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .unique();
-    if (!prefs?.congressionalDistrict) throw new Error("assembleContext: user has no districts");
+    if (!prefs?.congressionalDistrict || !prefs.stateSenateDistrict || !prefs.stateAssemblyDistrict) {
+      throw new Error("assembleContext: user has no districts");
+    }
     const districts: Districts = {
       congressional: Number(prefs.congressionalDistrict),
       senate: Number(prefs.stateSenateDistrict),

@@ -68,6 +68,21 @@ describe("briefs lifecycle", () => {
     expect(ctxBlock.races.find((r) => r.raceId === "WI-GOV-2026")!.candidates[0].slug).toBe("kelda-roys");
   });
 
+  test("assembleContext rejects when senate/assembly districts are missing", async () => {
+    const t = setup();
+    const userId = await seedUser(t);
+    await t.run((ctx) =>
+      ctx.db.insert("user_preferences", {
+        userId,
+        congressionalDistrict: "4", // senate/assembly unset
+        savedRaceIds: [],
+        savedIssues: [],
+        detailLevel: "standard",
+      }),
+    );
+    await expect(t.query(internal.briefs.assembleContext, { userId })).rejects.toThrow(/districts/i);
+  });
+
   test("generate throws without districts", async () => {
     const t = setup();
     await seedUser(t);
