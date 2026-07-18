@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { raceIdToSlug } from "@/lib/site";
-import { PartyBadge } from "./labels";
+import { PartyBadge, StatusBadge } from "./labels";
 
 export function RaceCard({
   race,
@@ -59,6 +59,7 @@ export function CandidateCard({ candidate }: { candidate: Doc<"candidates"> }) {
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
         <PartyBadge party={candidate.party} />
+        <StatusBadge status={candidate.status} />
       </div>
       {candidate.currentOccupation &&
         candidate.currentOccupation !== "Unknown" && (

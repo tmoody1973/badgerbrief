@@ -42,6 +42,27 @@ export function Stamp({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Compact badge for any non-active candidacy status (withdrawn, suspended, not on ballot). */
+export function StatusBadge({ status }: { status?: string }) {
+  if (!status || status.toLowerCase() === "active") return null;
+  const low = status.toLowerCase();
+  const label = low.includes("withdr")
+    ? "Withdrawn"
+    : low.includes("suspend")
+      ? "Suspended"
+      : low.includes("not on") || low.includes("did not file")
+        ? "Not on ballot"
+        : status;
+  return (
+    <span
+      title={status}
+      className="inline-block border-2 border-border bg-muted px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+    >
+      {label}
+    </span>
+  );
+}
+
 export function LastUpdated({ date }: { date: string }) {
   const parsed = new Date(date);
   const iso = isNaN(parsed.getTime())

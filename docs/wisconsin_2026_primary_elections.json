@@ -184,6 +184,39 @@
           "primary_date": "August 11, 2026",
           "candidates": [
             {
+              "name": "Mandela Barnes",
+              "party": "Democratic",
+              "status": "Active",
+              "incumbent": false,
+              "current_occupation": "Former Lieutenant Governor of Wisconsin",
+              "background": "Lieutenant Governor of Wisconsin (2019–2023), the first Black Wisconsinite to hold the office; former state Assembly representative from Milwaukee; narrowly lost the 2022 U.S. Senate race; announced his run for governor December 2, 2025 and is widely viewed as the Democratic frontrunner",
+              "key_priorities": [
+                "Affordability and cost of living",
+                "Expanding BadgerCare",
+                "Universal childcare"
+              ],
+              "notable_endorsements": [],
+              "notes": "Entered the race December 2, 2025. Sunshine committee 'Mandela for Wisconsin' still shows his prior Lieutenant Governor registration; gubernatorial campaign finance expected in the July 29, 2026 pre-primary filing.",
+              "campaign_finance": {
+                "search_term": "Mandela for Wisconsin",
+                "sunshine_search": "https://campaignfinance.wi.gov/browse-data/registrants"
+              },
+              "sources": [
+                {
+                  "name": "Ballotpedia",
+                  "url": "https://ballotpedia.org/Mandela_Barnes"
+                },
+                {
+                  "name": "PBS Wisconsin — Barnes enters 2026 race",
+                  "url": "https://pbswisconsin.org/news-item/mandela-barnes-enters-2026-race-for-wisconsin-governor/"
+                },
+                {
+                  "name": "Wisconsin Watch — Barnes fact check",
+                  "url": "https://wisconsinwatch.org/2025/12/wisconsin-mandela-barnes-governor-election-fact-check-claims-democrat/"
+                }
+              ]
+            },
+            {
               "name": "Joel Brennan",
               "party": "Democratic",
               "status": "Active",
@@ -217,7 +250,7 @@
             {
               "name": "David Crowley",
               "party": "Democratic",
-              "status": "Withdrew — still on ballot",
+              "status": "Withdrew July 8, 2026; reportedly re-entering as of July 17, 2026",
               "incumbent": false,
               "current_occupation": "Milwaukee County Executive",
               "background": "First Black man elected Milwaukee County Executive (since 2020); previously represented a Milwaukee district in the state Assembly",
@@ -229,6 +262,10 @@
                 {
                   "name": "Milwaukee Journal Sentinel",
                   "url": "https://www.jsonline.com/story/news/politics/elections/2026/06/01/david-crowley-drops-out-of-wisconsin-governor-race/"
+                },
+                {
+                  "name": "WPR — Crowley signals return",
+                  "url": "https://www.wpr.org/news/rodriguez-crowley-democratic-primary-shakeup"
                 }
               ],
               "campaign_finance": {
@@ -243,7 +280,8 @@
                 "instagram": "https://www.instagram.com/crowleyforwi/",
                 "youtube": "https://www.youtube.com/@Crowley4Wisconsin",
                 "campaign_website": "https://www.crowleyforwi.com/"
-              }
+              },
+              "notes": "Withdrew July 8 and endorsed Rodriguez; after her exit, signaled July 17 that he is re-entering the primary."
             },
             {
               "name": "Francesca Hong",
@@ -284,7 +322,7 @@
             {
               "name": "Brett Hulsey",
               "party": "Democratic",
-              "status": "Withdrew — still on ballot",
+              "status": "Did not file by June 1, 2026 deadline — not on primary ballot",
               "incumbent": false,
               "current_occupation": "Small business owner (energy and environmental)",
               "background": "Former state representative from Madison; former Dane County Board member; runs an energy and environmental small business",
@@ -296,6 +334,10 @@
                 {
                   "name": "WUWM Voter Guide",
                   "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                },
+                {
+                  "name": "Milwaukee Magazine — 2026 governor candidates",
+                  "url": "https://www.milwaukeemag.com/candidates-wisconsin-governor-2026/"
                 }
               ],
               "campaign_finance": {
@@ -328,7 +370,7 @@
             {
               "name": "Missy Hughes",
               "party": "Democratic",
-              "status": "Withdrew — still on ballot",
+              "status": "Suspended campaign (June 22, 2026)",
               "incumbent": false,
               "current_occupation": "Former WEDC CEO",
               "background": "Stepped down from leading the Wisconsin Economic Development Corporation to run for governor; previously an executive in the dairy industry",
@@ -340,6 +382,10 @@
                 {
                   "name": "WUWM Voter Guide",
                   "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                },
+                {
+                  "name": "Milwaukee Magazine — 2026 governor candidates",
+                  "url": "https://www.milwaukeemag.com/candidates-wisconsin-governor-2026/"
                 }
               ],
               "campaign_finance": {
@@ -350,7 +396,7 @@
             {
               "name": "Sara Rodriguez",
               "party": "Democratic",
-              "status": "Withdrew July 2026 — still on ballot",
+              "status": "Withdrawn (July 17, 2026)",
               "incumbent": false,
               "current_occupation": "Lieutenant Governor",
               "background": "Lieutenant Governor of Wisconsin under Gov. Tony Evers; formerly represented portions of Waukesha and Milwaukee counties in the state Assembly; registered nurse; withdrew citing campaign finance reporting issues",
@@ -362,6 +408,10 @@
                 {
                   "name": "PBS Wisconsin",
                   "url": "https://pbswisconsin.org/news-item/sara-rodriguez-drops-out-of-governors-race/"
+                },
+                {
+                  "name": "PBS Wisconsin — Rodriguez drops out",
+                  "url": "https://pbswisconsin.org/news-item/rodriguez-drops-out-of-wisconsins-2026-democratic-governors-race-over-campaign-finance-problems/"
                 }
               ],
               "campaign_finance": {
@@ -375,7 +425,8 @@
                 "facebook": "https://www.facebook.com/saraforwi/",
                 "instagram": "https://www.instagram.com/saraforwi/",
                 "campaign_website": "https://www.sararodriguez.com/"
-              }
+              },
+              "notes": "Withdrew July 17, 2026 after discovering campaign finance mismanagement; campaign manager fired over unreported fundraising shortfall."
             },
             {
               "name": "Kelda Roys",
@@ -383,7 +434,7 @@
               "status": "Active",
               "incumbent": false,
               "current_occupation": "State Senator",
-              "background": "Wisconsin State Senator representing District 26 (since 2021); attorney, small business owner, and former nonprofit executive; born June 24, 1979; previously served in the state Assembly; endorsed by WEAC (teachers union) and Lt. Gov. Mandela Barnes",
+              "background": "Wisconsin State Senator representing District 26 (since 2021); attorney, small business owner, and former nonprofit executive; born June 24, 1979; previously served in the state Assembly; endorsed by WEAC (teachers union) and former Lt. Gov. Mandela Barnes",
               "key_priorities": [
                 "Standing up to Trump administration",
                 "Economic opportunity for all",
@@ -421,7 +472,7 @@
             {
               "name": "Zachary Roper",
               "party": "Democratic",
-              "status": "Withdrew — still on ballot",
+              "status": "Did not file by June 1, 2026 deadline — not on primary ballot",
               "incumbent": false,
               "current_occupation": "College student",
               "background": "Political science student at Carthage College; previously ran for Wisconsin State Assembly (District including Muskego); lost to Chuck Wichgers",
@@ -433,6 +484,10 @@
                 {
                   "name": "WUWM Voter Guide",
                   "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                },
+                {
+                  "name": "Milwaukee Magazine — 2026 governor candidates",
+                  "url": "https://www.milwaukeemag.com/candidates-wisconsin-governor-2026/"
                 }
               ],
               "campaign_finance": {
@@ -443,7 +498,7 @@
             {
               "name": "Ryan Strnad",
               "party": "Democratic",
-              "status": "Withdrew — still on ballot",
+              "status": "Did not file by June 1, 2026 deadline — not on primary ballot",
               "incumbent": false,
               "current_occupation": "Beer vendor (American Family Field)",
               "background": "Lives in Mukwonago; left the Republican Party in 2001 to become a Democrat; running to improve the working class, healthcare, and education",
@@ -455,6 +510,10 @@
                 {
                   "name": "WUWM Voter Guide",
                   "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                },
+                {
+                  "name": "Milwaukee Magazine — 2026 governor candidates",
+                  "url": "https://www.milwaukeemag.com/candidates-wisconsin-governor-2026/"
                 }
               ],
               "campaign_finance": {
@@ -556,7 +615,7 @@
             {
               "name": "Josh Schoemann",
               "party": "Republican",
-              "status": "Withdrew — still on ballot",
+              "status": "Withdrew (January 28, 2026)",
               "incumbent": false,
               "current_occupation": "Washington County Executive",
               "background": "Washington County Executive; veteran; touts record of cutting taxes and reducing government staff",
@@ -568,6 +627,10 @@
                 {
                   "name": "WUWM Voter Guide",
                   "url": "https://www.wuwm.com/2026-wisconsin-governor-race-candidates"
+                },
+                {
+                  "name": "WPR — Schoemann drops out",
+                  "url": "https://www.wpr.org/news/republican-josh-schoemann-drops-out-of-wisconsin-governors-race"
                 }
               ],
               "campaign_finance": {
@@ -580,7 +643,8 @@
                 "twitter_x": "https://x.com/JoshSchoemann",
                 "instagram": "https://www.instagram.com/joshschoemann/",
                 "campaign_website": "https://www.joshschoemann.com/"
-              }
+              },
+              "notes": "Dropped out one day after President Trump endorsed Tom Tiffany."
             }
           ]
         },

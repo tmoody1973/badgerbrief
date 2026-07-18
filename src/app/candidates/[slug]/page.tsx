@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FinancePanel } from "@/components/guide/finance";
-import { LastUpdated, PartyBadge } from "@/components/guide/labels";
+import {
+  LastUpdated,
+  PartyBadge,
+  StatusBadge,
+} from "@/components/guide/labels";
 import { SourceList } from "@/components/guide/sources";
 import { getCandidateBySlug, listCandidateSlugs } from "@/lib/data";
 import {
@@ -73,6 +77,7 @@ export default async function CandidatePage({ params }: Props) {
           {candidate.name}
         </h1>
         <PartyBadge party={candidate.party} />
+        <StatusBadge status={candidate.status} />
         {candidate.incumbent && (
           <span className="border-2 border-border bg-secondary px-2 py-0.5 font-mono text-xs font-bold uppercase">
             Incumbent
