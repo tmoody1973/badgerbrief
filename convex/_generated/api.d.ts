@@ -17,6 +17,7 @@ import type * as demoWorkflow from "../demoWorkflow.js";
 import type * as finance from "../finance.js";
 import type * as helloAgent from "../helloAgent.js";
 import type * as lib_briefContext from "../lib/briefContext.js";
+import type * as lib_briefValidate from "../lib/briefValidate.js";
 import type * as lib_extraction from "../lib/extraction.js";
 import type * as lib_qa from "../lib/qa.js";
 import type * as monitor from "../monitor.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   finance: typeof finance;
   helloAgent: typeof helloAgent;
   "lib/briefContext": typeof lib_briefContext;
+  "lib/briefValidate": typeof lib_briefValidate;
   "lib/extraction": typeof lib_extraction;
   "lib/qa": typeof lib_qa;
   monitor: typeof monitor;
