@@ -45,18 +45,25 @@ export function parseCsv(text) {
   return rows;
 }
 
-/** Case/space-insensitive header lookup: "Registrant Name" ≈ "registrant_name". */
+/**
+ * Case/space-insensitive header lookup: "Registrant Name" ≈ "registrant_name".
+ * Falls back to prefix match for verbose real-world headers like
+ * "Contributor Name (-> Related Payer Name if applicable)".
+ */
 function headerIndex(headers, ...names) {
   const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
   const wanted = names.map(norm);
-  return headers.findIndex((h) => wanted.includes(norm(h)));
+  const normalized = headers.map(norm);
+  const exact = normalized.findIndex((h) => wanted.includes(h));
+  if (exact >= 0) return exact;
+  return normalized.findIndex((h) => wanted.some((w) => h.startsWith(w)));
 }
 
 /**
  * Aggregate a Sunshine transactions export into per-committee totals + top donors.
  * Returns { committees: Map<committeeName, {total, count, topDonors[]}>, skipped }.
  */
-export function aggregateSunshine(csvText, { topN = 10 } = {}) {
+export function aggregateSunshine(csvText, { topN = 10, cycle = "2026" } = {}) {
   const rows = parseCsv(csvText);
   if (rows.length < 2) return { committees: new Map(), skipped: 0 };
   const headers = rows[0];
@@ -66,6 +73,7 @@ export function aggregateSunshine(csvText, { topN = 10 } = {}) {
   const iDonor = headerIndex(headers, "Contributor Name", "Source Name");
   const iCity = headerIndex(headers, "Contributor City", "City");
   const iDate = headerIndex(headers, "Transaction Date", "Date");
+  const iEvent = headerIndex(headers, "Related Ballot Event Name");
   if (iRegistrant < 0 || iAmount < 0) {
     throw new Error(
       `Unrecognized Sunshine CSV header: ${headers.join(", ")} — expected at least "Registrant Name" and "Amount" columns`,
@@ -86,6 +94,15 @@ export function aggregateSunshine(csvText, { topN = 10 } = {}) {
     if (type && !type.includes("contribution") && !type.includes("receipt")) {
       skipped++;
       continue;
+    }
+    // Exclude rows tagged to a different election cycle (e.g. an old committee's
+    // 2022-tagged activity). Rows with no ballot-event tag are kept.
+    if (cycle && iEvent >= 0) {
+      const event = (row[iEvent] ?? "").trim();
+      if (event && !event.includes(cycle)) {
+        skipped++;
+        continue;
+      }
     }
     const entry = committees.get(committee) ?? {
       total: 0,
