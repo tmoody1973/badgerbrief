@@ -195,12 +195,20 @@ function TaskDetail({ row }: { row: QueueRow }) {
 
   const handlePublish = () =>
     run("publish", async () => {
+      // publishQuote/publishPosition are idempotent per draft, so retrying
+      // this whole button after a partial failure is safe.
       if (row.kind === "quote") {
         await publishQuote({ draftId: row.draft._id });
       } else {
         await publishPosition({ draftId: row.draft._id });
       }
-      await resolveTask({ taskId: row.task._id, outcome: "resolved" });
+      try {
+        await resolveTask({ taskId: row.task._id, outcome: "resolved" });
+      } catch (err) {
+        throw new Error(
+          `Published, but the review task could not be marked resolved — retry Publish. (${asMessage(err)})`,
+        );
+      }
     });
 
   const handleSaveEdits = () =>

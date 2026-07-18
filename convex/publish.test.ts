@@ -42,6 +42,24 @@ describe("quote publish gate", () => {
     expect(id).toBeDefined();
   });
 
+  test("publishing the same quote draft twice yields one row and the same id", async () => {
+    const t = setup();
+    const draftId = await t.run((ctx) =>
+      ctx.db.insert("quote_drafts", validQuoteDraft),
+    );
+    const first = await t
+      .withIdentity(ADMIN)
+      .mutation(api.publish.publishQuote, { draftId });
+    const second = await t
+      .withIdentity(ADMIN)
+      .mutation(api.publish.publishQuote, { draftId });
+    expect(second).toEqual(first);
+    const published = await t.run((ctx) =>
+      ctx.db.query("quote_published").collect(),
+    );
+    expect(published).toHaveLength(1);
+  });
+
   test("quote without source URL is rejected", async () => {
     const t = setup();
     const draftId = await t.run((ctx) =>

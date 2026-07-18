@@ -47,6 +47,16 @@ export const publishQuote = mutation({
     if (!sourceUrl.startsWith("http")) {
       throw new Error("publish gate: sourceUrl must be a valid URL");
     }
+    // Idempotent per draft: retries/double-clicks return the existing row
+    // instead of duplicating (publishPosition already upserts by design).
+    const existing = await ctx.db
+      .query("quote_published")
+      .withIndex("by_candidate", (q) =>
+        q.eq("raceId", draft.raceId).eq("candidateSlug", draft.candidateSlug),
+      )
+      .filter((q) => q.eq(q.field("draftId"), draftId))
+      .first();
+    if (existing) return existing._id;
     const publishedId = await ctx.db.insert("quote_published", {
       candidateSlug: draft.candidateSlug,
       raceId: draft.raceId,
