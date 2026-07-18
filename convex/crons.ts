@@ -19,4 +19,24 @@ crons.daily(
   {},
 );
 
+// 12:15 UTC — after the research sweep, re-fetch campaign sites and alert on
+// content-hash drift.
+crons.daily(
+  "source change sweep",
+  { hourUTC: 12, minuteUTC: 15 },
+  internal.monitor.sourceChangeSweep,
+  {},
+);
+
+// 12:30 UTC — flag published positions that haven't been reviewed recently.
+// Deviation from plan text: lives at internal.monitorQueries.stalenessSweep,
+// not internal.monitor.stalenessSweep — "use node" modules (convex/monitor.ts)
+// may only export actions, so the mutation lives in monitorQueries.ts instead.
+crons.daily(
+  "staleness sweep",
+  { hourUTC: 12, minuteUTC: 30 },
+  internal.monitorQueries.stalenessSweep,
+  {},
+);
+
 export default crons;

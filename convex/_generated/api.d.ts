@@ -17,6 +17,8 @@ import type * as finance from "../finance.js";
 import type * as helloAgent from "../helloAgent.js";
 import type * as lib_extraction from "../lib/extraction.js";
 import type * as lib_qa from "../lib/qa.js";
+import type * as monitor from "../monitor.js";
+import type * as monitorQueries from "../monitorQueries.js";
 import type * as preferences from "../preferences.js";
 import type * as public_ from "../public.js";
 import type * as publish from "../publish.js";
@@ -43,6 +45,8 @@ declare const fullApi: ApiFromModules<{
   helloAgent: typeof helloAgent;
   "lib/extraction": typeof lib_extraction;
   "lib/qa": typeof lib_qa;
+  monitor: typeof monitor;
+  monitorQueries: typeof monitorQueries;
   preferences: typeof preferences;
   public: typeof public_;
   publish: typeof publish;
