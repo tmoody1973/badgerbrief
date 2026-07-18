@@ -1,60 +1,119 @@
-import { SignInButton, UserButton } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { Button } from "@/components/retroui/Button";
-import { Card, CardTitle } from "@/components/retroui/Card";
+import { RaceCard } from "@/components/guide/cards";
+import { LastUpdated, Stamp } from "@/components/guide/labels";
+import { getElection, listRaces, getVotingInfo } from "@/lib/data";
+import {
+  JsonLd,
+  breadcrumbNode,
+  electionEventNode,
+  organizationNode,
+} from "@/lib/jsonld";
+
+export const revalidate = 300;
+
+const LEVEL_ORDER = [
+  "State Executive",
+  "Federal",
+  "State Judicial",
+  "State Legislative",
+];
 
 export default async function Home() {
-  const { userId } = await auth();
+  const [election, races, votingInfo] = await Promise.all([
+    getElection(),
+    listRaces(),
+    getVotingInfo(),
+  ]);
+
+  const byLevel = new Map<string, typeof races>();
+  for (const level of LEVEL_ORDER) {
+    const group = races.filter((r) => r.level === level);
+    if (group.length > 0) byLevel.set(level, group);
+  }
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-12">
-      <header className="flex items-center justify-between">
-        <h1 className="text-3xl font-black tracking-tight">
-          Badger<span className="text-primary">Brief</span>
-        </h1>
-        <div>
-          {userId ? (
-            <UserButton />
-          ) : (
-            <SignInButton mode="modal">
-              <Button>Sign in</Button>
-            </SignInButton>
-          )}
-        </div>
-      </header>
+    <main className="mx-auto w-full max-w-5xl px-4 py-10">
+      {election && (
+        <JsonLd
+          nodes={[
+            organizationNode(),
+            electionEventNode(election),
+            breadcrumbNode([{ name: "Home", path: "/" }]),
+          ]}
+        />
+      )}
 
-      <Card>
-        <CardTitle>Wisconsin&apos;s voter guide, under construction</CardTitle>
-        <p className="mt-2">
-          Non-partisan, source-linked, and built for the August 11, 2026
-          primary. The scaffold works — the guide is on its way.
+      <section className="border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)] sm:p-10">
+        <Stamp>Wisconsin 2026</Stamp>
+        <h1 className="font-display mt-3 max-w-2xl text-4xl leading-none sm:text-5xl">
+          Know your ballot before you fill it in.
+        </h1>
+        <p className="mt-4 max-w-2xl text-lg">
+          The Wisconsin partisan primary is{" "}
+          <strong>{election?.primaryDate ?? "August 11, 2026"}</strong>. This is
+          a non-partisan, source-linked guide to every statewide and
+          congressional race on it — who&apos;s running, what they say, and
+          exactly how to vote.
         </p>
-        <div className="mt-4 flex gap-3">
-          <Button variant="secondary">Primary: Aug 11</Button>
-          <Link href="/admin">
-            <Button variant="outline">Admin</Button>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href="/vote"
+            className="border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)] press"
+          >
+            How to vote →
+          </Link>
+          <Link
+            href="/races/wi-gov-2026"
+            className="border-2 border-border bg-secondary px-4 py-2 font-bold shadow-[var(--shadow-brutal)] press"
+          >
+            Governor&apos;s race
           </Link>
         </div>
-      </Card>
+        {election && (
+          <div className="mt-6">
+            <LastUpdated date={election.dataAsOf} />
+          </div>
+        )}
+      </section>
 
-      <Card className="bg-secondary">
-        <CardTitle>Palette check</CardTitle>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <span className="border-2 border-border bg-primary px-3 py-1 font-bold text-primary-foreground">
-            cardinal
-          </span>
-          <span className="border-2 border-border bg-accent px-3 py-1 font-bold text-accent-foreground">
-            lake
-          </span>
-          <span className="border-2 border-border bg-success px-3 py-1 font-bold text-white">
-            pine
-          </span>
-          <span className="border-2 border-border bg-warning px-3 py-1 font-bold">
-            alert
-          </span>
-        </div>
-      </Card>
+      {votingInfo && (
+        <section className="mt-8 border-2 border-border bg-warning p-4 shadow-[var(--shadow-brutal)]">
+          <h2 className="font-display text-lg">
+            When are the 2026 Wisconsin primary deadlines?
+          </h2>
+          <p className="mt-1 text-sm">
+            Polls are open {votingInfo.pollsOpen}–{votingInfo.pollsClose} on{" "}
+            {votingInfo.primaryDate}. Absentee, registration, and early-voting
+            details are on the{" "}
+            <Link href="/vote" className="font-bold underline decoration-2">
+              how-to-vote page
+            </Link>
+            , with every deadline linked to its official source.
+          </p>
+        </section>
+      )}
+
+      <section className="mt-10">
+        <h2 className="font-display text-2xl">
+          What races are on the Wisconsin 2026 primary ballot?
+        </h2>
+        <p className="mt-2 max-w-2xl">
+          {races.length} races: statewide offices, all eight U.S. House
+          districts, the state supreme court, and the legislature.
+        </p>
+        {[...byLevel.entries()].map(([level, group]) => (
+          <div key={level} className="mt-6">
+            <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              {level}
+            </h3>
+            <div className="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {group.map((race) => (
+                <RaceCard key={race.raceId} race={race} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
     </main>
   );
 }

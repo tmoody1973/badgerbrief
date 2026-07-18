@@ -1,23 +1,38 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Archivo_Black, Public_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { StoreUser } from "./store-user";
+import { SiteFooter, SiteHeader } from "@/components/guide/chrome";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const displayFont = Archivo_Black({
+  variable: "--font-archivo-black",
+  weight: "400",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
+const bodyFont = Public_Sans({
+  variable: "--font-public-sans",
+  subsets: ["latin"],
+});
+
+const monoFont = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "BadgerBrief — Wisconsin Voter Guide",
-  description:
-    "Non-partisan, source-linked Wisconsin voter guide: your ballot, the candidates, the money, and exactly how to vote.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} — Wisconsin Voter Guide 2026`,
+    template: `%s — ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    siteName: SITE_NAME,
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -28,12 +43,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>
           <StoreUser />
-          {children}
+          <SiteHeader />
+          <div className="flex-1">{children}</div>
+          <SiteFooter />
         </Providers>
       </body>
     </html>

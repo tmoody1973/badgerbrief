@@ -113,6 +113,7 @@ export default defineSchema({
   })
     .index("by_race", ["raceId"])
     .index("by_slug", ["raceId", "slug"])
+    .index("by_slug_only", ["slug"])
     .index("by_fec_id", ["fecCandidateId"]),
 
   sources: defineTable({

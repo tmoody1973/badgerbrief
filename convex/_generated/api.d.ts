@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as public_ from "../public.js";
 import type * as publish from "../publish.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
@@ -19,6 +20,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  public: typeof public_;
   publish: typeof publish;
   seed: typeof seed;
   users: typeof users;

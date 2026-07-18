@@ -43,12 +43,28 @@
   --color-border: var(--border);
   --color-ring: var(--ring);
   --shadow-brutal: var(--shadow-brutal);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-public-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-archivo-black);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-public-sans), Arial, Helvetica, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-archivo-black), Impact, sans-serif;
+}
+
+/* card press: shadow collapses into the page on hover */
+.press {
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+.press:hover {
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
