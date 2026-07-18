@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Card, CardTitle } from "@/components/retroui/Card";
+import { ReviewQueue } from "@/components/admin/review-queue";
 
 export default async function AdminPage() {
   const { sessionClaims } = await auth();
@@ -11,12 +12,13 @@ export default async function AdminPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-12">
+    <main className="mx-auto w-full max-w-6xl px-4 py-12">
       <Card>
         <CardTitle>Admin</CardTitle>
-        <p className="mt-2">
-          Review queue, alerts, and editorial tools land here (MOO-312).
+        <p className="mt-2 mb-4">
+          Review queue, alerts, and editorial tools.
         </p>
+        <ReviewQueue />
       </Card>
     </main>
   );
