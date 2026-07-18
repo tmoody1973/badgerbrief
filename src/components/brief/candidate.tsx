@@ -5,6 +5,14 @@ import { api } from "../../../convex/_generated/api";
 import { FinancePanel } from "@/components/guide/finance";
 import { BriefSkeleton, NotFoundCard } from "./chrome";
 
+const hostnameOf = (url: string) => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+};
+
 export function IssueStanceCardView({
   candidateSlug,
   issueSlug,
@@ -33,7 +41,7 @@ export function IssueStanceCardView({
         <p className="mt-2 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
           Source:{" "}
           <a href={position.sources[0].url} className="underline" rel="noopener noreferrer" target="_blank">
-            {new URL(position.sources[0].url).hostname}
+            {hostnameOf(position.sources[0].url)}
           </a>
         </p>
       )}
