@@ -132,3 +132,11 @@ export const getVotingInfo = query({
       .unique();
   },
 });
+
+export const listIssueSlugs = query({
+  args: {},
+  handler: async (ctx) => {
+    const positions = await ctx.db.query("candidate_positions_published").collect();
+    return [...new Set(positions.map((p) => p.issueSlug))].sort();
+  },
+});
