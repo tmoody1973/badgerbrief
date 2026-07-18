@@ -42,7 +42,7 @@ export function PreferencesPanel() {
     list.includes(value) ? list.filter((x) => x !== value) : [...list, value];
 
   return (
-    <section className="mb-8 border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
+    <section className="mb-8 border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)] print:hidden">
       <h2 className="font-display text-2xl">Your brief, your ballot</h2>
       {!districts && <BallotFinder races={races} />}
       {districts && (
