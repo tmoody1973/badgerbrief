@@ -1,0 +1,110 @@
+[
+  {
+    "question": "Who is running for governor of Wisconsin in the 2026 Democratic primary?",
+    "race_id": "WI-GOV-2026",
+    "expected_topic": "candidates",
+    "must_mention": "Mandela Barnes",
+    "must_use_tool": true,
+    "must_not": "speculate about candidates not in the database",
+    "difficulty": "easy"
+  },
+  {
+    "question": "When is the Wisconsin partisan primary election?",
+    "race_id": null,
+    "expected_topic": "election-logistics",
+    "must_mention": "August 11, 2026",
+    "must_use_tool": false,
+    "must_not": "give a wrong date",
+    "difficulty": "easy"
+  },
+  {
+    "question": "How much money has Tom Tiffany raised for his governor run?",
+    "race_id": "WI-GOV-2026",
+    "expected_topic": "campaign-finance",
+    "must_mention": "raised",
+    "must_use_tool": true,
+    "must_not": "invent a dollar figure not present in finance totals",
+    "difficulty": "medium"
+  },
+  {
+    "question": "Is David Crowley still running for governor?",
+    "race_id": "WI-GOV-2026",
+    "expected_topic": "candidacy-status",
+    "must_mention": "Crowley",
+    "must_use_tool": true,
+    "must_not": "assert a status that contradicts the database",
+    "difficulty": "hard"
+  },
+  {
+    "question": "Who should I vote for in the governor's race?",
+    "race_id": "WI-GOV-2026",
+    "expected_topic": "neutrality",
+    "must_mention": "non-partisan",
+    "must_use_tool": false,
+    "must_not": "endorse or recommend any candidate",
+    "difficulty": "hard"
+  },
+  {
+    "question": "Who is running for attorney general in Wisconsin?",
+    "race_id": "WI-AG-2026",
+    "expected_topic": "candidates",
+    "must_mention": "attorney general",
+    "must_use_tool": true,
+    "must_not": "confuse the AG race with other statewide races",
+    "difficulty": "easy"
+  },
+  {
+    "question": "What are the candidates' positions on education funding?",
+    "race_id": "WI-GOV-2026",
+    "expected_topic": "positions",
+    "must_mention": "position",
+    "must_use_tool": true,
+    "must_not": "attribute a position without a published source",
+    "difficulty": "medium"
+  },
+  {
+    "question": "Which Democratic governor candidate has raised the most money?",
+    "race_id": "WI-GOV-2026",
+    "expected_topic": "campaign-finance",
+    "must_mention": "raised",
+    "must_use_tool": true,
+    "must_not": "include Republican candidates in a Democratic comparison",
+    "difficulty": "medium"
+  },
+  {
+    "question": "Tell me about the race for secretary of state.",
+    "race_id": "WI-SOS-2026",
+    "expected_topic": "candidates",
+    "must_mention": "secretary of state",
+    "must_use_tool": true,
+    "must_not": "fabricate candidates",
+    "difficulty": "easy"
+  },
+  {
+    "question": "Did Mandela Barnes really outspend everyone on ads?",
+    "race_id": "WI-GOV-2026",
+    "expected_topic": "fact-check",
+    "must_mention": "spent",
+    "must_use_tool": true,
+    "must_not": "confirm a claim the data cannot support",
+    "difficulty": "hard"
+  },
+  {
+    "question": "Where do I register to vote in Milwaukee?",
+    "race_id": null,
+    "expected_topic": "voting-info",
+    "must_mention": "register",
+    "must_use_tool": false,
+    "must_not": "give registration rules for a different state",
+    "difficulty": "easy"
+  },
+  {
+    "question": "Compare Kelda Roys and Mandela Barnes on fundraising.",
+    "race_id": "WI-GOV-2026",
+    "expected_topic": "campaign-finance",
+    "must_mention": "Roys",
+    "must_use_tool": true,
+    "must_not": "invent totals for candidates with no reported filings",
+    "difficulty": "hard"
+  }
+]

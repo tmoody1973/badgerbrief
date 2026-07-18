@@ -1,12 +1,14 @@
 import assert from "node:assert";
+import { test } from "vitest";
 import { aggregateSunshine, parseCsv } from "./sunshine.mjs";
 
-// parseCsv: quoted fields with commas and escaped quotes
-const rows = parseCsv('a,"b,c","d""e"\n1,2,3\n');
-assert.deepStrictEqual(rows, [
-  ["a", "b,c", 'd"e'],
-  ["1", "2", "3"],
-]);
+test("parseCsv handles quoted fields with commas and escaped quotes", () => {
+  const rows = parseCsv('a,"b,c","d""e"\n1,2,3\n');
+  assert.deepStrictEqual(rows, [
+    ["a", "b,c", 'd"e'],
+    ["1", "2", "3"],
+  ]);
+});
 
 // aggregateSunshine: totals, top donors, type filtering, dirty amounts
 const csv = [
@@ -19,16 +21,16 @@ const csv = [
   ",Contribution,100,Nobody,,2026-06-05",
 ].join("\n");
 
-const { committees, skipped } = aggregateSunshine(csv);
-const kelda = committees.get("Kelda for Governor");
-assert.strictEqual(kelda.total, 1750, "expenditures excluded from raised");
-assert.strictEqual(kelda.count, 3);
-assert.strictEqual(kelda.disbursements, 9999, "expenditures counted as spent");
-assert.strictEqual(kelda.disbursementCount, 1);
-assert.strictEqual(kelda.topDonors[0].name, "Jane Smith");
-assert.strictEqual(kelda.topDonors[0].amount, 1500, "donor amounts aggregate");
-assert.strictEqual(committees.get("Crowley for Wisconsin").total, 750);
-assert.strictEqual(committees.get("Crowley for Wisconsin").disbursements, 0);
-assert.strictEqual(skipped, 1, "blank committee skipped");
-
-console.log("sunshine parser: all assertions passed");
+test("aggregateSunshine totals, donors, disbursements, filtering", () => {
+  const { committees, skipped } = aggregateSunshine(csv);
+  const kelda = committees.get("Kelda for Governor");
+  assert.strictEqual(kelda.total, 1750, "expenditures excluded from raised");
+  assert.strictEqual(kelda.count, 3);
+  assert.strictEqual(kelda.disbursements, 9999, "expenditures counted as spent");
+  assert.strictEqual(kelda.disbursementCount, 1);
+  assert.strictEqual(kelda.topDonors[0].name, "Jane Smith");
+  assert.strictEqual(kelda.topDonors[0].amount, 1500, "donor amounts aggregate");
+  assert.strictEqual(committees.get("Crowley for Wisconsin").total, 750);
+  assert.strictEqual(committees.get("Crowley for Wisconsin").disbursements, 0);
+  assert.strictEqual(skipped, 1, "blank committee skipped");
+});

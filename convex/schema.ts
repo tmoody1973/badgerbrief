@@ -22,6 +22,13 @@ const stanceLabel = v.union(
 );
 
 export default defineSchema({
+  // ---------- infrastructure demos ----------
+  // MOO-304 retry-demo attempt counter (deterministic first-attempt failure).
+  demo_counters: defineTable({
+    key: v.string(),
+    count: v.number(),
+  }).index("by_key", ["key"]),
+
   // ---------- users & personalization ----------
   users: defineTable({
     clerkId: v.string(),

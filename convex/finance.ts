@@ -177,7 +177,8 @@ export const syncOpenFec = internalAction({
       throw e;
     }
 
-    const ours = await ctx.runQuery(internal.finance.listFecCandidates, {});
+    const ours: { slug: string; raceId: string; fecCandidateId: string }[] =
+      await ctx.runQuery(internal.finance.listFecCandidates, {});
     const byFecId = new Map(ours.map((c) => [c.fecCandidateId, c]));
 
     let matched = 0;
