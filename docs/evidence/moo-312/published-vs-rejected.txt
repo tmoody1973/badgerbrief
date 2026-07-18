@@ -1,0 +1,4 @@
+_id                                | _creationTime      | candidateSlug | confidence | draftId                            | issueSlug     | lastReviewedAt | publishedAt   | raceId        | sources    
+-----------------------------------|--------------------|--------------|-----|------------------------------------|---------------|---------------|---------------|---------------|---------------------
+"js70c93k4gpzf9q4wxj39bf63n8arzjn" | 1784404348575.9153 | "kelda-roys" | 0.6 | "jn70h2qwabhy2bp1sp7sxv4yjd8as29j" | "immigration" | 1784404348575 | 1784404348575 | "WI-GOV-2026" | [{ "name": "Kelda Ro
+---planted taxes-budget must be absent above---

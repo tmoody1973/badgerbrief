@@ -1,0 +1,9 @@
+_id                                | _creationTime      | action            | actor                              | at            | refId                        
+-----------------------------------|--------------------|-------------------|------------------------------------|---------------|------------------------------
+"ms753z2qmrr1nj4n2d9mtz89d58as0rg" | 1784404348633.817  | "task:resolved"   | "user_3GgrKsLdTMEi6LxLR9Hgy70HyFB" | 1784404348633 | "ks76c31q2nahayyhx74x2m4h998a
+"ms770tpbbrb7e65cn0jmqcv0mx8ar5jp" | 1784404348575.9155 | "publish"         | "user_3GgrKsLdTMEi6LxLR9Hgy70HyFB" | 1784404348575 | "jn70h2qwabhy2bp1sp7sxv4yjd8a
+"ms7fes6jbtcwmcr4gn97qr5cz58asv7k" | 1784404348480.8438 | "review:approved" | "user_3GgrKsLdTMEi6LxLR9Hgy70HyFB" | 1784404348480 | "jn70h2qwabhy2bp1sp7sxv4yjd8a
+"ms7avgtncyjvg2awqq5v01jxxx8art3j" | 1784404337890.7317 | "qa:run"          | "user_3GgrKsLdTMEi6LxLR9Hgy70HyFB" | 1784404337890 | "jn70h2qwabhy2bp1sp7sxv4yjd8a
+"ms789q27mhmmqaeez195pj59zd8asxwt" | 1784404325019.8252 | "task:dismissed"  | "user_3GgrKsLdTMEi6LxLR9Hgy70HyFB" | 1784404325019 | "ks71ftfd97xwqq1grn03596pyh8a
+"ms79sm7m4v52nv56v0f80nysbh8aszkd" | 1784404324936.2144 | "review:rejected" | "user_3GgrKsLdTMEi6LxLR9Hgy70HyFB" | 1784404324936 | "jn764q4zdm1q4rrarrjvf7bkh98a
+"ms7bbekjc8x0f7ngnc79s2whwn8ar67z" | 1784404295452.6345 | "qa:run"          | "user_3GgrKsLdTMEi6LxLR9Hgy70HyFB" | 1784404295452 | "jn764q4zdm1q4rrarrjvf7bkh98a
