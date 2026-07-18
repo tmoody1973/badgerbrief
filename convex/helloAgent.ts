@@ -55,7 +55,13 @@ function ensureTelemetry(): NodeTracerProvider | null {
   return provider;
 }
 
-/** The one typed tool: read-only race lookup against published public data. */
+const tracer = () => trace.getTracer("badgerbrief-agents");
+
+/**
+ * The one typed tool: read-only race lookup against published public data.
+ * @convex-dev/agent does not forward experimental_telemetry to the AI SDK,
+ * so the TOOL span is created manually (no-op when telemetry is off).
+ */
 const getRaceInfo = createTool({
   description:
     "Look up a Wisconsin 2026 race by id (e.g. WI-GOV-2026): returns candidates, published positions, and campaign finance totals. Read-only.",
@@ -63,12 +69,25 @@ const getRaceInfo = createTool({
     raceId: z.string().describe('Race id such as "WI-GOV-2026"'),
   }),
   execute: async (ctx, { raceId }): Promise<string> => {
-    const data = await ctx.runQuery(api.public.getRace, { raceId });
-    if (!data) return `No race found with id "${raceId}"`;
-    return JSON.stringify({
-      race: data.race,
-      candidates: data.candidates,
-      financeTotals: data.finance,
+    return await tracer().startActiveSpan("getRaceInfo", async (span) => {
+      span.setAttribute("openinference.span.kind", "TOOL");
+      span.setAttribute("tool.name", "getRaceInfo");
+      if (ctx.threadId) span.setAttribute("session.id", ctx.threadId);
+      span.setAttribute("input.value", JSON.stringify({ raceId }));
+      try {
+        const data = await ctx.runQuery(api.public.getRace, { raceId });
+        const out = !data
+          ? `No race found with id "${raceId}"`
+          : JSON.stringify({
+              race: data.race,
+              candidates: data.candidates,
+              financeTotals: data.finance,
+            });
+        span.setAttribute("output.value", out.slice(0, 4000));
+        return out;
+      } finally {
+        span.end();
+      }
     });
   },
 });
@@ -93,45 +112,46 @@ export const ask = action({
     const threadId = await createThread(ctx, components.agent);
 
     const generate = async () => {
-      const result = await helloAgent.generateText(
-        ctx,
-        { threadId },
-        {
-          prompt,
-          experimental_telemetry: {
-            isEnabled: telemetry !== null,
-            functionId: AGENT_NAME,
-            metadata: {
-              "agent.name": AGENT_NAME,
-              "session.id": threadId,
-              ...(identity ? { "user.id": identity.tokenIdentifier } : {}),
-            },
-          },
-        },
-      );
-      return result.text;
+      return await helloAgent.generateText(ctx, { threadId }, { prompt });
     };
 
     let text: string;
     if (telemetry) {
-      const tracer = trace.getTracer("badgerbrief-agents");
-      text = await tracer.startActiveSpan(`${AGENT_NAME}.run`, async (span) => {
+      text = await tracer().startActiveSpan(`${AGENT_NAME}.run`, async (span) => {
         span.setAttribute("openinference.span.kind", "AGENT");
         span.setAttribute("agent.name", AGENT_NAME);
         span.setAttribute("session.id", threadId);
         if (identity) span.setAttribute("user.id", identity.tokenIdentifier);
         span.setAttribute("input.value", prompt);
         try {
-          const out = await generate();
-          span.setAttribute("output.value", out);
-          return out;
+          const result = await generate();
+          // @convex-dev/agent doesn't forward experimental_telemetry, so record
+          // the model call manually (usage is real; timing is span-approximate).
+          const usage = result.usage as
+            | { inputTokens?: number; outputTokens?: number; totalTokens?: number }
+            | undefined;
+          const llmSpan = tracer().startSpan("claude.generateText");
+          llmSpan.setAttribute("openinference.span.kind", "LLM");
+          llmSpan.setAttribute("llm.model_name", "claude-opus-4-8");
+          llmSpan.setAttribute("session.id", threadId);
+          llmSpan.setAttribute("input.value", prompt);
+          llmSpan.setAttribute("output.value", result.text);
+          if (usage?.inputTokens !== undefined)
+            llmSpan.setAttribute("llm.token_count.prompt", usage.inputTokens);
+          if (usage?.outputTokens !== undefined)
+            llmSpan.setAttribute("llm.token_count.completion", usage.outputTokens);
+          if (usage?.totalTokens !== undefined)
+            llmSpan.setAttribute("llm.token_count.total", usage.totalTokens);
+          llmSpan.end();
+          span.setAttribute("output.value", result.text);
+          return result.text;
         } finally {
           span.end();
         }
       });
       await telemetry.forceFlush();
     } else {
-      text = await generate();
+      text = (await generate()).text;
     }
 
     return { threadId, text };
