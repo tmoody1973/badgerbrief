@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, MutationCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { logAudit } from "./audit";
 
 /**
  * Publish gates — the ONLY paths from draft to published civic content.
@@ -46,7 +47,7 @@ export const publishQuote = mutation({
     if (!sourceUrl.startsWith("http")) {
       throw new Error("publish gate: sourceUrl must be a valid URL");
     }
-    return await ctx.db.insert("quote_published", {
+    const publishedId = await ctx.db.insert("quote_published", {
       candidateSlug: draft.candidateSlug,
       raceId: draft.raceId,
       speaker,
@@ -58,6 +59,12 @@ export const publishQuote = mutation({
       draftId,
       publishedAt: Date.now(),
     });
+    await logAudit(ctx, {
+      action: "publish",
+      refTable: "quote_drafts",
+      refId: draftId,
+    });
+    return publishedId;
   },
 });
 
@@ -103,11 +110,19 @@ export const publishPosition = mutation({
       publishedAt: prior?.publishedAt ?? Date.now(),
       lastReviewedAt: Date.now(),
     };
+    let publishedId: Id<"candidate_positions_published">;
     if (prior) {
       await ctx.db.patch(prior._id, doc);
-      return prior._id;
+      publishedId = prior._id;
+    } else {
+      publishedId = await ctx.db.insert("candidate_positions_published", doc);
     }
-    return await ctx.db.insert("candidate_positions_published", doc);
+    await logAudit(ctx, {
+      action: "publish",
+      refTable: "candidate_positions_drafts",
+      refId: draftId,
+    });
+    return publishedId;
   },
 });
 
@@ -134,5 +149,11 @@ export const setDraftReviewStatus = mutation({
         ...(reviewerNote === undefined ? {} : { reviewerNote }),
       });
     }
+    await logAudit(ctx, {
+      action: `review:${status}`,
+      refTable: kind === "quote" ? "quote_drafts" : "candidate_positions_drafts",
+      refId: draftId,
+      detail: reviewerNote,
+    });
   },
 });

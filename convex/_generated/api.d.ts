@@ -8,8 +8,13 @@
  * @module
  */
 
+import type * as audit from "../audit.js";
+import type * as briefs from "../briefs.js";
 import type * as crons from "../crons.js";
+import type * as demoWorkflow from "../demoWorkflow.js";
 import type * as finance from "../finance.js";
+import type * as helloAgent from "../helloAgent.js";
+import type * as preferences from "../preferences.js";
 import type * as public_ from "../public.js";
 import type * as publish from "../publish.js";
 import type * as seed from "../seed.js";
@@ -22,8 +27,13 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  audit: typeof audit;
+  briefs: typeof briefs;
   crons: typeof crons;
+  demoWorkflow: typeof demoWorkflow;
   finance: typeof finance;
+  helloAgent: typeof helloAgent;
+  preferences: typeof preferences;
   public: typeof public_;
   publish: typeof publish;
   seed: typeof seed;
@@ -56,4 +66,7 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  agent: import("@convex-dev/agent/_generated/component.js").ComponentApi<"agent">;
+  workflow: import("@convex-dev/workflow/_generated/component.js").ComponentApi<"workflow">;
+};

@@ -335,4 +335,14 @@ export default defineSchema({
     resolved: v.boolean(),
     createdAt: v.number(),
   }).index("by_resolved", ["resolved"]),
+
+  // Append-only decision trail for the publish path (MOO-312).
+  audit_log: defineTable({
+    actor: v.string(), // identity.subject
+    action: v.string(), // review:approved | review:rejected | publish | edit | qa:run | ...
+    refTable: v.string(),
+    refId: v.string(),
+    detail: v.optional(v.string()),
+    at: v.number(),
+  }).index("by_ref", ["refTable", "refId"]),
 });
