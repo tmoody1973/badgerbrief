@@ -10,6 +10,7 @@
 
 import type * as adminQueue from "../adminQueue.js";
 import type * as audit from "../audit.js";
+import type * as briefAgent from "../briefAgent.js";
 import type * as briefWorkflow from "../briefWorkflow.js";
 import type * as briefs from "../briefs.js";
 import type * as crons from "../crons.js";
@@ -41,6 +42,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   adminQueue: typeof adminQueue;
   audit: typeof audit;
+  briefAgent: typeof briefAgent;
   briefWorkflow: typeof briefWorkflow;
   briefs: typeof briefs;
   crons: typeof crons;
