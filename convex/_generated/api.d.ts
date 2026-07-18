@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as crons from "../crons.js";
+import type * as finance from "../finance.js";
 import type * as public_ from "../public.js";
 import type * as publish from "../publish.js";
 import type * as seed from "../seed.js";
@@ -20,6 +22,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  crons: typeof crons;
+  finance: typeof finance;
   public: typeof public_;
   publish: typeof publish;
   seed: typeof seed;

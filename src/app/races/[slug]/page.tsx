@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CandidateCard } from "@/components/guide/cards";
+import { RaceFinanceTable } from "@/components/guide/finance";
 import { LastUpdated } from "@/components/guide/labels";
 import { SourceList } from "@/components/guide/sources";
 import { getRace, listRaces } from "@/lib/data";
@@ -37,7 +38,7 @@ export default async function RacePage({ params }: Props) {
   const { slug } = await params;
   const data = await getRace(slugToRaceId(slug));
   if (!data) notFound();
-  const { race, candidates } = data;
+  const { race, candidates, finance } = data;
 
   const parties = [
     ...new Set(candidates.map((c) => c.primaryParty).filter(Boolean)),
@@ -119,6 +120,8 @@ export default async function RacePage({ params }: Props) {
           </div>
         </section>
       )}
+
+      <RaceFinanceTable finance={finance} candidates={candidates} />
 
       {candidates.length > 1 && (
         <div className="mt-8">

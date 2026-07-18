@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { FinancePanel } from "@/components/guide/finance";
 import { LastUpdated, PartyBadge } from "@/components/guide/labels";
 import { SourceList } from "@/components/guide/sources";
 import { getCandidateBySlug, listCandidateSlugs } from "@/lib/data";
@@ -36,7 +37,7 @@ export default async function CandidatePage({ params }: Props) {
   const { slug } = await params;
   const data = await getCandidateBySlug(slug);
   if (!data) notFound();
-  const { candidate, race, positions, quotes } = data;
+  const { candidate, race, positions, quotes, finance, contributions } = data;
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10">
@@ -137,6 +138,12 @@ export default async function CandidatePage({ params }: Props) {
             </ul>
           </section>
         )}
+
+      <FinancePanel
+        totals={finance}
+        contributions={contributions}
+        candidateName={candidate.name}
+      />
 
       {positions.length > 0 && (
         <section className="mt-6">

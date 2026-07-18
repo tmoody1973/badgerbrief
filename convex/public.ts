@@ -32,11 +32,17 @@ export const getRace = query({
       .query("candidates")
       .withIndex("by_race", (q) => q.eq("raceId", raceId))
       .collect();
-    const positions = await ctx.db
-      .query("candidate_positions_published")
-      .withIndex("by_candidate_issue", (q) => q.eq("raceId", raceId))
-      .collect();
-    return { race, candidates, positions };
+    const [positions, finance] = await Promise.all([
+      ctx.db
+        .query("candidate_positions_published")
+        .withIndex("by_candidate_issue", (q) => q.eq("raceId", raceId))
+        .collect(),
+      ctx.db
+        .query("finance_totals")
+        .withIndex("by_candidate", (q) => q.eq("raceId", raceId))
+        .collect(),
+    ]);
+    return { race, candidates, positions, finance };
   },
 });
 
@@ -52,7 +58,7 @@ export const getCandidateBySlug = query({
       .query("races")
       .withIndex("by_race_id", (q) => q.eq("raceId", candidate.raceId))
       .unique();
-    const [positions, quotes] = await Promise.all([
+    const [positions, quotes, finance, contributions] = await Promise.all([
       ctx.db
         .query("candidate_positions_published")
         .withIndex("by_candidate_issue", (q) =>
@@ -65,8 +71,20 @@ export const getCandidateBySlug = query({
           q.eq("raceId", candidate.raceId).eq("candidateSlug", slug),
         )
         .collect(),
+      ctx.db
+        .query("finance_totals")
+        .withIndex("by_candidate", (q) =>
+          q.eq("raceId", candidate.raceId).eq("candidateSlug", slug),
+        )
+        .collect(),
+      ctx.db
+        .query("contributions")
+        .withIndex("by_candidate", (q) =>
+          q.eq("raceId", candidate.raceId).eq("candidateSlug", slug),
+        )
+        .collect(),
     ]);
-    return { candidate, race, positions, quotes };
+    return { candidate, race, positions, quotes, finance, contributions };
   },
 });
 

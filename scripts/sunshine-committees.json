@@ -1,0 +1,11 @@
+{
+  "_comment": "Explicit Sunshine committee → candidate mapping. Unmatched committees are REPORTED by import-sunshine.mjs, never guessed. Extend as committees appear in exports.",
+  "Kelda for Governor": { "candidateSlug": "kelda-roys", "raceId": "WI-GOV-2026" },
+  "Friends of Kelda Roys": { "candidateSlug": "kelda-roys", "raceId": "WI-GOV-2026" },
+  "Crowley for Wisconsin": { "candidateSlug": "david-crowley", "raceId": "WI-GOV-2026" },
+  "Sara for Wisconsin": { "candidateSlug": "sara-rodriguez", "raceId": "WI-GOV-2026" },
+  "Tiffany for Wisconsin": { "candidateSlug": "tom-tiffany", "raceId": "WI-GOV-2026" },
+  "Schoemann for Governor": { "candidateSlug": "josh-schoemann", "raceId": "WI-GOV-2026" },
+  "Brennan for Wisconsin": { "candidateSlug": "joel-brennan", "raceId": "WI-GOV-2026" },
+  "Hughes for Wisconsin": { "candidateSlug": "missy-hughes", "raceId": "WI-GOV-2026" }
+}
