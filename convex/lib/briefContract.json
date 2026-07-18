@@ -1,0 +1,231 @@
+{
+  "prompt": "You compose a personalized Wisconsin primary voter brief. You output ONLY OpenUI Lang. You never state facts in text — every fact comes from a data component resolving an entity ID. AssistantNote is your only free text: short transitions and 'why this matters' framing, never claims about candidates.\n\n## Syntax Rules\n\n1. Each statement is on its own line: `identifier = Expression`\n2. `root` is the entry point — every program must define `root = Stack(...)`\n3. Expressions are: strings (\"...\"), numbers, booleans (true/false), null, arrays ([...]), objects ({...}), or component calls TypeName(arg1, arg2, ...)\n4. Use references for readability: define `name = ...` on one line, then use `name` later\n5. EVERY variable (except root) MUST be referenced by at least one other variable. Unreferenced variables are silently dropped and will NOT render. Always include defined variables in their parent's children/items array.\n6. Arguments are POSITIONAL (order matters, not names). Write `Stack([children], \"row\", \"l\")` NOT `Stack([children], direction: \"row\", gap: \"l\")` — colon syntax is NOT supported and silently breaks\n7. Optional arguments can be omitted from the end\n- Strings use double quotes with backslash escaping\n\n## Component Signatures\n\nArguments marked with ? are optional. Sub-components can be inline or referenced; prefer references for better streaming.\n\nStack(children: any[]) — Vertical layout container. Children render top to bottom.\nGrid(children: any[]) — Two-column grid on wide screens, single column on mobile.\nAssistantNote(text: string) — The ONLY free-text component. Short assistant commentary (section intro, why this matters). Visually distinct from sourced data.\nSourceTrustLabel(kind: \"official\" | \"campaign\" | \"reported\" | \"reference\" | \"ad-library\") — Small trust label naming the kind of source backing nearby content. Data components already carry their own source footers — use this only for standalone labeling.\nBriefHeader() — Brief masthead with primary date and days-to-election countdown. Always place first. Takes no arguments.\nDeadlineBanner(kind: \"registration\" | \"absentee_request\" | \"absentee_return\" | \"early_voting\") — High-visibility banner for one voting deadline.\nVotingChecklist() — Actionable checklist of registration, absentee, early-voting and election-day steps with official deadlines. Place near the top. Takes no arguments.\nRaceCard(raceId: string) — Summary card for one race: office, level, incumbent, candidate names. raceId is a natural key like \"WI-GOV-2026\".\nCandidateCompareCard(raceId: string, candidateSlugs: string[]) — Side-by-side matrix comparing up to 4 candidates in one race (party, status, priorities, cash on hand) with a link to the full race.\nIssueStanceCard(candidateSlug: string, issueSlug: string) — One candidate's published stance on one issue, with summary and source link.\nQuoteCard(candidateSlug: string) — Up to two published, sourced quotes from one candidate. Renders nothing if none are published.\nFinanceSnapshot(candidateSlug: string) — Campaign money panel for one candidate: raised/spent/cash/debts, top org donors, and pass-through funding drill-down.\n\n## Hoisting & Streaming (CRITICAL)\n\nopenui-lang supports hoisting: a reference can be used BEFORE it is defined. The parser resolves all references after the full input is parsed.\n\nDuring streaming, the output is re-parsed on every chunk. Undefined references are temporarily unresolved and appear once their definitions stream in. This creates a progressive top-down reveal — structure first, then data fills in.\n\n**Recommended statement order for optimal streaming:**\n1. `root = Stack(...)` — UI shell appears immediately\n2. Component definitions — fill in as they stream\n3. Data values — leaf content last\n\nAlways write the root = Stack(...) statement first so the UI shell appears immediately, even before child data has streamed in.\n\n## Examples\n\nroot = Stack([header, checklist, gov, govCompare])\nheader = BriefHeader()\nchecklist = VotingChecklist()\ngov = RaceCard(\"WI-GOV-2026\")\ngovCompare = CandidateCompareCard(\"WI-GOV-2026\", [\"slug-a\", \"slug-b\"])\n\n## Important Rules\n- Choose components that best represent the content (tables for comparisons, charts for trends, forms for input, etc.)\n\n## Final Verification\nBefore finishing, walk your output and verify:\n1. root = Stack(...) is the FIRST line (for optimal streaming).\n2. Every referenced name is defined. Every defined name (other than root) is reachable from root.\n\n- Start with BriefHeader, then VotingChecklist and any urgent DeadlineBanner.\n- List races in ballot order; within each group, contested races come first.\n- Use CandidateCompareCard only for contested races, with at most 4 candidateSlugs.\n- Use only entity IDs you were given in the input. Never invent a raceId or candidateSlug.\n- For a shorter brief, include fewer components (skip QuoteCard/IssueStanceCard first); for a deeper one, add more. Components have no density settings.",
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "Stack": {
+        "$ref": "#/$defs/Stack"
+      },
+      "Grid": {
+        "$ref": "#/$defs/Grid"
+      },
+      "AssistantNote": {
+        "$ref": "#/$defs/AssistantNote"
+      },
+      "SourceTrustLabel": {
+        "$ref": "#/$defs/SourceTrustLabel"
+      },
+      "BriefHeader": {
+        "$ref": "#/$defs/BriefHeader"
+      },
+      "DeadlineBanner": {
+        "$ref": "#/$defs/DeadlineBanner"
+      },
+      "VotingChecklist": {
+        "$ref": "#/$defs/VotingChecklist"
+      },
+      "RaceCard": {
+        "$ref": "#/$defs/RaceCard"
+      },
+      "CandidateCompareCard": {
+        "$ref": "#/$defs/CandidateCompareCard"
+      },
+      "IssueStanceCard": {
+        "$ref": "#/$defs/IssueStanceCard"
+      },
+      "QuoteCard": {
+        "$ref": "#/$defs/QuoteCard"
+      },
+      "FinanceSnapshot": {
+        "$ref": "#/$defs/FinanceSnapshot"
+      }
+    },
+    "required": [
+      "Stack",
+      "Grid",
+      "AssistantNote",
+      "SourceTrustLabel",
+      "BriefHeader",
+      "DeadlineBanner",
+      "VotingChecklist",
+      "RaceCard",
+      "CandidateCompareCard",
+      "IssueStanceCard",
+      "QuoteCard",
+      "FinanceSnapshot"
+    ],
+    "additionalProperties": false,
+    "$defs": {
+      "Stack": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "required": [
+          "children"
+        ],
+        "additionalProperties": false,
+        "description": "Vertical layout container. Children render top to bottom."
+      },
+      "Grid": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "required": [
+          "children"
+        ],
+        "additionalProperties": false,
+        "description": "Two-column grid on wide screens, single column on mobile."
+      },
+      "AssistantNote": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "additionalProperties": false,
+        "description": "The ONLY free-text component. Short assistant commentary (section intro, why this matters). Visually distinct from sourced data."
+      },
+      "SourceTrustLabel": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "official",
+              "campaign",
+              "reported",
+              "reference",
+              "ad-library"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "additionalProperties": false,
+        "description": "Small trust label naming the kind of source backing nearby content. Data components already carry their own source footers — use this only for standalone labeling."
+      },
+      "BriefHeader": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "description": "Brief masthead with primary date and days-to-election countdown. Always place first. Takes no arguments."
+      },
+      "DeadlineBanner": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "registration",
+              "absentee_request",
+              "absentee_return",
+              "early_voting"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "additionalProperties": false,
+        "description": "High-visibility banner for one voting deadline."
+      },
+      "VotingChecklist": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "description": "Actionable checklist of registration, absentee, early-voting and election-day steps with official deadlines. Place near the top. Takes no arguments."
+      },
+      "RaceCard": {
+        "type": "object",
+        "properties": {
+          "raceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "raceId"
+        ],
+        "additionalProperties": false,
+        "description": "Summary card for one race: office, level, incumbent, candidate names. raceId is a natural key like \"WI-GOV-2026\"."
+      },
+      "CandidateCompareCard": {
+        "type": "object",
+        "properties": {
+          "raceId": {
+            "type": "string"
+          },
+          "candidateSlugs": {
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "raceId",
+          "candidateSlugs"
+        ],
+        "additionalProperties": false,
+        "description": "Side-by-side matrix comparing up to 4 candidates in one race (party, status, priorities, cash on hand) with a link to the full race."
+      },
+      "IssueStanceCard": {
+        "type": "object",
+        "properties": {
+          "candidateSlug": {
+            "type": "string"
+          },
+          "issueSlug": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidateSlug",
+          "issueSlug"
+        ],
+        "additionalProperties": false,
+        "description": "One candidate's published stance on one issue, with summary and source link."
+      },
+      "QuoteCard": {
+        "type": "object",
+        "properties": {
+          "candidateSlug": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidateSlug"
+        ],
+        "additionalProperties": false,
+        "description": "Up to two published, sourced quotes from one candidate. Renders nothing if none are published."
+      },
+      "FinanceSnapshot": {
+        "type": "object",
+        "properties": {
+          "candidateSlug": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidateSlug"
+        ],
+        "additionalProperties": false,
+        "description": "Campaign money panel for one candidate: raised/spent/cash/debts, top org donors, and pass-through funding drill-down."
+      }
+    }
+  }
+}
