@@ -23,9 +23,12 @@ const { committees, skipped } = aggregateSunshine(csv);
 const kelda = committees.get("Kelda for Governor");
 assert.strictEqual(kelda.total, 1750, "expenditures excluded from raised");
 assert.strictEqual(kelda.count, 3);
+assert.strictEqual(kelda.disbursements, 9999, "expenditures counted as spent");
+assert.strictEqual(kelda.disbursementCount, 1);
 assert.strictEqual(kelda.topDonors[0].name, "Jane Smith");
 assert.strictEqual(kelda.topDonors[0].amount, 1500, "donor amounts aggregate");
 assert.strictEqual(committees.get("Crowley for Wisconsin").total, 750);
-assert.strictEqual(skipped, 2, "expenditure + blank committee skipped");
+assert.strictEqual(committees.get("Crowley for Wisconsin").disbursements, 0);
+assert.strictEqual(skipped, 1, "blank committee skipped");
 
 console.log("sunshine parser: all assertions passed");

@@ -48,6 +48,7 @@ for (const [committee, entry] of committees) {
     raceId: match.raceId,
     source: "sunshine",
     receipts: Math.round(entry.total * 100) / 100,
+    disbursements: Math.round(entry.disbursements * 100) / 100,
     coverageEndDate: coverage,
   });
   run("finance:replaceContributions", {
@@ -62,7 +63,9 @@ for (const [committee, entry] of committees) {
       committee,
     })),
   });
-  console.log(`✓ ${committee} → ${match.candidateSlug}: $${entry.total.toLocaleString()} (${entry.count} transactions)`);
+  console.log(
+    `✓ ${committee} → ${match.candidateSlug}: raised $${entry.total.toLocaleString()} (${entry.count} txns), spent $${entry.disbursements.toLocaleString()} (${entry.disbursementCount} txns)`,
+  );
   imported++;
 }
 

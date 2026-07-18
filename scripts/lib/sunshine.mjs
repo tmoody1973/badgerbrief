@@ -61,7 +61,9 @@ function headerIndex(headers, ...names) {
 
 /**
  * Aggregate a Sunshine transactions export into per-committee totals + top donors.
- * Returns { committees: Map<committeeName, {total, count, topDonors[]}>, skipped }.
+ * Contributions/receipts count toward `total` (raised); disbursement/expenditure
+ * rows count toward `disbursements` (spent). Returns
+ * { committees: Map<committeeName, {total, count, disbursements, disbursementCount, topDonors[]}>, skipped }.
  */
 export function aggregateSunshine(csvText, { topN = 10, cycle = "2026" } = {}) {
   const rows = parseCsv(csvText);
@@ -90,8 +92,11 @@ export function aggregateSunshine(csvText, { topN = 10, cycle = "2026" } = {}) {
       skipped++;
       continue;
     }
-    // Only count receipts/contributions toward "raised".
-    if (type && !type.includes("contribution") && !type.includes("receipt")) {
+    const isContribution =
+      !type || type.includes("contribution") || type.includes("receipt");
+    const isDisbursement =
+      type.includes("disbursement") || type.includes("expenditure");
+    if (!isContribution && !isDisbursement) {
       skipped++;
       continue;
     }
@@ -107,8 +112,16 @@ export function aggregateSunshine(csvText, { topN = 10, cycle = "2026" } = {}) {
     const entry = committees.get(committee) ?? {
       total: 0,
       count: 0,
+      disbursements: 0,
+      disbursementCount: 0,
       donors: new Map(),
     };
+    if (isDisbursement) {
+      entry.disbursements += amount;
+      entry.disbursementCount++;
+      committees.set(committee, entry);
+      continue;
+    }
     entry.total += amount;
     entry.count++;
     if (iDonor >= 0 && row[iDonor]) {

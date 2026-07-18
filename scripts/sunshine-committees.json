@@ -12,5 +12,8 @@
   "Crowley for Wisconsin": { "candidateSlug": "david-crowley", "raceId": "WI-GOV-2026" },
   "Tiffany for Wisconsin": { "candidateSlug": "tom-tiffany", "raceId": "WI-GOV-2026" },
   "Brennan for Wisconsin": { "candidateSlug": "joel-brennan", "raceId": "WI-GOV-2026" },
-  "Hughes for Wisconsin": { "candidateSlug": "missy-hughes", "raceId": "WI-GOV-2026" }
+  "Hughes for Wisconsin": { "candidateSlug": "missy-hughes", "raceId": "WI-GOV-2026" },
+  "Missy For Governor": { "candidateSlug": "missy-hughes", "raceId": "WI-GOV-2026" },
+  "Mandela for Wisconsin": { "candidateSlug": "mandela-barnes", "raceId": "WI-GOV-2026" },
+  "Friends of Francesca Hong": { "candidateSlug": "francesca-hong", "raceId": "WI-GOV-2026" }
 }
