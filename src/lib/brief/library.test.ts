@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { createParser } from "@openuidev/react-lang";
 import { briefLibrary } from "./library";
 import { fixtureBrief } from "./fixture";
+import { briefPrompt } from "./prompt";
+import { mkdirSync, writeFileSync } from "node:fs";
 
 const parse = (source: string) =>
   createParser(briefLibrary.toJSONSchema()).parse(source);
@@ -61,5 +63,21 @@ describe("fixture brief", () => {
     expect(result.root).not.toBeNull();
     expect(result.meta.errors).toHaveLength(0);
     expect(result.meta.unresolved).toHaveLength(0);
+  });
+});
+
+describe("brief agent prompt", () => {
+  it("carries the composition rules and full registry", () => {
+    expect(briefPrompt).toContain("ballot order");
+    expect(briefPrompt).toContain("AssistantNote");
+    expect(briefPrompt).toContain("FinanceSnapshot");
+  });
+});
+
+describe("brief agent prompt artifact", () => {
+  it("captures the prompt artifact for MOO-311", () => {
+    mkdirSync("docs", { recursive: true });
+    writeFileSync("docs/brief-agent-prompt.txt", briefPrompt);
+    expect(briefPrompt.length).toBeGreaterThan(500);
   });
 });
