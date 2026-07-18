@@ -41,7 +41,7 @@ export default async function CandidatePage({ params }: Props) {
   const { slug } = await params;
   const data = await getCandidateBySlug(slug);
   if (!data) notFound();
-  const { candidate, race, positions, quotes, finance, contributions } = data;
+  const { candidate, race, positions, quotes, finance, contributions, committeeFunding } = data;
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10">
@@ -147,6 +147,7 @@ export default async function CandidatePage({ params }: Props) {
       <FinancePanel
         totals={finance}
         contributions={contributions}
+        committeeFunding={committeeFunding}
         candidateName={candidate.name}
       />
 

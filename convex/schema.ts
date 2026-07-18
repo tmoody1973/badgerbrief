@@ -168,6 +168,28 @@ export default defineSchema({
     fetchedAt: v.number(),
   }).index("by_candidate", ["raceId", "candidateSlug"]),
 
+  // Second-hop money tracing (MOO-320): where a big committee donor's own
+  // money comes from, pulled from Sunshine report data. One row per committee
+  // per cycle window; topSources bounded to 10 so the array stays small.
+  committee_funding: defineTable({
+    committeeName: v.string(), // must match contributions.contributorName to join
+    sunshineEntityId: v.number(),
+    periodStart: v.string(),
+    periodLabel: v.string(),
+    receiptsTotal: v.number(),
+    receiptsCount: v.number(),
+    topSources: v.array(
+      v.object({
+        name: v.string(),
+        entityType: v.optional(v.string()),
+        amount: v.number(),
+        count: v.number(),
+      }),
+    ),
+    fetchedAt: v.number(),
+    sourceNote: v.string(),
+  }).index("by_committee", ["committeeName"]),
+
   contributions: defineTable({
     candidateSlug: v.string(),
     raceId: v.string(),

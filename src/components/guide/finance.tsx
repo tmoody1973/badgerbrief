@@ -28,13 +28,62 @@ function SourceNote({ source }: { source: "openfec" | "sunshine" }) {
   );
 }
 
+function FundingTrace({
+  funding,
+}: {
+  funding: Doc<"committee_funding">;
+}) {
+  return (
+    <details className="mt-1">
+      <summary className="cursor-pointer font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        Where this money comes from
+      </summary>
+      <div className="mt-2 border-2 border-dashed border-border bg-secondary/40 p-3">
+        <p className="text-xs">
+          {funding.committeeName} reported{" "}
+          <span className="font-mono font-bold">{fmt(funding.receiptsTotal)}</span> in
+          receipts {funding.periodLabel}. Its largest sources:
+        </p>
+        <ul className="mt-2 space-y-1 text-sm">
+          {funding.topSources.slice(0, 5).map((s) => (
+            <li
+              key={s.name}
+              className="flex justify-between gap-2 border-b border-dashed border-border pb-1"
+            >
+              <span>
+                {s.name}
+                {s.entityType && s.entityType !== "Individual" ? (
+                  <span className="ml-1 font-mono text-[10px] uppercase text-muted-foreground">
+                    {s.entityType === "Registrant" ? "PAC/Committee" : s.entityType}
+                  </span>
+                ) : null}
+              </span>
+              <span className="font-mono">{fmt(s.amount)}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Wisconsin caps what individuals may give a candidate directly, but
+          allows unlimited giving to party committees and unlimited party
+          transfers to candidates.
+        </p>
+        <p className="mt-2 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+          Source: {funding.sourceNote}
+        </p>
+      </div>
+    </details>
+  );
+}
+
 export function FinancePanel({
   totals,
   contributions,
+  committeeFunding,
   candidateName,
 }: {
   totals: Doc<"finance_totals">[];
   contributions?: Doc<"contributions">[];
+  committeeFunding?: Doc<"committee_funding">[];
   candidateName: string;
 }) {
   if (totals.length === 0) return null;
@@ -93,6 +142,15 @@ export function FinancePanel({
         const isOrg = (t?: string) =>
           !!t && t.toLowerCase() !== "individual" && t.toLowerCase() !== "anonymous";
         const orgs = ranked.filter((c) => isOrg(c.contributorType)).slice(0, 10);
+        const sunshineReceipts = totals.find((t) => t.source === "sunshine")?.receipts;
+        const fundingByName = new Map(
+          (committeeFunding ?? []).map((f) => [f.committeeName, f]),
+        );
+        // Trace only donations big enough to shape the race: >= $100K or >= 25%
+        // of the candidate's state-reported raise.
+        const qualifiesForTrace = (amount: number) =>
+          amount >= 100_000 ||
+          (sunshineReceipts !== undefined && amount >= sunshineReceipts * 0.25);
         return (
           <>
             <div className="mt-3 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
@@ -118,20 +176,28 @@ export function FinancePanel({
                   Top organization &amp; PAC donors
                 </h3>
                 <ul className="mt-2 space-y-1 text-sm">
-                  {orgs.map((c) => (
-                    <li key={c._id} className="flex justify-between gap-2 border-b border-dashed border-border pb-1">
-                      <span>
-                        {c.contributorName}
-                        {c.contributorLocation ? ` (${c.contributorLocation})` : ""}
-                        {c.contributorType && c.contributorType !== "Business" ? (
-                          <span className="ml-1 font-mono text-[10px] uppercase text-muted-foreground">
-                            {c.contributorType === "Registrant" ? "PAC/Committee" : c.contributorType}
+                  {orgs.map((c) => {
+                    const funding = qualifiesForTrace(c.amount)
+                      ? fundingByName.get(c.contributorName)
+                      : undefined;
+                    return (
+                      <li key={c._id} className="border-b border-dashed border-border pb-1">
+                        <div className="flex justify-between gap-2">
+                          <span>
+                            {c.contributorName}
+                            {c.contributorLocation ? ` (${c.contributorLocation})` : ""}
+                            {c.contributorType && c.contributorType !== "Business" ? (
+                              <span className="ml-1 font-mono text-[10px] uppercase text-muted-foreground">
+                                {c.contributorType === "Registrant" ? "PAC/Committee" : c.contributorType}
+                              </span>
+                            ) : null}
                           </span>
-                        ) : null}
-                      </span>
-                      <span className="font-mono">{fmt(c.amount)}</span>
-                    </li>
-                  ))}
+                          <span className="font-mono">{fmt(c.amount)}</span>
+                        </div>
+                        {funding && <FundingTrace funding={funding} />}
+                      </li>
+                    );
+                  })}
                 </ul>
                 <SourceNote source={contributions[0].source} />
               </div>

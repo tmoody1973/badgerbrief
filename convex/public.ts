@@ -84,7 +84,34 @@ export const getCandidateBySlug = query({
         )
         .collect(),
     ]);
-    return { candidate, race, positions, quotes, finance, contributions };
+    // Second-hop tracing (MOO-320): funding breakdowns for committee donors
+    // on this page, keyed by exact contributor name. Bounded by donor count.
+    const orgNames = [
+      ...new Set(
+        contributions
+          .filter((c) => c.contributorType && c.contributorType !== "Individual")
+          .map((c) => c.contributorName),
+      ),
+    ];
+    const committeeFunding = (
+      await Promise.all(
+        orgNames.map((name) =>
+          ctx.db
+            .query("committee_funding")
+            .withIndex("by_committee", (q) => q.eq("committeeName", name))
+            .unique(),
+        ),
+      )
+    ).filter((f) => f !== null);
+    return {
+      candidate,
+      race,
+      positions,
+      quotes,
+      finance,
+      contributions,
+      committeeFunding,
+    };
   },
 });
 

@@ -117,6 +117,38 @@ export const listFecCandidates = internalQuery({
   },
 });
 
+export const upsertCommitteeFunding = internalMutation({
+  args: {
+    committeeName: v.string(),
+    sunshineEntityId: v.number(),
+    periodStart: v.string(),
+    periodLabel: v.string(),
+    receiptsTotal: v.number(),
+    receiptsCount: v.number(),
+    topSources: v.array(
+      v.object({
+        name: v.string(),
+        entityType: v.optional(v.string()),
+        amount: v.number(),
+        count: v.number(),
+      }),
+    ),
+    sourceNote: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("committee_funding")
+      .withIndex("by_committee", (q) => q.eq("committeeName", args.committeeName))
+      .unique();
+    const doc = { ...args, fetchedAt: Date.now() };
+    if (existing) {
+      await ctx.db.replace("committee_funding", existing._id, doc);
+      return existing._id;
+    }
+    return await ctx.db.insert("committee_funding", doc);
+  },
+});
+
 export const removeTotals = internalMutation({
   args: {
     candidateSlug: v.string(),
