@@ -6,7 +6,7 @@ export const briefWorkflow = new WorkflowManager(components.workflow, {
   workpoolOptions: {
     defaultRetryBehavior: { maxAttempts: 3, initialBackoffMs: 250, base: 2 },
     retryActionsByDefault: true, // transient LLM/network failures — separate from parse retries
-    maxParallelism: 1,
+    maxParallelism: 5,
   },
 });
 
