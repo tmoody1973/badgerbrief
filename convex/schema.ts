@@ -174,6 +174,9 @@ export default defineSchema({
     source: v.union(v.literal("openfec"), v.literal("sunshine")),
     contributorName: v.string(),
     contributorLocation: v.optional(v.string()),
+    // Sunshine "Contributor Entity Type": Individual, Registrant (PAC/committee),
+    // Business, Depository/Bank, Anonymous, Unregistered.
+    contributorType: v.optional(v.string()),
     amount: v.number(),
     date: v.optional(v.string()),
     committee: v.optional(v.string()),

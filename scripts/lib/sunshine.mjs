@@ -73,6 +73,7 @@ export function aggregateSunshine(csvText, { topN = 10, cycle = "2026" } = {}) {
   const iAmount = headerIndex(headers, "Amount", "Contribution Amount");
   const iType = headerIndex(headers, "Transaction Type", "Type");
   const iDonor = headerIndex(headers, "Contributor Name", "Source Name");
+  const iDonorType = headerIndex(headers, "Contributor Entity Type");
   const iCity = headerIndex(headers, "Contributor City", "City");
   const iDate = headerIndex(headers, "Transaction Date", "Date");
   const iEvent = headerIndex(headers, "Related Ballot Event Name");
@@ -128,17 +129,25 @@ export function aggregateSunshine(csvText, { topN = 10, cycle = "2026" } = {}) {
       const donor = row[iDonor].trim();
       const city = iCity >= 0 ? (row[iCity] ?? "").trim() : "";
       const date = iDate >= 0 ? (row[iDate] ?? "").trim() : "";
-      const d = entry.donors.get(donor) ?? { amount: 0, city, date };
+      const entityType = iDonorType >= 0 ? (row[iDonorType] ?? "").trim() : "";
+      const d = entry.donors.get(donor) ?? { amount: 0, city, date, entityType };
       d.amount += amount;
       entry.donors.set(donor, d);
     }
     committees.set(committee, entry);
   }
 
+  // Org donors: PACs/committees ("Registrant"), businesses, banks — everything
+  // with a stated entity type other than Individual/Anonymous.
+  const isOrgType = (t) =>
+    t !== "" && t.toLowerCase() !== "individual" && t.toLowerCase() !== "anonymous";
   for (const entry of committees.values()) {
-    entry.topDonors = [...entry.donors.entries()]
+    const ranked = [...entry.donors.entries()]
       .map(([name, d]) => ({ name, ...d }))
-      .sort((a, b) => b.amount - a.amount)
+      .sort((a, b) => b.amount - a.amount);
+    entry.topDonors = ranked.slice(0, topN);
+    entry.topOrgDonors = ranked
+      .filter((d) => isOrgType(d.entityType))
       .slice(0, topN);
     delete entry.donors;
   }

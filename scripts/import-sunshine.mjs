@@ -51,13 +51,21 @@ for (const [committee, entry] of committees) {
     disbursements: Math.round(entry.disbursements * 100) / 100,
     coverageEndDate: coverage,
   });
+  // Overall top donors plus any org donors (PACs/businesses) that didn't make
+  // the overall cut — the UI splits them by contributorType.
+  const inTop = new Set(entry.topDonors.map((d) => d.name));
+  const donors = [
+    ...entry.topDonors,
+    ...entry.topOrgDonors.filter((d) => !inTop.has(d.name)),
+  ];
   run("finance:replaceContributions", {
     candidateSlug: match.candidateSlug,
     raceId: match.raceId,
     source: "sunshine",
-    contributions: entry.topDonors.map((d) => ({
+    contributions: donors.map((d) => ({
       contributorName: d.name,
       contributorLocation: d.city || undefined,
+      contributorType: d.entityType || undefined,
       amount: Math.round(d.amount * 100) / 100,
       date: d.date || undefined,
       committee,

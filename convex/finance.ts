@@ -50,6 +50,7 @@ export const replaceContributions = internalMutation({
       v.object({
         contributorName: v.string(),
         contributorLocation: v.optional(v.string()),
+        contributorType: v.optional(v.string()),
         amount: v.number(),
         date: v.optional(v.string()),
         committee: v.optional(v.string()),

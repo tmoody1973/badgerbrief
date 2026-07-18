@@ -76,25 +76,57 @@ export function FinancePanel({
           <SourceNote source={t.source} />
         </div>
       ))}
-      {contributions && contributions.length > 0 && (
-        <div className="mt-3 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
-          <h3 className="font-mono text-xs font-bold uppercase tracking-widest">
-            Top reported contributors
-          </h3>
-          <ul className="mt-2 space-y-1 text-sm">
-            {contributions.slice(0, 10).map((c) => (
-              <li key={c._id} className="flex justify-between gap-2 border-b border-dashed border-border pb-1">
-                <span>
-                  {c.contributorName}
-                  {c.contributorLocation ? ` (${c.contributorLocation})` : ""}
-                </span>
-                <span className="font-mono">{fmt(c.amount)}</span>
-              </li>
-            ))}
-          </ul>
-          <SourceNote source={contributions[0].source} />
-        </div>
-      )}
+      {contributions && contributions.length > 0 && (() => {
+        const ranked = [...contributions].sort((a, b) => b.amount - a.amount);
+        const isOrg = (t?: string) =>
+          !!t && t.toLowerCase() !== "individual" && t.toLowerCase() !== "anonymous";
+        const orgs = ranked.filter((c) => isOrg(c.contributorType)).slice(0, 10);
+        return (
+          <>
+            <div className="mt-3 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
+              <h3 className="font-mono text-xs font-bold uppercase tracking-widest">
+                Top reported contributors
+              </h3>
+              <ul className="mt-2 space-y-1 text-sm">
+                {ranked.slice(0, 10).map((c) => (
+                  <li key={c._id} className="flex justify-between gap-2 border-b border-dashed border-border pb-1">
+                    <span>
+                      {c.contributorName}
+                      {c.contributorLocation ? ` (${c.contributorLocation})` : ""}
+                    </span>
+                    <span className="font-mono">{fmt(c.amount)}</span>
+                  </li>
+                ))}
+              </ul>
+              <SourceNote source={contributions[0].source} />
+            </div>
+            {orgs.length > 0 && (
+              <div className="mt-3 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
+                <h3 className="font-mono text-xs font-bold uppercase tracking-widest">
+                  Top organization &amp; PAC donors
+                </h3>
+                <ul className="mt-2 space-y-1 text-sm">
+                  {orgs.map((c) => (
+                    <li key={c._id} className="flex justify-between gap-2 border-b border-dashed border-border pb-1">
+                      <span>
+                        {c.contributorName}
+                        {c.contributorLocation ? ` (${c.contributorLocation})` : ""}
+                        {c.contributorType && c.contributorType !== "Business" ? (
+                          <span className="ml-1 font-mono text-[10px] uppercase text-muted-foreground">
+                            {c.contributorType === "Registrant" ? "PAC/Committee" : c.contributorType}
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="font-mono">{fmt(c.amount)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <SourceNote source={contributions[0].source} />
+              </div>
+            )}
+          </>
+        );
+      })()}
     </section>
   );
 }
