@@ -99,7 +99,7 @@ async function fetchFirecrawlMarkdown(url: string): Promise<FetchResult> {
 
 type CandidateSummary = {
   slug: string;
-  status: "extracted" | "unchanged" | "fetch-error";
+  status: "extracted" | "unchanged" | "fetch-error" | "extraction_error";
   positions?: number;
   quotes?: number;
   error?: string;
@@ -162,75 +162,87 @@ export const run = internalAction({
         continue;
       }
 
-      const prompt = buildExtractionPrompt(target.name, target.url, fetched.markdown);
-      const extractOnce = () =>
-        generateObject({
-          model: anthropic("claude-opus-4-8"),
-          schema: extractionSchema,
-          prompt,
-        });
+      // Isolate extraction/save failures per candidate: one reliably-broken
+      // page must not abort the run and starve the targets sliced behind it.
+      try {
+        const prompt = buildExtractionPrompt(target.name, target.url, fetched.markdown);
+        const extractOnce = () =>
+          generateObject({
+            model: anthropic("claude-opus-4-8"),
+            schema: extractionSchema,
+            prompt,
+          });
 
-      let extraction: Extraction;
-      let traceId: string | undefined;
+        let extraction: Extraction;
+        let traceId: string | undefined;
 
-      if (telemetry) {
-        const spanResult = await tracer().startActiveSpan(
-          `${AGENT_NAME}.run`,
-          async (span) => {
-            span.setAttribute("openinference.span.kind", "AGENT");
-            span.setAttribute("agent.name", AGENT_NAME);
-            span.setAttribute(
-              "input.value",
-              JSON.stringify({ candidate: target.slug, url: target.url }),
-            );
-            try {
-              const result = await extractOnce();
-              // generateObject (plain `ai` call, not @convex-dev/agent) has no
-              // built-in telemetry hook, so the LLM child span is manual —
-              // same shape as helloAgent.ts lines 128-146, adapted for
-              // structured output (output.value = JSON of the object).
-              const usage = result.usage as
-                | { inputTokens?: number; outputTokens?: number; totalTokens?: number }
-                | undefined;
-              const llmSpan = tracer().startSpan("claude.generateObject");
-              llmSpan.setAttribute("openinference.span.kind", "LLM");
-              llmSpan.setAttribute("llm.model_name", "claude-opus-4-8");
-              llmSpan.setAttribute("input.value", prompt);
-              llmSpan.setAttribute("output.value", JSON.stringify(result.object));
-              if (usage?.inputTokens !== undefined)
-                llmSpan.setAttribute("llm.token_count.prompt", usage.inputTokens);
-              if (usage?.outputTokens !== undefined)
-                llmSpan.setAttribute("llm.token_count.completion", usage.outputTokens);
-              if (usage?.totalTokens !== undefined)
-                llmSpan.setAttribute("llm.token_count.total", usage.totalTokens);
-              llmSpan.end();
-              span.setAttribute("output.value", JSON.stringify(result.object).slice(0, 4000));
-              return { object: result.object, traceId: span.spanContext().traceId };
-            } finally {
-              span.end();
-            }
+        if (telemetry) {
+          const spanResult = await tracer().startActiveSpan(
+            `${AGENT_NAME}.run`,
+            async (span) => {
+              span.setAttribute("openinference.span.kind", "AGENT");
+              span.setAttribute("agent.name", AGENT_NAME);
+              span.setAttribute(
+                "input.value",
+                JSON.stringify({ candidate: target.slug, url: target.url }),
+              );
+              try {
+                const result = await extractOnce();
+                // generateObject (plain `ai` call, not @convex-dev/agent) has no
+                // built-in telemetry hook, so the LLM child span is manual —
+                // same shape as helloAgent.ts lines 128-146, adapted for
+                // structured output (output.value = JSON of the object).
+                const usage = result.usage as
+                  | { inputTokens?: number; outputTokens?: number; totalTokens?: number }
+                  | undefined;
+                const llmSpan = tracer().startSpan("claude.generateObject");
+                llmSpan.setAttribute("openinference.span.kind", "LLM");
+                llmSpan.setAttribute("llm.model_name", "claude-opus-4-8");
+                llmSpan.setAttribute("input.value", prompt);
+                llmSpan.setAttribute("output.value", JSON.stringify(result.object));
+                if (usage?.inputTokens !== undefined)
+                  llmSpan.setAttribute("llm.token_count.prompt", usage.inputTokens);
+                if (usage?.outputTokens !== undefined)
+                  llmSpan.setAttribute("llm.token_count.completion", usage.outputTokens);
+                if (usage?.totalTokens !== undefined)
+                  llmSpan.setAttribute("llm.token_count.total", usage.totalTokens);
+                llmSpan.end();
+                span.setAttribute("output.value", JSON.stringify(result.object).slice(0, 4000));
+                return { object: result.object, traceId: span.spanContext().traceId };
+              } catch (err) {
+                span.setAttribute("error", true);
+                throw err;
+              } finally {
+                span.end();
+              }
+            },
+          );
+          await telemetry.forceFlush();
+          extraction = spanResult.object;
+          traceId = spanResult.traceId;
+        } else {
+          extraction = (await extractOnce()).object;
+        }
+
+        const counts: { positions: number; quotes: number } = await ctx.runMutation(
+          internal.researchQueries.saveExtraction,
+          {
+            candidateSlug: target.slug,
+            raceId: target.raceId,
+            sourceUrl: target.url,
+            sourceName: target.name,
+            extraction,
+            traceId,
           },
         );
-        await telemetry.forceFlush();
-        extraction = spanResult.object;
-        traceId = spanResult.traceId;
-      } else {
-        extraction = (await extractOnce()).object;
+
+        summaries.push({ slug: target.slug, status: "extracted", ...counts });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(`research-agent: extraction failed for ${target.slug}: ${message}`);
+        summaries.push({ slug: target.slug, status: "extraction_error", error: message });
+        continue;
       }
-
-      const counts: { positions: number; quotes: number } = await ctx.runMutation(
-        internal.researchQueries.saveExtraction,
-        {
-          candidateSlug: target.slug,
-          raceId: target.raceId,
-          sourceUrl: target.url,
-          sourceName: target.name,
-          extraction,
-          traceId,
-        },
-      );
-
-      summaries.push({ slug: target.slug, status: "extracted", ...counts });
     }
 
     return summaries;
