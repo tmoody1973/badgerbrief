@@ -48,7 +48,11 @@ export function FinancePanel({
           key={t._id}
           className="mt-3 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]"
         >
-          <div className="grid grid-cols-3 gap-3 text-center">
+          <div
+            className={`grid gap-3 text-center ${
+              t.debts !== undefined ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"
+            }`}
+          >
             <div>
               <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Raised
@@ -67,6 +71,14 @@ export function FinancePanel({
               </p>
               <p className="font-display text-xl">{fmt(t.cashOnHand)}</p>
             </div>
+            {t.debts !== undefined && (
+              <div>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Debts
+                </p>
+                <p className="font-display text-xl">{fmt(t.debts)}</p>
+              </div>
+            )}
           </div>
           {t.coverageEndDate && (
             <p className="mt-3 text-center font-mono text-xs text-muted-foreground">

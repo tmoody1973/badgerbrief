@@ -25,7 +25,7 @@ layer for the November 3 general.
 | Agent runtime | **Convex-native** (`@convex-dev/agent` + `@convex-dev/workflow`), not Vercel Eve | Agents live beside the data; tools are typed calls to our own Convex functions; one backend, one deploy; best learning-to-plumbing ratio |
 | Monitor "agent" | Plain Convex cron jobs, no LLM loop | It's scheduled fetching + diffing; an agent adds nothing |
 | State campaign finance | Manual Sunshine CSV download → import script | No public API; scraping their internal backend is fragile and legally gray. Non-commercial use only per Wis. Stat. § 11.1304(12) — visible footer disclosure required |
-| Ad tracker | **Meta AND Google in M1** (scope change 2026-07-17) | Meta Ad Library has a real API with political-ad archive; **blocker: Meta developer app + political-ad identity confirmation takes 1–3 business days** (applied 2026-07-17). Google has no Transparency Center API, but publishes political ads as the free public BigQuery dataset `google_political_ads` — no application or verification needed, so it lands in M1 as the unblocked ad source (spend trends, lagged) while Meta verification clears |
+| Ad tracker | **Meta, Google, AND broadcast TV in M1** (scope changes 2026-07-17/18) | Meta Ad Library has a real API with political-ad archive; **blocker: Meta developer app + political-ad identity confirmation takes 1–3 business days** (applied 2026-07-17). Google has no Transparency Center API, but publishes political ads as the free public BigQuery dataset `google_political_ads` — no application or verification needed, so it lands in M1 as the unblocked ad source (spend trends, lagged) while Meta verification clears. TV via FCC online public inspection files (political files) — the only universal, legally required public record of local TV ad buys, incl. state/local races; free API, but records are PDFs needing LLM extraction behind review gates (M1: top-3 WI DMAs broadcast; cable + remaining DMAs M2) |
 | Brief rendering | **Generative UI via OpenUI** (`@openuidev/react-lang`), composition-only | Agent composes approved components by entity ID; facts come from published data at render time (§7) |
 | SEO/AEO | First-class requirement | Public pages SSR/ISR with JSON-LD; being cited by AI answer engines is the growth strategy (§8) |
 | Agent observability & evals | **Arize** (OTel/OpenInference tracing + LLM-as-judge evaluators) | Every agent run traced; trust-critical behaviors (citation faithfulness, neutrality, official-source-first) evaluated continuously and pre-deploy (§10a) |
@@ -78,7 +78,9 @@ State: manual CSV download from campaignfinance.wi.gov → `pnpm import:sunshine
 run after each filing deadline (next: July 29 pre-primary).
 
 ### Ads (Meta, M1)
-- `ads` — platform (`meta` and `google`, both M1), platform ad ID, page/committee, candidate ref (with match confidence), creative text/link, first/last seen, status, spend range, impression range, funding entity, ad snapshot URL
+- `ads` — platform (`meta`, `google`, and `tv`, all M1; tv rows add station
+  call sign, DMA/market, agreement date range, spot count, gross spend, and the
+  FCC document URL as provenance), platform ad ID, page/committee, candidate ref (with match confidence), creative text/link, first/last seen, status, spend range, impression range, funding entity, ad snapshot URL
 - `ad_metrics_daily` — per-ad daily spend/impression range snapshots for the timeline view
 
 Sync: Meta Ad Library API cron (daily; hourly in the final week before the primary)
@@ -303,5 +305,25 @@ automated Sunshine scraping, PDF service (browser print covers M1).
   trends, not same-day creative monitoring), so Meta remains the real-time
   source and Google the spend-trend source. Ad→candidate matching follows the
   same confidence-threshold + review-queue rule as Meta.
+
+  *Broadcast TV ad tracker (specified; M1 — added 2026-07-18):* daily sync of
+  FCC online public inspection files (publicfiles.fcc.gov — free public API,
+  the site itself runs on it) for full-power TV stations in Wisconsin's top
+  three DMAs (Milwaukee, Madison, Green Bay–Appleton). Political-file
+  documents (orders/invoices: sponsor, station, flight dates, spot counts,
+  gross spend, race/issue referenced) are PDFs — an extraction agent parses
+  them into `ads` rows with `platform: "tv"`, carrying the FCC document URL as
+  provenance. Extractions follow spec §3 governance: they land as drafts with
+  per-field confidence; low-confidence or ambiguous sponsor/race matches go to
+  `review_tasks`, and nothing is published without human approval. Voter-facing
+  fields: who paid (sponsor as stated + linked committee where matched), how
+  much, which station/market, when it ran, which race, and the source document
+  link. M2: Comcast political ad archive (cable), remaining WI/border DMAs
+  (La Crosse–Eau Claire, Wausau, Duluth–Superior, Minneapolis for western WI).
+  Notes: Wesleyan Media Project/Vivvix data is licensed — possible research
+  partnership, not a build dependency; UW–Madison WiscAds (1996–2008) is a
+  candidate for a later "history of WI TV ads" feature; FollowTheMoney is
+  enrichment-only since the Sunshine import is already our first-party state
+  money source (its marginal value is independent-expenditure context).
 - **M3 (post-election):** multilingual/audio briefs, partner
   workspaces (Clerk Orgs), county/municipal expansion, analytics warehouse if needed
