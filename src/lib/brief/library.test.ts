@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { createParser } from "@openuidev/react-lang";
 import { briefLibrary } from "./library";
+import { fixtureBrief } from "./fixture";
 
 const parse = (source: string) =>
   createParser(briefLibrary.toJSONSchema()).parse(source);
@@ -51,5 +52,14 @@ describe("brief library parser", () => {
     ]) {
       expect(prompt).toContain(name);
     }
+  });
+});
+
+describe("fixture brief", () => {
+  it("parses against the registry with zero errors and no unresolved refs", () => {
+    const result = parse(fixtureBrief);
+    expect(result.root).not.toBeNull();
+    expect(result.meta.errors).toHaveLength(0);
+    expect(result.meta.unresolved).toHaveLength(0);
   });
 });
