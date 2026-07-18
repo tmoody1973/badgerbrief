@@ -11,4 +11,12 @@ crons.daily(
   {},
 );
 
+// 12:00 UTC = 7:00 AM Central — after finance sync, before editorial review hours.
+crons.daily(
+  "research agent sweep",
+  { hourUTC: 12, minuteUTC: 0 },
+  internal.research.run,
+  {},
+);
+
 export default crons;

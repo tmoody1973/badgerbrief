@@ -14,9 +14,12 @@ import type * as crons from "../crons.js";
 import type * as demoWorkflow from "../demoWorkflow.js";
 import type * as finance from "../finance.js";
 import type * as helloAgent from "../helloAgent.js";
+import type * as lib_extraction from "../lib/extraction.js";
 import type * as preferences from "../preferences.js";
 import type * as public_ from "../public.js";
 import type * as publish from "../publish.js";
+import type * as research from "../research.js";
+import type * as researchQueries from "../researchQueries.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 
@@ -33,9 +36,12 @@ declare const fullApi: ApiFromModules<{
   demoWorkflow: typeof demoWorkflow;
   finance: typeof finance;
   helloAgent: typeof helloAgent;
+  "lib/extraction": typeof lib_extraction;
   preferences: typeof preferences;
   public: typeof public_;
   publish: typeof publish;
+  research: typeof research;
+  researchQueries: typeof researchQueries;
   seed: typeof seed;
   users: typeof users;
 }>;
