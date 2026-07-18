@@ -8,6 +8,7 @@ import {
   DeadlineBannerView,
   VotingChecklistView,
 } from "@/components/brief/voting";
+import { BriefRaceCardView, CandidateCompareCardView } from "@/components/brief/race";
 
 /**
  * MOO-305 registry. Safety contract: props are entity IDs and enums only —
@@ -100,9 +101,35 @@ export const VotingChecklist = defineComponent({
   component: () => <VotingChecklistView />,
 });
 
+export const RaceCard = defineComponent({
+  name: "RaceCard",
+  description:
+    "Summary card for one race: office, level, incumbent, candidate names. raceId is a natural key like \"WI-GOV-2026\".",
+  props: z.object({ raceId: z.string().describe("race natural key") }),
+  component: ({ props }) => <BriefRaceCardView raceId={props.raceId} />,
+});
+
+export const CandidateCompareCard = defineComponent({
+  name: "CandidateCompareCard",
+  description:
+    "Side-by-side matrix comparing up to 4 candidates in one race (party, status, priorities, cash on hand) with a link to the full race.",
+  props: z.object({
+    raceId: z.string().describe("race natural key"),
+    candidateSlugs: z
+      .array(z.string())
+      .max(4)
+      .describe("up to 4 candidate slugs from that race"),
+  }),
+  component: ({ props }) => (
+    <CandidateCompareCardView
+      raceId={props.raceId}
+      candidateSlugs={props.candidateSlugs}
+    />
+  ),
+});
+
 export const briefLibrary = createLibrary({
   root: "Stack",
-  components: [Stack, Grid, AssistantNote, SourceTrustLabel, BriefHeader, DeadlineBanner, VotingChecklist],
-  // Tasks 2-4 append: RaceCard,
-  // CandidateCompareCard, IssueStanceCard, QuoteCard, FinanceSnapshot.
+  components: [Stack, Grid, AssistantNote, SourceTrustLabel, BriefHeader, DeadlineBanner, VotingChecklist, RaceCard, CandidateCompareCard],
+  // Tasks 3-4 append: IssueStanceCard, QuoteCard, FinanceSnapshot.
 });

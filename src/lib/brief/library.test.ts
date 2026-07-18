@@ -43,6 +43,8 @@ describe("brief library parser", () => {
       "AssistantNote",
       "DeadlineBanner",
       "VotingChecklist",
+      "RaceCard",
+      "CandidateCompareCard",
     ]) {
       expect(prompt).toContain(name);
     }
