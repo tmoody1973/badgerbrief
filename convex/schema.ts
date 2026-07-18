@@ -57,6 +57,13 @@ export default defineSchema({
     openuiSource: v.string(), // OpenUI Lang — components reference entity IDs
     generatedAt: v.number(),
     traceId: v.optional(v.string()), // Arize trace for provenance
+    // MOO-311: generation lifecycle. Optional so pre-existing rows stay valid;
+    // readers treat missing as "ready".
+    status: v.optional(
+      v.union(v.literal("generating"), v.literal("ready"), v.literal("failed")),
+    ),
+    attempt: v.optional(v.number()),
+    error: v.optional(v.string()), // user-safe terminal failure reason
   }).index("by_user", ["userId"]),
 
   // ---------- civic core (seeded from docs/wisconsin_2026_primary_elections.json) ----------

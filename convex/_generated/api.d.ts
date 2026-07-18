@@ -10,11 +10,13 @@
 
 import type * as adminQueue from "../adminQueue.js";
 import type * as audit from "../audit.js";
+import type * as briefWorkflow from "../briefWorkflow.js";
 import type * as briefs from "../briefs.js";
 import type * as crons from "../crons.js";
 import type * as demoWorkflow from "../demoWorkflow.js";
 import type * as finance from "../finance.js";
 import type * as helloAgent from "../helloAgent.js";
+import type * as lib_briefContext from "../lib/briefContext.js";
 import type * as lib_extraction from "../lib/extraction.js";
 import type * as lib_qa from "../lib/qa.js";
 import type * as monitor from "../monitor.js";
@@ -38,11 +40,13 @@ import type {
 declare const fullApi: ApiFromModules<{
   adminQueue: typeof adminQueue;
   audit: typeof audit;
+  briefWorkflow: typeof briefWorkflow;
   briefs: typeof briefs;
   crons: typeof crons;
   demoWorkflow: typeof demoWorkflow;
   finance: typeof finance;
   helloAgent: typeof helloAgent;
+  "lib/briefContext": typeof lib_briefContext;
   "lib/extraction": typeof lib_extraction;
   "lib/qa": typeof lib_qa;
   monitor: typeof monitor;

@@ -9,7 +9,7 @@ import { BriefRenderer } from "./renderer";
 
 /** Loads the signed-in user's saved brief; falls back to the fixture until MOO-311 generates real ones. */
 export function BriefLoader() {
-  const saved = useQuery(api.briefs.getMine, {});
+  const saved = useQuery(api.briefs.getLatest, {});
 
   // Print contract (spec §5): drill-downs print expanded.
   useEffect(() => {
