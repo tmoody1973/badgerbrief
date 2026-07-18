@@ -1,19 +1,76 @@
 {
-  "_comment": "Explicit Sunshine committee → candidate mapping, verified against real export names + Related Office + Registrant Party. Unmatched committees are REPORTED by import-sunshine.mjs, never guessed. 'Wisconsin Rebuild' (Gov, Ind) intentionally unmapped — could be any of four seeded independents.",
-  "Josh Schoemann for Governor": { "candidateSlug": "josh-schoemann", "raceId": "WI-GOV-2026" },
-  "Sara Rodriguez For Wisconsin": { "candidateSlug": "sara-rodriguez", "raceId": "WI-GOV-2026" },
-  "Ryan Strnad for Governor": { "candidateSlug": "ryan-strnad", "raceId": "WI-GOV-2026" },
-  "Kaul for Attorney General": { "candidateSlug": "josh-kaul", "raceId": "WI-AG-2026" },
-  "Pete for Wisconsin": { "candidateSlug": "pete-karas", "raceId": "WI-SOS-2026" },
-  "Friends of John Leiber": { "candidateSlug": "john-leiber", "raceId": "WI-TREAS-2026" },
-  "Sarah for Wisconsin": { "candidateSlug": "sarah-godlewski", "raceId": "WI-LTGOV-2026" },
-  "Kelda for Governor": { "candidateSlug": "kelda-roys", "raceId": "WI-GOV-2026" },
-  "Friends of Kelda Roys": { "candidateSlug": "kelda-roys", "raceId": "WI-GOV-2026" },
-  "Crowley for Wisconsin": { "candidateSlug": "david-crowley", "raceId": "WI-GOV-2026" },
-  "Tiffany for Wisconsin": { "candidateSlug": "tom-tiffany", "raceId": "WI-GOV-2026" },
-  "Brennan for Wisconsin": { "candidateSlug": "joel-brennan", "raceId": "WI-GOV-2026" },
-  "Hughes for Wisconsin": { "candidateSlug": "missy-hughes", "raceId": "WI-GOV-2026" },
-  "Missy For Governor": { "candidateSlug": "missy-hughes", "raceId": "WI-GOV-2026" },
-  "Mandela for Wisconsin": { "candidateSlug": "mandela-barnes", "raceId": "WI-GOV-2026" },
-  "Friends of Francesca Hong": { "candidateSlug": "francesca-hong", "raceId": "WI-GOV-2026" }
+  "_comment": "Explicit Sunshine committee \u2192 candidate mapping, verified against real export names + Related Office + Registrant Party. Unmatched committees are REPORTED by import-sunshine.mjs, never guessed. 'Wisconsin Rebuild' (Gov, Ind) intentionally unmapped \u2014 could be any of four seeded independents.",
+  "Josh Schoemann for Governor": {
+    "candidateSlug": "josh-schoemann",
+    "raceId": "WI-GOV-2026",
+    "registrantId": "0106916"
+  },
+  "Sara Rodriguez For Wisconsin": {
+    "candidateSlug": "sara-rodriguez",
+    "raceId": "WI-GOV-2026",
+    "registrantId": "0106263"
+  },
+  "Ryan Strnad for Governor": {
+    "candidateSlug": "ryan-strnad",
+    "raceId": "WI-GOV-2026"
+  },
+  "Kaul for Attorney General": {
+    "candidateSlug": "josh-kaul",
+    "raceId": "WI-AG-2026"
+  },
+  "Pete for Wisconsin": {
+    "candidateSlug": "pete-karas",
+    "raceId": "WI-SOS-2026"
+  },
+  "Friends of John Leiber": {
+    "candidateSlug": "john-leiber",
+    "raceId": "WI-TREAS-2026"
+  },
+  "Sarah for Wisconsin": {
+    "candidateSlug": "sarah-godlewski",
+    "raceId": "WI-LTGOV-2026"
+  },
+  "Kelda for Governor": {
+    "candidateSlug": "kelda-roys",
+    "raceId": "WI-GOV-2026"
+  },
+  "Friends of Kelda Roys": {
+    "candidateSlug": "kelda-roys",
+    "raceId": "WI-GOV-2026",
+    "registrantId": "0104606"
+  },
+  "Crowley for Wisconsin": {
+    "candidateSlug": "david-crowley",
+    "raceId": "WI-GOV-2026",
+    "registrantId": "0105751"
+  },
+  "Tiffany for Wisconsin": {
+    "candidateSlug": "tom-tiffany",
+    "raceId": "WI-GOV-2026",
+    "registrantId": "0104212"
+  },
+  "Brennan for Wisconsin": {
+    "candidateSlug": "joel-brennan",
+    "raceId": "WI-GOV-2026",
+    "registrantId": "01072615"
+  },
+  "Hughes for Wisconsin": {
+    "candidateSlug": "missy-hughes",
+    "raceId": "WI-GOV-2026"
+  },
+  "Missy For Governor": {
+    "candidateSlug": "missy-hughes",
+    "raceId": "WI-GOV-2026",
+    "registrantId": "01072544"
+  },
+  "Mandela for Wisconsin": {
+    "candidateSlug": "mandela-barnes",
+    "raceId": "WI-GOV-2026",
+    "registrantId": "0105266"
+  },
+  "Friends of Francesca Hong": {
+    "candidateSlug": "francesca-hong",
+    "raceId": "WI-GOV-2026",
+    "registrantId": "0106285"
+  }
 }
