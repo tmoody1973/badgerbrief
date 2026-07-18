@@ -69,8 +69,14 @@ doesn't support extglobs).
   the same Graph Explorer query after approval; `ads_read` permission NOT required (basic token +
   verified identity). Meta app "BadgerBrief" exists (no-use-case type). Fallback if still 403 after
   verification: recreate app via legacy "Other"/Business + Ad Library API product + accept terms.
-- **July 29, 2026:** Sunshine pre-primary filings drop — the gov frontrunners (Roys, Crowley,
-  Tiffany, Brennan, Hughes, Hong) have NO gubernatorial filings yet (verified in real exports).
+- **Seed data rots fast (learned the hard way):** the seed JSON had missed Mandela Barnes — the
+  Democratic gov frontrunner — entirely, plus six stale statuses (Rodriguez withdrew 7/17, Crowley
+  out 7/8/re-entering 7/17, Hughes suspended, Schoemann out 1/28, three never filed). Corrected with
+  sources in commit `b22fcae`; `StatusBadge` now renders non-active candidacies. Treat the JSON as a
+  snapshot needing the MOO-312 monitor sweeps, not ground truth; the Crowley re-entry
+  situation is still moving and needs a re-check.
+- **July 29, 2026:** Sunshine pre-primary filings drop — the active gov candidates (Barnes, Roys,
+  Crowley?, Brennan, Hong, Tiffany) have NO gubernatorial filings yet (verified in real exports).
   User re-exports transactions then; run `node scripts/import-sunshine.mjs <csv> --prod --coverage
   "pre-primary filings"`. Unmatched committees print for mapping in `scripts/sunshine-committees.json`
   ("Wisconsin Rebuild" deliberately unmapped — unidentified independent; never guess).
