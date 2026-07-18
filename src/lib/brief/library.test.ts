@@ -36,7 +36,14 @@ describe("brief library parser", () => {
 
   it("prompt() names every registry component", () => {
     const prompt = briefLibrary.prompt();
-    for (const name of ["Stack", "Grid", "AssistantNote", "SourceTrustLabel"]) {
+    for (const name of [
+      "Stack",
+      "Grid",
+      "BriefHeader",
+      "AssistantNote",
+      "DeadlineBanner",
+      "VotingChecklist",
+    ]) {
       expect(prompt).toContain(name);
     }
   });

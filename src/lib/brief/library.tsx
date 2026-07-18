@@ -3,6 +3,11 @@
 import { createLibrary, defineComponent } from "@openuidev/react-lang";
 import { z } from "zod";
 import { SourceTrustLabel as GuideSourceTrustLabel } from "@/components/guide/labels";
+import {
+  BriefHeaderView,
+  DeadlineBannerView,
+  VotingChecklistView,
+} from "@/components/brief/voting";
 
 /**
  * MOO-305 registry. Safety contract: props are entity IDs and enums only —
@@ -65,9 +70,39 @@ export const SourceTrustLabel = defineComponent({
   component: ({ props }) => <GuideSourceTrustLabel kind={props.kind} />,
 });
 
+export const BriefHeader = defineComponent({
+  name: "BriefHeader",
+  description:
+    "Brief masthead with primary date and days-to-election countdown. Always place first. Takes no arguments.",
+  props: z.object({}),
+  component: () => <BriefHeaderView />,
+});
+
+export const DeadlineBanner = defineComponent({
+  name: "DeadlineBanner",
+  description: "High-visibility banner for one voting deadline.",
+  props: z.object({
+    kind: z.enum([
+      "registration",
+      "absentee_request",
+      "absentee_return",
+      "early_voting",
+    ]),
+  }),
+  component: ({ props }) => <DeadlineBannerView kind={props.kind} />,
+});
+
+export const VotingChecklist = defineComponent({
+  name: "VotingChecklist",
+  description:
+    "Actionable checklist of registration, absentee, early-voting and election-day steps with official deadlines. Place near the top. Takes no arguments.",
+  props: z.object({}),
+  component: () => <VotingChecklistView />,
+});
+
 export const briefLibrary = createLibrary({
   root: "Stack",
-  components: [Stack, Grid, AssistantNote, SourceTrustLabel],
-  // Tasks 2-4 append: BriefHeader, DeadlineBanner, VotingChecklist, RaceCard,
+  components: [Stack, Grid, AssistantNote, SourceTrustLabel, BriefHeader, DeadlineBanner, VotingChecklist],
+  // Tasks 2-4 append: RaceCard,
   // CandidateCompareCard, IssueStanceCard, QuoteCard, FinanceSnapshot.
 });
