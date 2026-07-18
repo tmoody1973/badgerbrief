@@ -57,7 +57,7 @@ where they fit.
 | `RaceCard` | raceId | `api.public.getRace` |
 | `CandidateCompareCard` | raceId, candidateIds (max 4) | published candidates |
 | `IssueStanceCard` | candidateId, issue | published positions |
-| `QuoteCard` | quoteId | published quotes w/ sources |
+| `QuoteCard` | candidateSlug | published quotes w/ sources (no quote-ID natural key exists; renders up to 2 for the candidate) |
 | `FinanceSnapshot` | candidateId | existing finance panels |
 | `AssistantNote` | text (free text) | — |
 
