@@ -110,6 +110,25 @@ export const editQuoteDraft = mutation({
   },
 });
 
+/** Close a review task so the queue drains (resolved after publish, dismissed after reject). */
+export const resolveTask = mutation({
+  args: {
+    taskId: v.id("review_tasks"),
+    outcome: v.union(v.literal("resolved"), v.literal("dismissed")),
+  },
+  handler: async (ctx, { taskId, outcome }) => {
+    await requireAdmin(ctx);
+    const task = await ctx.db.get(taskId);
+    if (!task) throw new Error("review task not found");
+    await ctx.db.patch(taskId, { status: outcome, resolvedAt: Date.now() });
+    await logAudit(ctx, {
+      action: `task:${outcome}`,
+      refTable: "review_tasks",
+      refId: taskId,
+    });
+  },
+});
+
 /** Open (unresolved) alerts, newest first. */
 export const alerts = query({
   args: {},

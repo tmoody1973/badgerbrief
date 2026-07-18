@@ -164,6 +164,7 @@ function TaskDetail({ row }: { row: QueueRow }) {
   const publishPosition = useMutation(api.publish.publishPosition);
   const editPositionDraft = useMutation(api.adminQueue.editPositionDraft);
   const editQuoteDraft = useMutation(api.adminQueue.editQuoteDraft);
+  const resolveTask = useMutation(api.adminQueue.resolveTask);
   const auditRows = useAudit(row.task.refTable, row.task.refId);
 
   const run = async (label: string, fn: () => Promise<unknown>) => {
@@ -186,16 +187,21 @@ function TaskDetail({ row }: { row: QueueRow }) {
     );
 
   const handleReject = () =>
-    run("reject", () =>
-      setReviewStatus({ kind: row.kind, draftId: row.draft._id, status: "rejected" }),
-    );
+    run("reject", async () => {
+      await setReviewStatus({ kind: row.kind, draftId: row.draft._id, status: "rejected" });
+      // Close the task so the queue drains; useQuery reactivity removes the row.
+      await resolveTask({ taskId: row.task._id, outcome: "dismissed" });
+    });
 
   const handlePublish = () =>
-    run("publish", () =>
-      row.kind === "quote"
-        ? publishQuote({ draftId: row.draft._id })
-        : publishPosition({ draftId: row.draft._id }),
-    );
+    run("publish", async () => {
+      if (row.kind === "quote") {
+        await publishQuote({ draftId: row.draft._id });
+      } else {
+        await publishPosition({ draftId: row.draft._id });
+      }
+      await resolveTask({ taskId: row.task._id, outcome: "resolved" });
+    });
 
   const handleSaveEdits = () =>
     run("save", async () => {

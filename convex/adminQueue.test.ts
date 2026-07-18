@@ -84,6 +84,40 @@ describe("adminQueue.editPositionDraft", () => {
   });
 });
 
+describe("adminQueue.resolveTask", () => {
+  test("flips status, audit-logs, and drops the task from list", async () => {
+    const t = setup();
+    const draftId = await t.run((ctx) =>
+      ctx.db.insert("candidate_positions_drafts", positionDraft),
+    );
+    const taskId = await t.run((ctx) =>
+      ctx.db.insert("review_tasks", {
+        kind: "position",
+        refTable: "candidate_positions_drafts",
+        refId: draftId,
+        status: "open",
+        createdAt: Date.now(),
+      }),
+    );
+    await t.withIdentity(ADMIN).mutation(api.adminQueue.resolveTask, {
+      taskId,
+      outcome: "resolved",
+    });
+    const updated = await t.run((ctx) => ctx.db.get(taskId));
+    expect(updated?.status).toBe("resolved");
+    expect(updated?.resolvedAt).toBeDefined();
+
+    const entries = await t.withIdentity(ADMIN).query(api.audit.forRecord, {
+      refTable: "review_tasks",
+      refId: taskId,
+    });
+    expect(entries.map((e) => e.action)).toEqual(["task:resolved"]);
+
+    const rows = await t.withIdentity(ADMIN).query(api.adminQueue.list, {});
+    expect(rows).toHaveLength(0);
+  });
+});
+
 describe("adminQueue.resolveAlert", () => {
   test("flips resolved and audit-logs", async () => {
     const t = setup();
