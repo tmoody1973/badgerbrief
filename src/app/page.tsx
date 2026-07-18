@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BallotFinder } from "@/components/guide/ballot-finder";
 import { RaceCard } from "@/components/guide/cards";
 import { LastUpdated, Stamp } from "@/components/guide/labels";
 import { getElection, listRaces, getVotingInfo } from "@/lib/data";
@@ -75,6 +76,8 @@ export default async function Home() {
           </div>
         )}
       </section>
+
+      <BallotFinder races={races} />
 
       {votingInfo && (
         <section className="mt-8 border-2 border-border bg-warning p-4 shadow-[var(--shadow-brutal)]">

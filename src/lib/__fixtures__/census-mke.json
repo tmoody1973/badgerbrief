@@ -1,0 +1,78 @@
+{
+ "result": {
+  "input": {
+   "address": {
+    "address": "200 E Wells St, Milwaukee, WI 53202"
+   },
+   "vintage": {
+    "isDefault": true,
+    "id": "4",
+    "vintageName": "Current_Current",
+    "vintageDescription": "Current Vintage - Current Benchmark"
+   },
+   "benchmark": {
+    "isDefault": true,
+    "benchmarkDescription": "Public Address Ranges - Current Benchmark",
+    "id": "4",
+    "benchmarkName": "Public_AR_Current"
+   }
+  },
+  "addressMatches": [
+   {
+    "tigerLine": {
+     "side": "L",
+     "tigerLineId": "77744586"
+    },
+    "geographies": {
+     "2024 State Legislative Districts - Upper": [
+      {
+       "NAME": "State Senate District 7",
+       "BASENAME": "7",
+       "STATE": "55"
+      }
+     ],
+     "2024 State Legislative Districts - Lower": [
+      {
+       "NAME": "Assembly District 19",
+       "BASENAME": "19",
+       "STATE": "55"
+      }
+     ],
+     "119th Congressional Districts": [
+      {
+       "NAME": "Congressional District 4",
+       "BASENAME": "4",
+       "STATE": "55"
+      }
+     ],
+     "States": [
+      {
+       "NAME": "Wisconsin",
+       "BASENAME": "Wisconsin",
+       "STATE": "55"
+      }
+     ]
+    },
+    "coordinates": {
+     "x": -87.909678226499,
+     "y": 43.041116069656
+    },
+    "addressComponents": {
+     "zip": "53202",
+     "streetName": "WELLS",
+     "preType": "",
+     "city": "MILWAUKEE",
+     "preDirection": "E",
+     "suffixDirection": "",
+     "fromAddress": "200",
+     "state": "WI",
+     "suffixType": "ST",
+     "toAddress": "298",
+     "suffixQualifier": "",
+     "preQualifier": ""
+    },
+    "matchedAddress": "200 E WELLS ST, MILWAUKEE, WI, 53202"
+   }
+  ]
+ }
+}
