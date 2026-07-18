@@ -9,6 +9,11 @@ import {
   VotingChecklistView,
 } from "@/components/brief/voting";
 import { BriefRaceCardView, CandidateCompareCardView } from "@/components/brief/race";
+import {
+  FinanceSnapshotView,
+  IssueStanceCardView,
+  QuoteCardView,
+} from "@/components/brief/candidate";
 
 /**
  * MOO-305 registry. Safety contract: props are entity IDs and enums only —
@@ -128,8 +133,41 @@ export const CandidateCompareCard = defineComponent({
   ),
 });
 
+export const IssueStanceCard = defineComponent({
+  name: "IssueStanceCard",
+  description:
+    "One candidate's published stance on one issue, with summary and source link.",
+  props: z.object({
+    candidateSlug: z.string().describe("candidate slug"),
+    issueSlug: z.string().describe("issue slug, e.g. \"abortion\""),
+  }),
+  component: ({ props }) => (
+    <IssueStanceCardView
+      candidateSlug={props.candidateSlug}
+      issueSlug={props.issueSlug}
+    />
+  ),
+});
+
+export const QuoteCard = defineComponent({
+  name: "QuoteCard",
+  description:
+    "Up to two published, sourced quotes from one candidate. Renders nothing if none are published.",
+  props: z.object({ candidateSlug: z.string().describe("candidate slug") }),
+  component: ({ props }) => <QuoteCardView candidateSlug={props.candidateSlug} />,
+});
+
+export const FinanceSnapshot = defineComponent({
+  name: "FinanceSnapshot",
+  description:
+    "Campaign money panel for one candidate: raised/spent/cash/debts, top org donors, and pass-through funding drill-down.",
+  props: z.object({ candidateSlug: z.string().describe("candidate slug") }),
+  component: ({ props }) => (
+    <FinanceSnapshotView candidateSlug={props.candidateSlug} />
+  ),
+});
+
 export const briefLibrary = createLibrary({
   root: "Stack",
-  components: [Stack, Grid, AssistantNote, SourceTrustLabel, BriefHeader, DeadlineBanner, VotingChecklist, RaceCard, CandidateCompareCard],
-  // Tasks 3-4 append: IssueStanceCard, QuoteCard, FinanceSnapshot.
+  components: [Stack, Grid, AssistantNote, SourceTrustLabel, BriefHeader, DeadlineBanner, VotingChecklist, RaceCard, CandidateCompareCard, IssueStanceCard, QuoteCard, FinanceSnapshot],
 });

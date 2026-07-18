@@ -45,6 +45,9 @@ describe("brief library parser", () => {
       "VotingChecklist",
       "RaceCard",
       "CandidateCompareCard",
+      "IssueStanceCard",
+      "QuoteCard",
+      "FinanceSnapshot",
     ]) {
       expect(prompt).toContain(name);
     }
