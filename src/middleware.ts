@@ -1,10 +1,10 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+const isProtectedRoute = createRouteMatcher(["/admin(.*)", "/brief(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isAdminRoute(req)) {
-    await auth.protect(); // signed-out → redirected to sign-in; role check happens in the page
+  if (isProtectedRoute(req)) {
+    await auth.protect(); // signed-out → redirected to sign-in; admin role check happens in the page
   }
 });
 

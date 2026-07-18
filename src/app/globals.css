@@ -68,3 +68,20 @@ body {
   transform: translate(2px, 2px);
   box-shadow: none;
 }
+
+@media print {
+  header,
+  footer,
+  nav {
+    display: none !important;
+  }
+  a {
+    text-decoration: none;
+  }
+  .shadow-\[var\(--shadow-brutal\)\] {
+    box-shadow: none !important;
+  }
+  details::details-content {
+    content-visibility: visible;
+  }
+}
