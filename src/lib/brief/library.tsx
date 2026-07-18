@@ -71,7 +71,11 @@ export const SourceTrustLabel = defineComponent({
   description:
     "Small trust label naming the kind of source backing nearby content. Data components already carry their own source footers — use this only for standalone labeling.",
   props: z.object({
-    kind: z.string().describe("source kind, e.g. \"official\", \"FEC\", \"news\""),
+    kind: z
+      .enum(["official", "campaign", "reported", "reference", "ad-library"])
+      .describe(
+        "source kind: \"official\" | \"campaign\" | \"reported\" | \"reference\" | \"ad-library\"",
+      ),
   }),
   component: ({ props }) => <GuideSourceTrustLabel kind={props.kind} />,
 });

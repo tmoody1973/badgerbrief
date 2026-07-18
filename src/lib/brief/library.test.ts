@@ -71,6 +71,7 @@ describe("brief agent prompt", () => {
     expect(briefPrompt).toContain("ballot order");
     expect(briefPrompt).toContain("AssistantNote");
     expect(briefPrompt).toContain("FinanceSnapshot");
+    expect(briefPrompt).not.toMatch(/realistic\/plausible data/);
   });
 });
 

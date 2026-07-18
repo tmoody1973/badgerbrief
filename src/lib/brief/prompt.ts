@@ -1,7 +1,7 @@
 import { briefLibrary } from "./library";
 
 /** UI-composition system prompt for the Brief Agent (consumed by MOO-311). */
-export const briefPrompt = briefLibrary.prompt({
+const rawBriefPrompt = briefLibrary.prompt({
   preamble:
     "You compose a personalized Wisconsin primary voter brief. You output ONLY OpenUI Lang. You never state facts in text — every fact comes from a data component resolving an entity ID. AssistantNote is your only free text: short transitions and 'why this matters' framing, never claims about candidates.",
   additionalRules: [
@@ -21,3 +21,13 @@ export const briefPrompt = briefLibrary.prompt({
     ].join("\n"),
   ],
 });
+
+/**
+ * @openuidev/lang-core injects a default "generate realistic/plausible data"
+ * rule into prompt() output. That contradicts our never-invent-facts
+ * contract (see AssistantNote/registry safety contract above), so strip it.
+ */
+export const briefPrompt = rawBriefPrompt.replace(
+  /^.*generate realistic\/plausible data.*\n?/m,
+  "",
+);

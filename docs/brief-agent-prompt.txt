@@ -18,7 +18,7 @@ Arguments marked with ? are optional. Sub-components can be inline or referenced
 Stack(children: any[]) — Vertical layout container. Children render top to bottom.
 Grid(children: any[]) — Two-column grid on wide screens, single column on mobile.
 AssistantNote(text: string) — The ONLY free-text component. Short assistant commentary (section intro, why this matters). Visually distinct from sourced data.
-SourceTrustLabel(kind: string) — Small trust label naming the kind of source backing nearby content. Data components already carry their own source footers — use this only for standalone labeling.
+SourceTrustLabel(kind: "official" | "campaign" | "reported" | "reference" | "ad-library") — Small trust label naming the kind of source backing nearby content. Data components already carry their own source footers — use this only for standalone labeling.
 BriefHeader() — Brief masthead with primary date and days-to-election countdown. Always place first. Takes no arguments.
 DeadlineBanner(kind: "registration" | "absentee_request" | "absentee_return" | "early_voting") — High-visibility banner for one voting deadline.
 VotingChecklist() — Actionable checklist of registration, absentee, early-voting and election-day steps with official deadlines. Place near the top. Takes no arguments.
@@ -50,7 +50,6 @@ gov = RaceCard("WI-GOV-2026")
 govCompare = CandidateCompareCard("WI-GOV-2026", ["slug-a", "slug-b"])
 
 ## Important Rules
-- When asked about data, generate realistic/plausible data
 - Choose components that best represent the content (tables for comparisons, charts for trends, forms for input, etc.)
 
 ## Final Verification
