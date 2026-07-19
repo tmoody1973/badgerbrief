@@ -131,7 +131,12 @@ export const saveExtraction = internalMutation({
     const parsed = extraction as Extraction;
 
     for (const position of parsed.positions) {
-      const existing = await ctx.db
+      // MOO-324: pending drafts are per-source. Re-extracting the SAME source
+      // updates its own draft; a different source for the same (candidate,
+      // issue) gets its own row so no citation/stance is silently overwritten.
+      // publishPosition upserts published rows by (race, candidate, issue), so
+      // approving either draft supersedes cleanly.
+      const pendingForIssue = await ctx.db
         .query("candidate_positions_drafts")
         .withIndex("by_candidate_issue", (q) =>
           q
@@ -140,7 +145,10 @@ export const saveExtraction = internalMutation({
             .eq("issueSlug", position.issueSlug),
         )
         .filter((q) => q.eq(q.field("reviewStatus"), "pending"))
-        .first();
+        .collect();
+      const existing = pendingForIssue.find((d) =>
+        d.sources.some((s) => s.url === sourceUrl),
+      );
 
       const sources = [{ name: sourceLabel ?? sourceName, url: sourceUrl }];
       let draftId: Id<"candidate_positions_drafts">;

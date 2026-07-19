@@ -1,6 +1,6 @@
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import schema from "./schema";
 
 const modules = import.meta.glob([
@@ -138,5 +138,128 @@ describe("saveExtraction sourceLabel", () => {
 
     const positions = await t.run((ctx) => ctx.db.query("candidate_positions_drafts").collect());
     expect(positions[0].sources[0].name).toBe("Joel Brennan");
+  });
+});
+
+describe("saveExtraction per-source drafts (MOO-324)", () => {
+  const ADMIN = { subject: "user_admin", metadata: { role: "admin" } };
+
+  const positionFor = (summary: string, stance = "support") => ({
+    positions: [
+      {
+        issueSlug: "education",
+        stance,
+        summary,
+        confidence: 0.8,
+        evidenceExcerpt: summary,
+      },
+    ],
+    quotes: [],
+  });
+
+  const campaignArgs = {
+    candidateSlug: "joel-brennan",
+    raceId: "WI-GOV-2026",
+    sourceUrl: "https://brennanforwisconsin.com",
+    sourceName: "Joel Brennan",
+  };
+
+  const articleArgs = {
+    candidateSlug: "joel-brennan",
+    raceId: "WI-GOV-2026",
+    sourceUrl: "https://urbanmilwaukee.com/2026/06/01/brennan-education",
+    sourceName: "Joel Brennan",
+    sourceLabel: "Urban Milwaukee",
+  };
+
+  test("cross-source extractions on the same issue both survive with their own citations and review tasks", async () => {
+    const t = setup();
+    await t.run((ctx) => ctx.db.insert("candidates", baseCandidate));
+
+    await t.mutation(internal.researchQueries.saveExtraction, {
+      ...campaignArgs,
+      extraction: positionFor("Campaign site: fully fund schools."),
+    });
+    await t.mutation(internal.researchQueries.saveExtraction, {
+      ...articleArgs,
+      extraction: positionFor("Article: supports referendum reform.", "mixed"),
+    });
+
+    const drafts = await t.run((ctx) => ctx.db.query("candidate_positions_drafts").collect());
+    expect(drafts).toHaveLength(2);
+    const urls = drafts.map((d) => d.sources[0].url).sort();
+    expect(urls).toEqual([
+      "https://brennanforwisconsin.com",
+      "https://urbanmilwaukee.com/2026/06/01/brennan-education",
+    ]);
+    const campaignDraft = drafts.find((d) => d.sources[0].url === campaignArgs.sourceUrl)!;
+    expect(campaignDraft.summary).toBe("Campaign site: fully fund schools.");
+    expect(campaignDraft.stance).toBe("support");
+
+    const tasks = await t.run((ctx) => ctx.db.query("review_tasks").collect());
+    expect(tasks).toHaveLength(2);
+    expect(new Set(tasks.map((task) => task.refId)).size).toBe(2);
+  });
+
+  test("re-extraction from the same source updates its own pending draft, no new row", async () => {
+    const t = setup();
+    await t.run((ctx) => ctx.db.insert("candidates", baseCandidate));
+
+    await t.mutation(internal.researchQueries.saveExtraction, {
+      ...campaignArgs,
+      extraction: positionFor("First pass."),
+    });
+    await t.mutation(internal.researchQueries.saveExtraction, {
+      ...campaignArgs,
+      extraction: positionFor("Updated after site refresh.", "evolving"),
+    });
+
+    const drafts = await t.run((ctx) => ctx.db.query("candidate_positions_drafts").collect());
+    expect(drafts).toHaveLength(1);
+    expect(drafts[0].summary).toBe("Updated after site refresh.");
+    expect(drafts[0].stance).toBe("evolving");
+
+    const tasks = await t.run((ctx) => ctx.db.query("review_tasks").collect());
+    expect(tasks).toHaveLength(1);
+  });
+
+  test("publish path unchanged: approving either per-source draft upserts the one published row", async () => {
+    const t = setup();
+    await t.run((ctx) => ctx.db.insert("candidates", baseCandidate));
+
+    await t.mutation(internal.researchQueries.saveExtraction, {
+      ...campaignArgs,
+      extraction: positionFor("Campaign stance."),
+    });
+    await t.mutation(internal.researchQueries.saveExtraction, {
+      ...articleArgs,
+      extraction: positionFor("Article stance.", "mixed"),
+    });
+
+    const drafts = await t.run((ctx) => ctx.db.query("candidate_positions_drafts").collect());
+    const campaignDraft = drafts.find((d) => d.sources[0].url === campaignArgs.sourceUrl)!;
+    const articleDraft = drafts.find((d) => d.sources[0].url === articleArgs.sourceUrl)!;
+
+    const admin = t.withIdentity(ADMIN);
+    await admin.mutation(api.publish.setDraftReviewStatus, {
+      kind: "position",
+      draftId: campaignDraft._id,
+      status: "approved",
+    });
+    await admin.mutation(api.publish.publishPosition, { draftId: campaignDraft._id });
+
+    await admin.mutation(api.publish.setDraftReviewStatus, {
+      kind: "position",
+      draftId: articleDraft._id,
+      status: "approved",
+    });
+    await admin.mutation(api.publish.publishPosition, { draftId: articleDraft._id });
+
+    const published = await t.run((ctx) =>
+      ctx.db.query("candidate_positions_published").collect(),
+    );
+    expect(published).toHaveLength(1);
+    expect(published[0].summary).toBe("Article stance.");
+    expect(published[0].draftId).toBe(articleDraft._id);
   });
 });

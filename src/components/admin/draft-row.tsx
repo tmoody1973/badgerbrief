@@ -67,7 +67,12 @@ function qaSummary(row: QueueRow) {
 }
 
 function summaryLine(row: QueueRow) {
-  if (row.kind === "position") return row.draft.issueSlug;
+  if (row.kind === "position") {
+    // MOO-324: drafts are per-source, so two rows can share an issue — the
+    // source name is what tells them apart at a glance.
+    const sourceName = row.draft.sources[0]?.name;
+    return sourceName ? `${row.draft.issueSlug} · ${sourceName}` : row.draft.issueSlug;
+  }
   const text = row.draft.text;
   return text.length > 100 ? `${text.slice(0, 100)}…` : text;
 }
