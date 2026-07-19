@@ -36,4 +36,15 @@ describe("qa contract", () => {
     expect(p).toContain("neutral");
     expect(p).toContain("untrusted");
   });
+  it("prompt contains the hardening block before the source-text content marker", () => {
+    const p = buildQaPrompt({
+      kind: "position",
+      draftJson: JSON.stringify({ summary: "Supports expanding BadgerCare." }),
+      sourceText: "We will expand BadgerCare to every family.",
+    });
+    expect(p).toMatch(/untrusted web content/i);
+    expect(p).toMatch(/ignore (them|any instructions)/i);
+    const hardeningIdx = p.search(/untrusted web content/i);
+    expect(hardeningIdx).toBeLessThan(p.indexOf("SOURCE TEXT:"));
+  });
 });

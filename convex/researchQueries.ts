@@ -8,16 +8,48 @@ import { internalMutation, internalQuery } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { Extraction } from "./lib/extraction";
 
-/** Piece 1: candidates with a campaign website to research. */
+/**
+ * Piece 1: campaign-site targets (as before) PLUS one target per approved
+ * article_sources row (MOO-322 Task 3). Proposed/rejected rows never become
+ * targets — only an admin decision promotes an article into the pipeline.
+ */
 export const listResearchTargets = internalQuery({
   args: {},
   handler: async (ctx) => {
     const candidates = await ctx.db.query("candidates").collect();
-    const targets: { slug: string; name: string; raceId: string; url: string }[] = [];
+    const nameBySlug = new Map(candidates.map((c) => [c.slug, c.name]));
+
+    const targets: {
+      slug: string;
+      name: string;
+      raceId: string;
+      url: string;
+      sourceKind: "campaign_site" | "article";
+      outlet?: string;
+    }[] = [];
+
     for (const c of candidates) {
       const url = c.socialMedia?.campaign_website;
-      if (url) targets.push({ slug: c.slug, name: c.name, raceId: c.raceId, url });
+      if (url) targets.push({ slug: c.slug, name: c.name, raceId: c.raceId, url, sourceKind: "campaign_site" });
     }
+
+    const approvedArticles = await ctx.db
+      .query("article_sources")
+      .withIndex("by_status", (q) => q.eq("status", "approved"))
+      .collect();
+    for (const a of approvedArticles) {
+      const name = nameBySlug.get(a.candidateSlug);
+      if (!name) continue; // orphaned row (candidate removed) — skip rather than emit a bad target
+      targets.push({
+        slug: a.candidateSlug,
+        name,
+        raceId: a.raceId,
+        url: a.url,
+        sourceKind: "article",
+        outlet: a.outlet,
+      });
+    }
+
     return targets;
   },
 });
@@ -76,9 +108,11 @@ export const recordFetch = internalMutation({
 
 /**
  * Piece 4: turn one candidate's extraction into pending drafts + open review
- * tasks. `sourceName` is the candidate's display name — used both as the
- * position citation label and as the quote speaker (the source in M1 is
- * always the candidate's own site, so those are the same string).
+ * tasks. `sourceName` is the candidate's display name — used as the quote
+ * speaker always (quotes are BY the candidate, regardless of source kind).
+ * `sourceLabel` (MOO-322), when given, becomes the position citation's
+ * `sources[].name` instead — e.g. the outlet name for an article source.
+ * Campaign sites omit it, so the citation still falls back to sourceName.
  */
 export const saveExtraction = internalMutation({
   args: {
@@ -86,10 +120,14 @@ export const saveExtraction = internalMutation({
     raceId: v.string(),
     sourceUrl: v.string(),
     sourceName: v.string(),
+    sourceLabel: v.optional(v.string()),
     extraction: v.any(),
     traceId: v.optional(v.string()),
   },
-  handler: async (ctx, { candidateSlug, raceId, sourceUrl, sourceName, extraction, traceId }) => {
+  handler: async (
+    ctx,
+    { candidateSlug, raceId, sourceUrl, sourceName, sourceLabel, extraction, traceId },
+  ) => {
     const parsed = extraction as Extraction;
 
     for (const position of parsed.positions) {
@@ -104,7 +142,7 @@ export const saveExtraction = internalMutation({
         .filter((q) => q.eq(q.field("reviewStatus"), "pending"))
         .first();
 
-      const sources = [{ name: sourceName, url: sourceUrl }];
+      const sources = [{ name: sourceLabel ?? sourceName, url: sourceUrl }];
       let draftId: Id<"candidate_positions_drafts">;
       if (existing) {
         await ctx.db.patch(existing._id, {

@@ -36,8 +36,39 @@ describe("extraction contract", () => {
     expect(() => extractionSchema.parse(bad)).toThrow();
   });
   it("prompt forbids invention and pins the vocabulary", () => {
-    const p = buildExtractionPrompt("Kelda Roys", "https://x.com", "site text");
+    const p = buildExtractionPrompt("Kelda Roys", "https://x.com", "site text", "campaign_site");
     expect(p).toContain("verbatim");
     for (const slug of ISSUE_SLUGS) expect(p).toContain(slug);
+  });
+  it("campaign_site prompt contains the hardening block before the content marker", () => {
+    const p = buildExtractionPrompt("Kelda Roys", "https://x.com", "site text", "campaign_site");
+    expect(p).toMatch(/untrusted web content/i);
+    expect(p).toMatch(/ignore (them|any instructions)/i);
+    expect(p.indexOf(/untrusted web content/i.exec(p)![0])).toBeLessThan(
+      p.indexOf("PAGE CONTENT"),
+    );
+  });
+  it("article prompt attributes the outlet and restricts quotes to the candidate", () => {
+    const p = buildExtractionPrompt(
+      "Kelda Roys",
+      "https://urbanmilwaukee.com/roys-education",
+      "article text",
+      "article",
+      "Urban Milwaukee",
+    );
+    expect(p).toContain("news article from Urban Milwaukee");
+    expect(p).toContain("only quotes the article directly attributes to Kelda Roys");
+    expect(p).toMatch(/never extract the journalist's characterization/i);
+  });
+  it("article prompt also contains the hardening block before the content marker", () => {
+    const p = buildExtractionPrompt(
+      "Kelda Roys",
+      "https://urbanmilwaukee.com/roys-education",
+      "article text",
+      "article",
+      "Urban Milwaukee",
+    );
+    expect(p).toMatch(/untrusted web content/i);
+    expect(p).toMatch(/ignore (them|any instructions)/i);
   });
 });

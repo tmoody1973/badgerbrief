@@ -125,8 +125,14 @@ export const run = internalAction({
 
     const telemetry = ensureTelemetry();
 
-    const allTargets: { slug: string; name: string; raceId: string; url: string }[] =
-      await ctx.runQuery(internal.researchQueries.listResearchTargets, {});
+    const allTargets: {
+      slug: string;
+      name: string;
+      raceId: string;
+      url: string;
+      sourceKind: "campaign_site" | "article";
+      outlet?: string;
+    }[] = await ctx.runQuery(internal.researchQueries.listResearchTargets, {});
 
     let targets: typeof allTargets;
     if (candidateSlugs) {
@@ -197,7 +203,13 @@ export const run = internalAction({
       // must leave prevHash pointing at the old content, or the next run
       // sees "unchanged" and skips this content version forever.
       try {
-        const prompt = buildExtractionPrompt(target.name, target.url, fetched.markdown);
+        const prompt = buildExtractionPrompt(
+          target.name,
+          target.url,
+          fetched.markdown,
+          target.sourceKind,
+          target.outlet,
+        );
         const extractOnce = () =>
           generateObject({
             model: anthropic("claude-opus-4-8"),
@@ -263,6 +275,7 @@ export const run = internalAction({
             raceId: target.raceId,
             sourceUrl: target.url,
             sourceName: target.name,
+            sourceLabel: target.outlet,
             extraction,
             traceId,
           },
