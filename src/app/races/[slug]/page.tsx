@@ -99,7 +99,11 @@ export default async function RacePage({ params }: Props) {
 
       {parties.map((party) => (
         <section key={party} className="mt-8">
-          <h2 className="font-display text-2xl">{party} primary</h2>
+          <h2 className="font-display text-2xl">
+            {/* Independents don't run in Wisconsin's partisan primary — they
+                go straight to the Nov 3 general (MOO-314 launch check). */}
+            {party === "Independent" ? "Independent — November general election only" : `${party} primary`}
+          </h2>
           <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {candidates
               .filter((c) => c.primaryParty === party)
