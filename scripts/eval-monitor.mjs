@@ -15,7 +15,8 @@ import { execFileSync } from "node:child_process";
 const PROJECT_ID = "TW9kZWw6ODgzOTMxNjQxOTo3NzFI"; // badgerbrief
 const PASS_LABELS = new Set(["faithful", "neutral", "official_first", "correct", "meets"]);
 const MIN_SAMPLES = 5;
-const WARN_RATE = 0.2;
+const warnArg = process.argv.indexOf("--warn-rate"); // test override, e.g. --warn-rate 0.05
+const WARN_RATE = warnArg >= 0 ? Number(process.argv[warnArg + 1]) : 0.2;
 const CRITICAL_RATE = 0.4;
 const dryRun = process.argv.includes("--dry-run");
 
