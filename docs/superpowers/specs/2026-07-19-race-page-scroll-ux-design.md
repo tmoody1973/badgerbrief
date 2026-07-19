@@ -44,9 +44,9 @@ the pattern earns it.
 
 ### 3. Not-on-ballot fold + classifier
 
-- New pure helper `isOnBallot(status?: string): boolean` in
-  `src/lib/districts.ts` or a new `src/lib/ballot-status.ts` (whichever keeps
-  imports clean): returns `false` only when the status contains
+- New pure helper `isOnBallot(status?: string): boolean` in a new
+  `src/lib/ballot-status.ts` (`districts.ts` stays pure district math; the
+  string heuristic intentionally mirrors `StatusBadge`'s label logic): returns `false` only when the status contains
   "not on" or "did not file" (case-insensitive); `true` otherwise
   (undefined, Active, Withdrawn, Suspended → `true`).
 - **Accuracy rule (from the MOO-314 WEC verification): Withdrawn (Rodriguez)
