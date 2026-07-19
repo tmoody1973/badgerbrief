@@ -39,7 +39,11 @@ export function SiteFooter() {
         <p>
           BadgerBrief is a non-partisan, source-linked Wisconsin voter guide.
           We link every claim to its source, label official information apart
-          from campaign claims and reporting, and never make endorsements.
+          from campaign claims and reporting, and never make endorsements.{" "}
+          <Link href="/methodology" className="underline decoration-2 underline-offset-2">
+            How we source and verify
+          </Link>
+          .
         </p>
         <p className="text-muted-foreground">
           Voting logistics are always confirmed against official sources — for
