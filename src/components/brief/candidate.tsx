@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { FinancePanel } from "@/components/guide/finance";
+import { sourceLabel } from "@/lib/source-label";
 import { BriefSkeleton, NotFoundCard } from "./chrome";
 
 const hostnameOf = (url: string) => {
@@ -63,10 +64,9 @@ export function QuoteCardView({ candidateSlug }: { candidateSlug: string }) {
         >
           <p className="text-sm">&ldquo;{q.text}&rdquo;</p>
           <footer className="mt-2 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-            — {q.speaker}, {q.outlet ? `${q.outlet}, ` : ""}
-            {q.date} ·{" "}
+            — {q.speaker}, {q.date} ·{" "}
             <a href={q.sourceUrl} className="underline" rel="noopener noreferrer" target="_blank">
-              source
+              {sourceLabel(q.sourceUrl, q.outlet)}
             </a>
           </footer>
         </blockquote>

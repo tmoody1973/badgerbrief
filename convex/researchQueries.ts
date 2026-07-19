@@ -203,6 +203,7 @@ export const saveExtraction = internalMutation({
         text: quote.text,
         context: quote.context,
         date: quote.date,
+        outlet: sourceLabel, // article quotes credit the outlet (undefined for campaign sites)
         sourceUrl,
         reviewStatus: "pending",
         extractedAt: Date.now(),

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CandidatePhoto } from "@/components/guide/candidate-photo";
+import { sourceLabel } from "@/lib/source-label";
 import { FinancePanel } from "@/components/guide/finance";
 import {
   LastUpdated,
@@ -199,15 +200,14 @@ export default async function CandidatePage({ params }: Props) {
               >
                 <p className="text-sm">&ldquo;{q.text}&rdquo;</p>
                 <footer className="mt-2 font-mono text-xs text-muted-foreground">
-                  — {q.speaker}, {q.outlet ? `${q.outlet}, ` : ""}
-                  {q.date} ·{" "}
+                  — {q.speaker}, {q.date} ·{" "}
                   <a
                     href={q.sourceUrl}
                     className="underline"
                     rel="noopener noreferrer"
                     target="_blank"
                   >
-                    source
+                    {sourceLabel(q.sourceUrl, q.outlet)}
                   </a>
                 </footer>
               </blockquote>
