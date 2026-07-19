@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CandidatePhoto } from "@/components/guide/candidate-photo";
 import { FinancePanel } from "@/components/guide/finance";
 import {
   LastUpdated,
@@ -72,24 +73,33 @@ export default async function CandidatePage({ params }: Props) {
           ← {race.office}
         </Link>
       )}
-      <div className="mt-2 flex flex-wrap items-center gap-3">
-        <h1 className="font-display text-3xl leading-tight sm:text-4xl">
-          {candidate.name}
-        </h1>
-        <PartyBadge party={candidate.party} />
-        <StatusBadge status={candidate.status} />
-        {candidate.incumbent && (
-          <span className="border-2 border-border bg-secondary px-2 py-0.5 font-mono text-xs font-bold uppercase">
-            Incumbent
-          </span>
-        )}
+      <div className="mt-2 flex items-start gap-4">
+        <CandidatePhoto
+          photoUrl={candidate.photoUrl}
+          photoSource={candidate.photoSource}
+          name={candidate.name}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-display text-3xl leading-tight sm:text-4xl">
+              {candidate.name}
+            </h1>
+            <PartyBadge party={candidate.party} />
+            <StatusBadge status={candidate.status} />
+            {candidate.incumbent && (
+              <span className="border-2 border-border bg-secondary px-2 py-0.5 font-mono text-xs font-bold uppercase">
+                Incumbent
+              </span>
+            )}
+          </div>
+          {candidate.currentOccupation &&
+            candidate.currentOccupation !== "Unknown" && (
+              <p className="mt-1 text-lg text-muted-foreground">
+                {candidate.currentOccupation}
+              </p>
+            )}
+        </div>
       </div>
-      {candidate.currentOccupation &&
-        candidate.currentOccupation !== "Unknown" && (
-          <p className="mt-1 text-lg text-muted-foreground">
-            {candidate.currentOccupation}
-          </p>
-        )}
 
       {candidate.background && (
         <section className="mt-6 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
