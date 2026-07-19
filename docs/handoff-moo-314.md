@@ -9,7 +9,7 @@ unless he says ship it — recent sessions were full ship-mode ("continue").
 ## Authoritative artifacts (read, don't re-derive)
 - Specs: `docs/superpowers/specs/` — M1 design 2026-07-17 is the contract.
 - **`docs/eval-gate.md` is now LAW for agent changes**: any prompt/instruction/
-  model change runs `pnpm eval:gate -- --name X --baseline opus-4-8-comparison`
+  model change runs `pnpm eval:gate -- --name X --baseline sonnet-5-tuned`
   first; regression = don't ship.
 - Linear: MOO-314 carries Intent/Acceptance/Verification. MOO-313's Done
   comment holds the full eval-stack evidence + the Haiku-revert narrative.
@@ -25,10 +25,10 @@ unless he says ship it — recent sessions were full ship-mode ("continue").
   mapping). 309 Meta-blocked.
 
 ## MOO-313 outcome you must respect
-- **Voter Help is back on `claude-opus-4-8`** (MODEL const, `convex/voterHelp.ts`).
-  The golden gate decided it: haiku 79% vs opus 93% on grounded golden-
-  expectations (haiku invented "leads polls", under-answered voter-ID, skipped
-  a no-record disclosure). Don't re-litigate without a new gate run.
+- **Voter Help runs `claude-sonnet-5` with gate-tuned instructions** (Tarik's
+  cost call, ratified by the gate: haiku 79% FAIL → opus 93% → sonnet untuned
+  79% FAIL (pseudo-link defect) → sonnet tuned 93% PASS = shipped). Gate
+  baseline is experiment `sonnet-5-tuned`. Don't re-litigate without a gate run.
 - Eval stack live: 5 sonnet-5 judges; continuous task `badgerbrief-agent-quality`
   (25% sampling, AGENT spans only); `pnpm eval:monitor` writes `eval_regression`
   alerts (2 informational ones left open on /admin — resolvable in UI);
@@ -73,7 +73,7 @@ unless he says ship it — recent sessions were full ship-mode ("continue").
   `npx convex deploy -y` BEFORE `npx vercel deploy --prod --yes` (vercel's
   first attempt sometimes errors — retry once). pnpm; dev server :3001.
 - `npx tsc --noEmit` clean; `npx next build` clean; 120 tests green.
-- Chat model back to `claude-opus-4-8`; all agents opus. Arize project
+- Chat model `claude-sonnet-5` (tuned instructions); other agents opus. Arize project
   `badgerbrief` (base64 `TW9kZWw6ODgzOTMxNjQxOTo3NzFI`), org/space IDs in
   `src/lib/arize.ts`.
 - Headless Clerk recipe unchanged (MOO-311 handoff gotcha 5); Playwright MCP
