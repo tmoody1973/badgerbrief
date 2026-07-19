@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Doc } from "../../../../convex/_generated/dataModel";
 import { CandidateCard } from "@/components/guide/cards";
 import { RaceFinanceTable } from "@/components/guide/finance";
 import { LastUpdated } from "@/components/guide/labels";
+import {
+  RaceSectionNav,
+  type RaceNavSection,
+} from "@/components/guide/race-section-nav";
 import { SourceList } from "@/components/guide/sources";
+import { isOnBallot, partySectionId } from "@/lib/ballot-status";
 import { getRace, listRaces } from "@/lib/data";
 import {
   JsonLd,
@@ -34,6 +40,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+/** On-ballot candidates in a compact 2-up grid; the rest in a collapsed fold. */
+function CandidateGrid({ list }: { list: Doc<"candidates">[] }) {
+  const onBallot = list.filter((c) => isOnBallot(c.status));
+  const offBallot = list.filter((c) => !isOnBallot(c.status));
+  return (
+    <>
+      <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-3">
+        {onBallot.map((c) => (
+          <CandidateCard key={c.slug} candidate={c} variant="compact" />
+        ))}
+      </div>
+      {offBallot.length > 0 && (
+        <details className="mt-3">
+          <summary className="cursor-pointer font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Not on the Aug 11 ballot ({offBallot.length})
+          </summary>
+          <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-3">
+            {offBallot.map((c) => (
+              <CandidateCard key={c.slug} candidate={c} variant="compact" />
+            ))}
+          </div>
+        </details>
+      )}
+    </>
+  );
+}
+
 export default async function RacePage({ params }: Props) {
   const { slug } = await params;
   const data = await getRace(slugToRaceId(slug));
@@ -45,8 +78,37 @@ export default async function RacePage({ params }: Props) {
   ] as string[];
   const nonPartisan = candidates.filter((c) => !c.primaryParty);
 
+  const byParty = (party: string) =>
+    candidates.filter((c) => c.primaryParty === party);
+  const partyChipLabel = (party: string) =>
+    party === "Democratic"
+      ? "Democrats"
+      : party === "Republican"
+        ? "Republicans"
+        : party;
+
+  const navSections: RaceNavSection[] = [
+    ...parties.map((party) => ({
+      id: partySectionId(party),
+      label: partyChipLabel(party),
+      count: byParty(party).filter((c) => isOnBallot(c.status)).length,
+    })),
+    ...(nonPartisan.length > 0
+      ? [
+          {
+            id: "candidates",
+            label: "Candidates",
+            count: nonPartisan.filter((c) => isOnBallot(c.status)).length,
+          },
+        ]
+      : []),
+    ...(finance.length > 0 ? [{ id: "money", label: "The money" }] : []),
+    { id: "sources", label: "Sources" },
+  ];
+
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
+      <RaceSectionNav sections={navSections} />
       <JsonLd
         nodes={[
           organizationNode(),
@@ -98,30 +160,24 @@ export default async function RacePage({ params }: Props) {
       )}
 
       {parties.map((party) => (
-        <section key={party} className="mt-8">
+        <section
+          key={party}
+          id={partySectionId(party)}
+          className="mt-8 scroll-mt-16"
+        >
           <h2 className="font-display text-2xl">
             {/* Independents don't run in Wisconsin's partisan primary — they
                 go straight to the Nov 3 general (MOO-314 launch check). */}
             {party === "Independent" ? "Independent — November general election only" : `${party} primary`}
           </h2>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {candidates
-              .filter((c) => c.primaryParty === party)
-              .map((c) => (
-                <CandidateCard key={c.slug} candidate={c} />
-              ))}
-          </div>
+          <CandidateGrid list={byParty(party)} />
         </section>
       ))}
 
       {nonPartisan.length > 0 && (
-        <section className="mt-8">
+        <section id="candidates" className="mt-8 scroll-mt-16">
           <h2 className="font-display text-2xl">Candidates</h2>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {nonPartisan.map((c) => (
-              <CandidateCard key={c.slug} candidate={c} />
-            ))}
-          </div>
+          <CandidateGrid list={nonPartisan} />
         </section>
       )}
 
@@ -138,10 +194,10 @@ export default async function RacePage({ params }: Props) {
         </div>
       )}
 
-      <div className="mt-10 space-y-3">
+      <section id="sources" className="mt-10 scroll-mt-16 space-y-3">
         <SourceList sources={race.sources} />
         <LastUpdated date={race.dataAsOf} />
-      </div>
+      </section>
     </main>
   );
 }
