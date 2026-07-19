@@ -17,7 +17,12 @@ import { ensureTelemetry, tracer } from "./lib/agentTelemetry";
 import { OFFICIAL_LINKS, OFFICIAL_LINK_TOPICS, type OfficialLinkTopic } from "../src/lib/official-links";
 
 const AGENT_NAME = "voter-help-agent";
-const MODEL = "claude-haiku-4-5"; // ~5x cheaper than opus; MOO-313 evals will confirm or revert
+// MOO-313 golden gate verdict (2026-07-19): haiku-4-5 scored 79% on grounded
+// golden-expectations (floor 90%) — invented a "leads polls" claim, under-
+// answered questions it had data for; opus scored 93% (+20 on refusal
+// correctness). The ~5x savings doesn't survive the trust bar. Experiments
+// haiku-4-5-baseline-v3 / opus-4-8-comparison on dataset voter-help-golden.
+const MODEL = "claude-opus-4-8";
 
 /** Manual TOOL span wrapper (no-op passthrough when telemetry is off). */
 async function withToolSpan(

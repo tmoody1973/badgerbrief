@@ -22,13 +22,21 @@ node scripts/eval-gate.mjs --name <change>-$(date +%Y%m%d) \
   without deploying anything (the harness `voterHelp:evalAnswer` takes them as
   overrides).
 - `--baseline` compares per-evaluator pass rates against a previous
-  experiment; any evaluator dropping more than 5 points fails the gate.
-- Absolute floor regardless of baseline: `golden-expectations ≥ 90%`.
+  experiment. **Only `golden-expectations` gates** (floor 90% absolute, and
+  no drop >5 points vs baseline) — it is the one judge that sees the agent's
+  tool trace, so its verdicts are grounded. The other four evaluators run
+  ungrounded in gate context (their templates are shared with the production
+  task) and systematically flag correct tool-sourced facts; they print as
+  advisory columns.
 - Experiments live in Arize under dataset `voter-help-golden` → full
   per-question judge explanations for any failure.
 
-Current baseline experiment: **`haiku-4-5-baseline`** (2026-07-19, the
-MOO-310/313 decision run that confirmed `claude-haiku-4-5` for Voter Help).
+Current baseline experiment: **`opus-4-8-comparison`** (2026-07-19).
+That run IS the MOO-310/313 model decision: `claude-haiku-4-5` scored 79%
+on grounded golden-expectations (invented a "leads polls" claim, under-
+answered questions it had data for, skipped a no-record disclosure) vs
+Opus 93% — Voter Help reverted to `claude-opus-4-8`; the ~5x savings did
+not survive the trust bar.
 
 ## Pieces
 

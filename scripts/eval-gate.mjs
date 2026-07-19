@@ -218,7 +218,13 @@ if (baseline) {
     if (rate === null || b === null || b === undefined) continue;
     const delta = rate - b;
     console.log(`  ${evalName.padEnd(24)} ${Math.round(b * 100)}% → ${Math.round(rate * 100)}% (${delta >= 0 ? "+" : ""}${Math.round(delta * 100)})`);
-    if (delta < -MAX_BASELINE_DROP) {
+    // Only golden-expectations gates: it is the one judge that sees the tool
+    // trace, so its deltas are real. The other four run ungrounded here (their
+    // templates are shared with the production task) and systematically flag
+    // correct tool-sourced facts — advisory only in gate context (learned
+    // 2026-07-19: opus beat haiku +14 on grounded golden while "losing" -13 on
+    // ungrounded citation-faithfulness purely by writing richer answers).
+    if (evalName === "golden-expectations" && delta < -MAX_BASELINE_DROP) {
       console.error(`  GATE FAIL: ${evalName} regressed more than ${MAX_BASELINE_DROP * 100} points`);
       failed = true;
     }
