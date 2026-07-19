@@ -11,6 +11,14 @@ crons.daily(
   {},
 );
 
+// 11:00 UTC — propose new article sources for human review (MOO-322).
+crons.daily(
+  "scout article sources",
+  { hourUTC: 11, minuteUTC: 0 },
+  internal.scout.run,
+  {},
+);
+
 // 12:00 UTC = 7:00 AM Central — after finance sync, before editorial review hours.
 crons.daily(
   "research agent sweep",

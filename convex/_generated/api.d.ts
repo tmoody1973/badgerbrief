@@ -21,6 +21,7 @@ import type * as lib_briefContext from "../lib/briefContext.js";
 import type * as lib_briefValidate from "../lib/briefValidate.js";
 import type * as lib_extraction from "../lib/extraction.js";
 import type * as lib_qa from "../lib/qa.js";
+import type * as lib_scoutParse from "../lib/scoutParse.js";
 import type * as monitor from "../monitor.js";
 import type * as monitorQueries from "../monitorQueries.js";
 import type * as preferences from "../preferences.js";
@@ -30,6 +31,8 @@ import type * as qa from "../qa.js";
 import type * as qaQueries from "../qaQueries.js";
 import type * as research from "../research.js";
 import type * as researchQueries from "../researchQueries.js";
+import type * as scout from "../scout.js";
+import type * as scoutQueries from "../scoutQueries.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 
@@ -53,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   "lib/briefValidate": typeof lib_briefValidate;
   "lib/extraction": typeof lib_extraction;
   "lib/qa": typeof lib_qa;
+  "lib/scoutParse": typeof lib_scoutParse;
   monitor: typeof monitor;
   monitorQueries: typeof monitorQueries;
   preferences: typeof preferences;
@@ -62,6 +66,8 @@ declare const fullApi: ApiFromModules<{
   qaQueries: typeof qaQueries;
   research: typeof research;
   researchQueries: typeof researchQueries;
+  scout: typeof scout;
+  scoutQueries: typeof scoutQueries;
   seed: typeof seed;
   users: typeof users;
 }>;
