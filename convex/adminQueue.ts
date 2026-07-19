@@ -157,3 +157,45 @@ export const resolveAlert = mutation({
     });
   },
 });
+
+/** Proposed article sources awaiting approval, newest first, with candidate name joined in. */
+export const listArticleSources = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const rows = await ctx.db
+      .query("article_sources")
+      .withIndex("by_status", (q) => q.eq("status", "proposed"))
+      .collect();
+    const sorted = rows.sort((a, b) => b.proposedAt - a.proposedAt);
+
+    const out = [];
+    for (const row of sorted) {
+      const candidate = await ctx.db
+        .query("candidates")
+        .withIndex("by_slug_only", (q) => q.eq("slug", row.candidateSlug))
+        .first();
+      out.push({ ...row, candidateName: candidate?.name ?? row.candidateSlug });
+    }
+    return out;
+  },
+});
+
+/** Approve or reject a proposed article source (human source-approval gate). */
+export const decideArticleSource = mutation({
+  args: {
+    sourceId: v.id("article_sources"),
+    decision: v.union(v.literal("approved"), v.literal("rejected")),
+  },
+  handler: async (ctx, { sourceId, decision }) => {
+    await requireAdmin(ctx);
+    const source = await ctx.db.get(sourceId);
+    if (!source) throw new Error("article source not found");
+    await ctx.db.patch(sourceId, { status: decision, decidedAt: Date.now() });
+    await logAudit(ctx, {
+      action: `source:${decision}`,
+      refTable: "article_sources",
+      refId: sourceId,
+    });
+  },
+});

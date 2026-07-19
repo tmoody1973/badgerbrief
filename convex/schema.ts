@@ -300,6 +300,24 @@ export default defineSchema({
     publishedAt: v.number(),
   }).index("by_candidate", ["raceId", "candidateSlug"]),
 
+  // ---------- article-source discovery (MOO-322) ----------
+  article_sources: defineTable({
+    candidateSlug: v.string(),
+    raceId: v.string(),
+    url: v.string(),
+    outlet: v.string(),            // e.g. "Urban Milwaukee"
+    headline: v.string(),
+    publishedAt: v.optional(v.string()), // ISO date if the scout found one
+    whyRelevant: v.string(),
+    status: v.union(v.literal("proposed"), v.literal("approved"), v.literal("rejected")),
+    proposedAt: v.number(),
+    decidedAt: v.optional(v.number()),
+    traceId: v.optional(v.string()), // Arize trace of the scout run
+  })
+    .index("by_url", ["url"])
+    .index("by_status", ["status"])
+    .index("by_candidate", ["candidateSlug"]),
+
   // ---------- workflow ----------
   review_tasks: defineTable({
     kind: v.union(
