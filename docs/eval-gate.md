@@ -31,12 +31,20 @@ node scripts/eval-gate.mjs --name <change>-$(date +%Y%m%d) \
 - Experiments live in Arize under dataset `voter-help-golden` → full
   per-question judge explanations for any failure.
 
-Current baseline experiment: **`opus-4-8-comparison`** (2026-07-19).
-That run IS the MOO-310/313 model decision: `claude-haiku-4-5` scored 79%
-on grounded golden-expectations (invented a "leads polls" claim, under-
-answered questions it had data for, skipped a no-record disclosure) vs
-Opus 93% — Voter Help reverted to `claude-opus-4-8`; the ~5x savings did
-not survive the trust bar.
+Current baseline experiment: **`sonnet-5-tuned`** (2026-07-19).
+Model-decision history, all decided by this gate on 2026-07-19:
+- `haiku-4-5-baseline-v3`: 79% — FAILED (invented "leads polls", under-
+  answered questions it had data for, skipped a no-record disclosure).
+  Reverted to opus.
+- `opus-4-8-comparison`: 93% — passed (interim baseline).
+- `sonnet-5-check` (untuned instructions): 79% — FAILED (emitted a literal
+  `handoffOfficialLink:pollingPlace` pseudo-link with no tool call; skipped
+  the municipal-coverage disclosure).
+- `sonnet-5-tuned`: **93%, ties opus** — instructions gained rule 3
+  (links copied verbatim from tool results only) and an explicit
+  out-of-coverage disclosure for county/municipal races. **Shipped:**
+  Voter Help runs `claude-sonnet-5` with the tuned instructions.
+  Known nit: the Green Bay-mayor disclosure sentence lands ~14/15 runs.
 
 ## Pieces
 

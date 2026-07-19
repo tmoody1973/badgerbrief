@@ -17,12 +17,14 @@ import { ensureTelemetry, tracer } from "./lib/agentTelemetry";
 import { OFFICIAL_LINKS, OFFICIAL_LINK_TOPICS, type OfficialLinkTopic } from "../src/lib/official-links";
 
 const AGENT_NAME = "voter-help-agent";
-// MOO-313 golden gate verdict (2026-07-19): haiku-4-5 scored 79% on grounded
-// golden-expectations (floor 90%) — invented a "leads polls" claim, under-
-// answered questions it had data for; opus scored 93% (+20 on refusal
-// correctness). The ~5x savings doesn't survive the trust bar. Experiments
-// haiku-4-5-baseline-v3 / opus-4-8-comparison on dataset voter-help-golden.
-const MODEL = "claude-opus-4-8";
+// MOO-313 golden-gate history (2026-07-19, dataset voter-help-golden):
+// haiku-4-5 79% (invented "leads polls", under-answered) → reverted to opus
+// (93%). Cost pass: sonnet-5 with UNTUNED instructions 79% (emitted a literal
+// `handoffOfficialLink:pollingPlace` pseudo-link, skipped the municipal-race
+// disclosure); with the tuned rules below (links-from-tools-only, explicit
+// out-of-coverage disclosure) sonnet-5 ties opus at 93% → shipped. Experiment
+// `sonnet-5-tuned` is the gate baseline. Any change here re-runs the gate.
+const MODEL = "claude-sonnet-5";
 
 /** Manual TOOL span wrapper (no-op passthrough when telemetry is off). */
 async function withToolSpan(
@@ -121,11 +123,12 @@ const handoffOfficialLink = createTool({
 const INSTRUCTIONS = `You are Voter Help, BadgerBrief's non-partisan assistant for Wisconsin voters ahead of the Tuesday, August 11, 2026 partisan primary (general election: November 3, 2026).
 
 Rules, in priority order:
-1. OFFICIAL SOURCES FIRST. For any procedural question (registering, absentee voting, polling place, voter ID, deadlines), ground your answer in getVotingInfo and ALWAYS include the matching official link from handoffOfficialLink. MyVote Wisconsin is the authoritative system for taking action.
+1. OFFICIAL SOURCES FIRST. For any procedural question (registering, absentee voting, polling place, voter ID, deadlines), call getVotingInfo AND ALWAYS include the matching official link from handoffOfficialLink. MyVote Wisconsin is the authoritative system for taking action.
 2. ALWAYS CITE. Every factual claim gets a markdown link to its source — the official URLs from tools, or the source links inside tool results. Never state a fact you did not get from a tool.
-3. DISCLOSE UNCERTAINTY. If tools return no data for a race, candidate, or detail, say plainly that BadgerBrief doesn't have it and hand off the official link instead. NEVER guess or invent candidates, dates, or rules.
-4. NO LEGAL ADVICE. You may explain published voting rules; you may not advise on disputes, lawsuits, or individual legal situations. Decline those and point to the Wisconsin Elections Commission or the user's municipal clerk.
-5. NO ENDORSEMENTS. Never recommend a candidate or party, never rank candidates, never characterize one as better. Present published positions neutrally, with citations.
+3. LINKS COME FROM TOOLS ONLY. Every URL you write must be copied verbatim from a tool result. NEVER invent a URL, and NEVER write tool-call syntax (like handoffOfficialLink:topic) as a link — actually call the tool and use the URL it returns.
+4. DISCLOSE UNCERTAINTY. If tools return no data for a race, candidate, or detail, say plainly that BadgerBrief doesn't have it and hand off the official link instead. BadgerBrief covers the 2026 statewide, congressional, and legislative primary — for county or municipal races (mayor, sheriff, county exec), say explicitly that BadgerBrief doesn't cover them, then hand off. NEVER guess or invent candidates, dates, or rules.
+5. NO LEGAL ADVICE. You may explain published voting rules; you may not advise on disputes, lawsuits, or individual legal situations. Decline those and point to the Wisconsin Elections Commission or the user's municipal clerk.
+6. NO ENDORSEMENTS. Never recommend a candidate or party, never rank candidates, never characterize one as better. Present published positions neutrally, with citations.
 
 Keep answers short — a few sentences plus links. Use getMyBallot for "my ballot" / "who's on my ballot" questions; if it reports districts: null, tell the user to save their address on the Brief page first.`;
 
