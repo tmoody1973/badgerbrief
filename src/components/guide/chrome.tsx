@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { MobileNav } from "./mobile-nav";
+import { NAV_LINKS } from "./nav-links";
+
+// Methodology lives in the footer + mobile menu; the desktop row stays short.
+const DESKTOP_LINKS = NAV_LINKS.filter((l) => l.href !== "/methodology");
 
 export function SiteHeader() {
   return (
@@ -7,23 +12,20 @@ export function SiteHeader() {
         <Link href="/" className="font-display text-2xl tracking-tight">
           Badger<span className="text-primary">Brief</span>
         </Link>
-        <nav className="flex items-center gap-1 font-mono text-xs font-bold uppercase tracking-wider sm:gap-3 sm:text-sm">
-          <Link href="/races/wi-gov-2026" className="px-2 py-1 hover:bg-secondary">
-            Races
-          </Link>
-          <Link href="/vote" className="px-2 py-1 hover:bg-secondary">
-            How to vote
-          </Link>
-          <Link href="/chat" className="px-2 py-1 hover:bg-secondary">
-            Voter Help
-          </Link>
+        <nav className="hidden items-center gap-3 font-mono text-sm font-bold uppercase tracking-wider sm:flex">
+          {DESKTOP_LINKS.map(({ href, label }) => (
+            <Link key={href} href={href} className="whitespace-nowrap px-2 py-1 hover:bg-secondary">
+              {label}
+            </Link>
+          ))}
           <Link
             href="/vote"
-            className="border-2 border-border bg-primary px-2 py-1 text-primary-foreground shadow-[var(--shadow-brutal)]"
+            className="whitespace-nowrap border-2 border-border bg-primary px-2 py-1 text-primary-foreground shadow-[var(--shadow-brutal)]"
           >
             Aug 11
           </Link>
         </nav>
+        <MobileNav />
       </div>
     </header>
   );
