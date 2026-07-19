@@ -209,6 +209,45 @@ export function FinancePanel({
   );
 }
 
+function FinanceRows({
+  rows,
+  nameBySlug,
+  headerHidden,
+}: {
+  rows: Doc<"finance_totals">[];
+  nameBySlug: Map<string, string>;
+  headerHidden?: boolean;
+}) {
+  return (
+    <div className="overflow-x-auto border-2 border-border bg-card shadow-[var(--shadow-brutal)]">
+      <table className="w-full min-w-[480px] border-collapse text-sm">
+        <thead className={headerHidden ? "sr-only" : undefined}>
+          <tr className="border-b-2 border-border bg-secondary text-left">
+            <th className="p-3 font-display text-sm">Candidate</th>
+            <th className="p-3 font-mono text-xs font-bold uppercase">Raised</th>
+            <th className="p-3 font-mono text-xs font-bold uppercase">Spent</th>
+            <th className="p-3 font-mono text-xs font-bold uppercase">Cash on hand</th>
+            <th className="p-3 font-mono text-xs font-bold uppercase">Through</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((t) => (
+            <tr key={t._id} className="border-b border-dashed border-border">
+              <td className="p-3 font-bold">
+                {nameBySlug.get(t.candidateSlug) ?? t.candidateSlug}
+              </td>
+              <td className="p-3 font-mono">{fmt(t.receipts)}</td>
+              <td className="p-3 font-mono">{fmt(t.disbursements)}</td>
+              <td className="p-3 font-mono">{fmt(t.cashOnHand)}</td>
+              <td className="p-3 font-mono text-xs">{t.coverageEndDate ?? "—"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function RaceFinanceTable({
   finance,
   candidates,
@@ -221,35 +260,26 @@ export function RaceFinanceTable({
   const rows = [...finance].sort(
     (a, b) => (b.receipts ?? 0) - (a.receipts ?? 0),
   );
+  const top = rows.slice(0, 5);
+  const rest = rows.slice(5);
   return (
-    <section className="mt-8">
+    <section id="money" className="mt-8 scroll-mt-16">
       <h2 className="font-display text-2xl">Who has raised the most money?</h2>
-      <div className="mt-3 overflow-x-auto border-2 border-border bg-card shadow-[var(--shadow-brutal)]">
-        <table className="w-full min-w-[480px] border-collapse text-sm">
-          <thead>
-            <tr className="border-b-2 border-border bg-secondary text-left">
-              <th className="p-3 font-display text-sm">Candidate</th>
-              <th className="p-3 font-mono text-xs font-bold uppercase">Raised</th>
-              <th className="p-3 font-mono text-xs font-bold uppercase">Spent</th>
-              <th className="p-3 font-mono text-xs font-bold uppercase">Cash on hand</th>
-              <th className="p-3 font-mono text-xs font-bold uppercase">Through</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((t) => (
-              <tr key={t._id} className="border-b border-dashed border-border">
-                <td className="p-3 font-bold">
-                  {nameBySlug.get(t.candidateSlug) ?? t.candidateSlug}
-                </td>
-                <td className="p-3 font-mono">{fmt(t.receipts)}</td>
-                <td className="p-3 font-mono">{fmt(t.disbursements)}</td>
-                <td className="p-3 font-mono">{fmt(t.cashOnHand)}</td>
-                <td className="p-3 font-mono text-xs">{t.coverageEndDate ?? "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="mt-3">
+        <FinanceRows rows={top} nameBySlug={nameBySlug} />
       </div>
+      {rest.length > 0 && (
+        <details className="mt-2">
+          <summary className="cursor-pointer font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Show all {rows.length} candidates
+          </summary>
+          {/* ponytail: second table inside <details> (a <details> can't live
+              in <tbody>); columns may not align exactly with the top table. */}
+          <div className="mt-2">
+            <FinanceRows rows={rest} nameBySlug={nameBySlug} headerHidden />
+          </div>
+        </details>
+      )}
       <p className="mt-2 font-mono text-xs text-muted-foreground">
         Federal data: FEC. State data: WI Ethics Commission Sunshine
         (non-commercial voter education use).
