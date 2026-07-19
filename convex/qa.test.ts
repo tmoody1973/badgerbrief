@@ -36,7 +36,7 @@ describe("qa contract", () => {
     expect(p).toContain("neutral");
     expect(p).toContain("untrusted");
   });
-  it("prompt contains the hardening block before the source-text content marker", () => {
+  it("prompt contains the hardening block before both the DRAFT and SOURCE TEXT markers", () => {
     const p = buildQaPrompt({
       kind: "position",
       draftJson: JSON.stringify({ summary: "Supports expanding BadgerCare." }),
@@ -44,7 +44,11 @@ describe("qa contract", () => {
     });
     expect(p).toMatch(/untrusted web content/i);
     expect(p).toMatch(/ignore (them|any instructions)/i);
+    expect(p).toMatch(/SOURCE TEXT marker/i);
     const hardeningIdx = p.search(/untrusted web content/i);
+    // Draft JSON is derived from untrusted content, so it must sit below the
+    // hardening line too — not just the raw source text (MOO-322 final review).
+    expect(hardeningIdx).toBeLessThan(p.indexOf("DRAFT:"));
     expect(hardeningIdx).toBeLessThan(p.indexOf("SOURCE TEXT:"));
   });
 });

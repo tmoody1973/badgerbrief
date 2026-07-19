@@ -318,6 +318,14 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_candidate", ["candidateSlug"]),
 
+  // Every scout attempt for a candidate, any outcome (proposed/empty/error) —
+  // rotation keys off this so a candidate that yields zero new URLs still
+  // advances instead of being re-picked forever (MOO-322 final review).
+  scout_attempts: defineTable({
+    candidateSlug: v.string(),
+    attemptedAt: v.number(),
+  }).index("by_candidate", ["candidateSlug"]),
+
   // ---------- workflow ----------
   review_tasks: defineTable({
     kind: v.union(

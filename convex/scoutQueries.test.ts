@@ -2,6 +2,7 @@ import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { internal } from "./_generated/api";
 import schema from "./schema";
+import { sortByRotation } from "./lib/scoutParse";
 
 const modules = import.meta.glob([
   "./**/*.ts",
@@ -113,6 +114,39 @@ describe("listScoutCandidates", () => {
     });
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ slug: "out-of-pool", raceId: "WI-ASSEMBLY-42-2026" });
+  });
+});
+
+describe("recordAttempt", () => {
+  test("a candidate scouted with zero inserts still advances rotation, sorting to the back on the next call", async () => {
+    const t = setup();
+    await t.run((ctx) =>
+      ctx.db.insert("candidates", { ...baseCandidate, slug: "joel-brennan", name: "Joel Brennan" }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("candidates", {
+        ...baseCandidate,
+        raceId: "WI-AG-2026",
+        slug: "josh-kaul",
+        name: "Josh Kaul",
+      }),
+    );
+
+    // Simulate a scout run that finds nothing new for brennan (status
+    // "empty" in scout.ts) — zero article_sources rows inserted, but the
+    // scout still recorded that it attempted this candidate.
+    await t.mutation(internal.scoutQueries.recordAttempt, { candidateSlug: "joel-brennan" });
+
+    const rows = await t.query(internal.scoutQueries.listScoutCandidates, {});
+    const brennan = rows.find((r) => r.slug === "joel-brennan");
+    const kaul = rows.find((r) => r.slug === "josh-kaul");
+    expect(brennan?.lastProposedAt).toBeGreaterThan(0);
+    expect(kaul?.lastProposedAt).toBeUndefined();
+
+    // Without attempt-based rotation, brennan (zero article_sources rows)
+    // would sort BEFORE never-scouted kaul forever — this is the starvation
+    // bug. With it, brennan correctly sorts to the back.
+    expect(sortByRotation(rows).map((r) => r.slug)).toEqual(["josh-kaul", "joel-brennan"]);
   });
 });
 

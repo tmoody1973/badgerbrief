@@ -25,11 +25,11 @@ const DEFAULT_LIMIT = 3;
 
 // Lazy singleton so deploys succeed with Arize keys absent (env read at call
 // time, never at import time). Returns null when telemetry is unconfigured.
-// THIRD copy of this block (helloAgent.ts, research.ts, now scout.ts) —
-// @convex-dev/agent doesn't forward experimental_telemetry, and a plain
-// fetch call has no telemetry hook of its own, so every agent action wires
-// this manually. Extracting a shared lib is recorded debt — do NOT do it in
-// this task.
+// FIFTH copy of this block (helloAgent.ts, research.ts, qa.ts, briefAgent.ts,
+// now scout.ts) — @convex-dev/agent doesn't forward experimental_telemetry,
+// and a plain fetch call has no telemetry hook of its own, so every agent
+// action wires this manually. Extracting a shared lib is recorded debt — do
+// NOT do it in this task.
 let provider: NodeTracerProvider | null = null;
 function ensureTelemetry(): NodeTracerProvider | null {
   if (provider) return provider;
@@ -240,6 +240,14 @@ export const run = internalAction({
         const message = err instanceof Error ? err.message : String(err);
         console.error(`article-scout: failed for ${target.slug}: ${message}`);
         summaries.push({ slug: target.slug, status: "error", error: message });
+      } finally {
+        // Record the attempt regardless of outcome so rotation (lastProposedAt
+        // in listScoutCandidates) advances even on a zero-insert "empty" run —
+        // otherwise the same least-recently-proposed candidates get re-picked
+        // forever once the contested pool's URLs are all already known.
+        await ctx.runMutation(internal.scoutQueries.recordAttempt, {
+          candidateSlug: target.slug,
+        });
       }
     }
 

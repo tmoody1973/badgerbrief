@@ -16,9 +16,14 @@ export const CONTESTED_RACE_IDS = [
 ];
 
 /**
- * Candidates to scout, with their last scout-proposal timestamp (any status)
- * for rotation. No args → the contested-race pool. Explicit `slugs` bypass
- * the pool filter entirely (spec: caller-picked candidates may be anywhere).
+ * Candidates to scout, with a rotation timestamp for last-touched-first
+ * ordering. No args → the contested-race pool. Explicit `slugs` bypass the
+ * pool filter entirely (spec: caller-picked candidates may be anywhere).
+ *
+ * `lastProposedAt` is max(last scout_attempts.attemptedAt, last
+ * article_sources.proposedAt) — attempts record every candidate the scout
+ * processed regardless of outcome, so a candidate that yields zero new URLs
+ * still advances instead of being re-picked forever (MOO-322 final review).
  */
 export const listScoutCandidates = internalQuery({
   args: { slugs: v.optional(v.array(v.string())) },
@@ -34,13 +39,20 @@ export const listScoutCandidates = internalQuery({
         .query("article_sources")
         .withIndex("by_candidate", (q) => q.eq("candidateSlug", c.slug))
         .collect();
-      const lastProposedAt =
-        rows.length === 0 ? undefined : rows.reduce((max, r) => Math.max(max, r.proposedAt), 0);
+      const maxProposedAt = rows.reduce((max, r) => Math.max(max, r.proposedAt), 0);
+
+      const attempts = await ctx.db
+        .query("scout_attempts")
+        .withIndex("by_candidate", (q) => q.eq("candidateSlug", c.slug))
+        .collect();
+      const maxAttemptedAt = attempts.reduce((max, a) => Math.max(max, a.attemptedAt), 0);
+
+      const lastProposedAt = Math.max(maxProposedAt, maxAttemptedAt);
       out.push({
         slug: c.slug,
         name: c.name,
         raceId: c.raceId,
-        ...(lastProposedAt !== undefined ? { lastProposedAt } : {}),
+        ...(lastProposedAt > 0 ? { lastProposedAt } : {}),
       });
     }
     return out;
@@ -70,6 +82,14 @@ export const knownSourceUrls = internalQuery({
     }
 
     return [...known];
+  },
+});
+
+/** Record a scout attempt for rotation — called for every candidate the scout processed, any outcome. attemptedAt set server-side. */
+export const recordAttempt = internalMutation({
+  args: { candidateSlug: v.string() },
+  handler: async (ctx, { candidateSlug }) => {
+    await ctx.db.insert("scout_attempts", { candidateSlug, attemptedAt: Date.now() });
   },
 });
 
