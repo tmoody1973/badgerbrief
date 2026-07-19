@@ -17,7 +17,7 @@ import { ensureTelemetry, tracer } from "./lib/agentTelemetry";
 import { OFFICIAL_LINKS, OFFICIAL_LINK_TOPICS, type OfficialLinkTopic } from "../src/lib/official-links";
 
 const AGENT_NAME = "voter-help-agent";
-const MODEL = "claude-opus-4-8";
+const MODEL = "claude-haiku-4-5"; // ~5x cheaper than opus; MOO-313 evals will confirm or revert
 
 /** Manual TOOL span wrapper (no-op passthrough when telemetry is off). */
 async function withToolSpan(
