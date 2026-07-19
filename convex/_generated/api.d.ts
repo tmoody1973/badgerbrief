@@ -17,6 +17,7 @@ import type * as crons from "../crons.js";
 import type * as demoWorkflow from "../demoWorkflow.js";
 import type * as finance from "../finance.js";
 import type * as helloAgent from "../helloAgent.js";
+import type * as lib_agentTelemetry from "../lib/agentTelemetry.js";
 import type * as lib_briefContext from "../lib/briefContext.js";
 import type * as lib_briefValidate from "../lib/briefValidate.js";
 import type * as lib_extraction from "../lib/extraction.js";
@@ -35,6 +36,8 @@ import type * as scout from "../scout.js";
 import type * as scoutQueries from "../scoutQueries.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
+import type * as voterHelp from "../voterHelp.js";
+import type * as voterHelpQueries from "../voterHelpQueries.js";
 
 import type {
   ApiFromModules,
@@ -52,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   demoWorkflow: typeof demoWorkflow;
   finance: typeof finance;
   helloAgent: typeof helloAgent;
+  "lib/agentTelemetry": typeof lib_agentTelemetry;
   "lib/briefContext": typeof lib_briefContext;
   "lib/briefValidate": typeof lib_briefValidate;
   "lib/extraction": typeof lib_extraction;
@@ -70,6 +74,8 @@ declare const fullApi: ApiFromModules<{
   scoutQueries: typeof scoutQueries;
   seed: typeof seed;
   users: typeof users;
+  voterHelp: typeof voterHelp;
+  voterHelpQueries: typeof voterHelpQueries;
 }>;
 
 /**

@@ -14,6 +14,9 @@ export function SiteHeader() {
           <Link href="/vote" className="px-2 py-1 hover:bg-secondary">
             How to vote
           </Link>
+          <Link href="/chat" className="px-2 py-1 hover:bg-secondary">
+            Voter Help
+          </Link>
           <Link
             href="/vote"
             className="border-2 border-border bg-primary px-2 py-1 text-primary-foreground shadow-[var(--shadow-brutal)]"
