@@ -223,23 +223,23 @@ function FinanceRows({
       <table className="w-full min-w-[480px] border-collapse text-sm">
         <thead className={headerHidden ? "sr-only" : undefined}>
           <tr className="border-b-2 border-border bg-secondary text-left">
-            <th className="p-3 font-display text-sm">Candidate</th>
-            <th className="p-3 font-mono text-xs font-bold uppercase">Raised</th>
-            <th className="p-3 font-mono text-xs font-bold uppercase">Spent</th>
-            <th className="p-3 font-mono text-xs font-bold uppercase">Cash on hand</th>
-            <th className="p-3 font-mono text-xs font-bold uppercase">Through</th>
+            <th className="px-3 py-2 font-display text-sm">Candidate</th>
+            <th className="px-3 py-2 font-mono text-xs font-bold uppercase">Raised</th>
+            <th className="px-3 py-2 font-mono text-xs font-bold uppercase">Spent</th>
+            <th className="px-3 py-2 font-mono text-xs font-bold uppercase">Cash on hand</th>
+            <th className="px-3 py-2 font-mono text-xs font-bold uppercase">Through</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((t) => (
             <tr key={t._id} className="border-b border-dashed border-border">
-              <td className="p-3 font-bold">
+              <td className="whitespace-nowrap px-3 py-2 font-bold">
                 {nameBySlug.get(t.candidateSlug) ?? t.candidateSlug}
               </td>
-              <td className="p-3 font-mono">{fmt(t.receipts)}</td>
-              <td className="p-3 font-mono">{fmt(t.disbursements)}</td>
-              <td className="p-3 font-mono">{fmt(t.cashOnHand)}</td>
-              <td className="p-3 font-mono text-xs">{t.coverageEndDate ?? "—"}</td>
+              <td className="px-3 py-2 font-mono">{fmt(t.receipts)}</td>
+              <td className="px-3 py-2 font-mono">{fmt(t.disbursements)}</td>
+              <td className="px-3 py-2 font-mono">{fmt(t.cashOnHand)}</td>
+              <td className="px-3 py-2 font-mono text-xs">{t.coverageEndDate ?? "—"}</td>
             </tr>
           ))}
         </tbody>
