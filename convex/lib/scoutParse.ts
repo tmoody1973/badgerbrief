@@ -59,6 +59,7 @@ export function parseScoutResponse(
   }
 
   const articles: ScoutArticle[] = [];
+  const seenUrls = new Set<string>(); // intra-batch dedup: same URL twice in one response → one article
   for (const item of rawArticles) {
     if (typeof item !== "object" || item === null) continue;
     const a = item as Record<string, unknown>;
@@ -73,6 +74,8 @@ export function parseScoutResponse(
       // valid one.
       continue;
     }
+    if (seenUrls.has(a.url)) continue;
+    seenUrls.add(a.url);
     articles.push({
       url: a.url,
       outlet: a.outlet,

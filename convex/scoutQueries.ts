@@ -15,12 +15,18 @@ export const CONTESTED_RACE_IDS = [
   "WI-US-HOUSE-D4-2026",
 ];
 
-/** Candidates in contested races, with their last scout-proposal timestamp (any status) for rotation. */
+/**
+ * Candidates to scout, with their last scout-proposal timestamp (any status)
+ * for rotation. No args → the contested-race pool. Explicit `slugs` bypass
+ * the pool filter entirely (spec: caller-picked candidates may be anywhere).
+ */
 export const listScoutCandidates = internalQuery({
-  args: {},
-  handler: async (ctx) => {
+  args: { slugs: v.optional(v.array(v.string())) },
+  handler: async (ctx, { slugs }) => {
     const candidates = await ctx.db.query("candidates").collect();
-    const targets = candidates.filter((c) => CONTESTED_RACE_IDS.includes(c.raceId));
+    const targets = slugs
+      ? candidates.filter((c) => slugs.includes(c.slug))
+      : candidates.filter((c) => CONTESTED_RACE_IDS.includes(c.raceId));
 
     const out: { slug: string; name: string; raceId: string; lastProposedAt?: number }[] = [];
     for (const c of targets) {

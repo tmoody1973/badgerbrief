@@ -21,7 +21,7 @@ import { SEMRESATTRS_PROJECT_NAME } from "@arizeai/openinference-semantic-conven
 import { ALLOWED_DOMAINS, isAllowedUrl, parseScoutResponse, sortByRotation } from "./lib/scoutParse";
 
 const AGENT_NAME = "article-scout";
-const DEFAULT_LIMIT = 5;
+const DEFAULT_LIMIT = 3;
 
 // Lazy singleton so deploys succeed with Arize keys absent (env read at call
 // time, never at import time). Returns null when telemetry is unconfigured.
@@ -132,22 +132,19 @@ export const run = internalAction({
 
     const telemetry = ensureTelemetry();
 
-    const allCandidates: ScoutCandidate[] = await ctx.runQuery(
+    // Explicit slugs bypass BOTH the contested-race pool filter (resolved
+    // against all candidates in the query) and rotation — caller picked them.
+    const pool: ScoutCandidate[] = await ctx.runQuery(
       internal.scoutQueries.listScoutCandidates,
-      {},
+      candidateSlugs ? { slugs: candidateSlugs } : {},
     );
-
-    let targets: ScoutCandidate[];
-    if (candidateSlugs) {
-      // Explicit slugs bypass rotation — caller picked the order.
-      targets = allCandidates
-        .filter((c) => candidateSlugs.includes(c.slug))
-        .slice(0, limit ?? DEFAULT_LIMIT);
-    } else {
-      // Rotate least-recently-proposed-first so candidates past DEFAULT_LIMIT
-      // aren't starved forever by a fixed slice. Never-proposed sort first.
-      targets = sortByRotation(allCandidates).slice(0, limit ?? DEFAULT_LIMIT);
-    }
+    // No-args path rotates least-recently-proposed-first so candidates past
+    // DEFAULT_LIMIT aren't starved forever by a fixed slice; never-proposed
+    // sort first.
+    const targets = (candidateSlugs ? pool : sortByRotation(pool)).slice(
+      0,
+      limit ?? DEFAULT_LIMIT,
+    );
 
     const summaries: CandidateSummary[] = [];
 

@@ -93,6 +93,27 @@ describe("listScoutCandidates", () => {
     );
     expect(sorted.map((r) => r.slug)).toEqual(["josh-kaul", "joel-brennan"]);
   });
+
+  test("explicit slugs bypass the contested pool — out-of-pool candidates resolve", async () => {
+    const t = setup();
+    await t.run((ctx) =>
+      ctx.db.insert("candidates", { ...baseCandidate, slug: "joel-brennan", name: "Joel Brennan" }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("candidates", {
+        ...baseCandidate,
+        raceId: "WI-ASSEMBLY-42-2026", // NOT in CONTESTED_RACE_IDS
+        slug: "out-of-pool",
+        name: "Out Of Pool",
+      }),
+    );
+
+    const rows = await t.query(internal.scoutQueries.listScoutCandidates, {
+      slugs: ["out-of-pool"],
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ slug: "out-of-pool", raceId: "WI-ASSEMBLY-42-2026" });
+  });
 });
 
 describe("knownSourceUrls", () => {

@@ -118,6 +118,23 @@ describe("parseScoutResponse", () => {
     expect("articles" in result && result.articles).toEqual([]);
   });
 
+  test("dedupes the same URL appearing twice in one response — first occurrence wins", () => {
+    const raw = JSON.stringify({
+      articles: [
+        { url: "https://wpr.org/dupe", outlet: "WPR", headline: "First", whyRelevant: "r" },
+        { url: "https://wpr.org/dupe", outlet: "WPR", headline: "Second", whyRelevant: "r" },
+        { url: "https://wpr.org/other", outlet: "WPR", headline: "Other", whyRelevant: "r" },
+      ],
+    });
+    const result = parseScoutResponse(raw);
+    if ("articles" in result) {
+      expect(result.articles).toHaveLength(2);
+      expect(result.articles[0].headline).toBe("First");
+    } else {
+      expect.fail("expected articles");
+    }
+  });
+
   test("drops individual malformed articles without failing the whole batch", () => {
     const raw = JSON.stringify({
       articles: [
