@@ -6,6 +6,7 @@ import { ConvexError } from "convex/values";
 import { api } from "../../../convex/_generated/api";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { Button } from "@/components/retroui/Button";
+import { arizeTraceUrl } from "@/lib/arize";
 
 /** MOO-327: one row per draft in the review queue — compact by default, full detail on expand. */
 
@@ -394,6 +395,22 @@ export function DraftRow({ row }: { row: QueueRow }) {
         </div>
 
         <ErrorLine message={error} />
+
+        {(row.task.traceId ?? row.draft.traceId) && (
+          <p className="mt-3 text-sm">
+            <a
+              href={arizeTraceUrl(
+                (row.task.traceId ?? row.draft.traceId)!,
+                row.draft.extractedAt,
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              View trace in Arize ↗
+            </a>
+          </p>
+        )}
 
         <div className="mt-4 border-t-2 border-border pt-3">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">

@@ -19,6 +19,7 @@ import type * as finance from "../finance.js";
 import type * as helloAgent from "../helloAgent.js";
 import type * as lib_agentTelemetry from "../lib/agentTelemetry.js";
 import type * as lib_briefContext from "../lib/briefContext.js";
+import type * as lib_briefEntities from "../lib/briefEntities.js";
 import type * as lib_briefValidate from "../lib/briefValidate.js";
 import type * as lib_extraction from "../lib/extraction.js";
 import type * as lib_qa from "../lib/qa.js";
@@ -57,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   helloAgent: typeof helloAgent;
   "lib/agentTelemetry": typeof lib_agentTelemetry;
   "lib/briefContext": typeof lib_briefContext;
+  "lib/briefEntities": typeof lib_briefEntities;
   "lib/briefValidate": typeof lib_briefValidate;
   "lib/extraction": typeof lib_extraction;
   "lib/qa": typeof lib_qa;

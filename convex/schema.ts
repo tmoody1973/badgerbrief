@@ -345,6 +345,7 @@ export default defineSchema({
     note: v.optional(v.string()),
     createdAt: v.number(),
     resolvedAt: v.optional(v.number()),
+    traceId: v.optional(v.string()), // Arize trace of the run that produced the draft (MOO-313)
   }).index("by_status", ["status"]),
 
   source_fetch_logs: defineTable({

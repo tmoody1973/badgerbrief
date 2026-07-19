@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "generate:brief-contract": "tsx scripts/generate-brief-contract.ts"
+    "generate:brief-contract": "tsx scripts/generate-brief-contract.ts",
+    "eval:gate": "node scripts/eval-gate.mjs",
+    "eval:monitor": "node scripts/eval-monitor.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.98",

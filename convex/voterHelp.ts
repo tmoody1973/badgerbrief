@@ -124,12 +124,50 @@ Rules, in priority order:
 
 Keep answers short — a few sentences plus links. Use getMyBallot for "my ballot" / "who's on my ballot" questions; if it reports districts: null, tell the user to save their address on the Brief page first.`;
 
-const voterHelpAgent = new Agent(components.agent, {
-  name: AGENT_NAME,
-  languageModel: anthropic(MODEL),
-  instructions: INSTRUCTIONS,
-  tools: { getVotingInfo, getMyBallot, getRaceInfo, getCandidateInfo, handoffOfficialLink },
-  stopWhen: stepCountIs(8),
+function makeVoterHelpAgent(model: string, instructions: string = INSTRUCTIONS) {
+  return new Agent(components.agent, {
+    name: AGENT_NAME,
+    languageModel: anthropic(model),
+    instructions,
+    tools: { getVotingInfo, getMyBallot, getRaceInfo, getCandidateInfo, handoffOfficialLink },
+    stopWhen: stepCountIs(8),
+  });
+}
+
+const voterHelpAgent = makeVoterHelpAgent(MODEL);
+
+/**
+ * MOO-313 golden-dataset harness: one-shot answer with the production agent
+ * (same instructions + tools), no thread persisted, NO telemetry spans — eval
+ * runs must not pollute the continuous production-trace evaluators.
+ * `model` / `instructions` overrides exist ONLY so the pre-deploy gate can run
+ * candidate configs (e.g. haiku-vs-opus, deliberately degraded prompts).
+ */
+export const evalAnswer = internalAction({
+  args: {
+    prompt: v.string(),
+    model: v.optional(v.string()),
+    instructions: v.optional(v.string()),
+  },
+  returns: v.object({ text: v.string(), model: v.string(), toolTrace: v.string() }),
+  handler: async (ctx, { prompt, model, instructions }) => {
+    const useModel = model ?? MODEL;
+    const agent = makeVoterHelpAgent(useModel, instructions);
+    // Synthetic userId satisfies the agent's identity requirement; tools treat
+    // it as signed-out (ballotForUser normalizes it away). No thread persisted.
+    const result = await agent.generateText(ctx, { userId: "eval-gate" }, { prompt });
+    // Tool calls + results, so the golden judge can verify grounding instead
+    // of flagging correct tool-sourced facts as invented.
+    const toolTrace = result.steps.flatMap((step) =>
+      step.toolResults.map((tr) => ({
+        tool: tr.toolName,
+        // 30K/tool: getRaceInfo alone is ~62KB pretty-printed; harsher cuts made
+        // the golden judge read real tool data as "fabricated by the agent".
+        output: String(typeof tr.output === "string" ? tr.output : JSON.stringify(tr.output)).slice(0, 30000),
+      })),
+    );
+    return { text: result.text, model: useModel, toolTrace: JSON.stringify(toolTrace) };
+  },
 });
 
 /** Streams the answer into the thread (saveStreamDeltas → syncStreams on the client). */

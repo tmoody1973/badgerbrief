@@ -119,8 +119,12 @@ export const listThreadMessages = query({
  * candidate names. `districts: null` means the user hasn't saved an address.
  */
 export const ballotForUser = internalQuery({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
+  // v.string() + normalizeId, not v.id: the MOO-313 eval harness runs the agent
+  // under a synthetic userId, and that must read as "no saved address", not crash.
+  args: { userId: v.string() },
+  handler: async (ctx, { userId: rawUserId }) => {
+    const userId = ctx.db.normalizeId("users", rawUserId);
+    if (!userId) return { districts: null, races: [] };
     const prefs = await ctx.db
       .query("user_preferences")
       .withIndex("by_user", (q) => q.eq("userId", userId))

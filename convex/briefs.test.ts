@@ -104,6 +104,15 @@ describe("briefs lifecycle", () => {
 
     await t.mutation(internal.briefs.finalize, { briefId, error: "failed after 3 attempts" });
     expect((await t.run((ctx) => ctx.db.get(briefId)))!.status).toBe("failed");
+    // MOO-313: terminal failure writes an /admin alert
+    const alerts = await t.run((ctx) => ctx.db.query("alerts").collect());
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0]).toMatchObject({
+      kind: "brief_generation_failure",
+      severity: "warning",
+      resolved: false,
+      refId: briefId,
+    });
 
     // legacy row without status reads as ready
     await t.run((ctx) => ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "x", generatedAt: 2 }));
@@ -121,5 +130,29 @@ describe("briefs lifecycle", () => {
     });
     const list = await t.withIdentity(USER).query(api.briefs.listMine, {});
     expect(list.map((b) => b.openuiSource)).toEqual(["c", "a"]);
+  });
+
+  test("checkEntityRefs flags unknown races, candidates, and issues (MOO-313)", async () => {
+    const t = setup();
+    const userId = await seedUser(t);
+    await seedBallotWorld(t, userId);
+
+    const clean = await t.query(internal.briefs.checkEntityRefs, {
+      raceIds: ["WI-GOV-2026"],
+      candidateSlugs: ["kelda-roys"],
+      issueSlugs: ["housing"],
+    });
+    expect(clean).toEqual([]);
+
+    const missing = await t.query(internal.briefs.checkEntityRefs, {
+      raceIds: ["WI-GOV-2026", "WI-FAKE-RACE"],
+      candidateSlugs: ["kelda-roys", "made-up-person"],
+      issueSlugs: ["housing", "not-an-issue"],
+    });
+    expect(missing).toEqual([
+      'raceId "WI-FAKE-RACE"',
+      'candidateSlug "made-up-person"',
+      'issueSlug "not-an-issue"',
+    ]);
   });
 });

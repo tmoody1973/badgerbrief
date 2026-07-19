@@ -191,6 +191,7 @@ export const saveExtraction = internalMutation({
           refId: draftId,
           status: "open",
           createdAt: Date.now(),
+          traceId,
         });
       }
     }
@@ -225,6 +226,7 @@ export const saveExtraction = internalMutation({
         refId: draftId,
         status: "open",
         createdAt: Date.now(),
+        traceId,
       });
     }
 

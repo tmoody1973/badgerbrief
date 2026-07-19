@@ -5,6 +5,7 @@ import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { relevantRaces, type Districts } from "../src/lib/districts";
 import type { BriefContext } from "./lib/briefContext";
+import { ISSUE_SLUGS } from "./lib/extraction";
 
 const STALE_GENERATING_MS = 10 * 60_000; // ponytail: crashed-workflow escape hatch; onComplete handler if it ever matters
 
@@ -167,11 +168,54 @@ export const setSource = internalMutation({
   },
 });
 
+/** MOO-313 code evaluator: every entity ID a brief references must exist in
+ * published tables (races/candidates) or the canonical issue vocabulary. */
+export const checkEntityRefs = internalQuery({
+  args: {
+    raceIds: v.array(v.string()),
+    candidateSlugs: v.array(v.string()),
+    issueSlugs: v.array(v.string()),
+  },
+  returns: v.array(v.string()),
+  handler: async (ctx, { raceIds, candidateSlugs, issueSlugs }) => {
+    const missing: string[] = [];
+    for (const raceId of raceIds) {
+      const race = await ctx.db
+        .query("races")
+        .withIndex("by_race_id", (q) => q.eq("raceId", raceId))
+        .first();
+      if (!race) missing.push(`raceId "${raceId}"`);
+    }
+    for (const slug of candidateSlugs) {
+      const candidate = await ctx.db
+        .query("candidates")
+        .withIndex("by_slug_only", (q) => q.eq("slug", slug))
+        .first();
+      if (!candidate) missing.push(`candidateSlug "${slug}"`);
+    }
+    const issueSet = new Set<string>(ISSUE_SLUGS);
+    for (const slug of issueSlugs) {
+      if (!issueSet.has(slug)) missing.push(`issueSlug "${slug}"`);
+    }
+    return missing;
+  },
+});
+
 export const finalize = internalMutation({
   args: { briefId: v.id("voter_briefs"), traceId: v.optional(v.string()), error: v.optional(v.string()) },
   handler: async (ctx, { briefId, traceId, error }) => {
     if (error) {
       await ctx.db.patch(briefId, { status: "failed", error });
+      // MOO-313: terminal generation failures are an eval signal — surface on /admin.
+      await ctx.db.insert("alerts", {
+        kind: "brief_generation_failure",
+        message: `voter brief failed after all attempts: ${error}`,
+        refTable: "voter_briefs",
+        refId: briefId,
+        severity: "warning",
+        resolved: false,
+        createdAt: Date.now(),
+      });
       return;
     }
     await ctx.db.patch(briefId, { status: "ready", traceId, error: undefined, generatedAt: Date.now() });

@@ -5,6 +5,7 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Button } from "@/components/retroui/Button";
+import { arizeTraceUrl } from "@/lib/arize";
 
 /** MOO-322 Task 4: /admin section for approving/rejecting scout-proposed article sources. */
 
@@ -82,6 +83,18 @@ export function ArticleSources() {
                 {row.publishedAt ? ` · ${row.publishedAt}` : ""}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">{row.whyRelevant}</p>
+              {row.traceId && (
+                <p className="mt-1 text-sm">
+                  <a
+                    href={arizeTraceUrl(row.traceId, row.proposedAt)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    View trace in Arize ↗
+                  </a>
+                </p>
+              )}
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button
                   variant="primary"

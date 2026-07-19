@@ -179,6 +179,7 @@ describe("saveExtraction per-source drafts (MOO-324)", () => {
     await t.mutation(internal.researchQueries.saveExtraction, {
       ...campaignArgs,
       extraction: positionFor("Campaign site: fully fund schools."),
+      traceId: "trace-campaign-1",
     });
     await t.mutation(internal.researchQueries.saveExtraction, {
       ...articleArgs,
@@ -199,6 +200,9 @@ describe("saveExtraction per-source drafts (MOO-324)", () => {
     const tasks = await t.run((ctx) => ctx.db.query("review_tasks").collect());
     expect(tasks).toHaveLength(2);
     expect(new Set(tasks.map((task) => task.refId)).size).toBe(2);
+    // MOO-313: the review task carries the originating trace for Arize deep-links
+    const campaignTask = tasks.find((task) => task.refId === campaignDraft._id)!;
+    expect(campaignTask.traceId).toBe("trace-campaign-1");
   });
 
   test("re-extraction from the same source updates its own pending draft, no new row", async () => {

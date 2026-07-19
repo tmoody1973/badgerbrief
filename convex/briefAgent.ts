@@ -23,6 +23,7 @@ import { SEMRESATTRS_PROJECT_NAME } from "@arizeai/openinference-semantic-conven
 import contract from "./lib/briefContract.json";
 import { buildBriefUserMessage, buildCorrectiveMessage, type BriefContext } from "./lib/briefContext";
 import { validateBriefSource } from "./lib/briefValidate";
+import { collectEntityRefs } from "./lib/briefEntities";
 
 const AGENT_NAME = "brief-agent";
 const MODEL = "claude-opus-4-8";
@@ -109,7 +110,19 @@ export const composeAttempt = internalAction({
         if (usage?.outputTokens !== undefined) llmSpan.setAttribute("llm.token_count.completion", usage.outputTokens);
         llmSpan.end();
       }
-      return verdict.ok ? { ok: true, text: acc } : { ok: false, failureSummary: verdict.summary, text: acc };
+      if (!verdict.ok) return { ok: false, failureSummary: verdict.summary, text: acc };
+      // MOO-313 code evaluator: every referenced entity ID must exist. A miss
+      // feeds the corrective-retry loop exactly like a parse failure.
+      const refs = collectEntityRefs(verdict.root);
+      const missing: string[] = await ctx.runQuery(internal.briefs.checkEntityRefs, refs);
+      if (missing.length > 0) {
+        return {
+          ok: false,
+          failureSummary: `unknown entity IDs (use ONLY IDs from the input): ${missing.join(", ")}`,
+          text: acc,
+        };
+      }
+      return { ok: true, text: acc };
     };
 
     if (!telemetry) {
