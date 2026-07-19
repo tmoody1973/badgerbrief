@@ -41,7 +41,33 @@ export function RaceCard({
   );
 }
 
-export function CandidateCard({ candidate }: { candidate: Doc<"candidates"> }) {
+export function CandidateCard({
+  candidate,
+  variant = "full",
+}: {
+  candidate: Doc<"candidates">;
+  variant?: "full" | "compact";
+}) {
+  if (variant === "compact") {
+    return (
+      <Link
+        href={`/candidates/${candidate.slug}`}
+        className="press block min-w-0 border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]"
+      >
+        <h3 className="font-display text-sm leading-tight">{candidate.name}</h3>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          <PartyBadge party={candidate.party} />
+          <StatusBadge status={candidate.status} />
+        </div>
+        {candidate.currentOccupation &&
+          candidate.currentOccupation !== "Unknown" && (
+            <p className="mt-1.5 truncate text-xs text-muted-foreground">
+              {candidate.currentOccupation}
+            </p>
+          )}
+      </Link>
+    );
+  }
   return (
     <Link
       href={`/candidates/${candidate.slug}`}
