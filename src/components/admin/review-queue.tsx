@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
+import { ConvexError } from "convex/values";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Button } from "@/components/retroui/Button";
@@ -43,6 +44,9 @@ function ErrorLine({ message }: { message: string | null }) {
 }
 
 function asMessage(err: unknown): string {
+  // ConvexError data survives to prod clients; plain Error messages are
+  // redacted to "Server Error" there (publish gates throw ConvexError).
+  if (err instanceof ConvexError) return String(err.data);
   return err instanceof Error ? err.message : String(err);
 }
 

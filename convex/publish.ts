@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, MutationCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { logAudit } from "./audit";
@@ -12,19 +12,19 @@ import { logAudit } from "./audit";
 async function requireAdmin(ctx: MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
-    throw new Error("publish requires authentication");
+    throw new ConvexError("publish requires authentication");
   }
   // metadata.role comes from the Clerk "convex" JWT template custom claims
   // (wired the same way as the session token; enforced UI lands in MOO-312)
   const role = (identity as { metadata?: { role?: string } }).metadata?.role;
   if (role !== "admin") {
-    throw new Error("publish requires the admin role");
+    throw new ConvexError("publish requires the admin role");
   }
 }
 
 function requireNonEmpty(value: string | undefined, field: string): string {
   if (!value || value.trim().length === 0) {
-    throw new Error(`publish gate: ${field} is required and must be non-empty`);
+    throw new ConvexError(`publish gate: ${field} is required and must be non-empty`);
   }
   return value;
 }
@@ -34,9 +34,9 @@ export const publishQuote = mutation({
   handler: async (ctx, { draftId }) => {
     await requireAdmin(ctx);
     const draft = await ctx.db.get(draftId);
-    if (!draft) throw new Error("quote draft not found");
+    if (!draft) throw new ConvexError("quote draft not found");
     if (draft.reviewStatus !== "approved") {
-      throw new Error("publish gate: quote draft must be approved by a human reviewer");
+      throw new ConvexError("publish gate: quote draft must be approved by a human reviewer");
     }
     // Gate: speaker + source URL + date + excerpt + context, all present.
     const speaker = requireNonEmpty(draft.speaker, "speaker");
@@ -45,7 +45,7 @@ export const publishQuote = mutation({
     const date = requireNonEmpty(draft.date, "date");
     const sourceUrl = requireNonEmpty(draft.sourceUrl, "sourceUrl");
     if (!sourceUrl.startsWith("http")) {
-      throw new Error("publish gate: sourceUrl must be a valid URL");
+      throw new ConvexError("publish gate: sourceUrl must be a valid URL");
     }
     // Idempotent per draft: retries/double-clicks return the existing row
     // instead of duplicating (publishPosition already upserts by design).
@@ -83,19 +83,19 @@ export const publishPosition = mutation({
   handler: async (ctx, { draftId }) => {
     await requireAdmin(ctx);
     const draft = await ctx.db.get(draftId);
-    if (!draft) throw new Error("position draft not found");
+    if (!draft) throw new ConvexError("position draft not found");
     if (draft.reviewStatus !== "approved") {
-      throw new Error("publish gate: position draft must be approved by a human reviewer");
+      throw new ConvexError("publish gate: position draft must be approved by a human reviewer");
     }
     // Gate: issue tag + summary + ≥1 source link.
     requireNonEmpty(draft.issueSlug, "issueSlug");
     requireNonEmpty(draft.summary, "summary");
     if (draft.sources.length < 1) {
-      throw new Error("publish gate: position requires at least one source link");
+      throw new ConvexError("publish gate: position requires at least one source link");
     }
     for (const s of draft.sources) {
       if (!s.url.startsWith("http")) {
-        throw new Error(`publish gate: invalid source URL: ${s.url}`);
+        throw new ConvexError(`publish gate: invalid source URL: ${s.url}`);
       }
     }
     // Versioning: replace any prior published record for this candidate+issue.
