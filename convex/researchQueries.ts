@@ -7,6 +7,7 @@ import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { Extraction } from "./lib/extraction";
+import { isSameSite } from "./lib/campaignMap";
 
 /** Candidates with a registered campaign website — the site mapper's work list. */
 export const listMapTargets = internalQuery({
@@ -77,6 +78,47 @@ export const registerCampaignSubpages = internalMutation({
       registered++;
     }
     return { registered, skipped };
+  },
+});
+
+/**
+ * One-shot backfill (MOO-326): rows hand-registered before sourceKind existed
+ * encoded "own site" by typing it into the outlet string ("Kelda Roys
+ * (campaign site)"), so they route to the news-article extraction prompt on
+ * pages the candidate wrote themselves. Retag any row whose host matches that
+ * candidate's registered campaign_website. Rows for candidates with no
+ * registered homepage are left alone — own-domain can't be verified without
+ * one. Idempotent; safe to re-run.
+ */
+export const backfillCampaignSourceKind = internalMutation({
+  args: { dryRun: v.optional(v.boolean()) },
+  handler: async (ctx, args) => {
+    const candidates = await ctx.db.query("candidates").collect();
+    const homeBySlug = new Map(
+      candidates.map((c) => [c.slug, c.socialMedia?.campaign_website]),
+    );
+
+    const rows = await ctx.db.query("article_sources").collect();
+    const matched: string[] = [];
+    const unverifiable: string[] = [];
+
+    for (const row of rows) {
+      if (row.sourceKind) continue;
+      const homepage = homeBySlug.get(row.candidateSlug);
+      if (!homepage) {
+        if (row.outlet.toLowerCase().includes("campaign site")) {
+          unverifiable.push(row.url);
+        }
+        continue;
+      }
+      if (!isSameSite(homepage, row.url)) continue;
+      matched.push(row.url);
+      if (!args.dryRun) {
+        await ctx.db.patch(row._id, { sourceKind: "campaign_site" });
+      }
+    }
+
+    return { matched: matched.length, unverifiable, dryRun: args.dryRun ?? false };
   },
 });
 

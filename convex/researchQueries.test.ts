@@ -201,6 +201,95 @@ describe("registerCampaignSubpages", () => {
   });
 });
 
+describe("backfillCampaignSourceKind", () => {
+  test("retags own-domain rows, leaves off-domain and unverifiable ones alone", async () => {
+    const t = setup();
+    await t.run((ctx) =>
+      ctx.db.insert("candidates", {
+        ...baseCandidate,
+        socialMedia: { campaign_website: "https://brennanforwisconsin.com" },
+      }),
+    );
+    // Candidate with no registered homepage — own-domain can't be verified.
+    await t.run((ctx) =>
+      ctx.db.insert("candidates", {
+        ...baseCandidate,
+        slug: "mandela-barnes",
+        name: "Mandela Barnes",
+        socialMedia: undefined,
+      }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseArticleSource,
+        url: "https://www.brennanforwisconsin.com/policy",
+        outlet: "Joel Brennan (campaign site)",
+        status: "approved" as const,
+      }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseArticleSource,
+        url: "https://urbanmilwaukee.com/brennan-story",
+        status: "approved" as const,
+      }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseArticleSource,
+        candidateSlug: "mandela-barnes",
+        url: "https://www.mandelabarnes.com/wisconsinway",
+        outlet: "Mandela Barnes (campaign site)",
+        status: "approved" as const,
+      }),
+    );
+
+    const result = await t.mutation(
+      internal.researchQueries.backfillCampaignSourceKind,
+      {},
+    );
+    expect(result.matched).toBe(1);
+    expect(result.unverifiable).toEqual(["https://www.mandelabarnes.com/wisconsinway"]);
+
+    const rows = await t.run((ctx) => ctx.db.query("article_sources").collect());
+    const byUrl = new Map(rows.map((r) => [r.url, r.sourceKind]));
+    expect(byUrl.get("https://www.brennanforwisconsin.com/policy")).toBe("campaign_site");
+    expect(byUrl.get("https://urbanmilwaukee.com/brennan-story")).toBeUndefined();
+    expect(byUrl.get("https://www.mandelabarnes.com/wisconsinway")).toBeUndefined();
+  });
+
+  test("dryRun reports without writing, and re-running is idempotent", async () => {
+    const t = setup();
+    await t.run((ctx) =>
+      ctx.db.insert("candidates", {
+        ...baseCandidate,
+        socialMedia: { campaign_website: "https://brennanforwisconsin.com" },
+      }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseArticleSource,
+        url: "https://www.brennanforwisconsin.com/policy",
+        status: "approved" as const,
+      }),
+    );
+
+    const dry = await t.mutation(internal.researchQueries.backfillCampaignSourceKind, {
+      dryRun: true,
+    });
+    expect(dry).toMatchObject({ matched: 1, dryRun: true });
+    const afterDry = await t.run((ctx) => ctx.db.query("article_sources").collect());
+    expect(afterDry[0].sourceKind).toBeUndefined();
+
+    await t.mutation(internal.researchQueries.backfillCampaignSourceKind, {});
+    const second = await t.mutation(
+      internal.researchQueries.backfillCampaignSourceKind,
+      {},
+    );
+    expect(second.matched).toBe(0); // already tagged — nothing left to do
+  });
+});
+
 describe("saveExtraction sourceLabel", () => {
   const extraction = {
     positions: [
