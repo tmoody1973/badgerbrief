@@ -220,6 +220,38 @@ export const setCampaignWebsite = internalMutation({
   },
 });
 
+/**
+ * Set a candidate's header photo. photoSource is REQUIRED and is rendered as
+ * a visible credit — CC BY images oblige attribution, and a voter guide should
+ * show where every asset came from regardless.
+ */
+export const setPhoto = internalMutation({
+  args: {
+    slug: v.string(),
+    photoUrl: v.string(),
+    photoSource: v.string(),
+  },
+  handler: async (ctx, args) => {
+    if (!/^https:\/\//.test(args.photoUrl)) {
+      throw new Error("photoUrl must be https");
+    }
+    if (!args.photoSource.trim()) {
+      throw new Error("photoSource is required (attribution)");
+    }
+    const candidate = await ctx.db
+      .query("candidates")
+      .withIndex("by_slug_only", (q) => q.eq("slug", args.slug))
+      .first();
+    if (!candidate) throw new Error(`no candidate with slug "${args.slug}"`);
+
+    await ctx.db.patch(candidate._id, {
+      photoUrl: args.photoUrl,
+      photoSource: args.photoSource,
+    });
+    return { slug: args.slug, photoUrl: args.photoUrl, photoSource: args.photoSource };
+  },
+});
+
 export const counts = internalMutation({
   args: {},
   handler: async (ctx) => {

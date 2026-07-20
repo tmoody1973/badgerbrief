@@ -22,6 +22,49 @@ const baseCandidate = {
   dataAsOf: "2026-07-19",
 };
 
+describe("setPhoto", () => {
+  test("sets photo and required attribution", async () => {
+    const t = setup();
+    await t.run((ctx) => ctx.db.insert("candidates", baseCandidate));
+
+    await t.mutation(internal.seed.setPhoto, {
+      slug: "mandela-barnes",
+      photoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/49/Mandela_Barnes_2022.jpg",
+      photoSource: "Susan Ruggles / Wikimedia Commons (CC BY 2.0)",
+    });
+
+    const row = await t.run((ctx) =>
+      ctx.db
+        .query("candidates")
+        .withIndex("by_slug_only", (q) => q.eq("slug", "mandela-barnes"))
+        .first(),
+    );
+    expect(row!.photoUrl).toMatch(/^https:\/\/upload\.wikimedia\.org/);
+    expect(row!.photoSource).toContain("CC BY 2.0");
+  });
+
+  test("rejects non-https and blank attribution", async () => {
+    const t = setup();
+    await t.run((ctx) => ctx.db.insert("candidates", baseCandidate));
+
+    await expect(
+      t.mutation(internal.seed.setPhoto, {
+        slug: "mandela-barnes",
+        photoUrl: "http://insecure.example.com/x.jpg",
+        photoSource: "somewhere",
+      }),
+    ).rejects.toThrow(/https/);
+
+    await expect(
+      t.mutation(internal.seed.setPhoto, {
+        slug: "mandela-barnes",
+        photoUrl: "https://example.com/x.jpg",
+        photoSource: "   ",
+      }),
+    ).rejects.toThrow(/attribution/);
+  });
+});
+
 describe("setCampaignWebsite", () => {
   test("sets the homepage for a candidate that had none", async () => {
     const t = setup();
