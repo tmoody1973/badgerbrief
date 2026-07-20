@@ -67,4 +67,15 @@ crons.daily(
   {},
 );
 
+// 13:00 UTC — Google political ads (BigQuery public dataset). No-arg: reads
+// GOOGLE_SERVICE_ACCOUNT_JSON. No creds → info alert and skip, never crashes
+// (MOO-315). Google ads are M2; the cron is registered now, dormant until the
+// GCP project + service account exist.
+crons.daily(
+  "sync Google ads",
+  { hourUTC: 13, minuteUTC: 0 },
+  internal.ads.syncGoogleAds,
+  {},
+);
+
 export default crons;

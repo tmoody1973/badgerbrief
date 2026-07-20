@@ -36,7 +36,7 @@ async function seedGovRace(t: ReturnType<typeof convexTest>) {
 
 const syncArgs = {
   fixture: META_ADS_FIXTURE,
-  trackedPages: META_ADS_FIXTURE_TRACKED_PAGES,
+  trackedEntities: META_ADS_FIXTURE_TRACKED_PAGES,
 };
 
 afterEach(() => vi.unstubAllGlobals());
@@ -163,7 +163,7 @@ test("expired token → warning alert and graceful return, no crash", async () =
 
   const result = await t.action(internal.ads.syncMetaAds, {
     token: "expired-token",
-    trackedPages: META_ADS_FIXTURE_TRACKED_PAGES,
+    trackedEntities: META_ADS_FIXTURE_TRACKED_PAGES,
   });
   expect(result).toMatchObject({ status: "token_expired" });
 

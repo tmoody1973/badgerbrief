@@ -57,5 +57,5 @@ export const META_ADS_FIXTURE: MetaAdArchiveEntry[] = [
 
 /** The one page we "know" belongs to a candidate in the fixture set. */
 export const META_ADS_FIXTURE_TRACKED_PAGES = [
-  { pageId: "1000000001", candidateSlug: "kelda-roys", raceId: "WI-GOV-2026" },
+  { entityId: "1000000001", candidateSlug: "kelda-roys", raceId: "WI-GOV-2026" },
 ];

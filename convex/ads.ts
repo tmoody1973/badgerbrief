@@ -1,32 +1,46 @@
 import { v } from "convex/values";
 import {
+  ActionCtx,
   internalAction,
   internalMutation,
   internalQuery,
   query,
 } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 import {
-  MetaAdArchiveEntry,
   MatchCandidate,
-  normalizeMetaAd,
+  NormalizedAd,
   PUBLIC_MATCH_THRESHOLD,
   scoreAdMatch,
-  TrackedPage,
-} from "./lib/metaAds";
+  TrackedEntity,
+} from "./lib/adsMatch";
+import { MetaAdArchiveEntry, normalizeMetaAd } from "./lib/metaAds";
+import { GooglePoliticalAdRow, normalizeGoogleAd } from "./lib/googleAds";
 
 /**
- * Meta Ad Library adapter (MOO-309). Mirrors finance.ts: one file, plain
- * fetch (no "use node"), sync failures logged to alerts rather than crashing.
- * Pure normalize/match logic lives in ./lib/metaAds.ts.
+ * Ad-library adapters: Meta (MOO-309) + Google (MOO-315), same tables. Mirrors
+ * finance.ts: plain fetch, failures → alerts (never crash). Pure normalize per
+ * platform (lib/metaAds.ts, lib/googleAds.ts); platform-agnostic match/routing
+ * in lib/adsMatch.ts; the DB writes + ingest loop are shared here.
  *
- * Fixture-first: syncMetaAds accepts an injected `fixture` (the raw ads_archive
- * `data` array) so the whole pipeline runs and tests without a live token.
- * Swapping in credentials is config (set META_ADS_ACCESS_TOKEN + curate
- * trackedPages), not a rewrite.
+ * Fixture-first: each sync accepts an injected `fixture` so the whole pipeline
+ * runs and tests without live credentials. Swapping creds in is config
+ * (set the token / service account + curate tracked entities), not a rewrite.
  */
 
 const GRAPH_API_BASE = "https://graph.facebook.com/v21.0";
+
+const platformValidator = v.union(v.literal("meta"), v.literal("google"));
+const trackedEntitiesValidator = v.optional(
+  v.array(
+    v.object({
+      entityId: v.string(),
+      candidateSlug: v.string(),
+      raceId: v.string(),
+    }),
+  ),
+);
 
 // ---------- reads for the sync ----------
 
@@ -52,7 +66,7 @@ export const listCandidatesForMatching = internalQuery({
 // ---------- writes ----------
 
 const adWriteFields = {
-  platform: v.literal("meta"),
+  platform: platformValidator,
   platformAdId: v.string(),
   pageOrCommittee: v.string(),
   candidateSlug: v.optional(v.string()),
@@ -125,7 +139,7 @@ export const upsertAd = internalMutation({
 
 export const recordDailyMetric = internalMutation({
   args: {
-    platform: v.literal("meta"),
+    platform: platformValidator,
     platformAdId: v.string(),
     date: v.string(),
     spendLower: v.optional(v.number()),
@@ -152,10 +166,7 @@ export const recordDailyMetric = internalMutation({
 });
 
 export const openAdReviewTask = internalMutation({
-  args: {
-    adId: v.id("ads"),
-    note: v.string(),
-  },
+  args: { adId: v.id("ads"), note: v.string() },
   handler: async (ctx, args) => {
     // Dedupe: one open ad_match task per ad, so re-syncs don't pile up.
     const open = await ctx.db
@@ -198,7 +209,7 @@ export const logSync = internalMutation({
     if (args.status === "error") {
       await ctx.db.insert("alerts", {
         kind: "sync_failure",
-        message: `Meta ads sync: ${args.error ?? "unknown"}`,
+        message: `Ad sync: ${args.error ?? "unknown"} (${args.url})`,
         severity: args.severity ?? "warning",
         resolved: false,
         createdAt: Date.now(),
@@ -207,21 +218,82 @@ export const logSync = internalMutation({
   },
 });
 
-// ---------- sync action ----------
+// ---------- shared ingest (both platforms) ----------
 
 function todayISO(now: number): string {
   return new Date(now).toISOString().slice(0, 10);
 }
 
 /**
- * Fetch a page of ads_archive for the tracked pages. Only reached when a live
- * token is present. Detects an expired/invalid token (Graph error code 190)
- * and signals it to the caller so the sync degrades gracefully.
+ * The heart of both syncs: for each normalized ad, score the attribution,
+ * upsert the ad (public candidateSlug only when it clears the threshold),
+ * snapshot today's metrics, and route below-threshold inferences to review.
  */
+async function ingestAds(
+  ctx: ActionCtx,
+  normalized: NormalizedAd[],
+  trackedEntities: TrackedEntity[],
+  candidates: MatchCandidate[],
+  date: string,
+): Promise<{ attributed: number; review: number; unmatched: number }> {
+  let attributed = 0;
+  let review = 0;
+  let unmatched = 0;
+  for (const ad of normalized) {
+    const match = scoreAdMatch(ad, trackedEntities, candidates);
+    const isPublic = match.confidence >= PUBLIC_MATCH_THRESHOLD;
+
+    const adId: Id<"ads"> = await ctx.runMutation(internal.ads.upsertAd, {
+      platform: ad.platform,
+      platformAdId: ad.platformAdId,
+      pageOrCommittee: ad.pageOrCommittee,
+      candidateSlug: isPublic ? match.candidateSlug : undefined,
+      raceId: isPublic ? match.raceId : undefined,
+      matchConfidence: match.confidence,
+      creativeText: ad.creativeText,
+      creativeLinkUrl: ad.creativeLinkUrl,
+      snapshotUrl: ad.snapshotUrl,
+      fundingEntity: ad.fundingEntity,
+      status: ad.status,
+      spendLower: ad.spendLower,
+      spendUpper: ad.spendUpper,
+      impressionsLower: ad.impressionsLower,
+      impressionsUpper: ad.impressionsUpper,
+    });
+
+    await ctx.runMutation(internal.ads.recordDailyMetric, {
+      platform: ad.platform,
+      platformAdId: ad.platformAdId,
+      date,
+      spendLower: ad.spendLower,
+      spendUpper: ad.spendUpper,
+      impressionsLower: ad.impressionsLower,
+      impressionsUpper: ad.impressionsUpper,
+    });
+
+    if (isPublic) {
+      attributed++;
+    } else if (match.review) {
+      review++;
+      await ctx.runMutation(internal.ads.openAdReviewTask, {
+        adId,
+        note: `${ad.pageOrCommittee}: ${match.reason}${
+          match.suggestedSlug ? ` → suggested: ${match.suggestedSlug}` : ""
+        }`,
+      });
+    } else {
+      unmatched++;
+    }
+  }
+  return { attributed, review, unmatched };
+}
+
+// ---------- Meta sync (MOO-309) ----------
+
 async function fetchAdsArchive(
   base: string,
   token: string,
-  trackedPages: TrackedPage[],
+  trackedEntities: TrackedEntity[],
 ): Promise<
   | { kind: "ok"; entries: MetaAdArchiveEntry[] }
   | { kind: "token_expired" }
@@ -229,7 +301,7 @@ async function fetchAdsArchive(
 > {
   const fields =
     "id,page_id,page_name,bylines,ad_creative_bodies,ad_creative_link_captions,ad_snapshot_url,ad_delivery_start_time,ad_delivery_stop_time,spend,impressions,currency";
-  const pageIds = JSON.stringify(trackedPages.map((p) => p.pageId));
+  const pageIds = JSON.stringify(trackedEntities.map((p) => p.entityId));
   const url =
     `${base}/ads_archive?access_token=${token}` +
     `&ad_type=POLITICAL_AND_ISSUE_ADS&ad_reached_countries=${encodeURIComponent(
@@ -261,29 +333,17 @@ async function fetchAdsArchive(
 
 export const syncMetaAds = internalAction({
   args: {
-    // Inject the raw ads_archive `data` array to run without a live token.
-    fixture: v.optional(v.array(v.any())),
-    // Curated Meta pages we know belong to a candidate → verified attribution.
-    trackedPages: v.optional(
-      v.array(
-        v.object({
-          pageId: v.string(),
-          candidateSlug: v.string(),
-          raceId: v.string(),
-        }),
-      ),
-    ),
+    fixture: v.optional(v.array(v.any())), // MetaAdArchiveEntry[]
+    trackedEntities: trackedEntitiesValidator,
     token: v.optional(v.string()),
     apiBase: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const now = Date.now();
-    const date = todayISO(now);
-    const trackedPages: TrackedPage[] = args.trackedPages ?? [];
+    const date = todayISO(Date.now());
+    const trackedEntities: TrackedEntity[] = args.trackedEntities ?? [];
     const token = args.token ?? process.env.META_ADS_ACCESS_TOKEN;
     const logUrl = `${args.apiBase ?? GRAPH_API_BASE}/ads_archive`;
 
-    // Resolve the ad entries: fixture (dev/test) → live fetch → graceful skip.
     let entries: MetaAdArchiveEntry[];
     if (args.fixture) {
       entries = args.fixture as MetaAdArchiveEntry[];
@@ -299,7 +359,7 @@ export const syncMetaAds = internalAction({
       const result = await fetchAdsArchive(
         args.apiBase ?? GRAPH_API_BASE,
         token,
-        trackedPages,
+        trackedEntities,
       );
       if (result.kind === "token_expired") {
         await ctx.runMutation(internal.ads.logSync, {
@@ -326,71 +386,86 @@ export const syncMetaAds = internalAction({
       internal.ads.listCandidatesForMatching,
       {},
     );
-
-    let attributed = 0;
-    let review = 0;
-    let unmatched = 0;
-    for (const entry of entries) {
-      const ad = normalizeMetaAd(entry);
-      if (!ad) continue;
-      const match = scoreAdMatch(ad, trackedPages, candidates);
-      const isPublic = match.confidence >= PUBLIC_MATCH_THRESHOLD;
-
-      const adId = await ctx.runMutation(internal.ads.upsertAd, {
-        platform: "meta",
-        platformAdId: ad.platformAdId,
-        pageOrCommittee: ad.pageOrCommittee,
-        candidateSlug: isPublic ? match.candidateSlug : undefined,
-        raceId: isPublic ? match.raceId : undefined,
-        matchConfidence: match.confidence,
-        creativeText: ad.creativeText,
-        creativeLinkUrl: ad.creativeLinkUrl,
-        snapshotUrl: ad.snapshotUrl,
-        fundingEntity: ad.fundingEntity,
-        status: ad.status,
-        spendLower: ad.spendLower,
-        spendUpper: ad.spendUpper,
-        impressionsLower: ad.impressionsLower,
-        impressionsUpper: ad.impressionsUpper,
-      });
-
-      await ctx.runMutation(internal.ads.recordDailyMetric, {
-        platform: "meta",
-        platformAdId: ad.platformAdId,
-        date,
-        spendLower: ad.spendLower,
-        spendUpper: ad.spendUpper,
-        impressionsLower: ad.impressionsLower,
-        impressionsUpper: ad.impressionsUpper,
-      });
-
-      if (isPublic) {
-        attributed++;
-      } else if (match.review) {
-        review++;
-        await ctx.runMutation(internal.ads.openAdReviewTask, {
-          adId,
-          note: `${ad.pageOrCommittee}: ${match.reason}${
-            match.suggestedSlug ? ` → suggested: ${match.suggestedSlug}` : ""
-          }`,
-        });
-      } else {
-        unmatched++;
-      }
-    }
+    const normalized = entries
+      .map(normalizeMetaAd)
+      .filter((a): a is NormalizedAd => a !== null);
+    const counts = await ingestAds(
+      ctx,
+      normalized,
+      trackedEntities,
+      candidates,
+      date,
+    );
 
     await ctx.runMutation(internal.ads.logSync, {
       url: logUrl,
       status: "ok",
       httpStatus: 200,
     });
-    return {
-      status: "ok" as const,
-      fetched: entries.length,
-      attributed,
-      review,
-      unmatched,
-    };
+    return { status: "ok" as const, fetched: entries.length, ...counts };
+  },
+});
+
+// ---------- Google sync (MOO-315) ----------
+
+const GOOGLE_DATASET = "bigquery://google_political_ads.creative_stats";
+
+export const syncGoogleAds = internalAction({
+  args: {
+    fixture: v.optional(v.array(v.any())), // GooglePoliticalAdRow[]
+    trackedEntities: trackedEntitiesValidator,
+  },
+  handler: async (ctx, args) => {
+    const date = todayISO(Date.now());
+    const trackedEntities: TrackedEntity[] = args.trackedEntities ?? [];
+
+    let rows: GooglePoliticalAdRow[];
+    if (args.fixture) {
+      rows = args.fixture as GooglePoliticalAdRow[];
+    } else if (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+      await ctx.runMutation(internal.ads.logSync, {
+        url: GOOGLE_DATASET,
+        status: "error",
+        error: "GOOGLE_SERVICE_ACCOUNT_JSON not configured — sync skipped",
+        severity: "info",
+      });
+      return { status: "skipped" as const, reason: "no credentials" };
+    } else {
+      // ponytail: the live BigQuery query is the credentials-gated follow-up.
+      // Service-account JWT → OAuth token → jobs.query REST gets wired when the
+      // GCP project exists; it's untestable without real creds, so not built
+      // blind. Everything downstream (normalize → match → upsert → review) is
+      // done and tested via the fixture path. See MOO-315.
+      await ctx.runMutation(internal.ads.logSync, {
+        url: GOOGLE_DATASET,
+        status: "error",
+        error: "credentials present but live BigQuery query not yet wired (MOO-315)",
+        severity: "info",
+      });
+      return { status: "pending_live_query" as const };
+    }
+
+    const candidates: MatchCandidate[] = await ctx.runQuery(
+      internal.ads.listCandidatesForMatching,
+      {},
+    );
+    const normalized = rows
+      .map(normalizeGoogleAd)
+      .filter((a): a is NormalizedAd => a !== null);
+    const counts = await ingestAds(
+      ctx,
+      normalized,
+      trackedEntities,
+      candidates,
+      date,
+    );
+
+    await ctx.runMutation(internal.ads.logSync, {
+      url: GOOGLE_DATASET,
+      status: "ok",
+      httpStatus: 200,
+    });
+    return { status: "ok" as const, fetched: rows.length, ...counts };
   },
 });
 
@@ -420,12 +495,12 @@ export const adsForCandidate = query({
 
 /** Daily spend/impression snapshots for one ad, oldest→newest (timeline). */
 export const adSpendTimeline = query({
-  args: { platformAdId: v.string() },
-  handler: async (ctx, { platformAdId }) => {
+  args: { platform: platformValidator, platformAdId: v.string() },
+  handler: async (ctx, { platform, platformAdId }) => {
     return await ctx.db
       .query("ad_metrics_daily")
       .withIndex("by_ad_date", (q) =>
-        q.eq("platform", "meta").eq("platformAdId", platformAdId),
+        q.eq("platform", platform).eq("platformAdId", platformAdId),
       )
       .take(400);
   },

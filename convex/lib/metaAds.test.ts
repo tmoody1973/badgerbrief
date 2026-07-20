@@ -2,11 +2,11 @@
 import { describe, expect, it } from "vitest";
 import {
   MatchCandidate,
-  normalizeMetaAd,
   PUBLIC_MATCH_THRESHOLD,
   scoreAdMatch,
-  TrackedPage,
-} from "./metaAds";
+  TrackedEntity,
+} from "./adsMatch";
+import { normalizeMetaAd } from "./metaAds";
 import {
   META_ADS_FIXTURE,
   META_ADS_FIXTURE_TRACKED_PAGES,
@@ -28,13 +28,13 @@ const candidates: MatchCandidate[] = [
     level: "State Executive",
   },
 ];
-const tracked: TrackedPage[] = META_ADS_FIXTURE_TRACKED_PAGES;
+const tracked: TrackedEntity[] = META_ADS_FIXTURE_TRACKED_PAGES;
 
 describe("normalizeMetaAd", () => {
   it("maps Graph fields, taking first of array fields and coercing money", () => {
     const ad = normalizeMetaAd(META_ADS_FIXTURE[0])!;
     expect(ad.platformAdId).toBe("aid_1001");
-    expect(ad.pageId).toBe("1000000001");
+    expect(ad.entityId).toBe("1000000001");
     expect(ad.pageOrCommittee).toBe("Kelda Roys for Wisconsin");
     expect(ad.creativeText).toContain("reproductive freedom");
     expect(ad.spendLower).toBe(5000);
