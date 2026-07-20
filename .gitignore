@@ -45,3 +45,8 @@ yarn-error.log*
 next-env.d.ts
 .playwright-mcp/
 backups/
+
+# video production artifacts (footage/frames stay out of git)
+docs/video/out/
+docs/video/frames/
+docs/video/seg/
