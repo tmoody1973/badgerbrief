@@ -121,6 +121,49 @@ describe("listArticleSources", () => {
     expect(rows[0].candidateName).toBe("Joel Brennan");
   });
 
+  test("shows auto-registered own-site sources alongside proposed articles", async () => {
+    const t = setup();
+    await t.run((ctx) =>
+      ctx.db.insert("candidates", {
+        slug: "joel-brennan",
+        raceId: "WI-GOV-2026",
+        name: "Joel Brennan",
+        sources: [],
+        dataAsOf: "2026-07-18",
+      }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseSource,
+        url: "https://www.brennanforwisconsin.com/Plan",
+        outlet: "Joel Brennan",
+        sourceKind: "campaign_site" as const,
+        status: "approved" as const,
+        proposedAt: 5000,
+        decidedAt: 5000,
+      }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseSource,
+        url: "https://urbanmilwaukee.com/brennan-other",
+        status: "approved" as const,
+        proposedAt: 4000,
+        decidedAt: 4000,
+      }),
+    );
+
+    const rows = await t.withIdentity(ADMIN).query(api.adminQueue.listArticleSources, {});
+    const urls = rows.map((r) => r.url);
+
+    expect(urls).toContain("https://www.brennanforwisconsin.com/Plan");
+    // An approved ARTICLE stays hidden — only own-site rows join the list.
+    expect(urls).not.toContain("https://urbanmilwaukee.com/brennan-other");
+    const ownSite = rows.find((r) => r.url === "https://www.brennanforwisconsin.com/Plan");
+    expect(ownSite!.sourceKind).toBe("campaign_site");
+    expect(ownSite!.candidateName).toBe("Joel Brennan");
+  });
+
   test("non-admin is rejected", async () => {
     const t = setup();
     await expect(

@@ -158,16 +158,29 @@ export const resolveAlert = mutation({
   },
 });
 
-/** Proposed article sources awaiting approval, newest first, with candidate name joined in. */
+/**
+ * Sources needing the editor's eye, newest first, with candidate name joined in:
+ * article sources awaiting approval, plus own-site subpages the campaign-site
+ * mapper auto-registered (MOO-326) — those skip per-URL approval, so this list
+ * is the only place an editor can see and dismiss what is being read.
+ */
 export const listArticleSources = query({
   args: {},
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    const rows = await ctx.db
+    const proposed = await ctx.db
       .query("article_sources")
       .withIndex("by_status", (q) => q.eq("status", "proposed"))
       .collect();
-    const sorted = rows.sort((a, b) => b.proposedAt - a.proposedAt);
+    const ownSite = (
+      await ctx.db
+        .query("article_sources")
+        .withIndex("by_status", (q) => q.eq("status", "approved"))
+        .collect()
+    ).filter((r) => r.sourceKind === "campaign_site");
+    const sorted = [...proposed, ...ownSite].sort(
+      (a, b) => b.proposedAt - a.proposedAt,
+    );
 
     const out = [];
     for (const row of sorted) {
@@ -175,7 +188,11 @@ export const listArticleSources = query({
         .query("candidates")
         .withIndex("by_slug_only", (q) => q.eq("slug", row.candidateSlug))
         .first();
-      out.push({ ...row, candidateName: candidate?.name ?? row.candidateSlug });
+      out.push({
+        ...row,
+        sourceKind: row.sourceKind ?? ("article" as const),
+        candidateName: candidate?.name ?? row.candidateSlug,
+      });
     }
     return out;
   },

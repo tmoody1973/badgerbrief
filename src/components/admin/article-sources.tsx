@@ -67,6 +67,14 @@ export function ArticleSources() {
         <ul className="mt-2 space-y-3">
           {rows.map((row) => (
             <li key={row._id} className="border-2 border-border bg-background p-3">
+              {row.sourceKind === "campaign_site" && (
+                <span
+                  title="Own-domain page auto-registered by the campaign-site mapper — already being read. Dismiss to stop reading it."
+                  className="mb-2 inline-block border-2 border-border bg-secondary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider"
+                >
+                  Own site · auto
+                </span>
+              )}
               <p className="text-sm">
                 <span className="font-bold">{row.outlet}</span> —{" "}
                 <a
@@ -96,19 +104,26 @@ export function ArticleSources() {
                 </p>
               )}
               <div className="mt-3 flex flex-wrap gap-2">
-                <Button
-                  variant="primary"
-                  disabled={busyId === row._id}
-                  onClick={() => handleDecide(row._id, "approved")}
-                >
-                  {busyId === row._id ? "Working…" : "Approve"}
-                </Button>
+                {/* Own-site rows are already approved — only dismissal applies. */}
+                {row.sourceKind !== "campaign_site" && (
+                  <Button
+                    variant="primary"
+                    disabled={busyId === row._id}
+                    onClick={() => handleDecide(row._id, "approved")}
+                  >
+                    {busyId === row._id ? "Working…" : "Approve"}
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   disabled={busyId === row._id}
                   onClick={() => handleDecide(row._id, "rejected")}
                 >
-                  {busyId === row._id ? "Working…" : "Reject"}
+                  {busyId === row._id
+                    ? "Working…"
+                    : row.sourceKind === "campaign_site"
+                      ? "Dismiss"
+                      : "Reject"}
                 </Button>
               </div>
             </li>
