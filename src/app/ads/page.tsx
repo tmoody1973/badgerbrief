@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AdsAnalytics } from "@/components/guide/ads-analytics";
 import { AdsBrowser } from "@/components/guide/ads-browser";
 import { listAds } from "@/lib/data";
 
@@ -37,7 +38,16 @@ export default async function AdsPage() {
         </p>
       </section>
 
-      <div className="mt-8">
+      {ads.length > 0 && (
+        <div className="mt-10">
+          <AdsAnalytics ads={ads} />
+        </div>
+      )}
+
+      <hr className="mt-10 border-t-2 border-dashed border-border" />
+      <h2 className="font-display mt-8 text-2xl">Browse every ad</h2>
+
+      <div className="mt-4">
         {ads.length > 0 ? (
           <AdsBrowser ads={ads} />
         ) : (

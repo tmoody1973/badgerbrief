@@ -15,7 +15,11 @@ import {
   scoreAdMatch,
   TrackedEntity,
 } from "./lib/adsMatch";
-import { MetaAdArchiveEntry, normalizeMetaAd } from "./lib/metaAds";
+import {
+  deliveredInWisconsin,
+  MetaAdArchiveEntry,
+  normalizeMetaAd,
+} from "./lib/metaAds";
 import { GooglePoliticalAdRow, normalizeGoogleAd } from "./lib/googleAds";
 
 /**
@@ -218,6 +222,35 @@ export const logSync = internalMutation({
   },
 });
 
+/**
+ * Wipe all synced ad data (ads + daily metrics + open ad_match review tasks) in
+ * batches, self-scheduling until drained. For a clean re-sync after a scoping
+ * change — safe while no attribution has been human-resolved. Leaves non-ad
+ * review tasks (positions/quotes) untouched.
+ */
+export const purgeAdData = internalMutation({
+  args: {},
+  handler: async (ctx): Promise<{ ads: number; metrics: number; tasks: number; more: boolean }> => {
+    const B = 300;
+    const ads = await ctx.db.query("ads").take(B);
+    for (const a of ads) await ctx.db.delete(a._id);
+    const metrics = await ctx.db.query("ad_metrics_daily").take(B);
+    for (const m of metrics) await ctx.db.delete(m._id);
+    // Filter to ad_match in the query, not after take() — otherwise non-ad
+    // tasks (positions/quotes) fill the page and we never reach the ad ones.
+    const adTasks = await ctx.db
+      .query("review_tasks")
+      .withIndex("by_status", (q) => q.eq("status", "open"))
+      .filter((q) => q.eq(q.field("kind"), "ad_match"))
+      .take(B);
+    for (const t of adTasks) await ctx.db.delete(t._id);
+
+    const more = ads.length === B || metrics.length === B || adTasks.length === B;
+    if (more) await ctx.scheduler.runAfter(0, internal.ads.purgeAdData, {});
+    return { ads: ads.length, metrics: metrics.length, tasks: adTasks.length, more };
+  },
+});
+
 // ---------- shared ingest (both platforms) ----------
 
 function todayISO(now: number): string {
@@ -291,7 +324,7 @@ async function ingestAds(
 // ---------- Meta sync (MOO-309) ----------
 
 const AD_FIELDS =
-  "id,page_id,page_name,bylines,ad_creative_bodies,ad_creative_link_captions,ad_snapshot_url,ad_delivery_start_time,ad_delivery_stop_time,spend,impressions,currency";
+  "id,page_id,page_name,bylines,ad_creative_bodies,ad_creative_link_captions,ad_snapshot_url,ad_delivery_start_time,ad_delivery_stop_time,spend,impressions,currency,delivery_by_region";
 
 type AdQuery = { searchTerms?: string; searchPageIds?: string[] };
 type FetchResult =
@@ -410,7 +443,15 @@ export const syncMetaAds = internalAction({
         }
         for (const e of r.entries) if (e.id) seen.set(e.id, e);
       }
-      entries = [...seen.values()];
+      // WI scoping: Meta has no state filter, so name-search drags in national
+      // ads. Keep an ad only if it names one of our WI candidates (reliable) or
+      // Meta reports real Wisconsin delivery (bonus for WI issue ads).
+      entries = [...seen.values()].filter((e) => {
+        const ad = normalizeMetaAd(e);
+        if (!ad) return false;
+        if (deliveredInWisconsin(e)) return true;
+        return scoreAdMatch(ad, trackedEntities, candidates).confidence > 0;
+      });
     }
 
     const normalized = entries
@@ -502,7 +543,7 @@ export const syncGoogleAds = internalAction({
 export const listAds = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("ads").order("desc").take(500);
+    return await ctx.db.query("ads").order("desc").take(1000);
   },
 });
 

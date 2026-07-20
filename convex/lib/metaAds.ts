@@ -23,6 +23,29 @@ export interface MetaAdArchiveEntry {
   spend?: { lower_bound?: string; upper_bound?: string };
   impressions?: { lower_bound?: string; upper_bound?: string };
   currency?: string;
+  delivery_by_region?: Array<{ region?: string; percentage?: string }>;
+}
+
+/**
+ * Did this ad meaningfully reach Wisconsin? Meta has no state query filter
+ * (only country), so name-based discovery pulls in national ads (a Michigan
+ * Senate ad surfaced on the WI tracker). `delivery_by_region` is the after-the-
+ * fact signal: keep an ad only if Wisconsin is a real share of its delivery,
+ * not the ~2% spillover a nationwide ad shows in every state.
+ * ponytail: 5% threshold; tune if legit WI ads get dropped.
+ */
+export function deliveredInWisconsin(
+  entry: MetaAdArchiveEntry,
+  minShare = 0.05,
+): boolean {
+  const wi = entry.delivery_by_region?.find(
+    (r) => (r.region ?? "").trim().toLowerCase() === "wisconsin",
+  );
+  if (!wi) return false;
+  let share = Number(wi.percentage ?? 0);
+  if (!Number.isFinite(share)) return false;
+  if (share > 1) share = share / 100; // some responses use percent, not fraction
+  return share >= minShare;
 }
 
 function num(value: string | undefined): number | undefined {

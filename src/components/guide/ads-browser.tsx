@@ -3,10 +3,26 @@
 import { useMemo, useState } from "react";
 import type { Doc } from "../../../convex/_generated/dataModel";
 
-/** Client-side search over synced ads. Sorted by spend (biggest spenders lead —
- * that's the newsworthy end), filterable by sponsor / funder / creative text. */
+type StatusFilter = "all" | "active" | "inactive";
+type MatchFilter = "all" | "matched" | "unverified";
+
+const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+];
+const MATCH_OPTIONS: { value: MatchFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "matched", label: "Matched" },
+  { value: "unverified", label: "Unverified" },
+];
+
+/** Client-side search + filter over synced ads. Sorted by spend (biggest
+ * spenders lead — the newsworthy end). */
 export function AdsBrowser({ ads }: { ads: Doc<"ads">[] }) {
   const [q, setQ] = useState("");
+  const [status, setStatus] = useState<StatusFilter>("all");
+  const [match, setMatch] = useState<MatchFilter>("all");
 
   const sorted = useMemo(
     () => [...ads].sort((a, b) => (b.spendUpper ?? 0) - (a.spendUpper ?? 0)),
@@ -15,13 +31,20 @@ export function AdsBrowser({ ads }: { ads: Doc<"ads">[] }) {
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return sorted;
-    return sorted.filter((a) =>
-      `${a.pageOrCommittee} ${a.fundingEntity ?? ""} ${a.creativeText ?? ""}`
-        .toLowerCase()
-        .includes(needle),
-    );
-  }, [sorted, q]);
+    return sorted.filter((a) => {
+      if (status !== "all" && (a.status ?? "") !== status) return false;
+      if (match === "matched" && !a.candidateSlug) return false;
+      if (match === "unverified" && a.candidateSlug) return false;
+      if (
+        needle &&
+        !`${a.pageOrCommittee} ${a.fundingEntity ?? ""} ${a.creativeText ?? ""}`
+          .toLowerCase()
+          .includes(needle)
+      )
+        return false;
+      return true;
+    });
+  }, [sorted, q, status, match]);
 
   const CAP = 120;
   const shown = filtered.slice(0, CAP);
@@ -38,6 +61,21 @@ export function AdsBrowser({ ads }: { ads: Doc<"ads">[] }) {
           className="w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm shadow-[var(--shadow-brutal)] focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </label>
+
+      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+        <PillGroup
+          label="Status"
+          value={status}
+          options={STATUS_OPTIONS}
+          onChange={setStatus}
+        />
+        <PillGroup
+          label="Attribution"
+          value={match}
+          options={MATCH_OPTIONS}
+          onChange={setMatch}
+        />
+      </div>
 
       <p className="mt-3 font-mono text-xs text-muted-foreground">
         Showing {shown.length} of {filtered.length.toLocaleString()} tracked ad
@@ -56,6 +94,41 @@ export function AdsBrowser({ ads }: { ads: Doc<"ads">[] }) {
           No ads match “{q}”.
         </p>
       )}
+    </div>
+  );
+}
+
+function PillGroup<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </span>
+      <div className="flex">
+        {options.map((o, i) => (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => onChange(o.value)}
+            aria-pressed={value === o.value}
+            className={`border-2 border-border px-2 py-1 font-mono text-xs font-bold ${
+              i > 0 ? "-ml-0.5" : ""
+            } ${value === o.value ? "bg-primary text-primary-foreground" : "bg-card"}`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
