@@ -128,6 +128,79 @@ describe("listResearchTargets", () => {
   });
 });
 
+describe("registerCampaignSubpages", () => {
+  test("registers own-site subpages as approved campaign_site rows", async () => {
+    const t = setup();
+    await t.run((ctx) => ctx.db.insert("candidates", baseCandidate));
+
+    const result = await t.mutation(
+      internal.researchQueries.registerCampaignSubpages,
+      {
+        candidateSlug: "joel-brennan",
+        raceId: "WI-GOV-2026",
+        candidateName: "Joel Brennan",
+        urls: [
+          "https://www.brennanforwisconsin.com/Plan",
+          "https://www.brennanforwisconsin.com/issues",
+        ],
+      },
+    );
+    expect(result).toEqual({ registered: 2, skipped: 0 });
+
+    const rows = await t.run((ctx) => ctx.db.query("article_sources").collect());
+    expect(rows).toHaveLength(2);
+    expect(rows[0].status).toBe("approved");
+    expect(rows[0].sourceKind).toBe("campaign_site");
+    expect(rows[0].outlet).toBe("Joel Brennan");
+  });
+
+  test("is idempotent — re-registering the same URLs adds nothing", async () => {
+    const t = setup();
+    const args = {
+      candidateSlug: "joel-brennan",
+      raceId: "WI-GOV-2026",
+      candidateName: "Joel Brennan",
+      urls: ["https://www.brennanforwisconsin.com/Plan"],
+    };
+    await t.mutation(internal.researchQueries.registerCampaignSubpages, args);
+    const second = await t.mutation(
+      internal.researchQueries.registerCampaignSubpages,
+      args,
+    );
+
+    expect(second).toEqual({ registered: 0, skipped: 1 });
+    const rows = await t.run((ctx) => ctx.db.query("article_sources").collect());
+    expect(rows).toHaveLength(1);
+  });
+
+  test("never resurrects a URL an editor rejected", async () => {
+    const t = setup();
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseArticleSource,
+        url: "https://www.brennanforwisconsin.com/Plan",
+        status: "rejected" as const,
+        decidedAt: 1600,
+      }),
+    );
+
+    const result = await t.mutation(
+      internal.researchQueries.registerCampaignSubpages,
+      {
+        candidateSlug: "joel-brennan",
+        raceId: "WI-GOV-2026",
+        candidateName: "Joel Brennan",
+        urls: ["https://www.brennanforwisconsin.com/Plan"],
+      },
+    );
+
+    expect(result).toEqual({ registered: 0, skipped: 1 });
+    const rows = await t.run((ctx) => ctx.db.query("article_sources").collect());
+    expect(rows).toHaveLength(1);
+    expect(rows[0].status).toBe("rejected");
+  });
+});
+
 describe("saveExtraction sourceLabel", () => {
   const extraction = {
     positions: [

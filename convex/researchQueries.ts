@@ -8,6 +8,78 @@ import { internalMutation, internalQuery } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { Extraction } from "./lib/extraction";
 
+/** Candidates with a registered campaign website — the site mapper's work list. */
+export const listMapTargets = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const candidates = await ctx.db.query("candidates").collect();
+    const targets: {
+      slug: string;
+      name: string;
+      raceId: string;
+      homepageUrl: string;
+    }[] = [];
+    for (const c of candidates) {
+      const homepageUrl = c.socialMedia?.campaign_website;
+      if (homepageUrl) {
+        targets.push({
+          slug: c.slug,
+          name: c.name,
+          raceId: c.raceId,
+          homepageUrl,
+        });
+      }
+    }
+    return targets;
+  },
+});
+
+/**
+ * Idempotently register own-site policy subpages as approved extraction
+ * sources (MOO-326). Own-domain subpages inherit the homepage's trust class,
+ * so they skip per-URL human approval — the human gate on CONTENT (drafts →
+ * review → publish) is untouched. A URL an editor already rejected is never
+ * resurrected: any existing row for the URL, in any status, blocks re-insert.
+ */
+export const registerCampaignSubpages = internalMutation({
+  args: {
+    candidateSlug: v.string(),
+    raceId: v.string(),
+    candidateName: v.string(),
+    urls: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let registered = 0;
+    let skipped = 0;
+    for (const url of args.urls) {
+      const existing = await ctx.db
+        .query("article_sources")
+        .withIndex("by_url", (q) => q.eq("url", url))
+        .first();
+      if (existing) {
+        skipped++;
+        continue;
+      }
+      const now = Date.now();
+      await ctx.db.insert("article_sources", {
+        candidateSlug: args.candidateSlug,
+        raceId: args.raceId,
+        url,
+        outlet: args.candidateName,
+        sourceKind: "campaign_site",
+        headline: `${args.candidateName} — campaign site page`,
+        whyRelevant:
+          "Own-domain policy page discovered by the campaign-site mapper.",
+        status: "approved",
+        proposedAt: now,
+        decidedAt: now,
+      });
+      registered++;
+    }
+    return { registered, skipped };
+  },
+});
+
 /**
  * Piece 1: campaign-site targets (as before) PLUS one target per approved
  * article_sources row (MOO-322 Task 3). Proposed/rejected rows never become

@@ -101,6 +101,46 @@ export async function fetchFirecrawlMarkdown(url: string): Promise<FetchResult> 
   }
 }
 
+export type MapResult =
+  | { ok: true; links: string[] }
+  | { ok: false; error: string };
+
+/**
+ * Firecrawl v2 map (MOO-326) — URL discovery only, no LLM, no markdown.
+ * A sibling of fetchFirecrawlMarkdown rather than a flag on it because the
+ * response shape differs entirely: {links:[{url,title?,description?}]}.
+ */
+export async function fetchFirecrawlMap(
+  url: string,
+  limit: number,
+): Promise<MapResult> {
+  try {
+    const res = await fetch("https://api.firecrawl.dev/v2/map", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.FIRECRAWL_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url, limit }),
+      signal: AbortSignal.timeout(60_000),
+    });
+    if (!res.ok) return { ok: false, error: `map request failed (http ${res.status})` };
+    const body = (await res.json()) as {
+      success?: boolean;
+      links?: { url?: string }[];
+    };
+    if (!body.success || !Array.isArray(body.links)) {
+      return { ok: false, error: "map returned no links" };
+    }
+    const links = body.links
+      .map((l) => l.url)
+      .filter((u): u is string => typeof u === "string" && u.length > 0);
+    return { ok: true, links };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
 type CandidateSummary = {
   slug: string;
   status: "extracted" | "unchanged" | "fetch-error" | "extraction_error";
