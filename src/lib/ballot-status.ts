@@ -14,7 +14,7 @@ export function isOnBallot(status?: string): boolean {
 
 /**
  * Anchor id for a party section on the race page. Shared by the section
- * headings (ids) and RaceSectionNav (hrefs) so they can't drift apart.
+ * headings (ids) and SectionNav (hrefs) so they can't drift apart.
  * Independent has no primary — it links to the general-election section.
  */
 export function partySectionId(party: string): string {

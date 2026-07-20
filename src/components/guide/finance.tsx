@@ -88,7 +88,7 @@ export function FinancePanel({
 }) {
   if (totals.length === 0) return null;
   return (
-    <section className="mt-6">
+    <section id="money" className="mt-6 scroll-mt-16">
       <h2 className="font-display text-xl">
         How much money has {candidateName} raised?
       </h2>
@@ -158,7 +158,7 @@ export function FinancePanel({
                 Top reported contributors
               </h3>
               <ul className="mt-2 space-y-1 text-sm">
-                {ranked.slice(0, 10).map((c) => (
+                {ranked.slice(0, 5).map((c) => (
                   <li key={c._id} className="flex justify-between gap-2 border-b border-dashed border-border pb-1">
                     <span>
                       {c.contributorName}
@@ -168,6 +168,24 @@ export function FinancePanel({
                   </li>
                 ))}
               </ul>
+              {ranked.length > 5 && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Show {Math.min(ranked.length, 10) - 5} more
+                  </summary>
+                  <ul className="mt-2 space-y-1 text-sm">
+                    {ranked.slice(5, 10).map((c) => (
+                      <li key={c._id} className="flex justify-between gap-2 border-b border-dashed border-border pb-1">
+                        <span>
+                          {c.contributorName}
+                          {c.contributorLocation ? ` (${c.contributorLocation})` : ""}
+                        </span>
+                        <span className="font-mono">{fmt(c.amount)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
               <SourceNote source={contributions[0].source} />
             </div>
             {orgs.length > 0 && (

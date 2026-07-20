@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Doc } from "../../../../convex/_generated/dataModel";
 import { CandidatePhoto } from "@/components/guide/candidate-photo";
 import { sourceLabel } from "@/lib/source-label";
 import { FinancePanel } from "@/components/guide/finance";
@@ -9,6 +10,7 @@ import {
   PartyBadge,
   StatusBadge,
 } from "@/components/guide/labels";
+import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
 import { getCandidateBySlug, listCandidateSlugs } from "@/lib/data";
 import {
@@ -39,14 +41,55 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+function Quote({ quote }: { quote: Doc<"quote_published"> }) {
+  return (
+    <blockquote className="border-l-4 border-primary bg-card p-3">
+      <p className="text-sm">&ldquo;{quote.text}&rdquo;</p>
+      <footer className="mt-2 font-mono text-xs text-muted-foreground">
+        — {quote.speaker}, {quote.date} ·{" "}
+        <a
+          href={quote.sourceUrl}
+          className="underline"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          {sourceLabel(quote.sourceUrl, quote.outlet)}
+        </a>
+      </footer>
+    </blockquote>
+  );
+}
+
 export default async function CandidatePage({ params }: Props) {
   const { slug } = await params;
   const data = await getCandidateBySlug(slug);
   if (!data) notFound();
   const { candidate, race, positions, quotes, finance, contributions, committeeFunding } = data;
 
+  // Quotes past this point fold away — the section grows without bound as
+  // extraction publishes more (MOO-330).
+  const VISIBLE_QUOTES = 5;
+  const shownQuotes = quotes.slice(0, VISIBLE_QUOTES);
+  const foldedQuotes = quotes.slice(VISIBLE_QUOTES);
+
+  const navSections: NavSection[] = [
+    ...(candidate.background ? [{ id: "bio", label: "Background" }] : []),
+    ...(candidate.keyPriorities?.length
+      ? [{ id: "priorities", label: "Priorities" }]
+      : []),
+    ...(finance.length > 0 ? [{ id: "money", label: "The money" }] : []),
+    ...(positions.length > 0
+      ? [{ id: "positions", label: "Issues", count: positions.length }]
+      : []),
+    ...(quotes.length > 0
+      ? [{ id: "quotes", label: "Quotes", count: quotes.length }]
+      : []),
+    { id: "sources", label: "Sources" },
+  ];
+
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10">
+      <SectionNav sections={navSections} />
       <JsonLd
         nodes={[
           organizationNode(),
@@ -103,7 +146,7 @@ export default async function CandidatePage({ params }: Props) {
       </div>
 
       {candidate.background && (
-        <section className="mt-6 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
+        <section id="bio" className="mt-6 scroll-mt-16 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
           <h2 className="font-display text-xl">
             Who is {candidate.name}?
           </h2>
@@ -117,7 +160,7 @@ export default async function CandidatePage({ params }: Props) {
       )}
 
       {candidate.keyPriorities && candidate.keyPriorities.length > 0 && (
-        <section className="mt-6">
+        <section id="priorities" className="mt-6 scroll-mt-16">
           <h2 className="font-display text-xl">
             What does {candidate.name} say their priorities are?
           </h2>
@@ -163,7 +206,7 @@ export default async function CandidatePage({ params }: Props) {
       />
 
       {positions.length > 0 && (
-        <section className="mt-6">
+        <section id="positions" className="mt-6 scroll-mt-16">
           <h2 className="font-display text-xl">
             Where does {candidate.name} stand on the issues?
           </h2>
@@ -182,7 +225,7 @@ export default async function CandidatePage({ params }: Props) {
                   </span>
                 </div>
                 <p className="mt-2 text-sm">{p.summary}</p>
-                <SourceList sources={p.sources} title="Position sources" />
+                <SourceList sources={p.sources} title="Position sources" collapsible />
               </div>
             ))}
           </div>
@@ -190,36 +233,32 @@ export default async function CandidatePage({ params }: Props) {
       )}
 
       {quotes.length > 0 && (
-        <section className="mt-6">
+        <section id="quotes" className="mt-6 scroll-mt-16">
           <h2 className="font-display text-xl">In their own words</h2>
           <div className="mt-3 space-y-3">
-            {quotes.map((q) => (
-              <blockquote
-                key={q._id}
-                className="border-l-4 border-primary bg-card p-3"
-              >
-                <p className="text-sm">&ldquo;{q.text}&rdquo;</p>
-                <footer className="mt-2 font-mono text-xs text-muted-foreground">
-                  — {q.speaker}, {q.date} ·{" "}
-                  <a
-                    href={q.sourceUrl}
-                    className="underline"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    {sourceLabel(q.sourceUrl, q.outlet)}
-                  </a>
-                </footer>
-              </blockquote>
+            {shownQuotes.map((q) => (
+              <Quote key={q._id} quote={q} />
             ))}
           </div>
+          {foldedQuotes.length > 0 && (
+            <details className="mt-3">
+              <summary className="cursor-pointer font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Show all {quotes.length} quotes
+              </summary>
+              <div className="mt-3 space-y-3">
+                {foldedQuotes.map((q) => (
+                  <Quote key={q._id} quote={q} />
+                ))}
+              </div>
+            </details>
+          )}
         </section>
       )}
 
-      <div className="mt-10 space-y-3">
+      <section id="sources" className="mt-10 scroll-mt-16 space-y-3">
         <SourceList sources={candidate.sources} />
         <LastUpdated date={candidate.dataAsOf} />
-      </div>
+      </section>
     </main>
   );
 }

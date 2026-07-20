@@ -6,9 +6,9 @@ import { CandidateCard } from "@/components/guide/cards";
 import { RaceFinanceTable } from "@/components/guide/finance";
 import { LastUpdated } from "@/components/guide/labels";
 import {
-  RaceSectionNav,
-  type RaceNavSection,
-} from "@/components/guide/race-section-nav";
+  SectionNav,
+  type NavSection,
+} from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
 import { isOnBallot, partySectionId } from "@/lib/ballot-status";
 import { getRace, listRaces } from "@/lib/data";
@@ -87,7 +87,7 @@ export default async function RacePage({ params }: Props) {
         ? "Republicans"
         : party;
 
-  const navSections: RaceNavSection[] = [
+  const navSections: NavSection[] = [
     ...parties.map((party) => ({
       id: partySectionId(party),
       label: partyChipLabel(party),
@@ -108,7 +108,7 @@ export default async function RacePage({ params }: Props) {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
-      <RaceSectionNav sections={navSections} />
+      <SectionNav sections={navSections} />
       <JsonLd
         nodes={[
           organizationNode(),

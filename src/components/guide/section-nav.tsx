@@ -1,11 +1,11 @@
-export type RaceNavSection = { id: string; label: string; count?: number };
+export type NavSection = { id: string; label: string; count?: number };
 
 /**
- * Sticky in-page jump nav for the race page. Plain anchor chips, no
+ * Sticky in-page jump nav, shared by race and candidate pages. Plain anchor chips, no
  * scroll-spy in v1. Target sections must carry scroll-mt-16 so anchored
  * headings land below this bar (it is ~48px tall; 64px margin is safe).
  */
-export function RaceSectionNav({ sections }: { sections: RaceNavSection[] }) {
+export function SectionNav({ sections }: { sections: NavSection[] }) {
   if (sections.length === 0) return null;
   return (
     <nav
