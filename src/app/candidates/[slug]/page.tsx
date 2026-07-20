@@ -228,7 +228,11 @@ export default async function CandidatePage({ params }: Props) {
         {/* Reference rail (MOO-331): at-a-glance facts that otherwise
             interrupt the reading flow. Sticky below the section nav. */}
         <aside className="lg:col-span-4 lg:sticky lg:top-20 lg:self-start">
-          <FinanceSummary totals={finance} candidateName={candidate.name} />
+          <FinanceSummary
+            totals={finance}
+            candidateName={candidate.name}
+            layout="rail"
+          />
         {candidate.keyPriorities && candidate.keyPriorities.length > 0 && (
           <section id="priorities" className="mt-6 scroll-mt-16">
             <h2 className="font-display text-xl">

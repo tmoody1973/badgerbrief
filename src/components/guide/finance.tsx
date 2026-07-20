@@ -120,9 +120,16 @@ function OrgDonorList({
 export function FinanceSummary({
   totals,
   candidateName,
+  layout = "wide",
 }: {
   totals: Doc<"finance_totals">[];
   candidateName: string;
+  /**
+   * "rail" forces a 2-up stat grid. Viewport breakpoints (sm:) can't help
+   * here — the rail is ~350px wide on a 1440px screen, so sm:grid-cols-4
+   * would still fire and the figures would collide (MOO-331).
+   */
+  layout?: "wide" | "rail";
 }) {
   if (totals.length === 0) return null;
   return (
@@ -137,7 +144,11 @@ export function FinanceSummary({
         >
           <div
             className={`grid gap-3 text-center ${
-              t.debts !== undefined ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"
+              layout === "rail"
+                ? "grid-cols-2"
+                : t.debts !== undefined
+                  ? "grid-cols-2 sm:grid-cols-4"
+                  : "grid-cols-3"
             }`}
           >
             <div>
