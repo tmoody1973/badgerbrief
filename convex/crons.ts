@@ -56,4 +56,15 @@ crons.daily(
   {},
 );
 
+// 12:45 UTC — after the other syncs. No-arg: reads META_ADS_ACCESS_TOKEN and
+// (once curated) tracked pages. With no token it logs an info alert and skips,
+// never crashes (MOO-309). Switch to crons.interval hourly for the final
+// pre-primary week when spend moves fast.
+crons.daily(
+  "sync Meta ads",
+  { hourUTC: 12, minuteUTC: 45 },
+  internal.ads.syncMetaAds,
+  {},
+);
+
 export default crons;

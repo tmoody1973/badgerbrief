@@ -9,6 +9,7 @@
  */
 
 import type * as adminQueue from "../adminQueue.js";
+import type * as ads from "../ads.js";
 import type * as audit from "../audit.js";
 import type * as briefAgent from "../briefAgent.js";
 import type * as briefWorkflow from "../briefWorkflow.js";
@@ -23,6 +24,8 @@ import type * as lib_briefEntities from "../lib/briefEntities.js";
 import type * as lib_briefValidate from "../lib/briefValidate.js";
 import type * as lib_campaignMap from "../lib/campaignMap.js";
 import type * as lib_extraction from "../lib/extraction.js";
+import type * as lib_metaAds from "../lib/metaAds.js";
+import type * as lib_metaAdsFixture from "../lib/metaAdsFixture.js";
 import type * as lib_qa from "../lib/qa.js";
 import type * as lib_scoutParse from "../lib/scoutParse.js";
 import type * as monitor from "../monitor.js";
@@ -50,6 +53,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   adminQueue: typeof adminQueue;
+  ads: typeof ads;
   audit: typeof audit;
   briefAgent: typeof briefAgent;
   briefWorkflow: typeof briefWorkflow;
@@ -64,6 +68,8 @@ declare const fullApi: ApiFromModules<{
   "lib/briefValidate": typeof lib_briefValidate;
   "lib/campaignMap": typeof lib_campaignMap;
   "lib/extraction": typeof lib_extraction;
+  "lib/metaAds": typeof lib_metaAds;
+  "lib/metaAdsFixture": typeof lib_metaAdsFixture;
   "lib/qa": typeof lib_qa;
   "lib/scoutParse": typeof lib_scoutParse;
   monitor: typeof monitor;
