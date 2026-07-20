@@ -112,15 +112,16 @@ function OrgDonorList({
   );
 }
 
-export function FinancePanel({
+/**
+ * Rail-friendly totals only (MOO-331). Stat tiles stay side-by-side in the
+ * main flow but stack in a narrow reference rail, so the grid is driven by
+ * container width rather than a fixed breakpoint.
+ */
+export function FinanceSummary({
   totals,
-  contributions,
-  committeeFunding,
   candidateName,
 }: {
   totals: Doc<"finance_totals">[];
-  contributions?: Doc<"contributions">[];
-  committeeFunding?: Doc<"committee_funding">[];
   candidateName: string;
 }) {
   if (totals.length === 0) return null;
@@ -174,6 +175,26 @@ export function FinancePanel({
           <SourceNote source={t.source} />
         </div>
       ))}
+    </section>
+  );
+}
+
+/**
+ * Contributor + PAC tables. Kept OUT of the reference rail (MOO-331): at
+ * ~500px they would make a sticky rail taller than the viewport.
+ */
+export function FinanceDetail({
+  totals,
+  contributions,
+  committeeFunding,
+}: {
+  totals: Doc<"finance_totals">[];
+  contributions?: Doc<"contributions">[];
+  committeeFunding?: Doc<"committee_funding">[];
+}) {
+  if (totals.length === 0) return null;
+  return (
+    <section className="mt-6">
       {contributions && contributions.length > 0 && (() => {
         const ranked = [...contributions].sort((a, b) => b.amount - a.amount);
         const isOrg = (t?: string) =>
@@ -333,5 +354,33 @@ export function RaceFinanceTable({
         (non-commercial voter education use).
       </p>
     </section>
+  );
+}
+
+/**
+ * Summary + detail in one block, the pre-MOO-331 shape. Kept for the brief
+ * renderer, which is a single narrow column and wants them adjacent.
+ */
+export function FinancePanel({
+  totals,
+  contributions,
+  committeeFunding,
+  candidateName,
+}: {
+  totals: Doc<"finance_totals">[];
+  contributions?: Doc<"contributions">[];
+  committeeFunding?: Doc<"committee_funding">[];
+  candidateName: string;
+}) {
+  if (totals.length === 0) return null;
+  return (
+    <>
+      <FinanceSummary totals={totals} candidateName={candidateName} />
+      <FinanceDetail
+        totals={totals}
+        contributions={contributions}
+        committeeFunding={committeeFunding}
+      />
+    </>
   );
 }

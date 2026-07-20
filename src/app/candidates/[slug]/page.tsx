@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import type { Doc } from "../../../../convex/_generated/dataModel";
 import { CandidatePhoto } from "@/components/guide/candidate-photo";
 import { sourceLabel } from "@/lib/source-label";
-import { FinancePanel } from "@/components/guide/finance";
+import { FinanceDetail, FinanceSummary } from "@/components/guide/finance";
 import {
   LastUpdated,
   PartyBadge,
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function Quote({ quote }: { quote: Doc<"quote_published"> }) {
   return (
     <blockquote className="border-l-4 border-primary bg-card p-3">
-      <p className="text-sm">&ldquo;{quote.text}&rdquo;</p>
+      <p className="max-w-[54ch] text-sm">&ldquo;{quote.text}&rdquo;</p>
       <footer className="mt-2 font-mono text-xs text-muted-foreground">
         — {quote.speaker}, {quote.date} ·{" "}
         <a
@@ -88,7 +88,7 @@ export default async function CandidatePage({ params }: Props) {
   ];
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10">
+    <main className="mx-auto w-full max-w-3xl px-4 py-10 lg:max-w-6xl">
       <SectionNav sections={navSections} />
       <JsonLd
         nodes={[
@@ -145,120 +145,131 @@ export default async function CandidatePage({ params }: Props) {
         </div>
       </div>
 
-      {candidate.background && (
-        <section id="bio" className="mt-6 scroll-mt-16 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
-          <h2 className="font-display text-xl">
-            Who is {candidate.name}?
-          </h2>
-          <p className="mt-2">{candidate.background}</p>
-          {candidate.notes && (
-            <p className="mt-2 text-sm text-muted-foreground">
-              {candidate.notes}
-            </p>
-          )}
-        </section>
-      )}
+      <div className="lg:grid lg:grid-cols-12 lg:gap-8">
+        <div className="min-w-0 lg:col-span-8">
+        {candidate.background && (
+          <section id="bio" className="mt-6 scroll-mt-16 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
+            <h2 className="font-display text-xl">
+              Who is {candidate.name}?
+            </h2>
+            <p className="mt-2 max-w-[54ch]">{candidate.background}</p>
+            {candidate.notes && (
+              <p className="mt-2 max-w-[54ch] text-sm text-muted-foreground">
+                {candidate.notes}
+              </p>
+            )}
+          </section>
+        )}
 
-      {candidate.keyPriorities && candidate.keyPriorities.length > 0 && (
-        <section id="priorities" className="mt-6 scroll-mt-16">
-          <h2 className="font-display text-xl">
-            What does {candidate.name} say their priorities are?
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            As stated by the campaign — these are candidate claims, not
-            BadgerBrief analysis.
-          </p>
-          <ul className="mt-3 space-y-2">
-            {candidate.keyPriorities.map((p) => (
-              <li
-                key={p}
-                className="border-2 border-border bg-secondary p-2 text-sm font-medium"
-              >
-                {p}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {candidate.notableEndorsements &&
-        candidate.notableEndorsements.length > 0 && (
-          <section className="mt-6">
-            <h2 className="font-display text-xl">Notable endorsements</h2>
-            <ul className="mt-3 flex flex-wrap gap-2">
-              {candidate.notableEndorsements.map((e) => (
-                <li
-                  key={e}
-                  className="border border-border bg-card px-2 py-1 text-sm"
+        {positions.length > 0 && (
+          <section id="positions" className="mt-6 scroll-mt-16">
+            <h2 className="font-display text-xl">
+              Where does {candidate.name} stand on the issues?
+            </h2>
+            <div className="mt-3 grid gap-3 xl:grid-cols-2">
+              {positions.map((p) => (
+                <div
+                  key={p._id}
+                  className="border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]"
                 >
-                  {e}
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold uppercase tracking-widest">
+                      {p.issueSlug}
+                    </span>
+                    <span className="border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase">
+                      {p.stance}
+                    </span>
+                  </div>
+                  <p className="mt-2 max-w-[54ch] text-sm">{p.summary}</p>
+                  <SourceList sources={p.sources} title="Position sources" collapsible />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {quotes.length > 0 && (
+          <section id="quotes" className="mt-6 scroll-mt-16">
+            <h2 className="font-display text-xl">In their own words</h2>
+            <div className="mt-3 space-y-3">
+              {shownQuotes.map((q) => (
+                <Quote key={q._id} quote={q} />
+              ))}
+            </div>
+            {foldedQuotes.length > 0 && (
+              <details className="mt-3">
+                <summary className="cursor-pointer font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  Show all {quotes.length} quotes
+                </summary>
+                <div className="mt-3 space-y-3">
+                  {foldedQuotes.map((q) => (
+                    <Quote key={q._id} quote={q} />
+                  ))}
+                </div>
+              </details>
+            )}
+          </section>
+        )}
+
+          {/* Contributor + PAC tables stay in the main column — too tall
+              for a sticky rail (MOO-331). */}
+          <FinanceDetail
+            totals={finance}
+            contributions={contributions}
+            committeeFunding={committeeFunding}
+          />
+
+          <section id="sources" className="mt-10 scroll-mt-16 space-y-3">
+            <SourceList sources={candidate.sources} />
+            <LastUpdated date={candidate.dataAsOf} />
+          </section>
+        </div>
+
+        {/* Reference rail (MOO-331): at-a-glance facts that otherwise
+            interrupt the reading flow. Sticky below the section nav. */}
+        <aside className="lg:col-span-4 lg:sticky lg:top-20 lg:self-start">
+          <FinanceSummary totals={finance} candidateName={candidate.name} />
+        {candidate.keyPriorities && candidate.keyPriorities.length > 0 && (
+          <section id="priorities" className="mt-6 scroll-mt-16">
+            <h2 className="font-display text-xl">
+              What does {candidate.name} say their priorities are?
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              As stated by the campaign — these are candidate claims, not
+              BadgerBrief analysis.
+            </p>
+            <ul className="mt-3 space-y-2">
+              {candidate.keyPriorities.map((p) => (
+                <li
+                  key={p}
+                  className="border-2 border-border bg-secondary p-2 text-sm font-medium"
+                >
+                  {p}
                 </li>
               ))}
             </ul>
           </section>
         )}
 
-      <FinancePanel
-        totals={finance}
-        contributions={contributions}
-        committeeFunding={committeeFunding}
-        candidateName={candidate.name}
-      />
-
-      {positions.length > 0 && (
-        <section id="positions" className="mt-6 scroll-mt-16">
-          <h2 className="font-display text-xl">
-            Where does {candidate.name} stand on the issues?
-          </h2>
-          <div className="mt-3 space-y-3">
-            {positions.map((p) => (
-              <div
-                key={p._id}
-                className="border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold uppercase tracking-widest">
-                    {p.issueSlug}
-                  </span>
-                  <span className="border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase">
-                    {p.stance}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm">{p.summary}</p>
-                <SourceList sources={p.sources} title="Position sources" collapsible />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {quotes.length > 0 && (
-        <section id="quotes" className="mt-6 scroll-mt-16">
-          <h2 className="font-display text-xl">In their own words</h2>
-          <div className="mt-3 space-y-3">
-            {shownQuotes.map((q) => (
-              <Quote key={q._id} quote={q} />
-            ))}
-          </div>
-          {foldedQuotes.length > 0 && (
-            <details className="mt-3">
-              <summary className="cursor-pointer font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Show all {quotes.length} quotes
-              </summary>
-              <div className="mt-3 space-y-3">
-                {foldedQuotes.map((q) => (
-                  <Quote key={q._id} quote={q} />
+        {candidate.notableEndorsements &&
+          candidate.notableEndorsements.length > 0 && (
+            <section className="mt-6">
+              <h2 className="font-display text-xl">Notable endorsements</h2>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {candidate.notableEndorsements.map((e) => (
+                  <li
+                    key={e}
+                    className="border border-border bg-card px-2 py-1 text-sm"
+                  >
+                    {e}
+                  </li>
                 ))}
-              </div>
-            </details>
+              </ul>
+            </section>
           )}
-        </section>
-      )}
+        </aside>
+      </div>
 
-      <section id="sources" className="mt-10 scroll-mt-16 space-y-3">
-        <SourceList sources={candidate.sources} />
-        <LastUpdated date={candidate.dataAsOf} />
-      </section>
     </main>
   );
 }
