@@ -75,6 +75,43 @@ function FundingTrace({
   );
 }
 
+function OrgDonorList({
+  orgs,
+  fundingByName,
+  qualifiesForTrace,
+}: {
+  orgs: Doc<"contributions">[];
+  fundingByName: Map<string, Doc<"committee_funding">>;
+  qualifiesForTrace: (amount: number) => boolean;
+}) {
+  return (
+    <ul className="mt-2 space-y-1 text-sm">
+      {orgs.map((c) => {
+        const funding = qualifiesForTrace(c.amount)
+          ? fundingByName.get(c.contributorName)
+          : undefined;
+        return (
+          <li key={c._id} className="border-b border-dashed border-border pb-1">
+            <div className="flex justify-between gap-2">
+              <span>
+                {c.contributorName}
+                {c.contributorLocation ? ` (${c.contributorLocation})` : ""}
+                {c.contributorType && c.contributorType !== "Business" ? (
+                  <span className="ml-1 font-mono text-[10px] uppercase text-muted-foreground">
+                    {c.contributorType === "Registrant" ? "PAC/Committee" : c.contributorType}
+                  </span>
+                ) : null}
+              </span>
+              <span className="font-mono">{fmt(c.amount)}</span>
+            </div>
+            {funding && <FundingTrace funding={funding} />}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 export function FinancePanel({
   totals,
   contributions,
@@ -193,30 +230,23 @@ export function FinancePanel({
                 <h3 className="font-mono text-xs font-bold uppercase tracking-widest">
                   Top organization &amp; PAC donors
                 </h3>
-                <ul className="mt-2 space-y-1 text-sm">
-                  {orgs.map((c) => {
-                    const funding = qualifiesForTrace(c.amount)
-                      ? fundingByName.get(c.contributorName)
-                      : undefined;
-                    return (
-                      <li key={c._id} className="border-b border-dashed border-border pb-1">
-                        <div className="flex justify-between gap-2">
-                          <span>
-                            {c.contributorName}
-                            {c.contributorLocation ? ` (${c.contributorLocation})` : ""}
-                            {c.contributorType && c.contributorType !== "Business" ? (
-                              <span className="ml-1 font-mono text-[10px] uppercase text-muted-foreground">
-                                {c.contributorType === "Registrant" ? "PAC/Committee" : c.contributorType}
-                              </span>
-                            ) : null}
-                          </span>
-                          <span className="font-mono">{fmt(c.amount)}</span>
-                        </div>
-                        {funding && <FundingTrace funding={funding} />}
-                      </li>
-                    );
-                  })}
-                </ul>
+                <OrgDonorList
+                  orgs={orgs.slice(0, 5)}
+                  fundingByName={fundingByName}
+                  qualifiesForTrace={qualifiesForTrace}
+                />
+                {orgs.length > 5 && (
+                  <details className="mt-2">
+                    <summary className="cursor-pointer font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Show {orgs.length - 5} more
+                    </summary>
+                    <OrgDonorList
+                      orgs={orgs.slice(5)}
+                      fundingByName={fundingByName}
+                      qualifiesForTrace={qualifiesForTrace}
+                    />
+                  </details>
+                )}
                 <SourceNote source={contributions[0].source} />
               </div>
             )}
