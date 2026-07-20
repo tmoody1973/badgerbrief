@@ -141,3 +141,74 @@ describe("adminQueue.resolveAlert", () => {
     expect(entries.map((e) => e.action)).toEqual(["resolve"]);
   });
 });
+
+describe("adQueue + confirmAdMatch (MOO-309)", () => {
+  async function seedAdTask(t: ReturnType<typeof setup>) {
+    return await t.run(async (ctx) => {
+      await ctx.db.insert("candidates", {
+        slug: "kelda-roys",
+        raceId: "WI-GOV-2026",
+        name: "Kelda Roys",
+        sources: [],
+        dataAsOf: "2026-07-20",
+      });
+      const adId = await ctx.db.insert("ads", {
+        platform: "meta",
+        platformAdId: "aid_x",
+        pageOrCommittee: "Roys Victory Fund",
+        creativeText: "Kelda Roys for Governor.",
+        matchConfidence: 0.45,
+        firstSeenAt: 0,
+        lastSeenAt: 0,
+      });
+      const taskId = await ctx.db.insert("review_tasks", {
+        kind: "ad_match",
+        refTable: "ads",
+        refId: adId,
+        status: "open",
+        note: "Roys Victory Fund: name matched → suggested: kelda-roys",
+        createdAt: Date.now(),
+      });
+      return { adId, taskId };
+    });
+  }
+
+  test("confirming attributes the ad publicly and resolves the task", async () => {
+    const t = setup();
+    const { adId, taskId } = await seedAdTask(t);
+
+    const queue = await t.withIdentity(ADMIN).query(api.adminQueue.adQueue, {});
+    expect(queue.openCount).toBe(1);
+    expect(queue.rows[0].suggestedSlug).toBe("kelda-roys");
+
+    await t.withIdentity(ADMIN).mutation(api.adminQueue.confirmAdMatch, {
+      taskId,
+      candidateSlug: "kelda-roys",
+    });
+
+    const ad = await t.run((ctx) => ctx.db.get(adId));
+    expect(ad?.candidateSlug).toBe("kelda-roys");
+    expect(ad?.raceId).toBe("WI-GOV-2026");
+    expect(ad?.matchConfidence).toBe(1);
+    const task = await t.run((ctx) => ctx.db.get(taskId));
+    expect(task?.status).toBe("resolved");
+
+    // Now shows on the candidate's page.
+    const forRoys = await t.query(api.ads.adsForCandidate, {
+      raceId: "WI-GOV-2026",
+      candidateSlug: "kelda-roys",
+    });
+    expect(forRoys).toHaveLength(1);
+  });
+
+  test("rejects a non-admin caller", async () => {
+    const t = setup();
+    const { taskId } = await seedAdTask(t);
+    await expect(
+      t.withIdentity(READER).mutation(api.adminQueue.confirmAdMatch, {
+        taskId,
+        candidateSlug: "kelda-roys",
+      }),
+    ).rejects.toThrow(/admin/);
+  });
+});

@@ -198,6 +198,78 @@ export const listArticleSources = query({
   },
 });
 
+// ---------- ad → candidate attribution review (MOO-309) ----------
+
+/**
+ * Open ad_match tasks joined with their ad, plus the candidate list for the
+ * picker and a real open count. `list` skips ad_match (no draft table); this
+ * is where a human confirms which candidate an ad actually backs.
+ */
+export const adQueue = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const allOpen = await ctx.db
+      .query("review_tasks")
+      .withIndex("by_status", (q) => q.eq("status", "open"))
+      .collect();
+    const adTasks = allOpen
+      .filter((t) => t.kind === "ad_match")
+      .sort((a, b) => b.createdAt - a.createdAt);
+
+    const rows = [];
+    for (const task of adTasks.slice(0, 50)) {
+      const id = ctx.db.normalizeId("ads", task.refId);
+      const ad = id ? await ctx.db.get(id) : null;
+      if (!ad) continue;
+      const suggestedSlug = task.note?.match(/suggested: ([a-z0-9-]+)/)?.[1];
+      rows.push({ task, ad, suggestedSlug });
+    }
+
+    const candidates = (await ctx.db.query("candidates").collect())
+      .map((c) => ({ slug: c.slug, name: c.name, raceId: c.raceId }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    return { rows, candidates, openCount: adTasks.length };
+  },
+});
+
+/**
+ * Confirm an ad belongs to a candidate: attribute it publicly (human-verified,
+ * confidence 1 — so it shows on that candidate's page) and resolve the task.
+ * Dismissing an ad_match uses the generic resolveTask (ad stays unattributed).
+ */
+export const confirmAdMatch = mutation({
+  args: { taskId: v.id("review_tasks"), candidateSlug: v.string() },
+  handler: async (ctx, { taskId, candidateSlug }) => {
+    await requireAdmin(ctx);
+    const task = await ctx.db.get(taskId);
+    if (!task || task.kind !== "ad_match") {
+      throw new Error("ad_match task not found");
+    }
+    const candidate = await ctx.db
+      .query("candidates")
+      .withIndex("by_slug_only", (q) => q.eq("slug", candidateSlug))
+      .first();
+    if (!candidate) throw new Error(`candidate not found: ${candidateSlug}`);
+    const adId = ctx.db.normalizeId("ads", task.refId);
+    if (!adId || !(await ctx.db.get(adId))) throw new Error("ad not found");
+
+    await ctx.db.patch(adId, {
+      candidateSlug: candidate.slug,
+      raceId: candidate.raceId,
+      matchConfidence: 1, // human-verified
+    });
+    await ctx.db.patch(taskId, { status: "resolved", resolvedAt: Date.now() });
+    await logAudit(ctx, {
+      action: "ad:attributed",
+      refTable: "ads",
+      refId: adId,
+      detail: candidate.slug,
+    });
+  },
+});
+
 /** Approve or reject a proposed article source (human source-approval gate). */
 export const decideArticleSource = mutation({
   args: {
