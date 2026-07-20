@@ -77,14 +77,14 @@ describe("selectPolicySubpages", () => {
   // Real /map output shapes, captured 2026-07-19.
   it("picks Crowley's policy pages and drops the rest", () => {
     const links = [
-      "https://www.crowleyforwi.com/Plan",
-      "https://www.crowleyforwi.com",
-      "https://www.crowleyforwi.com/badger-basics",
-      "https://www.crowleyforwi.com/sitemap.xml",
-      "https://www.crowleyforwi.com/events",
-      "https://www.crowleyforwi.com/issues",
-      "https://www.crowleyforwi.com/privacy",
-      "https://www.crowleyforwi.com/volunteer",
+      { url: "https://www.crowleyforwi.com/Plan" },
+      { url: "https://www.crowleyforwi.com" },
+      { url: "https://www.crowleyforwi.com/badger-basics" },
+      { url: "https://www.crowleyforwi.com/sitemap.xml" },
+      { url: "https://www.crowleyforwi.com/events" },
+      { url: "https://www.crowleyforwi.com/issues" },
+      { url: "https://www.crowleyforwi.com/privacy" },
+      { url: "https://www.crowleyforwi.com/volunteer" },
     ];
     expect(
       selectPolicySubpages({
@@ -104,9 +104,9 @@ describe("selectPolicySubpages", () => {
     const out = selectPolicySubpages({
       homepageUrl: "https://crowleyforwi.com",
       links: [
-        "https://crowleyforwi.com",
-        "https://www.crowleyforwi.com/",
-        "https://crowleyforwi.com/plan",
+        { url: "https://crowleyforwi.com" },
+        { url: "https://www.crowleyforwi.com/" },
+        { url: "https://crowleyforwi.com/plan" },
       ],
       cap: 10,
     });
@@ -117,9 +117,9 @@ describe("selectPolicySubpages", () => {
     const out = selectPolicySubpages({
       homepageUrl: "https://crowleyforwi.com",
       links: [
-        "https://secure.actblue.com/donate/crowley/issues",
-        "https://twitter.com/crowley/plan",
-        "https://crowleyforwi.com/issues",
+        { url: "https://secure.actblue.com/donate/crowley/issues" },
+        { url: "https://twitter.com/crowley/plan" },
+        { url: "https://crowleyforwi.com/issues" },
       ],
       cap: 10,
     });
@@ -128,10 +128,10 @@ describe("selectPolicySubpages", () => {
 
   it("caps at N, preferring shallower paths then alphabetical", () => {
     const links = [
-      "https://francescahong.com/policy/veterans",
-      "https://francescahong.com/policy/universal-childcare",
-      "https://francescahong.com/policy",
-      "https://francescahong.com/policy/firewall",
+      { url: "https://francescahong.com/policy/veterans" },
+      { url: "https://francescahong.com/policy/universal-childcare" },
+      { url: "https://francescahong.com/policy" },
+      { url: "https://francescahong.com/policy/firewall" },
     ];
     expect(
       selectPolicySubpages({
@@ -149,20 +149,62 @@ describe("selectPolicySubpages", () => {
     const out = selectPolicySubpages({
       homepageUrl: "https://francescahong.com",
       links: [
-        "https://francescahong.com/policy",
-        "https://francescahong.com/policy/",
-        "http://francescahong.com/policy",
+        { url: "https://francescahong.com/policy" },
+        { url: "https://francescahong.com/policy/" },
+        { url: "http://francescahong.com/policy" },
       ],
       cap: 10,
     });
     expect(out).toHaveLength(1);
   });
 
+  // Real Barnes /map output, captured 2026-07-19: an unedited Squarespace
+  // template stub and a route that just serves the homepage.
+  it("drops unedited template placeholders and homepage-fallback routes", () => {
+    const out = selectPolicySubpages({
+      homepageUrl: "https://www.mandelabarnes.com/",
+      links: [
+        {
+          url: "https://www.mandelabarnes.com/",
+          title: "Mandela Barnes for Governor of Wisconsin | Official Campaign Website",
+        },
+        {
+          // Serves the homepage verbatim — same title gives it away.
+          url: "https://www.mandelabarnes.com/issues",
+          title: "Mandela Barnes for Governor of Wisconsin | Official Campaign Website",
+        },
+        {
+          url: "https://www.mandelabarnes.com/issues/issue-2",
+          title: "Your issue title here",
+        },
+        {
+          url: "https://www.mandelabarnes.com/priorities",
+          title: "The Wisconsin Way — Mandela Barnes",
+        },
+        { url: "https://www.mandelabarnes.com/about", title: "About Mandela Barnes" },
+      ],
+      cap: 10,
+    });
+    expect(out).toEqual([
+      "https://www.mandelabarnes.com/about",
+      "https://www.mandelabarnes.com/priorities",
+    ]);
+  });
+
+  it("keeps pages when titles are absent (map does not always return one)", () => {
+    const out = selectPolicySubpages({
+      homepageUrl: "https://francescahong.com",
+      links: [{ url: "https://francescahong.com/policy/veterans" }],
+      cap: 10,
+    });
+    expect(out).toEqual(["https://francescahong.com/policy/veterans"]);
+  });
+
   it("returns [] when the homepage is unparseable", () => {
     expect(
       selectPolicySubpages({
         homepageUrl: "nonsense",
-        links: ["https://x.com/policy"],
+        links: [{ url: "https://x.com/policy" }],
         cap: 10,
       }),
     ).toEqual([]);

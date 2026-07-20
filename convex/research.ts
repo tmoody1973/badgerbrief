@@ -8,6 +8,7 @@
  */
 import { createHash } from "node:crypto";
 import { v } from "convex/values";
+import type { MapLink } from "./lib/campaignMap";
 import { internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { anthropic } from "@ai-sdk/anthropic";
@@ -102,7 +103,7 @@ export async function fetchFirecrawlMarkdown(url: string): Promise<FetchResult> 
 }
 
 export type MapResult =
-  | { ok: true; links: string[] }
+  | { ok: true; links: MapLink[] }
   | { ok: false; error: string };
 
 /**
@@ -127,14 +128,18 @@ export async function fetchFirecrawlMap(
     if (!res.ok) return { ok: false, error: `map request failed (http ${res.status})` };
     const body = (await res.json()) as {
       success?: boolean;
-      links?: { url?: string }[];
+      links?: { url?: string; title?: string }[];
     };
     if (!body.success || !Array.isArray(body.links)) {
       return { ok: false, error: "map returned no links" };
     }
+    // Titles are kept, not discarded: they are how the selector spots template
+    // placeholders and homepage-fallback routes without paying for a scrape.
     const links = body.links
-      .map((l) => l.url)
-      .filter((u): u is string => typeof u === "string" && u.length > 0);
+      .filter((l): l is { url: string; title?: string } =>
+        typeof l.url === "string" && l.url.length > 0,
+      )
+      .map((l) => ({ url: l.url, title: l.title }));
     return { ok: true, links };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) };

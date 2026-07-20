@@ -201,6 +201,59 @@ describe("registerCampaignSubpages", () => {
   });
 });
 
+describe("rejectSourceUrls", () => {
+  test("marks rows rejected without deleting, and reports unknown URLs", async () => {
+    const t = setup();
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseArticleSource,
+        url: "https://www.mandelabarnes.com/issues/issue-2",
+        status: "approved" as const,
+      }),
+    );
+
+    const result = await t.mutation(internal.researchQueries.rejectSourceUrls, {
+      urls: [
+        "https://www.mandelabarnes.com/issues/issue-2",
+        "https://example.com/never-registered",
+      ],
+    });
+    expect(result).toEqual({
+      rejected: 1,
+      notFound: ["https://example.com/never-registered"],
+    });
+
+    const rows = await t.run((ctx) => ctx.db.query("article_sources").collect());
+    expect(rows).toHaveLength(1); // retired, not deleted
+    expect(rows[0].status).toBe("rejected");
+  });
+
+  test("a retired URL is not re-registered by the mapper", async () => {
+    const t = setup();
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseArticleSource,
+        url: "https://www.mandelabarnes.com/issues/issue-2",
+        status: "approved" as const,
+      }),
+    );
+    await t.mutation(internal.researchQueries.rejectSourceUrls, {
+      urls: ["https://www.mandelabarnes.com/issues/issue-2"],
+    });
+
+    const result = await t.mutation(
+      internal.researchQueries.registerCampaignSubpages,
+      {
+        candidateSlug: "joel-brennan",
+        raceId: "WI-GOV-2026",
+        candidateName: "Joel Brennan",
+        urls: ["https://www.mandelabarnes.com/issues/issue-2"],
+      },
+    );
+    expect(result).toEqual({ registered: 0, skipped: 1 });
+  });
+});
+
 describe("backfillCampaignSourceKind", () => {
   test("retags own-domain rows, leaves off-domain and unverifiable ones alone", async () => {
     const t = setup();

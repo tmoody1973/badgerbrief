@@ -82,6 +82,33 @@ export const registerCampaignSubpages = internalMutation({
 });
 
 /**
+ * Retire registered source URLs by marking them rejected — never by deleting,
+ * so the audit trail survives and registerCampaignSubpages won't re-add them
+ * (any existing row blocks re-insert). Used to retire pages a mapper run
+ * registered before the placeholder/fallback filters existed.
+ */
+export const rejectSourceUrls = internalMutation({
+  args: { urls: v.array(v.string()) },
+  handler: async (ctx, args) => {
+    const rejected: string[] = [];
+    const notFound: string[] = [];
+    for (const url of args.urls) {
+      const row = await ctx.db
+        .query("article_sources")
+        .withIndex("by_url", (q) => q.eq("url", url))
+        .first();
+      if (!row) {
+        notFound.push(url);
+        continue;
+      }
+      await ctx.db.patch(row._id, { status: "rejected", decidedAt: Date.now() });
+      rejected.push(url);
+    }
+    return { rejected: rejected.length, notFound };
+  },
+});
+
+/**
  * One-shot backfill (MOO-326): rows hand-registered before sourceKind existed
  * encoded "own site" by typing it into the outlet string ("Kelda Roys
  * (campaign site)"), so they route to the news-article extraction prompt on

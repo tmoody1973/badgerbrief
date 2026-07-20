@@ -23,6 +23,9 @@ const POLICY_SEGMENTS = [
   "about",
 ];
 
+/** One entry from a Firecrawl /map response. */
+export type MapLink = { url: string; title?: string };
+
 /** Registrable-ish domain of a URL: lowercased host with a leading "www." removed. */
 export function baseDomain(url: string): string | null {
   let parsed: URL;
@@ -56,6 +59,19 @@ export function isPolicyPath(url: string): boolean {
   return POLICY_SEGMENTS.includes(segments[0].toLowerCase());
 }
 
+/**
+ * Titles from unedited site templates. Campaign sites ship on Squarespace/Wix
+ * themes and leave stub pages behind — mandelabarnes.com/issues/issue-2 is
+ * literally titled "Your issue title here" — so registering them as sources
+ * would feed empty pages to the extractor and clutter the editor's queue.
+ */
+const PLACEHOLDER_TITLE = /(your .{0,24}(title|text|heading) here|untitled|lorem ipsum|page title)/i;
+
+export function isPlaceholderTitle(title?: string): boolean {
+  if (!title) return false;
+  return PLACEHOLDER_TITLE.test(title);
+}
+
 /** Identity of a page for dedup: host+path, scheme- and trailing-slash-insensitive. */
 function pageKey(url: string): string {
   const parsed = new URL(url);
@@ -74,7 +90,7 @@ export function selectPolicySubpages({
   cap,
 }: {
   homepageUrl: string;
-  links: string[];
+  links: MapLink[];
   cap: number;
 }): string[] {
   if (!baseDomain(homepageUrl)) return [];
@@ -86,10 +102,25 @@ export function selectPolicySubpages({
     }
   })();
 
+  // A campaign site's unused routes often serve the homepage (Barnes's /issues
+  // is the homepage verbatim). Same title as the homepage ⇒ same page ⇒ a
+  // duplicate extraction of content the homepage target already covers.
+  const homeTitle = links
+    .find((l) => {
+      try {
+        return pageKey(l.url) === homeKey;
+      } catch {
+        return false;
+      }
+    })
+    ?.title?.trim();
+
   const seen = new Set<string>();
   const kept: string[] = [];
-  for (const link of links) {
+  for (const { url: link, title } of links) {
     if (!isSameSite(homepageUrl, link) || !isPolicyPath(link)) continue;
+    if (isPlaceholderTitle(title)) continue;
+    if (homeTitle && title?.trim() === homeTitle) continue;
     let key: string;
     try {
       key = pageKey(link);
