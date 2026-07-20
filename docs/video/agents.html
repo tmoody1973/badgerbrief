@@ -1,0 +1,62 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Public+Sans:wght@400;700&family=Geist+Mono:wght@700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1920px;height:1080px;background:#fff7ed;color:#1c1b1a;font-family:'Public Sans',sans-serif;overflow:hidden}
+.stage{padding:70px 90px}
+h2{font-family:'Archivo Black',sans-serif;font-size:62px;letter-spacing:-.02em;opacity:0;transform:translateY(18px);
+   animation:in .5s .1s forwards}
+.red{color:#c5050c}
+.row{display:flex;align-items:stretch;gap:26px;margin-top:54px}
+.node{flex:1;border:5px solid #1c1b1a;background:#fff;padding:26px 24px;box-shadow:12px 12px 0 #1c1b1a;
+      opacity:0;transform:translateY(26px);animation:in .45s forwards}
+.node .tag{font-family:'Geist Mono',monospace;font-size:19px;font-weight:700;letter-spacing:.16em;
+           text-transform:uppercase;color:#4a4742}
+.node h3{font-family:'Archivo Black',sans-serif;font-size:33px;margin-top:10px;line-height:1.08}
+.node p{font-size:22px;margin-top:12px;line-height:1.32;color:#3a3733}
+.node.human{background:#f6e7b2;border-color:#c5050c}
+.node.human h3{color:#c5050c}
+.arrow{align-self:center;font-size:44px;font-weight:700;opacity:0;animation:in .3s forwards}
+.n1{animation-delay:.55s}.a1{animation-delay:.95s}
+.n2{animation-delay:1.15s}.a2{animation-delay:1.6s}
+.n3{animation-delay:1.8s}.a3{animation-delay:2.25s}
+.n4{animation-delay:2.45s}
+.foot{margin-top:52px;display:inline-block;border:5px solid #1c1b1a;background:#c5050c;color:#fff;
+      padding:20px 30px;font-family:'Geist Mono',monospace;font-size:29px;font-weight:700;
+      box-shadow:12px 12px 0 #1c1b1a;opacity:0;animation:in .5s 3s forwards}
+@keyframes in{to{opacity:1;transform:translateY(0)}}
+/* gate variant */
+body.gate .stage{display:flex;flex-direction:column;justify-content:center;height:1080px}
+body.gate .big{font-family:'Archivo Black',sans-serif;font-size:118px;line-height:1.02;
+     opacity:0;transform:translateY(24px);animation:in .55s .2s forwards;letter-spacing:-.02em}
+body.gate .sub{font-size:40px;margin-top:34px;max-width:1250px;line-height:1.35;opacity:0;
+     animation:in .5s 1.1s forwards}
+body.gate .stamp{margin-top:44px;display:inline-block;border:6px solid #c5050c;color:#c5050c;
+     padding:18px 34px;font-family:'Geist Mono',monospace;font-size:34px;font-weight:700;
+     text-transform:uppercase;letter-spacing:.16em;transform:rotate(-2deg) scale(.85);opacity:0;
+     animation:stamp .45s 2s forwards}
+@keyframes stamp{0%{opacity:0;transform:rotate(-2deg) scale(1.5)}60%{opacity:1;transform:rotate(-2deg) scale(.94)}
+                 100%{opacity:1;transform:rotate(-2deg) scale(1)}}
+</style></head><body>
+<div class="stage" id="pipe">
+  <h2>How the <span class="red">agents</span> work</h2>
+  <div class="row">
+    <div class="node n1"><div class="tag">Step 1</div><h3>Scout</h3><p>Finds candidate sites and local reporting worth reading.</p></div>
+    <div class="arrow a1">→</div>
+    <div class="node n2"><div class="tag">Step 2</div><h3>Research</h3><p>Extracts each stance with a verbatim excerpt and a link.</p></div>
+    <div class="arrow a2">→</div>
+    <div class="node n3"><div class="tag">Step 3</div><h3>Quality</h3><p>A second model scores every draft against its source.</p></div>
+    <div class="arrow a3">→</div>
+    <div class="node n4 human"><div class="tag">Step 4</div><h3>Human editor</h3><p>Approves, edits, or rejects — before anything ships.</p></div>
+  </div>
+  <div class="foot">Nothing publishes automatically</div>
+</div>
+<script>
+  if (location.hash === '#gate') {
+    document.body.className = 'gate';
+    document.getElementById('pipe').innerHTML =
+      '<div class="big">No agent<br/>publishes<br/><span class="red">anything.</span></div>' +
+      '<div class="sub">Every extracted position and quote lands in a review queue as a draft, with its source attached.</div>' +
+      '<div class="stamp">Human approval required</div>';
+  }
+</script>
+</body></html>
