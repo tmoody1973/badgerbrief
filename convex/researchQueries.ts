@@ -40,13 +40,16 @@ export const listResearchTargets = internalQuery({
     for (const a of approvedArticles) {
       const name = nameBySlug.get(a.candidateSlug);
       if (!name) continue; // orphaned row (candidate removed) — skip rather than emit a bad target
+      // MOO-326: own-site subpages carry the campaign-site prompt + citation
+      // label (the candidate, not an outlet). Legacy rows have no sourceKind.
+      const kind = a.sourceKind ?? "article";
       targets.push({
         slug: a.candidateSlug,
         name,
         raceId: a.raceId,
         url: a.url,
-        sourceKind: "article",
-        outlet: a.outlet,
+        sourceKind: kind,
+        outlet: kind === "article" ? a.outlet : undefined,
       });
     }
 

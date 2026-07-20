@@ -306,6 +306,11 @@ export default defineSchema({
     raceId: v.string(),
     url: v.string(),
     outlet: v.string(),            // e.g. "Urban Milwaukee"
+    // MOO-326: own-site policy subpages auto-registered by the campaign-site
+    // mapper. Undefined means "article" — every pre-MOO-326 row.
+    sourceKind: v.optional(
+      v.union(v.literal("article"), v.literal("campaign_site")),
+    ),
     headline: v.string(),
     publishedAt: v.optional(v.string()), // ISO date if the scout found one
     whyRelevant: v.string(),

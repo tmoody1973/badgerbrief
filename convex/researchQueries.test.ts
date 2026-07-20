@@ -81,6 +81,51 @@ describe("listResearchTargets", () => {
       outlet: "Urban Milwaukee",
     });
   });
+
+  test("emits campaign_site semantics for auto-registered own-site subpages", async () => {
+    const t = setup();
+    await t.run((ctx) => ctx.db.insert("candidates", baseCandidate));
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseArticleSource,
+        url: "https://www.brennanforwisconsin.com/Plan",
+        outlet: "Joel Brennan",
+        sourceKind: "campaign_site" as const,
+        status: "approved" as const,
+        decidedAt: 1500,
+      }),
+    );
+
+    const targets = await t.query(internal.researchQueries.listResearchTargets, {});
+    const plan = targets.find(
+      (tg) => tg.url === "https://www.brennanforwisconsin.com/Plan",
+    );
+
+    expect(plan).toBeDefined();
+    expect(plan!.sourceKind).toBe("campaign_site");
+    // No outlet, so saveExtraction cites the candidate rather than a publication.
+    expect(plan!.outlet).toBeUndefined();
+  });
+
+  test("treats a sourceKind-less row as an article (back-compat)", async () => {
+    const t = setup();
+    await t.run((ctx) => ctx.db.insert("candidates", baseCandidate));
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseArticleSource,
+        status: "approved" as const,
+        decidedAt: 1500,
+      }),
+    );
+
+    const targets = await t.query(internal.researchQueries.listResearchTargets, {});
+    const story = targets.find(
+      (tg) => tg.url === "https://urbanmilwaukee.com/2026/06/01/brennan-education",
+    );
+
+    expect(story!.sourceKind).toBe("article");
+    expect(story!.outlet).toBe("Urban Milwaukee");
+  });
 });
 
 describe("saveExtraction sourceLabel", () => {
