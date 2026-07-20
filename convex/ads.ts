@@ -290,26 +290,38 @@ async function ingestAds(
 
 // ---------- Meta sync (MOO-309) ----------
 
+const AD_FIELDS =
+  "id,page_id,page_name,bylines,ad_creative_bodies,ad_creative_link_captions,ad_snapshot_url,ad_delivery_start_time,ad_delivery_stop_time,spend,impressions,currency";
+
+type AdQuery = { searchTerms?: string; searchPageIds?: string[] };
+type FetchResult =
+  | { kind: "ok"; entries: MetaAdArchiveEntry[] }
+  | { kind: "token_expired" }
+  | { kind: "error"; message: string; httpStatus?: number };
+
 async function fetchAdsArchive(
   base: string,
   token: string,
-  trackedEntities: TrackedEntity[],
-): Promise<
-  | { kind: "ok"; entries: MetaAdArchiveEntry[] }
-  | { kind: "token_expired" }
-  | { kind: "error"; message: string; httpStatus?: number }
-> {
-  const fields =
-    "id,page_id,page_name,bylines,ad_creative_bodies,ad_creative_link_captions,ad_snapshot_url,ad_delivery_start_time,ad_delivery_stop_time,spend,impressions,currency";
-  const pageIds = JSON.stringify(trackedEntities.map((p) => p.entityId));
-  const url =
-    `${base}/ads_archive?access_token=${token}` +
-    `&ad_type=POLITICAL_AND_ISSUE_ADS&ad_reached_countries=${encodeURIComponent(
-      '["US"]',
-    )}&search_page_ids=${encodeURIComponent(pageIds)}` +
-    `&fields=${fields}&limit=100`;
+  q: AdQuery,
+  limit: number,
+): Promise<FetchResult> {
+  const params = [
+    `access_token=${token}`,
+    "ad_type=POLITICAL_AND_ISSUE_ADS",
+    `ad_reached_countries=${encodeURIComponent('["US"]')}`,
+    `fields=${AD_FIELDS}`,
+    `limit=${limit}`,
+  ];
+  if (q.searchTerms) {
+    params.push(`search_terms=${encodeURIComponent(q.searchTerms)}`);
+  }
+  if (q.searchPageIds && q.searchPageIds.length > 0) {
+    params.push(
+      `search_page_ids=${encodeURIComponent(JSON.stringify(q.searchPageIds))}`,
+    );
+  }
   try {
-    const res = await fetch(url);
+    const res = await fetch(`${base}/ads_archive?${params.join("&")}`);
     const body = (await res.json()) as {
       data?: MetaAdArchiveEntry[];
       error?: { code?: number; message?: string };
@@ -324,8 +336,8 @@ async function fetchAdsArchive(
       };
     }
     return { kind: "ok", entries: body.data ?? [] };
-    // ponytail: single page (limit 100). Add paging.next follow when a real
-    // page count exceeds it — untestable until live creds exist.
+    // ponytail: first page per query (limit N). Add paging.next follow when a
+    // single candidate's ad count exceeds it.
   } catch (e) {
     return { kind: "error", message: e instanceof Error ? e.message : String(e) };
   }
@@ -335,14 +347,23 @@ export const syncMetaAds = internalAction({
   args: {
     fixture: v.optional(v.array(v.any())), // MetaAdArchiveEntry[]
     trackedEntities: trackedEntitiesValidator,
+    // Override discovery terms; default is every candidate's name.
+    searchTerms: v.optional(v.array(v.string())),
+    perQueryLimit: v.optional(v.number()),
     token: v.optional(v.string()),
     apiBase: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const date = todayISO(Date.now());
+    const base = args.apiBase ?? GRAPH_API_BASE;
+    const logUrl = `${base}/ads_archive`;
     const trackedEntities: TrackedEntity[] = args.trackedEntities ?? [];
     const token = args.token ?? process.env.META_ADS_ACCESS_TOKEN;
-    const logUrl = `${args.apiBase ?? GRAPH_API_BASE}/ads_archive`;
+
+    const candidates: MatchCandidate[] = await ctx.runQuery(
+      internal.ads.listCandidatesForMatching,
+      {},
+    );
 
     let entries: MetaAdArchiveEntry[];
     if (args.fixture) {
@@ -356,36 +377,42 @@ export const syncMetaAds = internalAction({
       });
       return { status: "skipped" as const, reason: "no token" };
     } else {
-      const result = await fetchAdsArchive(
-        args.apiBase ?? GRAPH_API_BASE,
-        token,
-        trackedEntities,
-      );
-      if (result.kind === "token_expired") {
-        await ctx.runMutation(internal.ads.logSync, {
-          url: logUrl,
-          status: "error",
-          error: "Meta access token expired or invalid (code 190) — data is stale",
-          severity: "warning",
-        });
-        return { status: "token_expired" as const };
+      // Discovery: one query per candidate name (targeted to our guide) plus
+      // any curated tracked pages. Deduped by ad id. Term-found ads aren't from
+      // a verified page, so downstream scoring routes them to review.
+      const limit = args.perQueryLimit ?? 15;
+      const terms = args.searchTerms ?? candidates.map((c) => c.name);
+      const queries: AdQuery[] = terms.map((t) => ({ searchTerms: t }));
+      if (trackedEntities.length > 0) {
+        queries.push({ searchPageIds: trackedEntities.map((t) => t.entityId) });
       }
-      if (result.kind === "error") {
-        await ctx.runMutation(internal.ads.logSync, {
-          url: logUrl,
-          status: "error",
-          error: result.message,
-          httpStatus: result.httpStatus,
-        });
-        throw new Error(`Meta ads sync failed: ${result.message}`);
+      const seen = new Map<string, MetaAdArchiveEntry>();
+      for (const q of queries) {
+        const r = await fetchAdsArchive(base, token, q, limit);
+        if (r.kind === "token_expired") {
+          await ctx.runMutation(internal.ads.logSync, {
+            url: logUrl,
+            status: "error",
+            error:
+              "Meta access token expired or invalid (code 190) — data is stale",
+            severity: "warning",
+          });
+          return { status: "token_expired" as const };
+        }
+        if (r.kind === "error") {
+          await ctx.runMutation(internal.ads.logSync, {
+            url: logUrl,
+            status: "error",
+            error: r.message,
+            httpStatus: r.httpStatus,
+          });
+          throw new Error(`Meta ads sync failed: ${r.message}`);
+        }
+        for (const e of r.entries) if (e.id) seen.set(e.id, e);
       }
-      entries = result.entries;
+      entries = [...seen.values()];
     }
 
-    const candidates: MatchCandidate[] = await ctx.runQuery(
-      internal.ads.listCandidatesForMatching,
-      {},
-    );
     const normalized = entries
       .map(normalizeMetaAd)
       .filter((a): a is NormalizedAd => a !== null);
