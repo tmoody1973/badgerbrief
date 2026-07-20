@@ -219,18 +219,19 @@ export const adQueue = query({
       .query("review_tasks")
       .withIndex("by_status", (q) => q.eq("status", "open"))
       .collect();
-    const adTasks = allOpen
-      .filter((t) => t.kind === "ad_match")
-      .sort((a, b) => b.createdAt - a.createdAt);
+    const adTasks = allOpen.filter((t) => t.kind === "ad_match");
 
     const rows = [];
-    for (const task of adTasks.slice(0, 50)) {
+    for (const task of adTasks.slice(0, 300)) {
       const id = ctx.db.normalizeId("ads", task.refId);
       const ad = id ? await ctx.db.get(id) : null;
       if (!ad) continue;
       const suggestedSlug = task.note?.match(/suggested: ([a-z0-9-]+)/)?.[1];
       rows.push({ task, ad, suggestedSlug });
     }
+    // Biggest spenders first — the highest-impact ads to triage. The client
+    // adds search + a likely-attacks filter over this set.
+    rows.sort((a, b) => (b.ad.spendUpper ?? 0) - (a.ad.spendUpper ?? 0));
 
     const candidates = (await ctx.db.query("candidates").collect())
       .map((c) => ({ slug: c.slug, name: c.name, raceId: c.raceId }))

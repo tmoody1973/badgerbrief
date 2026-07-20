@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Doc } from "../../../../convex/_generated/dataModel";
 import { CandidatePhoto } from "@/components/guide/candidate-photo";
 import { sourceLabel } from "@/lib/source-label";
+import { CandidateAds } from "@/components/guide/candidate-ads";
 import { FinanceDetail, FinanceSummary } from "@/components/guide/finance";
 import {
   LastUpdated,
@@ -64,7 +65,7 @@ export default async function CandidatePage({ params }: Props) {
   const { slug } = await params;
   const data = await getCandidateBySlug(slug);
   if (!data) notFound();
-  const { candidate, race, positions, quotes, finance, contributions, committeeFunding } = data;
+  const { candidate, race, positions, quotes, finance, contributions, committeeFunding, ads } = data;
 
   // Quotes past this point fold away — the section grows without bound as
   // extraction publishes more (MOO-330).
@@ -78,6 +79,7 @@ export default async function CandidatePage({ params }: Props) {
       ? [{ id: "priorities", label: "Priorities" }]
       : []),
     ...(finance.length > 0 ? [{ id: "money", label: "The money" }] : []),
+    ...(ads.length > 0 ? [{ id: "ads", label: "The ads", count: ads.length }] : []),
     ...(positions.length > 0
       ? [{ id: "positions", label: "Issues", count: positions.length }]
       : []),
@@ -218,6 +220,8 @@ export default async function CandidatePage({ params }: Props) {
             contributions={contributions}
             committeeFunding={committeeFunding}
           />
+
+          <CandidateAds ads={ads} candidateName={candidate.name} />
 
           <section id="sources" className="mt-10 scroll-mt-16 space-y-3">
             <SourceList sources={candidate.sources} />

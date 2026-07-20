@@ -24,6 +24,25 @@ export function AdReviewQueue() {
   );
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [stanceFilter, setStanceFilter] = useState<"all" | "oppose" | "support">(
+    "all",
+  );
+
+  const nameOf = (slug?: string) =>
+    data?.candidates.find((c) => c.slug === slug)?.name;
+
+  const filteredRows = (data?.rows ?? []).filter((row) => {
+    const guess = defaultStance(nameOf(row.suggestedSlug), row.ad);
+    if (stanceFilter !== "all" && guess !== stanceFilter) return false;
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return `${row.ad.pageOrCommittee} ${row.ad.fundingEntity ?? ""} ${
+      row.ad.creativeText ?? ""
+    } ${nameOf(row.suggestedSlug) ?? ""}`
+      .toLowerCase()
+      .includes(q);
+  });
 
   const run = async (id: string, fn: () => Promise<unknown>) => {
     setBusyId(id);
@@ -59,12 +78,47 @@ export function AdReviewQueue() {
         </p>
       ) : (
         <>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search candidate, sponsor, or ad text…"
+              className="min-w-48 flex-1 border-2 border-border bg-card px-2 py-1.5 font-mono text-sm"
+            />
+            <div className="flex">
+              {(
+                [
+                  ["all", "All"],
+                  ["oppose", "Likely attacks"],
+                  ["support", "Likely support"],
+                ] as const
+              ).map(([val, label], i) => (
+                <button
+                  key={val}
+                  type="button"
+                  aria-pressed={stanceFilter === val}
+                  onClick={() => setStanceFilter(val)}
+                  className={`border-2 border-border px-2 py-1.5 font-mono text-xs font-bold ${
+                    i > 0 ? "-ml-0.5" : ""
+                  } ${
+                    stanceFilter === val
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Showing {data.rows.length} of {data.openCount}. Confirm attributes
-            the ad to that candidate&apos;s page; dismiss leaves it unattributed.
+            {filteredRows.length} shown · {data.openCount} open total (biggest
+            spenders first). Confirm attributes the ad to that candidate&apos;s
+            page; dismiss leaves it unattributed.
           </p>
           <ul className="mt-3 space-y-3">
-            {data.rows.map(({ task, ad, suggestedSlug }) => {
+            {filteredRows.map(({ task, ad, suggestedSlug }) => {
               const selected = picks[task._id] ?? suggestedSlug ?? "";
               const cand = data.candidates.find((c) => c.slug === selected);
               const stance =
