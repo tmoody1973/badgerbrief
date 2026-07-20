@@ -19,6 +19,15 @@ crons.daily(
   {},
 );
 
+// 11:30 UTC — between scout and the research sweep, so own-site policy pages
+// discovered today are extractable in the same run (MOO-326).
+crons.daily(
+  "map campaign sites",
+  { hourUTC: 11, minuteUTC: 30 },
+  internal.siteMap.run,
+  {},
+);
+
 // 12:00 UTC = 7:00 AM Central — after finance sync, before editorial review hours.
 crons.daily(
   "research agent sweep",
