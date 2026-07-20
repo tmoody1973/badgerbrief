@@ -305,6 +305,43 @@ export const addBallotCandidates = internalMutation({
   },
 });
 
+/**
+ * Merge a duplicate candidate created by a name-spelling mismatch (MOO-334):
+ * keep the original row (it carries any enrichment), rename it to the WEC
+ * "Name On Ballot", and delete the duplicate. Refuses if either row is missing
+ * so a typo can't silently delete the wrong person.
+ */
+export const mergeDuplicateCandidate = internalMutation({
+  args: {
+    raceId: v.string(),
+    keepSlug: v.string(),
+    dropSlug: v.string(),
+    ballotName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const bySlug = async (slug: string) =>
+      ctx.db
+        .query("candidates")
+        .withIndex("by_slug", (q) => q.eq("raceId", args.raceId).eq("slug", slug))
+        .first();
+
+    const keep = await bySlug(args.keepSlug);
+    const drop = await bySlug(args.dropSlug);
+    if (!keep) throw new Error(`keepSlug not found: ${args.keepSlug}`);
+    if (!drop) throw new Error(`dropSlug not found: ${args.dropSlug}`);
+
+    const previousName = keep.name;
+    await ctx.db.patch(keep._id, { name: args.ballotName });
+    await ctx.db.delete(drop._id);
+    return {
+      kept: args.keepSlug,
+      renamedFrom: previousName,
+      renamedTo: args.ballotName,
+      deleted: args.dropSlug,
+    };
+  },
+});
+
 export const counts = internalMutation({
   args: {},
   handler: async (ctx) => {
