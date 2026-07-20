@@ -197,6 +197,29 @@ function classifySource(
   }
 }
 
+/**
+ * Register (or correct) a candidate's campaign homepage. 20 of 48 seeded
+ * candidates have no campaign_website, so their site is neither a research
+ * target nor mappable (MOO-326). Merges into socialMedia rather than replacing
+ * it — the record also holds twitter_x / instagram / facebook handles.
+ */
+export const setCampaignWebsite = internalMutation({
+  args: { slug: v.string(), url: v.string() },
+  handler: async (ctx, args) => {
+    const candidate = await ctx.db
+      .query("candidates")
+      .withIndex("by_slug_only", (q) => q.eq("slug", args.slug))
+      .first();
+    if (!candidate) throw new Error(`no candidate with slug "${args.slug}"`);
+
+    const previous = candidate.socialMedia?.campaign_website;
+    await ctx.db.patch(candidate._id, {
+      socialMedia: { ...(candidate.socialMedia ?? {}), campaign_website: args.url },
+    });
+    return { slug: args.slug, previous: previous ?? null, current: args.url };
+  },
+});
+
 export const counts = internalMutation({
   args: {},
   handler: async (ctx) => {
