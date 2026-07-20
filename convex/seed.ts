@@ -252,6 +252,59 @@ export const setPhoto = internalMutation({
   },
 });
 
+/**
+ * Add candidates taken straight from the WEC official contest list (MOO-334).
+ * WEC is authoritative for who is on the printed ballot, so `name` here is the
+ * WEC "Name On Ballot" verbatim — that is what the voter sees in the booth.
+ * Idempotent on (raceId, slug); an existing row is left untouched so this can
+ * never overwrite editorially-enriched records.
+ */
+export const addBallotCandidates = internalMutation({
+  args: {
+    dataAsOf: v.string(),
+    candidates: v.array(
+      v.object({
+        slug: v.string(),
+        raceId: v.string(),
+        name: v.string(),
+        primaryParty: v.string(),
+        party: v.string(),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const added: string[] = [];
+    const skipped: string[] = [];
+    for (const c of args.candidates) {
+      const existing = await ctx.db
+        .query("candidates")
+        .withIndex("by_slug", (q) => q.eq("raceId", c.raceId).eq("slug", c.slug))
+        .first();
+      if (existing) {
+        skipped.push(c.slug);
+        continue;
+      }
+      await ctx.db.insert("candidates", {
+        slug: c.slug,
+        raceId: c.raceId,
+        name: c.name,
+        party: c.party,
+        primaryParty: c.primaryParty,
+        status: "Active",
+        sources: [
+          {
+            name: "Wisconsin Elections Commission — 2026 Partisan Primary candidate list",
+            url: "https://elections.wi.gov/media/40146/download",
+          },
+        ],
+        dataAsOf: args.dataAsOf,
+      });
+      added.push(c.slug);
+    }
+    return { added: added.length, skipped: skipped.length, addedSlugs: added };
+  },
+});
+
 export const counts = internalMutation({
   args: {},
   handler: async (ctx) => {
