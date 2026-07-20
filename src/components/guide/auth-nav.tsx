@@ -1,6 +1,7 @@
 "use client";
 
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { track } from "@/lib/analytics";
 
 /**
  * Sign-in affordance for the site chrome (MOO-332). Before this the site had
@@ -29,6 +30,7 @@ export function AuthNav() {
     <SignInButton mode="modal">
       <button
         type="button"
+        onClick={() => track("auth_start", { intent: "sign_in", from: "nav" })}
         className="press whitespace-nowrap border-2 border-border bg-card px-2 py-1 font-mono text-sm font-bold uppercase tracking-wider shadow-[var(--shadow-brutal)]"
       >
         Sign in

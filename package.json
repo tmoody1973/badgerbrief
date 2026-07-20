@@ -24,6 +24,7 @@
     "@opentelemetry/sdk-trace-node": "^2.9.0",
     "@openuidev/lang-core": "0.2.9",
     "@openuidev/react-lang": "^0.2.8",
+    "@vercel/analytics": "^2.0.1",
     "ai": "^6.0.230",
     "convex": "^1.42.3",
     "next": "16.2.10",

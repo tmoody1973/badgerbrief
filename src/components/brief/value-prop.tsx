@@ -1,6 +1,7 @@
 "use client";
 
 import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
+import { track } from "@/lib/analytics";
 
 /**
  * Value-first screen for signed-out visitors (MOO-332). /brief used to be
@@ -47,6 +48,7 @@ export function BriefValueProp() {
         <SignUpButton mode="modal">
           <button
             type="button"
+            onClick={() => track("auth_start", { intent: "sign_up", from: "brief" })}
             className="press border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)]"
           >
             Create a free account

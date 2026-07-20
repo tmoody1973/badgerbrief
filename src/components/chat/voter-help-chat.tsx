@@ -2,6 +2,7 @@
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { track } from "@/lib/analytics";
 import { ConvexError } from "convex/values";
 import {
   toUIMessages,
@@ -112,11 +113,14 @@ export function VoterHelpChat() {
     setPendingEcho(trimmed);
     setDraft("");
     try {
+      track("voter_help_ask"); // deliberately no properties — the prompt may contain PII
       const { threadId: tid } = await sendMessage({ prompt: trimmed });
       setLocalThreadId(tid);
+      track("voter_help_answered", { ok: true });
     } catch (err) {
       setPendingEcho(null);
       setDraft(trimmed);
+      track("voter_help_answered", { ok: false });
       setError(asMessage(err));
     }
   };

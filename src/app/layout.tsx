@@ -3,6 +3,8 @@ import { Archivo_Black, Public_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { StoreUser } from "./store-user";
+import { Analytics } from "@/components/guide/analytics";
+import { AnalyticsEvents } from "@/components/guide/analytics-events";
 import { SiteFooter, SiteHeader } from "@/components/guide/chrome";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -52,6 +54,8 @@ export default function RootLayout({
           <div className="flex-1">{children}</div>
           <SiteFooter />
         </Providers>
+        <Analytics />
+        <AnalyticsEvents />
       </body>
     </html>
   );

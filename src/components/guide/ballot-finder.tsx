@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { track } from "@/lib/analytics";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Doc } from "../../../convex/_generated/dataModel";
@@ -84,17 +85,20 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
       const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`);
       const data = await res.json();
       if (data.ok) {
+        track("ballot_lookup", { status: "ok" }); // status only — never the address
         applyDistricts(
           { congressional: data.congressional, senate: data.senate, assembly: data.assembly },
           data.matchedAddress,
         );
       } else if (data.error === "not_wisconsin") {
+        track("ballot_lookup", { status: "no_match" });
         setStatus({
           kind: "error",
           message:
             "That address doesn't look like it's in Wisconsin — this guide covers Wisconsin ballots only.",
         });
       } else {
+        track("ballot_lookup", { status: "no_match" });
         setStatus({
           kind: "error",
           message:
@@ -103,6 +107,7 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
         setManual(true);
       }
     } catch {
+      track("ballot_lookup", { status: "error" });
       setStatus({
         kind: "error",
         message: "The address lookup is unavailable right now. You can pick your districts below.",
