@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AuthNav } from "./auth-nav";
 import { NAV_LINKS } from "./nav-links";
 
 /** MOO-314: hamburger menu for narrow screens — the desktop nav row gets
@@ -41,6 +42,9 @@ export function MobileNav() {
           >
             Primary: Aug 11
           </Link>
+          <div className="flex items-center gap-2 border-t-2 border-border px-4 py-3">
+            <AuthNav />
+          </div>
         </nav>
       )}
     </div>

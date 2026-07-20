@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthNav } from "./auth-nav";
 import { MobileNav } from "./mobile-nav";
 import { NAV_LINKS } from "./nav-links";
 
@@ -24,6 +25,7 @@ export function SiteHeader() {
           >
             Aug 11
           </Link>
+          <AuthNav />
         </nav>
         <MobileNav />
       </div>

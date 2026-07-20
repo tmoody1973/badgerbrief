@@ -1,6 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isProtectedRoute = createRouteMatcher(["/admin(.*)", "/brief(.*)", "/chat(.*)"]);
+// /brief is deliberately NOT gated here (MOO-332): the page renders a value
+// explainer + a sample brief for signed-out visitors, and the personal data
+// behind it is gated by Convex auth in the components themselves.
+const isProtectedRoute = createRouteMatcher(["/admin(.*)", "/chat(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
