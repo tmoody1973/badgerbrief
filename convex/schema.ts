@@ -219,6 +219,9 @@ export default defineSchema({
     candidateSlug: v.optional(v.string()),
     raceId: v.optional(v.string()),
     matchConfidence: v.optional(v.number()), // below threshold → review_tasks, not public
+    // Human-set at attribution time: does this ad support or attack the
+    // candidate it's about? Powers the for-vs-against spend analytics (MOO-309).
+    stance: v.optional(v.union(v.literal("support"), v.literal("oppose"))),
     creativeText: v.optional(v.string()),
     creativeLinkUrl: v.optional(v.string()),
     snapshotUrl: v.optional(v.string()),

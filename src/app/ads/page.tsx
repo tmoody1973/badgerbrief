@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AdsAnalytics } from "@/components/guide/ads-analytics";
 import { AdsBrowser } from "@/components/guide/ads-browser";
-import { listAds } from "@/lib/data";
+import { candidateDirectory, listAds } from "@/lib/data";
 
 export const revalidate = 300;
 
@@ -12,7 +12,10 @@ export const metadata: Metadata = {
 };
 
 export default async function AdsPage() {
-  const ads = await listAds();
+  const [ads, candidates] = await Promise.all([listAds(), candidateDirectory()]);
+  const candidateNames = Object.fromEntries(
+    candidates.map((c) => [c.slug, c.name]),
+  );
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
@@ -40,7 +43,7 @@ export default async function AdsPage() {
 
       {ads.length > 0 && (
         <div className="mt-10">
-          <AdsAnalytics ads={ads} />
+          <AdsAnalytics ads={ads} candidateNames={candidateNames} />
         </div>
       )}
 

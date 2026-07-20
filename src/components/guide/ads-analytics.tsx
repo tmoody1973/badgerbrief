@@ -44,7 +44,13 @@ function aggregateBySponsor(ads: Doc<"ads">[]): Agg[] {
   return [...by.values()];
 }
 
-export function AdsAnalytics({ ads }: { ads: Doc<"ads">[] }) {
+export function AdsAnalytics({
+  ads,
+  candidateNames,
+}: {
+  ads: Doc<"ads">[];
+  candidateNames: Record<string, string>;
+}) {
   const totalSpendLow = ads.reduce((s, a) => s + (a.spendLower ?? 0), 0);
   const totalSpendHigh = ads.reduce((s, a) => s + (a.spendUpper ?? 0), 0);
   const sponsors = aggregateBySponsor(ads);
@@ -68,6 +74,8 @@ export function AdsAnalytics({ ads }: { ads: Doc<"ads">[] }) {
         <StatTile label="Sponsors" value={sponsors.length.toLocaleString()} />
         <StatTile label="Running now" value={activeCount.toLocaleString()} />
       </div>
+
+      <ForAgainstChart ads={ads} names={candidateNames} />
 
       <BarList
         title="Top spenders"
@@ -95,6 +103,97 @@ export function AdsAnalytics({ ads }: { ads: Doc<"ads">[] }) {
         not just ad-buying skill.
       </p>
     </section>
+  );
+}
+
+/** Diverging for-vs-against spend per candidate — attacks grow left (red),
+ * support grows right (green) from a shared center. Polarity is encoded by
+ * side (not color alone), with a legend and per-side value labels. */
+function ForAgainstChart({
+  ads,
+  names,
+}: {
+  ads: Doc<"ads">[];
+  names: Record<string, string>;
+}) {
+  const by = new Map<string, { support: number; oppose: number }>();
+  for (const ad of ads) {
+    if (!ad.candidateSlug || !ad.stance) continue;
+    const cur = by.get(ad.candidateSlug) ?? { support: 0, oppose: 0 };
+    const m = mid(ad.spendLower, ad.spendUpper);
+    if (ad.stance === "support") cur.support += m;
+    else cur.oppose += m;
+    by.set(ad.candidateSlug, cur);
+  }
+  const rows = [...by.entries()]
+    .map(([slug, v]) => ({
+      slug,
+      name: names[slug] ?? slug,
+      ...v,
+      total: v.support + v.oppose,
+    }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 12);
+
+  return (
+    <div>
+      <h2 className="font-display text-xl">Spending for &amp; against each candidate</h2>
+      {rows.length === 0 ? (
+        <p className="mt-2 border-2 border-dashed border-border p-4 text-sm text-muted-foreground">
+          No attributed ads yet. As editors confirm ad→candidate matches in the
+          review queue and mark each as supporting or attacking, this fills in.
+        </p>
+      ) : (
+        <>
+          <div className="mt-1 flex items-center gap-4 font-mono text-xs">
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-3 w-3 border-2 border-border bg-success" />
+              Supports
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-3 w-3 border-2 border-border bg-destructive" />
+              Attacks
+            </span>
+          </div>
+          <ul className="mt-3 space-y-2">
+            {rows.map((r) => {
+              const max = Math.max(
+                ...rows.flatMap((x) => [x.support, x.oppose]),
+                1,
+              );
+              return (
+                <li key={r.slug} className="flex items-center gap-2">
+                  <span className="w-32 shrink-0 truncate text-sm sm:w-44" title={r.name}>
+                    {r.name}
+                  </span>
+                  <span className="hidden w-14 shrink-0 text-right font-mono text-[11px] text-muted-foreground sm:inline">
+                    {r.oppose > 0 ? usd(r.oppose) : ""}
+                  </span>
+                  <span className="flex flex-1 items-center">
+                    <span className="flex w-1/2 justify-end">
+                      <span
+                        className="block h-4 rounded-l-[3px] bg-destructive"
+                        style={{ width: `${(r.oppose / max) * 100}%` }}
+                      />
+                    </span>
+                    <span className="h-4 w-px bg-border" />
+                    <span className="flex w-1/2 justify-start">
+                      <span
+                        className="block h-4 rounded-r-[3px] bg-success"
+                        style={{ width: `${(r.support / max) * 100}%` }}
+                      />
+                    </span>
+                  </span>
+                  <span className="hidden w-14 shrink-0 font-mono text-[11px] text-muted-foreground sm:inline">
+                    {r.support > 0 ? usd(r.support) : ""}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+    </div>
   );
 }
 

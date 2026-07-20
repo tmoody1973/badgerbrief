@@ -19,6 +19,9 @@ export function AdReviewQueue() {
   const resolveTask = useMutation(api.adminQueue.resolveTask);
 
   const [picks, setPicks] = useState<Record<string, string>>({});
+  const [stances, setStances] = useState<Record<string, "support" | "oppose">>(
+    {},
+  );
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,6 +66,9 @@ export function AdReviewQueue() {
           <ul className="mt-3 space-y-3">
             {data.rows.map(({ task, ad, suggestedSlug }) => {
               const selected = picks[task._id] ?? suggestedSlug ?? "";
+              const cand = data.candidates.find((c) => c.slug === selected);
+              const stance =
+                stances[task._id] ?? defaultStance(cand?.name, ad);
               const busy = busyId === task._id;
               return (
                 <li
@@ -89,6 +95,12 @@ export function AdReviewQueue() {
                         </option>
                       ))}
                     </select>
+                    <StanceToggle
+                      value={stance}
+                      onChange={(v) =>
+                        setStances((s) => ({ ...s, [task._id]: v }))
+                      }
+                    />
                     <Button
                       disabled={busy || !selected}
                       onClick={() =>
@@ -96,6 +108,7 @@ export function AdReviewQueue() {
                           confirmMatch({
                             taskId: task._id as Id<"review_tasks">,
                             candidateSlug: selected,
+                            stance,
                           }),
                         )
                       }
@@ -123,6 +136,50 @@ export function AdReviewQueue() {
           </ul>
         </>
       )}
+    </div>
+  );
+}
+
+/** Default guess: an ad from the candidate's own committee (their name is in
+ * the sponsor/funder) supports them; anyone else naming them is treated as an
+ * attack until the reviewer says otherwise. */
+function defaultStance(
+  candidateName: string | undefined,
+  ad: Doc<"ads">,
+): "support" | "oppose" {
+  if (!candidateName) return "oppose";
+  const surname = candidateName.trim().split(/\s+/).pop()?.toLowerCase() ?? "";
+  const hay = `${ad.pageOrCommittee} ${ad.fundingEntity ?? ""}`.toLowerCase();
+  return surname && hay.includes(surname) ? "support" : "oppose";
+}
+
+function StanceToggle({
+  value,
+  onChange,
+}: {
+  value: "support" | "oppose";
+  onChange: (v: "support" | "oppose") => void;
+}) {
+  const opts: { value: "support" | "oppose"; label: string; active: string }[] =
+    [
+      { value: "support", label: "Supports", active: "bg-success text-white" },
+      { value: "oppose", label: "Attacks", active: "bg-destructive text-white" },
+    ];
+  return (
+    <div className="flex" role="group" aria-label="Ad stance">
+      {opts.map((o, i) => (
+        <button
+          key={o.value}
+          type="button"
+          aria-pressed={value === o.value}
+          onClick={() => onChange(o.value)}
+          className={`border-2 border-border px-2 py-1.5 font-mono text-xs font-bold ${
+            i > 0 ? "-ml-0.5" : ""
+          } ${value === o.value ? o.active : "bg-card"}`}
+        >
+          {o.label}
+        </button>
+      ))}
     </div>
   );
 }

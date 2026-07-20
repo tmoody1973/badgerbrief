@@ -133,6 +133,20 @@ export const getVotingInfo = query({
   },
 });
 
+/** slug → name/race for all candidates — the /ads analytics turns attributed
+ * ad candidateSlugs into readable names. */
+export const candidateDirectory = query({
+  args: {},
+  handler: async (ctx) => {
+    const candidates = await ctx.db.query("candidates").collect();
+    return candidates.map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      raceId: c.raceId,
+    }));
+  },
+});
+
 export const listIssueSlugs = query({
   args: {},
   handler: async (ctx) => {

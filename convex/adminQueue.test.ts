@@ -184,12 +184,14 @@ describe("adQueue + confirmAdMatch (MOO-309)", () => {
     await t.withIdentity(ADMIN).mutation(api.adminQueue.confirmAdMatch, {
       taskId,
       candidateSlug: "kelda-roys",
+      stance: "support",
     });
 
     const ad = await t.run((ctx) => ctx.db.get(adId));
     expect(ad?.candidateSlug).toBe("kelda-roys");
     expect(ad?.raceId).toBe("WI-GOV-2026");
     expect(ad?.matchConfidence).toBe(1);
+    expect(ad?.stance).toBe("support");
     const task = await t.run((ctx) => ctx.db.get(taskId));
     expect(task?.status).toBe("resolved");
 
@@ -208,6 +210,7 @@ describe("adQueue + confirmAdMatch (MOO-309)", () => {
       t.withIdentity(READER).mutation(api.adminQueue.confirmAdMatch, {
         taskId,
         candidateSlug: "kelda-roys",
+        stance: "support",
       }),
     ).rejects.toThrow(/admin/);
   });

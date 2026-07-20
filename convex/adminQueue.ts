@@ -1,5 +1,11 @@
 import { v } from "convex/values";
-import { mutation, query, MutationCtx, QueryCtx } from "./_generated/server";
+import {
+  internalMutation,
+  mutation,
+  query,
+  MutationCtx,
+  QueryCtx,
+} from "./_generated/server";
 import { Doc } from "./_generated/dataModel";
 import { logAudit } from "./audit";
 
@@ -240,8 +246,12 @@ export const adQueue = query({
  * Dismissing an ad_match uses the generic resolveTask (ad stays unattributed).
  */
 export const confirmAdMatch = mutation({
-  args: { taskId: v.id("review_tasks"), candidateSlug: v.string() },
-  handler: async (ctx, { taskId, candidateSlug }) => {
+  args: {
+    taskId: v.id("review_tasks"),
+    candidateSlug: v.string(),
+    stance: v.union(v.literal("support"), v.literal("oppose")),
+  },
+  handler: async (ctx, { taskId, candidateSlug, stance }) => {
     await requireAdmin(ctx);
     const task = await ctx.db.get(taskId);
     if (!task || task.kind !== "ad_match") {
@@ -259,14 +269,74 @@ export const confirmAdMatch = mutation({
       candidateSlug: candidate.slug,
       raceId: candidate.raceId,
       matchConfidence: 1, // human-verified
+      stance,
     });
     await ctx.db.patch(taskId, { status: "resolved", resolvedAt: Date.now() });
     await logAudit(ctx, {
       action: "ad:attributed",
       refTable: "ads",
       refId: adId,
-      detail: candidate.slug,
+      detail: `${candidate.slug} (${stance})`,
     });
+  },
+});
+
+/**
+ * Bulk-resolve the SAFE subset of the attribution queue: an ad whose sponsor
+ * bears the candidate's own name (both names, or surname + a "for <office>"
+ * committee pattern) is unambiguously that campaign's own ad → attribute as
+ * "support". Outside-group/attack ads never match this and stay open for human
+ * judgment. Reads all open ad_match tasks at once (bounded ~hundreds).
+ */
+export const bulkConfirmOwnCommittee = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const tasks = await ctx.db
+      .query("review_tasks")
+      .withIndex("by_status", (q) => q.eq("status", "open"))
+      .filter((q) => q.eq(q.field("kind"), "ad_match"))
+      .take(1000);
+
+    let confirmed = 0;
+    let leftForHuman = 0;
+    for (const task of tasks) {
+      const slug = task.note?.match(/suggested: ([a-z0-9-]+)/)?.[1];
+      const adId = slug ? ctx.db.normalizeId("ads", task.refId) : null;
+      const ad = adId ? await ctx.db.get(adId) : null;
+      const cand = slug
+        ? await ctx.db
+            .query("candidates")
+            .withIndex("by_slug_only", (q) => q.eq("slug", slug))
+            .first()
+        : null;
+      if (!ad || !cand || !adId) {
+        leftForHuman++;
+        continue;
+      }
+      const parts = cand.name.toLowerCase().split(/\s+/).filter((p) => p.length >= 3);
+      const hay = `${ad.pageOrCommittee} ${ad.fundingEntity ?? ""}`.toLowerCase();
+      const first = parts[0];
+      const last = parts[parts.length - 1];
+      const committeeish =
+        /\bfor (congress|governor|senate|assembly|wisconsin|lieutenant|attorney|state|us house|treasurer|secretary)\b/.test(
+          hay,
+        );
+      const ownCommittee =
+        !!last && hay.includes(last) && (!!first && hay.includes(first) || committeeish);
+      if (!ownCommittee) {
+        leftForHuman++;
+        continue;
+      }
+      await ctx.db.patch(adId, {
+        candidateSlug: cand.slug,
+        raceId: cand.raceId,
+        matchConfidence: 1,
+        stance: "support",
+      });
+      await ctx.db.patch(task._id, { status: "resolved", resolvedAt: Date.now() });
+      confirmed++;
+    }
+    return { confirmed, leftForHuman, scanned: tasks.length };
   },
 });
 
