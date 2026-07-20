@@ -35,7 +35,7 @@ function FundingTrace({
 }) {
   return (
     <details className="mt-1">
-      <summary className="mt-1 inline-block cursor-pointer border-2 border-border bg-warning px-2 py-1 font-mono text-[11px] font-bold uppercase tracking-widest text-black shadow-[var(--shadow-brutal)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none">
+      <summary className="mt-1 inline-block cursor-pointer border-2 border-border bg-warning px-2 py-1 font-mono text-[11px] font-bold uppercase tracking-widest text-foreground shadow-[var(--shadow-brutal)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none">
         ▸ Where this money comes from
       </summary>
       <div className="mt-2 border-2 border-dashed border-border bg-secondary/40 p-3">

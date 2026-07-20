@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AuthNav } from "./auth-nav";
 import { MobileNav } from "./mobile-nav";
 import { NAV_LINKS } from "./nav-links";
+import { ThemeToggle } from "./theme-toggle";
 
 // Methodology lives in the footer + mobile menu; the desktop row stays short.
 const DESKTOP_LINKS = NAV_LINKS.filter((l) => l.href !== "/methodology");
@@ -26,6 +27,7 @@ export function SiteHeader() {
             Aug 11
           </Link>
           <AuthNav />
+          <ThemeToggle />
         </nav>
         <MobileNav />
       </div>

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AuthNav } from "./auth-nav";
 import { NAV_LINKS } from "./nav-links";
+import { ThemeToggle } from "./theme-toggle";
 
 /** MOO-314: hamburger menu for narrow screens — the desktop nav row gets
  * cramped below `sm`. Closes on route change so it never sticks open. */
@@ -42,8 +43,9 @@ export function MobileNav() {
           >
             Primary: Aug 11
           </Link>
-          <div className="flex items-center gap-2 border-t-2 border-border px-4 py-3">
+          <div className="flex items-center justify-between gap-2 border-t-2 border-border px-4 py-3">
             <AuthNav />
+            <ThemeToggle />
           </div>
         </nav>
       )}

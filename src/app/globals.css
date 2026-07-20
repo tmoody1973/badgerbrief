@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: next-themes toggles `.dark` on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* BadgerBrief Wisconsin civic palette — spec: docs/superpowers/specs/2026-07-17-badgerbrief-m1-design.md */
 :root {
+  color-scheme: light;
   --background: #fff7ed; /* bb-cream */
   --foreground: #1c1b1a; /* bb-charcoal */
   --card: #ffffff; /* bb-paper */
@@ -21,6 +25,39 @@
   --border: #1c1b1a;
   --ring: #c5050c;
   --shadow-brutal: 4px 4px 0px #1c1b1a;
+}
+
+/* Dark mode: same semantic tokens, warm-dark values. Every component reads
+   these via bg-card / border-border / text-muted etc., so overriding here
+   flips the whole guide. Neo-brutalist signature preserved by making the
+   border AND the offset shadow light (a black border/shadow vanishes on a
+   dark ground). Cardinal + lake are brightened for legibility on dark; the
+   alert yellow stays bright so existing dark-text-on-warning pairings hold. */
+.dark {
+  color-scheme: dark;
+  --background: #17140f; /* warm near-black (echoes the cream, not cold gray) */
+  --foreground: #f5efe2; /* warm off-white */
+  --card: #221e17; /* elevated warm surface */
+  --card-foreground: #f5efe2;
+  --primary: #e24a50; /* cardinal, brightened for dark */
+  --primary-foreground: #ffffff;
+  --secondary: #2c2718; /* dark warm (was butter) */
+  --secondary-foreground: #f5efe2;
+  --muted: #2a251d;
+  --muted-foreground: #b8b0a2; /* the 90×-used token — muted but legible */
+  --accent: #57a6db; /* lake, brightened for dark */
+  --accent-foreground: #17140f;
+  --destructive: #ef5a5a;
+  --destructive-foreground: #17140f;
+  --success: #63b178;
+  --warning: #6b5010; /* deep amber: reads as an alert w/ light text, and a
+                         bright-yellow slab would glare on a dark page. The
+                         ~19 bg-warning surfaces inherit the light foreground,
+                         so deepening (not brightening) is what makes them
+                         legible in dark mode. */
+  --border: #e7dfce; /* light hard border keeps the brutalist edge */
+  --ring: #e24a50;
+  --shadow-brutal: 4px 4px 0px #e7dfce; /* light offset block on dark */
 }
 
 @theme inline {
