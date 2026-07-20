@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Public+Sans:wght@400;700&family=Geist+Mono:wght@700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1920px;height:1080px;background:#fff7ed;color:#1c1b1a;font-family:'Public Sans',sans-serif;overflow:hidden}
+.stage{padding:80px 100px;height:1080px;display:flex;flex-direction:column;justify-content:center}
+.kick{font-family:'Geist Mono',monospace;font-size:24px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+      color:#fff;background:#c5050c;display:inline-block;padding:12px 22px;align-self:flex-start;
+      opacity:0;transform:translateY(16px);animation:in .45s .1s forwards}
+h1{font-family:'Archivo Black',sans-serif;font-size:96px;line-height:1.04;letter-spacing:-.02em;margin-top:30px;
+   opacity:0;transform:translateY(20px);animation:in .5s .35s forwards}
+.red{color:#c5050c}
+.row{display:flex;gap:26px;margin-top:56px}
+.card{flex:1;border:5px solid #1c1b1a;background:#fff;padding:28px 26px;box-shadow:12px 12px 0 #1c1b1a;
+      opacity:0;transform:translateY(24px);animation:in .45s forwards}
+.card .t{font-family:'Geist Mono',monospace;font-size:20px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#4a4742}
+.card h3{font-family:'Archivo Black',sans-serif;font-size:35px;margin-top:10px}
+.card p{font-size:22px;margin-top:12px;line-height:1.34;color:#3a3733}
+.c1{animation-delay:.9s}.c2{animation-delay:1.2s}.c3{animation-delay:1.5s}
+.note{margin-top:46px;font-size:26px;color:#4a4742;opacity:0;animation:in .5s 2.2s forwards;
+      font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.1em}
+@keyframes in{to{opacity:1;transform:translateY(0)}}
+</style></head><body>
+<div class="stage">
+  <div class="kick">Coming next</div>
+  <h1>Who's <span class="red">paying</span> to<br/>reach you.</h1>
+  <div class="row">
+    <div class="card c1"><div class="t">Meta</div><h3>Facebook &amp; Instagram</h3><p>Political ad spend, creatives, and who funded them.</p></div>
+    <div class="card c2"><div class="t">Google</div><h3>Search &amp; YouTube</h3><p>Ad spend by race, from the public transparency dataset.</p></div>
+    <div class="card c3"><div class="t">FCC</div><h3>Broadcast TV</h3><p>Station political files — the record every buyer must publish.</p></div>
+  </div>
+  <div class="note">In development — not yet on the site</div>
+</div>
+</body></html>
