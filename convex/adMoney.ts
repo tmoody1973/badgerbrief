@@ -48,7 +48,8 @@ export const adMoneyOverview = query({
   args: {},
   handler: async (ctx) => {
     const [ads, races, candidates] = await Promise.all([
-      ctx.db.query("ads").take(2000),
+      // ponytail: .collect() reads all ads (bounded by Convex's ~16k-doc/8MB query limit); paginate if a cycle ever approaches that.
+      ctx.db.query("ads").collect(),
       ctx.db.query("races").collect(),
       ctx.db.query("candidates").collect(),
     ]);

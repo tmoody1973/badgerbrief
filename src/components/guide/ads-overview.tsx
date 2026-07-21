@@ -24,9 +24,14 @@ function StatTile({ label, value, note }: { label: string; value: string; note?:
 /** support-vs-attack mini bar for a race card. */
 function ForAgainstBar({ supportShare, attackShare }: { supportShare: number; attackShare: number }) {
   return (
-    <div className="mt-2 flex h-2 w-full overflow-hidden border-2 border-border">
-      <div className="bg-success" style={{ width: `${Math.round(supportShare * 100)}%` }} />
-      <div className="bg-destructive" style={{ width: `${Math.round(attackShare * 100)}%` }} />
+    <div>
+      <div className="mt-2 flex h-2 w-full overflow-hidden border-2 border-border">
+        <div className="bg-success" style={{ width: `${Math.round(supportShare * 100)}%` }} />
+        <div className="bg-destructive" style={{ width: `${Math.round(attackShare * 100)}%` }} />
+      </div>
+      <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        {Math.round(supportShare * 100)}% for · {Math.round(attackShare * 100)}% against
+      </p>
     </div>
   );
 }
