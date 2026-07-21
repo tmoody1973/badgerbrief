@@ -13,5 +13,8 @@ export const listCandidateSlugs = () =>
   fetchQuery(api.public.listCandidateSlugs, {});
 export const getVotingInfo = () => fetchQuery(api.public.getVotingInfo, {});
 export const listAds = () => fetchQuery(api.ads.listAds, {});
+export const getAdMoneyForRace = (raceId: string) =>
+  fetchQuery(api.adMoney.adMoneyForRace, { raceId });
+export const getAdMoneyOverview = () => fetchQuery(api.adMoney.adMoneyOverview, {});
 export const candidateDirectory = () =>
   fetchQuery(api.public.candidateDirectory, {});

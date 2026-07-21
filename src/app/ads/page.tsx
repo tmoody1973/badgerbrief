@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { AdsAnalytics } from "@/components/guide/ads-analytics";
 import { AdsBrowser } from "@/components/guide/ads-browser";
-import { candidateDirectory, listAds } from "@/lib/data";
+import { AdsOverview } from "@/components/guide/ads-overview";
+import { YourRaces } from "@/components/guide/your-races";
+import { candidateDirectory, getAdMoneyOverview, listAds } from "@/lib/data";
 
 export const revalidate = 300;
 
@@ -12,7 +14,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AdsPage() {
-  const [ads, candidates] = await Promise.all([listAds(), candidateDirectory()]);
+  const [ads, candidates, overview] = await Promise.all([
+    listAds(),
+    candidateDirectory(),
+    getAdMoneyOverview(),
+  ]);
   const candidateNames = Object.fromEntries(
     candidates.map((c) => [c.slug, c.name]),
   );
@@ -42,6 +48,13 @@ export default async function AdsPage() {
           who it really backs.
         </p>
       </section>
+
+      <YourRaces races={overview.races} />
+
+      <AdsOverview overview={overview} />
+
+      <hr className="mt-10 border-t-2 border-dashed border-border" />
+      <h2 className="font-display mt-8 text-2xl">Statewide detail</h2>
 
       {ads.length > 0 && (
         <div className="mt-10">

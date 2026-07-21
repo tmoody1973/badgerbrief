@@ -5,13 +5,14 @@ import type { Doc } from "../../../../convex/_generated/dataModel";
 import { CandidateCard } from "@/components/guide/cards";
 import { RaceFinanceTable } from "@/components/guide/finance";
 import { LastUpdated } from "@/components/guide/labels";
+import { RaceAdMoney } from "@/components/guide/race-ad-money";
 import {
   SectionNav,
   type NavSection,
 } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
 import { isOnBallot, partySectionId } from "@/lib/ballot-status";
-import { getRace, listRaces } from "@/lib/data";
+import { getAdMoneyForRace, getRace, listRaces } from "@/lib/data";
 import {
   JsonLd,
   breadcrumbNode,
@@ -72,6 +73,7 @@ export default async function RacePage({ params }: Props) {
   const data = await getRace(slugToRaceId(slug));
   if (!data) notFound();
   const { race, candidates, finance } = data;
+  const adMoney = await getAdMoneyForRace(slugToRaceId(slug));
 
   const parties = [
     ...new Set(candidates.map((c) => c.primaryParty).filter(Boolean)),
@@ -103,6 +105,7 @@ export default async function RacePage({ params }: Props) {
         ]
       : []),
     ...(finance.length > 0 ? [{ id: "money", label: "The money" }] : []),
+    ...(adMoney.candidates.length > 0 ? [{ id: "ad-money", label: "Ad money" }] : []),
     { id: "sources", label: "Sources" },
   ];
 
@@ -182,6 +185,8 @@ export default async function RacePage({ params }: Props) {
       )}
 
       <RaceFinanceTable finance={finance} candidates={candidates} />
+
+      <RaceAdMoney data={adMoney} />
 
       {candidates.length > 1 && (
         <div className="mt-8">
