@@ -259,6 +259,7 @@ export function AdReviewQueue() {
   const data = useQuery(api.adminQueue.adQueue, isAuthenticated ? {} : "skip");
   const confirmMatch = useMutation(api.adminQueue.confirmAdMatch);
   const resolveTask = useMutation(api.adminQueue.resolveTask);
+  const publishIssue = useMutation(api.adminQueue.publishTvIssueAd);
   const { busyId, error, run } = useBusyRunner();
 
   const [query, setQuery] = useState("");
@@ -365,6 +366,26 @@ export function AdReviewQueue() {
                   >
                     Dismiss
                   </Button>
+                  {ad.platform === "tv" && (
+                    <Button
+                      variant="outline"
+                      disabled={busyId === task._id}
+                      onClick={() =>
+                        run(task._id, () =>
+                          publishIssue({
+                            taskId: task._id as Id<"review_tasks">,
+                            issueTopic:
+                              ad.disclosure?.nationalIssue ?? "Issue ad",
+                          }),
+                        )
+                      }
+                    >
+                      Confirm as issue ad
+                      {ad.disclosure?.nationalIssue
+                        ? ` (${ad.disclosure.nationalIssue})`
+                        : ""}
+                    </Button>
+                  )}
                 </AttributionControls>
                 {ad.platform === "tv" && (
                   <SponsorResolver advertiser={ad.pageOrCommittee} />

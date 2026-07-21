@@ -50,6 +50,25 @@ async function candidatesWithOffice(ctx: QueryCtx | MutationCtx) {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+/** Match a disclosed candidate name (from the NAB form) to one of our tracked
+ * candidates by surname — so the reviewer's picker pre-selects who the ad's own
+ * FCC disclosure says it's about. */
+function matchDisclosedCandidate(
+  disclosed: string[] | undefined,
+  roster: { slug: string; name: string }[],
+): string | undefined {
+  if (!disclosed?.length) return undefined;
+  const surname = (n: string) =>
+    n.toLowerCase().replace(/[^a-z\s]/g, "").trim().split(/\s+/).pop() ?? "";
+  for (const name of disclosed) {
+    const s = surname(name);
+    if (s.length < 4) continue;
+    const hit = roster.find((c) => surname(c.name) === s);
+    if (hit) return hit.slug;
+  }
+  return undefined;
+}
+
 const stanceLabel = v.union(
   v.literal("support"),
   v.literal("oppose"),
@@ -282,6 +301,7 @@ export const adQueue = query({
       .withIndex("by_status", (q) => q.eq("status", "open"))
       .collect();
     const adTasks = allOpen.filter((t) => t.kind === "ad_match");
+    const roster = await candidatesWithOffice(ctx);
 
     // Join EVERY ad_match task, then sort by spend, then cap. Slicing before the
     // sort (the old bug) truncated in insertion order, so the biggest spenders —
@@ -291,7 +311,11 @@ export const adQueue = query({
       const id = ctx.db.normalizeId("ads", task.refId);
       const ad = id ? await ctx.db.get(id) : null;
       if (!ad) continue;
-      const suggestedSlug = task.note?.match(/suggested: ([a-z0-9-]+)/)?.[1];
+      // Prefer the ad's own FCC disclosure (who it says it's about) over the
+      // sponsor-name surname guess — that's the one-click race attribution.
+      const suggestedSlug =
+        matchDisclosedCandidate(ad.disclosure?.candidates, roster) ??
+        task.note?.match(/suggested: ([a-z0-9-]+)/)?.[1];
       const pdfUrl = await tvPdfUrl(ctx, ad);
       rows.push({ task, ad, suggestedSlug, pdfUrl });
     }
@@ -301,7 +325,7 @@ export const adQueue = query({
 
     return {
       rows: rows.slice(0, 300),
-      candidates: await candidatesWithOffice(ctx),
+      candidates: roster,
       openCount: adTasks.length,
     };
   },
@@ -344,6 +368,32 @@ export const confirmAdMatch = mutation({
       refTable: "ads",
       refId: adId,
       detail: `${candidate.slug} (${stance})`,
+    });
+  },
+});
+
+/**
+ * Confirm a TV ad as an ISSUE ad — a national-issue buy with no candidate to
+ * attribute (e.g. "Tariffs"). Stamps issueTopic + resolves the task, so it
+ * clears the queue and reads as human-reviewed on the outside-spending tracker.
+ */
+export const publishTvIssueAd = mutation({
+  args: { taskId: v.id("review_tasks"), issueTopic: v.string() },
+  handler: async (ctx, { taskId, issueTopic }) => {
+    await requireAdmin(ctx);
+    const task = await ctx.db.get(taskId);
+    if (!task || task.kind !== "ad_match") {
+      throw new Error("ad_match task not found");
+    }
+    const adId = ctx.db.normalizeId("ads", task.refId);
+    if (!adId || !(await ctx.db.get(adId))) throw new Error("ad not found");
+    await ctx.db.patch(adId, { issueTopic: issueTopic.trim() || "Issue ad" });
+    await ctx.db.patch(taskId, { status: "resolved", resolvedAt: Date.now() });
+    await logAudit(ctx, {
+      action: "ad:issue_published",
+      refTable: "ads",
+      refId: adId,
+      detail: issueTopic,
     });
   },
 });
