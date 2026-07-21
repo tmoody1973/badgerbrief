@@ -15,7 +15,7 @@
 /** At/above this confidence an ad auto-attributes to a candidate publicly. */
 export const PUBLIC_MATCH_THRESHOLD = 0.7;
 
-export type AdPlatform = "meta" | "google";
+export type AdPlatform = "meta" | "google" | "tv";
 
 /** Normalized ad, aligned to the `ads` table columns (minus bookkeeping
  * timestamps and the attribution the caller decides). `entityId` is the

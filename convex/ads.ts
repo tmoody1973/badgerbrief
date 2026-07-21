@@ -74,6 +74,18 @@ export const listCandidatesForMatching = internalQuery({
   },
 });
 
+/** Already-synced TV fileManagerIds (platformAdId) — the sync's dedup set. */
+export const existingTvIds = internalQuery({
+  args: {},
+  handler: async (ctx): Promise<string[]> => {
+    const rows = await ctx.db
+      .query("ads")
+      .withIndex("by_platform_ad", (q) => q.eq("platform", "tv"))
+      .collect();
+    return rows.map((r) => r.platformAdId);
+  },
+});
+
 // ---------- writes ----------
 
 const adWriteFields = {
@@ -376,7 +388,8 @@ async function ingestAds(
     });
 
     await ctx.runMutation(internal.ads.recordDailyMetric, {
-      platform: ad.platform,
+      // ingestAds only runs for the meta/google syncs; TV has no daily series.
+      platform: ad.platform as "meta" | "google",
       platformAdId: ad.platformAdId,
       date,
       spendLower: ad.spendLower,

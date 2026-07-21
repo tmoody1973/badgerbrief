@@ -11,6 +11,7 @@
 import type * as adMoney from "../adMoney.js";
 import type * as adminQueue from "../adminQueue.js";
 import type * as ads from "../ads.js";
+import type * as adsTv from "../adsTv.js";
 import type * as audit from "../audit.js";
 import type * as briefAgent from "../briefAgent.js";
 import type * as briefWorkflow from "../briefWorkflow.js";
@@ -48,7 +49,6 @@ import type * as scoutQueries from "../scoutQueries.js";
 import type * as seed from "../seed.js";
 import type * as siteMap from "../siteMap.js";
 import type * as tvExtractAgent from "../tvExtractAgent.js";
-import type * as tvSpike from "../tvSpike.js";
 import type * as users from "../users.js";
 import type * as voterHelp from "../voterHelp.js";
 import type * as voterHelpQueries from "../voterHelpQueries.js";
@@ -63,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   adMoney: typeof adMoney;
   adminQueue: typeof adminQueue;
   ads: typeof ads;
+  adsTv: typeof adsTv;
   audit: typeof audit;
   briefAgent: typeof briefAgent;
   briefWorkflow: typeof briefWorkflow;
@@ -100,7 +101,6 @@ declare const fullApi: ApiFromModules<{
   seed: typeof seed;
   siteMap: typeof siteMap;
   tvExtractAgent: typeof tvExtractAgent;
-  tvSpike: typeof tvSpike;
   users: typeof users;
   voterHelp: typeof voterHelp;
   voterHelpQueries: typeof voterHelpQueries;
