@@ -37,9 +37,13 @@ per station — WISN + WTMJ confirmed below).
 **Madison (DMA):** WISC-TV (CBS), WMTV (NBC), WKOW (ABC), WMSN-TV (Fox) — *ad-relevant*. Likely-empty: WHA-TV (PBS), WIFS (Ion).
 **Green Bay–Appleton (DMA):** WBAY-TV (ABC), WFRV-TV (CBS), WLUK-TV (Fox), WGBA-TV (NBC), WCWF (CW), WACY-TV (ind) — *ad-relevant*. Likely-empty: WPNE-TV (PBS), WMEI (MeTV).
 
-**Confirmed folder URLs:**
-- WISN-TV (Milwaukee, ABC/Hearst, Facility 65680): `https://publicfiles.fcc.gov/tv-profile/WISN-TV/political-files/2026/080b644a-6eef-ea4c-f3b5-8bec6e0439f3`
-- WTMJ-TV (Milwaukee, NBC/TMJ4): `https://publicfiles.fcc.gov/tv-profile/WTMJ-TV/political-files/2026/36e1aa59-fc1c-d3a2-f609-17e91507462c`
+**Station seed committed:** `docs/superpowers/specs/fixtures/wi-tv-stations.csv` — all
+full-power TV across the 3 DMAs (26 stations), with `dma`, `network`, and an
+`ad_relevant` flag (16 yes = Big-4+CW+independent affiliates that carry buys; 10 no =
+PBS/religious/Ion/shopping, near-empty). URLs are base `/tv-profile/{callSign}` profiles;
+the sync navigates from there into Political Files → 2026 (folder UUID differs per
+station — discover it, don't hardcode). Low-power/translator/radio excluded (no political
+buys). Confirmed 2026-folder UUIDs so far: WISN-TV `080b644a-…`, WTMJ-TV `36e1aa59-…`.
 
 ## Build shape (from the spec)
 
