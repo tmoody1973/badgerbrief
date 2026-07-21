@@ -84,7 +84,7 @@ crons.daily(
 crons.daily(
   "sync TV ads",
   { hourUTC: 13, minuteUTC: 30 },
-  internal.adsTv.syncTvAds,
+  internal.adsTv.syncTvAdsDispatch,
   {},
 );
 

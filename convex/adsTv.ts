@@ -309,34 +309,38 @@ async function enumerateStation(
 async function unwrapPortfolio(
   pdf: Uint8Array,
 ): Promise<Uint8Array[] | null> {
-  const mupdf: any = await import("mupdf");
-  const doc = mupdf.Document.openDocument(pdf, "application/pdf");
-  const asPdf = doc.asPDF ? doc.asPDF() : doc;
-  const ef = asPdf
-    .getTrailer()
-    .get("Root")
-    .get("Names")
-    .get("EmbeddedFiles");
-  if (!ef || ef.isNull?.()) return null;
-  const names = ef.get("Names");
-  const len = names.length ?? 0;
-  const out: Uint8Array[] = [];
-  for (let i = 0; i + 1 < len; i += 2) {
-    try {
-      const filespec = names.get(i + 1);
-      const stream = filespec.get("EF").get("F");
-      const buf = stream.readStream();
-      const bytes: Uint8Array = buf.asUint8Array
-        ? buf.asUint8Array()
-        : new Uint8Array(buf);
-      // Only keep real PDF attachments (skip signatures/NAB xml, etc.).
-      if (bytes.length > 2000 && bytes[0] === 0x25 && bytes[1] === 0x50)
-        out.push(bytes);
-    } catch {
-      // skip a bad attachment
+  try {
+    const mupdf: any = await import("mupdf");
+    const doc = mupdf.Document.openDocument(pdf, "application/pdf");
+    const asPdf = doc.asPDF ? doc.asPDF() : doc;
+    const names = asPdf.getTrailer().get("Root").get("Names");
+    if (!names || names.isNull?.()) return null;
+    const ef = names.get("EmbeddedFiles");
+    if (!ef || ef.isNull?.()) return null;
+    const entries = ef.get("Names");
+    if (!entries || entries.isNull?.()) return null;
+    const len = entries.length ?? 0;
+    const out: Uint8Array[] = [];
+    for (let i = 0; i + 1 < len; i += 2) {
+      try {
+        const filespec = entries.get(i + 1);
+        const stream = filespec.get("EF").get("F");
+        const buf = stream.readStream();
+        const bytes: Uint8Array = buf.asUint8Array
+          ? buf.asUint8Array()
+          : new Uint8Array(buf);
+        // Only keep real PDF attachments (skip signatures/NAB xml, etc.).
+        if (bytes.length > 2000 && bytes[0] === 0x25 && bytes[1] === 0x50)
+          out.push(bytes);
+      } catch {
+        // skip a bad attachment
+      }
     }
+    return out.length ? out : null;
+  } catch {
+    // Malformed portfolio metadata — treat as a plain PDF (extract directly).
+    return null;
   }
-  return out.length ? out : null;
 }
 
 const slugify = (s: string) =>
@@ -357,7 +361,7 @@ async function downloadDocs(
   const idBySlug: { id: string; slug: string }[] = [];
   for (const id of fileManagerIds) {
     const [download] = await Promise.all([
-      page.waitForEvent("download", { timeout: 30000 }).catch(() => null),
+      page.waitForEvent("download", { timeout: 15000 }).catch(() => null),
       page.goto(`${DOWNLOAD_HOST}/${id}.pdf`).catch(() => null),
     ]);
     if (download) {
@@ -397,7 +401,26 @@ async function downloadDocs(
 
 // ---------- orchestration ----------
 
-/** Daily TV ad sync. Optional narrowing for verification runs. */
+/**
+ * Cron entry: fan out one bounded worker per station, staggered ~90s apart so
+ * concurrent Browserbase sessions stay within the project's concurrency cap (3)
+ * and each worker action stays well within Convex's time limit. A full
+ * all-stations sweep in one action would time out.
+ */
+export const syncTvAdsDispatch = internalAction({
+  args: {},
+  handler: async (ctx): Promise<{ scheduled: number }> => {
+    for (let i = 0; i < TV_STATIONS.length; i++) {
+      await ctx.scheduler.runAfter(i * 90_000, internal.adsTv.syncTvAds, {
+        callSigns: [TV_STATIONS[i].callSign],
+      });
+    }
+    return { scheduled: TV_STATIONS.length };
+  },
+});
+
+/** Per-station TV ad sync worker (bounded). Called by the dispatcher + for
+ * verification runs. */
 export const syncTvAds = internalAction({
   args: {
     callSigns: v.optional(v.array(v.string())),
@@ -444,7 +467,7 @@ export const syncTvAds = internalAction({
       extractionFailed: 0,
       errors: 0,
     };
-    const perDocCap = docLimit ?? 25;
+    const perDocCap = docLimit ?? 12;
 
     for (const station of stations) {
       const stationUrl = `${FCC_BASE}/tv-profile/${station.callSign}/political-files/${YEAR}`;
@@ -479,32 +502,38 @@ export const syncTvAds = internalAction({
             : [{ bytes, idSuffix: "", isEmbedded: false }];
 
           for (const u of units) {
-            const extraction = await ctx.runAction(
-              internal.tvExtractAgent.extractTvAd,
-              {
-                pdfBase64: Buffer.from(u.bytes).toString("base64"),
-                hintName: d.name,
+            try {
+              const extraction = await ctx.runAction(
+                internal.tvExtractAgent.extractTvAd,
+                {
+                  pdfBase64: Buffer.from(u.bytes).toString("base64"),
+                  hintName: d.name,
+                  year: YEAR,
+                },
+              );
+              // Skip junk: no advertiser (unreadable) — and, for a portfolio's
+              // embedded units, no gross (NAB forms / revisions carry no dollars).
+              if (
+                !extraction?.advertiser?.trim() ||
+                (u.isEmbedded && !extraction.grossSpend)
+              ) {
+                totals.extractionFailed++;
+                continue;
+              }
+              // TV orders don't carry the market; stamp it from the station.
+              const withDma = { ...extraction, station: station.callSign, dma: station.dma };
+              await ctx.runAction(internal.adsTv.ingestTvDoc, {
+                extraction: withDma,
+                fileManagerId: d.fileManagerId + u.idSuffix,
+                fccDocUrl: d.fccDocUrl,
                 year: YEAR,
-              },
-            );
-            // Skip junk: no advertiser (unreadable) — and, for a portfolio's
-            // embedded units, no gross (NAB forms / revisions carry no dollars).
-            if (
-              !extraction?.advertiser?.trim() ||
-              (u.isEmbedded && !extraction.grossSpend)
-            ) {
+              });
+              totals.ingested++;
+            } catch {
+              // A single bad PDF (corrupt download / Anthropic rejects it) must
+              // not abort the station — skip this unit and keep going.
               totals.extractionFailed++;
-              continue;
             }
-            // TV orders don't carry the market; stamp it from the station.
-            const withDma = { ...extraction, station: station.callSign, dma: station.dma };
-            await ctx.runAction(internal.adsTv.ingestTvDoc, {
-              extraction: withDma,
-              fileManagerId: d.fileManagerId + u.idSuffix,
-              fccDocUrl: d.fccDocUrl,
-              year: YEAR,
-            });
-            totals.ingested++;
           }
           seen.add(d.fileManagerId);
         }
