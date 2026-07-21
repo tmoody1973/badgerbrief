@@ -6,13 +6,19 @@ import { CandidateCard } from "@/components/guide/cards";
 import { RaceFinanceTable } from "@/components/guide/finance";
 import { LastUpdated } from "@/components/guide/labels";
 import { RaceAdMoney } from "@/components/guide/race-ad-money";
+import { RaceTvAds } from "@/components/guide/race-tv-ads";
 import {
   SectionNav,
   type NavSection,
 } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
 import { isOnBallot, partySectionId } from "@/lib/ballot-status";
-import { getAdMoneyForRace, getRace, listRaces } from "@/lib/data";
+import {
+  getAdMoneyForRace,
+  getRace,
+  getTvAdsForRace,
+  listRaces,
+} from "@/lib/data";
 import {
   JsonLd,
   breadcrumbNode,
@@ -74,6 +80,7 @@ export default async function RacePage({ params }: Props) {
   if (!data) notFound();
   const { race, candidates, finance } = data;
   const adMoney = await getAdMoneyForRace(slugToRaceId(slug));
+  const tvAds = await getTvAdsForRace(slugToRaceId(slug));
 
   const parties = [
     ...new Set(candidates.map((c) => c.primaryParty).filter(Boolean)),
@@ -106,6 +113,7 @@ export default async function RacePage({ params }: Props) {
       : []),
     ...(finance.length > 0 ? [{ id: "money", label: "The money" }] : []),
     ...(adMoney.candidates.length > 0 ? [{ id: "ad-money", label: "Ad money" }] : []),
+    ...(tvAds.length > 0 ? [{ id: "tv-ads", label: "TV ads" }] : []),
     { id: "sources", label: "Sources" },
   ];
 
@@ -187,6 +195,8 @@ export default async function RacePage({ params }: Props) {
       <RaceFinanceTable finance={finance} candidates={candidates} />
 
       <RaceAdMoney data={adMoney} />
+
+      <RaceTvAds ads={tvAds} />
 
       {candidates.length > 1 && (
         <div className="mt-8">

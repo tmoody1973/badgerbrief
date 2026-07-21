@@ -16,5 +16,7 @@ export const listAds = () => fetchQuery(api.ads.listAds, {});
 export const getAdMoneyForRace = (raceId: string) =>
   fetchQuery(api.adMoney.adMoneyForRace, { raceId });
 export const getAdMoneyOverview = () => fetchQuery(api.adMoney.adMoneyOverview, {});
+export const getTvAdsForRace = (raceId: string) =>
+  fetchQuery(api.ads.tvAdsForRace, { raceId });
 export const candidateDirectory = () =>
   fetchQuery(api.public.candidateDirectory, {});

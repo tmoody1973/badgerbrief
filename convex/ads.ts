@@ -813,6 +813,35 @@ export const adsForCandidate = query({
   },
 });
 
+/** Attributed broadcast-TV orders (platform:"tv") for a race, biggest spend
+ * first. Human-gated: only rows a reviewer approved (raceId set) appear —
+ * unattributed TV orders stay in the review queue, never on public pages. */
+export const tvAdsForRace = query({
+  args: { raceId: v.string() },
+  handler: async (ctx, { raceId }) => {
+    const rows = await ctx.db
+      .query("ads")
+      .withIndex("by_candidate", (q) => q.eq("raceId", raceId))
+      .collect();
+    return rows
+      .filter((r) => r.platform === "tv")
+      .map((r) => ({
+        id: r._id,
+        sponsor: r.pageOrCommittee,
+        candidateSlug: r.candidateSlug,
+        stance: r.stance,
+        station: r.station,
+        dma: r.dma,
+        spend: r.spendUpper ?? r.spendLower,
+        spotCount: r.spotCount,
+        flightStart: r.flightStart,
+        flightEnd: r.flightEnd,
+        fccDocUrl: r.fccDocUrl,
+      }))
+      .sort((a, b) => (b.spend ?? 0) - (a.spend ?? 0));
+  },
+});
+
 /** Daily spend/impression snapshots for one ad, oldest→newest (timeline). */
 export const adSpendTimeline = query({
   args: { platform: metricPlatformValidator, platformAdId: v.string() },
