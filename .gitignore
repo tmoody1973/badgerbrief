@@ -50,3 +50,6 @@ backups/
 docs/video/out/
 docs/video/frames/
 docs/video/seg/
+
+# Superpowers brainstorm companion (local mockups)
+.superpowers/
