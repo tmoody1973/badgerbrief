@@ -10,11 +10,15 @@ import type { getAdMoneyOverview } from "@/lib/data";
 
 type RaceCard = Awaited<ReturnType<typeof getAdMoneyOverview>>["races"][number];
 
-// ponytail: v1 personalizes to statewide + your US House race. State
-// Senate/Assembly matching needs per-race district data on the card — a
-// fast-follow (add districts to RaceOverview when we surface leg. races).
-function pick(races: RaceCard[], districts: Districts): RaceCard[] {
-  const likes = races.map((r) => ({ raceId: r.raceId, level: r.level, districts: undefined }));
+/** Filter the overview's race cards to the viewer's ballot: statewide + their
+ * US House, State Senate, and State Assembly races (MOO-349). Leg-district
+ * matching uses the district numbers now carried on each card. */
+export function pick(races: RaceCard[], districts: Districts): RaceCard[] {
+  const likes = races.map((r) => ({
+    raceId: r.raceId,
+    level: r.level,
+    districts: r.districts,
+  }));
   const keep = new Set(relevantRaces(districts, likes).map((r) => r.raceId));
   return races.filter((r) => keep.has(r.raceId));
 }

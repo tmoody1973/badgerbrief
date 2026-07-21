@@ -69,5 +69,56 @@ describe("adMoneyOverview", () => {
     expect(o.statewide.mostAttacked?.slug).toBe("tom-tiffany");
     expect(o.statewide.mostAttacked?.office).toBe("Governor");
   });
+
+  test("projects a State Legislative race's districts to numbers only (MOO-349)", async () => {
+    const t = setup();
+    await t.run(async (ctx) => {
+      await ctx.db.insert("races", {
+        raceId: "WI-STATE-SENATE-2026",
+        electionSlug: "wi-2026",
+        office: "State Senate",
+        level: "State Legislative",
+        // Rich seed blob — only the district numbers should survive to the client.
+        districts: [
+          { district: 1, district_description: "Northeast", open_seat: true, primaries: {} },
+          { district: 3, district_description: "Milwaukee", primaries: {} },
+        ],
+        sources: [],
+        dataAsOf: "2026-01-01",
+      } as any);
+      await ctx.db.insert("candidates", {
+        raceId: "WI-STATE-SENATE-2026",
+        slug: "robyn-vining",
+        name: "Robyn Vining",
+        sources: [],
+        dataAsOf: "2026-01-01",
+      } as any);
+      await ctx.db.insert("ads", {
+        platform: "meta" as const,
+        firstSeenAt: 0,
+        lastSeenAt: 0,
+        platformAdId: "s1",
+        raceId: "WI-STATE-SENATE-2026",
+        candidateSlug: "robyn-vining",
+        stance: "support",
+        pageOrCommittee: "Vining for Senate",
+        spendLower: 1000,
+        spendUpper: 3000,
+      } as any);
+    });
+    const o = await t.query(api.adMoney.adMoneyOverview, {});
+    const senate = o.races.find((r) => r.raceId === "WI-STATE-SENATE-2026");
+    expect(senate).toBeDefined();
+    // trimmed to numbers only — no district_description / primaries / open_seat
+    expect(senate?.districts).toEqual([{ district: 1 }, { district: 3 }]);
+  });
+
+  test("leaves statewide/federal races' districts undefined", async () => {
+    const t = setup();
+    await seed(t);
+    const o = await t.query(api.adMoney.adMoneyOverview, {});
+    const gov = o.races.find((r) => r.raceId === "WI-GOV-2026");
+    expect(gov?.districts).toBeUndefined();
+  });
 }
 );

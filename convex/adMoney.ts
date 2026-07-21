@@ -41,6 +41,10 @@ export type RaceOverview = {
   attackShare: number;
   adCount: number;
   mostAttacked: string | null;
+  // District numbers this race covers (State Legislative races only), trimmed
+  // from the race's districts blob so "Your races" can match a voter's ballot
+  // without shipping the full nested candidate data. Undefined for statewide/federal.
+  districts?: { district: number }[];
 };
 
 /** Statewide by-race overview for /ads: race summaries + statewide headline stats. */
@@ -89,6 +93,13 @@ export const adMoneyOverview = query({
         attackShare: roll.attackShare,
         adCount: roll.adCount,
         mostAttacked: roll.mostAttacked,
+        // Trim the districts blob to just the numbers relevantRaces() needs.
+        districts: Array.isArray(race.districts)
+          ? race.districts
+              .map((d: { district?: number }) => d?.district)
+              .filter((n: unknown): n is number => typeof n === "number")
+              .map((district: number) => ({ district }))
+          : undefined,
       });
       for (const c of roll.candidates) {
         if (c.attackSpend > (mostAttacked?.attackSpend ?? 0)) {
