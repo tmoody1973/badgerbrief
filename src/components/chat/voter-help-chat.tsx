@@ -10,6 +10,8 @@ import {
   useThreadMessages,
   type UIMessage,
 } from "@convex-dev/agent/react";
+import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/retroui/Button";
 
@@ -27,27 +29,54 @@ function asMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-/** Renders assistant text with markdown links as anchors; everything else as plain text. */
-function MdText({ text }: { text: string }) {
-  const parts = text.split(/(\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g);
+/** Assistant markdown → styled elements. react-markdown renders NO raw HTML by
+ * default, so LLM output can't inject markup; links open safely in a new tab. */
+const markdownComponents: Components = {
+  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+  strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+  em: ({ children }) => <em className="italic">{children}</em>,
+  a: ({ href, children }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline decoration-2 underline-offset-2"
+    >
+      {children}
+    </a>
+  ),
+  ul: ({ children }) => (
+    <ul className="mb-2 list-disc space-y-1 pl-5 last:mb-0">{children}</ul>
+  ),
+  ol: ({ children }) => (
+    <ol className="mb-2 list-decimal space-y-1 pl-5 last:mb-0">{children}</ol>
+  ),
+  h1: ({ children }) => <h3 className="mb-1 font-display text-base">{children}</h3>,
+  h2: ({ children }) => <h3 className="mb-1 font-display text-base">{children}</h3>,
+  h3: ({ children }) => <h3 className="mb-1 font-display text-base">{children}</h3>,
+  h4: ({ children }) => <h4 className="mb-1 font-bold">{children}</h4>,
+  code: ({ children }) => (
+    <code className="bg-secondary px-1 font-mono text-[0.85em]">{children}</code>
+  ),
+  pre: ({ children }) => (
+    <pre className="mb-2 overflow-x-auto border-2 border-border bg-secondary p-2 font-mono text-xs last:mb-0">
+      {children}
+    </pre>
+  ),
+  blockquote: ({ children }) => (
+    <blockquote className="mb-2 border-l-2 border-border pl-3 italic last:mb-0">
+      {children}
+    </blockquote>
+  ),
+};
+
+export function MdText({ text }: { text: string }) {
   return (
-    <span className="whitespace-pre-wrap">
-      {parts.map((part, i) => {
-        const m = part.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/);
-        if (!m) return <span key={i}>{part}</span>;
-        return (
-          <a
-            key={i}
-            href={m[2]}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline decoration-2 underline-offset-2"
-          >
-            {m[1]}
-          </a>
-        );
-      })}
-    </span>
+    <div className="text-sm">
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+        {text}
+      </ReactMarkdown>
+    </div>
   );
 }
 
