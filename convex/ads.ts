@@ -35,7 +35,14 @@ import { GooglePoliticalAdRow, normalizeGoogleAd } from "./lib/googleAds";
 
 const GRAPH_API_BASE = "https://graph.facebook.com/v21.0";
 
-const platformValidator = v.union(v.literal("meta"), v.literal("google"));
+const platformValidator = v.union(
+  v.literal("meta"),
+  v.literal("google"),
+  v.literal("tv"),
+);
+// ad_metrics_daily is a per-day spend/impression series; TV orders state exact
+// spend up front and have no daily metrics, so those paths stay meta|google.
+const metricPlatformValidator = v.union(v.literal("meta"), v.literal("google"));
 const trackedEntitiesValidator = v.optional(
   v.array(
     v.object({
@@ -86,6 +93,14 @@ const adWriteFields = {
   impressionsLower: v.optional(v.number()),
   impressionsUpper: v.optional(v.number()),
   deliveryStart: v.optional(v.string()),
+  // TV order fields (platform:"tv", MOO-318)
+  station: v.optional(v.string()),
+  dma: v.optional(v.string()),
+  spotCount: v.optional(v.number()),
+  flightStart: v.optional(v.string()),
+  flightEnd: v.optional(v.string()),
+  fccDocUrl: v.optional(v.string()),
+  orderRef: v.optional(v.string()),
 };
 
 export const upsertAd = internalMutation({
@@ -113,6 +128,13 @@ export const upsertAd = internalMutation({
       impressionsLower: args.impressionsLower,
       impressionsUpper: args.impressionsUpper,
       deliveryStart: args.deliveryStart,
+      station: args.station,
+      dma: args.dma,
+      spotCount: args.spotCount,
+      flightStart: args.flightStart,
+      flightEnd: args.flightEnd,
+      fccDocUrl: args.fccDocUrl,
+      orderRef: args.orderRef,
       lastSeenAt: now,
     };
 
@@ -145,7 +167,7 @@ export const upsertAd = internalMutation({
 
 export const recordDailyMetric = internalMutation({
   args: {
-    platform: platformValidator,
+    platform: metricPlatformValidator,
     platformAdId: v.string(),
     date: v.string(),
     spendLower: v.optional(v.number()),
@@ -753,7 +775,7 @@ export const adsForCandidate = query({
 
 /** Daily spend/impression snapshots for one ad, oldest→newest (timeline). */
 export const adSpendTimeline = query({
-  args: { platform: platformValidator, platformAdId: v.string() },
+  args: { platform: metricPlatformValidator, platformAdId: v.string() },
   handler: async (ctx, { platform, platformAdId }) => {
     return await ctx.db
       .query("ad_metrics_daily")

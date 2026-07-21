@@ -213,7 +213,7 @@ export default defineSchema({
 
   // ---------- ads (Meta in M1; Google via same tables in M2) ----------
   ads: defineTable({
-    platform: v.union(v.literal("meta"), v.literal("google")),
+    platform: v.union(v.literal("meta"), v.literal("google"), v.literal("tv")),
     platformAdId: v.string(),
     pageOrCommittee: v.string(),
     candidateSlug: v.optional(v.string()),
@@ -236,6 +236,15 @@ export default defineSchema({
     // AD_CYCLE_START_DATE are off-cycle. Optional: legacy rows synced before this
     // field existed carry undefined until a re-sync refreshes them.
     deliveryStart: v.optional(v.string()),
+    // Broadcast-TV order fields (platform:"tv", MOO-318). FCC political-file
+    // orders state exact spend + a flight window; these are unset for meta/google.
+    station: v.optional(v.string()), // call sign, e.g. "WISN-TV"
+    dma: v.optional(v.string()), // market, e.g. "Milwaukee"
+    spotCount: v.optional(v.number()),
+    flightStart: v.optional(v.string()), // YYYY-MM-DD
+    flightEnd: v.optional(v.string()), // YYYY-MM-DD
+    fccDocUrl: v.optional(v.string()), // source FCC order PDF
+    orderRef: v.optional(v.string()), // station's contract/order number
     firstSeenAt: v.number(),
     lastSeenAt: v.number(),
   })
