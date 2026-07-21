@@ -171,3 +171,29 @@ test("expired token → warning alert and graceful return, no crash", async () =
   expect(alerts).toHaveLength(1);
   expect(alerts[0].severity).toBe("warning");
 });
+
+test("purgeOffCycleAds removes off-cycle + undated ads, keeps in-scope + attribution", async () => {
+  const t = convexTest(schema, modules);
+  const base = { platform: "meta" as const, pageOrCommittee: "X", firstSeenAt: 0, lastSeenAt: 0 };
+  await t.run(async (ctx) => {
+    // in-scope 2025+ (one attributed) — must survive
+    await ctx.db.insert("ads", { ...base, platformAdId: "keep1", deliveryStart: "2025-03-01" });
+    await ctx.db.insert("ads", { ...base, platformAdId: "keep2", deliveryStart: "2026-07-01", candidateSlug: "tom-tiffany", raceId: "WI-GOV-2026" });
+    // off-cycle dated — must go
+    await ctx.db.insert("ads", { ...base, platformAdId: "old1", deliveryStart: "2024-11-01" });
+    // undated (legacy, never re-synced) — must go
+    await ctx.db.insert("ads", { ...base, platformAdId: "undated1" });
+  });
+
+  const dry = await t.mutation(internal.ads.purgeOffCycleAds, { dryRun: true });
+  expect(dry).toMatchObject({ dryRun: true, total: 4, offCycleDated: 1, undated: 1, toRemove: 2, kept: 2 });
+  // dry run touched nothing
+  expect(await t.run((ctx) => ctx.db.query("ads").collect())).toHaveLength(4);
+
+  const real = await t.mutation(internal.ads.purgeOffCycleAds, { dryRun: false });
+  expect(real).toMatchObject({ dryRun: false, toRemove: 2, kept: 2 });
+  const remaining = await t.run((ctx) => ctx.db.query("ads").collect());
+  expect(remaining.map((a) => a.platformAdId).sort()).toEqual(["keep1", "keep2"]);
+  // attribution preserved on the surviving in-scope ad
+  expect(remaining.find((a) => a.platformAdId === "keep2")?.candidateSlug).toBe("tom-tiffany");
+});

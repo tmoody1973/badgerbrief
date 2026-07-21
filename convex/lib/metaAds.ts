@@ -72,6 +72,8 @@ export function normalizeMetaAd(entry: MetaAdArchiveEntry): NormalizedAd | null 
     fundingEntity: entry.bylines || undefined,
     // Meta doesn't return a status; a stop time means it stopped.
     status: entry.ad_delivery_stop_time ? "inactive" : "active",
+    // ISO timestamp ("2025-03-14T00:00:00+0000") → YYYY-MM-DD.
+    deliveryStart: entry.ad_delivery_start_time?.slice(0, 10),
     spendLower: num(entry.spend?.lower_bound),
     spendUpper: num(entry.spend?.upper_bound),
     impressionsLower: num(entry.impressions?.lower_bound),

@@ -35,6 +35,8 @@ export interface NormalizedAd {
   spendUpper?: number;
   impressionsLower?: number;
   impressionsUpper?: number;
+  /** Ad's delivery start date, YYYY-MM-DD (platform-reported). Used for cycle scope. */
+  deliveryStart?: string;
 }
 
 /** A curated platform entity we know belongs to a candidate — the only

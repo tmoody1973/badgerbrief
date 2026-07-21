@@ -85,6 +85,7 @@ const adWriteFields = {
   spendUpper: v.optional(v.number()),
   impressionsLower: v.optional(v.number()),
   impressionsUpper: v.optional(v.number()),
+  deliveryStart: v.optional(v.string()),
 };
 
 export const upsertAd = internalMutation({
@@ -111,6 +112,7 @@ export const upsertAd = internalMutation({
       spendUpper: args.spendUpper,
       impressionsLower: args.impressionsLower,
       impressionsUpper: args.impressionsUpper,
+      deliveryStart: args.deliveryStart,
       lastSeenAt: now,
     };
 
@@ -251,6 +253,55 @@ export const purgeAdData = internalMutation({
   },
 });
 
+/**
+ * Cycle-scope cleanup: remove ads outside the tracked cycle, preserving the
+ * attribution on in-scope rows (unlike purgeAdData, which wipes everything). An
+ * ad is off-cycle if its `deliveryStart` is before AD_CYCLE_START_DATE, or is
+ * still undefined AFTER a full re-sync — the filtered syncs stamp deliveryStart
+ * on every in-scope ad, so a dateless row means it wasn't returned by the 2025+
+ * pull (off-cycle or delisted).
+ *
+ * DEPLOY-TIME ORDER (must hold, or you'll delete in-scope rows): deploy → re-run
+ * syncMetaAds + syncGoogleAds → run this with `dryRun: true` and confirm the
+ * counts → re-run with `dryRun: false`. `dryRun` defaults to true so a stray call
+ * never deletes.
+ *
+ * ponytail: single .collect() scan — fine at WI cycle volumes (~1-2k ads, well
+ * under Convex's ~16k-doc query limit); batch + self-schedule if it ever grows.
+ */
+export const purgeOffCycleAds = internalMutation({
+  args: { dryRun: v.optional(v.boolean()) },
+  handler: async (
+    ctx,
+    { dryRun = true },
+  ): Promise<{
+    dryRun: boolean;
+    total: number;
+    offCycleDated: number;
+    undated: number;
+    toRemove: number;
+    kept: number;
+  }> => {
+    const ads = await ctx.db.query("ads").collect();
+    const offCycleDated = ads.filter(
+      (a) => a.deliveryStart !== undefined && a.deliveryStart < AD_CYCLE_START_DATE,
+    );
+    const undated = ads.filter((a) => a.deliveryStart === undefined);
+    const toRemove = [...offCycleDated, ...undated];
+    if (!dryRun) {
+      for (const a of toRemove) await ctx.db.delete(a._id);
+    }
+    return {
+      dryRun,
+      total: ads.length,
+      offCycleDated: offCycleDated.length,
+      undated: undated.length,
+      toRemove: toRemove.length,
+      kept: ads.length - toRemove.length,
+    };
+  },
+});
+
 // ---------- shared ingest (both platforms) ----------
 
 function todayISO(now: number): string {
@@ -292,6 +343,7 @@ async function ingestAds(
       spendUpper: ad.spendUpper,
       impressionsLower: ad.impressionsLower,
       impressionsUpper: ad.impressionsUpper,
+      deliveryStart: ad.deliveryStart,
     });
 
     await ctx.runMutation(internal.ads.recordDailyMetric, {

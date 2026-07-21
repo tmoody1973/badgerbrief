@@ -84,6 +84,8 @@ export function normalizeGoogleAd(
     snapshotUrl: row.ad_url,
     fundingEntity: row.advertiser_name || undefined,
     status: row.date_range_end ? "inactive" : "active",
+    // BigQuery creative_stats reports date_range_start as YYYY-MM-DD.
+    deliveryStart: row.date_range_start?.slice(0, 10),
     spendLower: num(row.spend_range_min_usd),
     spendUpper: num(row.spend_range_max_usd),
     impressionsLower: impressions.lower,

@@ -231,6 +231,11 @@ export default defineSchema({
     spendUpper: v.optional(v.number()),
     impressionsLower: v.optional(v.number()),
     impressionsUpper: v.optional(v.number()),
+    // Ad's own delivery start (YYYY-MM-DD, from the platform) — distinct from
+    // firstSeenAt (when WE synced it). Powers cycle-scope filtering: rows before
+    // AD_CYCLE_START_DATE are off-cycle. Optional: legacy rows synced before this
+    // field existed carry undefined until a re-sync refreshes them.
+    deliveryStart: v.optional(v.string()),
     firstSeenAt: v.number(),
     lastSeenAt: v.number(),
   })

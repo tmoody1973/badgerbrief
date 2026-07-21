@@ -53,6 +53,7 @@ describe("normalizeGoogleAd", () => {
     expect(ad.impressionsUpper).toBe(1000000);
     expect(ad.status).toBe("active");
     expect(ad.creativeText).toBeUndefined(); // dataset has no creative body
+    expect(ad.deliveryStart).toBe("2026-07-01"); // date_range_start, for cycle scope
   });
 
   it("marks an ad with an end date inactive", () => {

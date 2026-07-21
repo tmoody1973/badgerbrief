@@ -41,6 +41,8 @@ describe("normalizeMetaAd", () => {
     expect(ad.spendUpper).toBe(9999);
     expect(ad.impressionsLower).toBe(100000);
     expect(ad.status).toBe("active");
+    // ISO delivery start → YYYY-MM-DD for cycle-scope filtering.
+    expect(ad.deliveryStart).toBe("2026-07-01");
   });
 
   it("marks an ad with a stop time inactive", () => {
