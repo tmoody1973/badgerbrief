@@ -49,8 +49,17 @@ by git revert + `npx convex deploy -y`, and MUST re-run the eval gate
 1. **48h cron health**: Convex dashboard → prod deployment → Schedules/Crons →
    confirm all 5 daily crons (finance, scout, research, source-change,
    staleness) green for the previous 48h; screenshot for MOO-314.
-   (CLI cross-check: `npx convex data finance_totals --prod --limit 1 --order desc`
-   fetchedAt within 24h; `scout_attempts` / `source_fetch_logs` likewise.)
+   CLI cross-check (freshness = `fetchedAt`, NOT `_creationTime`):
+   ```bash
+   # finance: filter to the daily-patched openfec rows — DO NOT use --order desc,
+   # which sorts by creation time and hides in-place fetchedAt updates (the daily
+   # sync PATCHES rows seeded weeks ago, so their _creationTime stays old).
+   npx convex data finance_totals --prod --limit 200 | grep '"openfec"' \
+     | grep -oE '[0-9]{13}' | sort -rn | head -1   # newest fetchedAt, expect <24h
+   npx convex run finance:syncOpenFec --prod   # or just re-run it; expect matched>0
+   ```
+   `scout_attempts` / `source_fetch_logs` are append-only, so `--order desc` on
+   those IS a valid freshness check.
 2. **Alerts**: /admin → resolve or triage everything; launch requires zero
    unresolved critical.
 3. **Snapshot**: `npx convex export --prod --path backups/prod-launch.zip`.
