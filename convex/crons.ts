@@ -78,4 +78,14 @@ crons.daily(
   {},
 );
 
+// 13:30 UTC — broadcast-TV political-file orders via Browserbase + FCC (MOO-318).
+// Drives a hosted browser (Convex can't), unwraps PDF portfolios, Sonnet-extracts,
+// lands human-reviewed platform:tv ads. One station's failure alerts + continues.
+crons.daily(
+  "sync TV ads",
+  { hourUTC: 13, minuteUTC: 30 },
+  internal.adsTv.syncTvAds,
+  {},
+);
+
 export default crons;
