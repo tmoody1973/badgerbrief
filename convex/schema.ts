@@ -211,6 +211,34 @@ export default defineSchema({
     committee: v.optional(v.string()),
   }).index("by_candidate", ["raceId", "candidateSlug"]),
 
+  // Sponsor profiles (MOO-318 follow-up): who's behind an outside-group ad.
+  // One row per normalized sponsor name, reused across all that group's ads.
+  // Reviewer-assisted: FEC/Sunshine facts + a Perplexity-sourced one-liner, then
+  // human-approved. Only `approved` rows surface publicly (trust posture).
+  sponsors: defineTable({
+    key: v.string(), // normalized sponsor name — the dedup + join key
+    displayName: v.string(),
+    kind: v.optional(v.string()), // "Super PAC", "Hybrid PAC", "Party committee", "Dark money (501c4)", "Candidate committee", …
+    lean: v.optional(
+      v.union(
+        v.literal("supports_d"),
+        v.literal("supports_r"),
+        v.literal("bipartisan"),
+        v.literal("issue"),
+      ),
+    ),
+    summary: v.optional(v.string()), // one sentence, sourced
+    fecCommitteeId: v.optional(v.string()),
+    disclosesDonors: v.optional(v.boolean()),
+    topDonors: v.optional(
+      v.array(v.object({ name: v.string(), amount: v.number() })),
+    ),
+    totalRaised: v.optional(v.number()),
+    sources: v.array(v.object({ label: v.string(), url: v.string() })),
+    reviewStatus: v.union(v.literal("draft"), v.literal("approved")),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
+
   // ---------- ads (Meta in M1; Google via same tables in M2) ----------
   ads: defineTable({
     platform: v.union(v.literal("meta"), v.literal("google"), v.literal("tv")),

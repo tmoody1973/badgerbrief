@@ -37,32 +37,108 @@ function StanceTag({ stance }: { stance?: "support" | "oppose" }) {
 function TvAdRow({ a }: { a: TvAd }) {
   const f = flight(a);
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]">
-      <div className="min-w-0">
-        <div className="flex items-baseline gap-2">
-          <span className="font-bold">{a.sponsor}</span>
-          <StanceTag stance={a.stance} />
+    <div className="border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <div className="min-w-0">
+          <div className="flex items-baseline gap-2">
+            <span className="font-bold">{a.sponsor}</span>
+            <StanceTag stance={a.stance} />
+          </div>
+          <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+            {[a.station, a.dma].filter(Boolean).join(" · ")}
+            {a.spotCount ? ` · ${a.spotCount} spots` : ""}
+            {f ? ` · ${f}` : ""}
+          </p>
         </div>
-        <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-          {[a.station, a.dma].filter(Boolean).join(" · ")}
-          {a.spotCount ? ` · ${a.spotCount} spots` : ""}
-          {f ? ` · ${f}` : ""}
-        </p>
+        <div className="flex items-baseline gap-3">
+          <span className="font-mono text-lg font-bold">{usd(a.spend)}</span>
+          {a.pdfUrl && (
+            <a
+              href={a.pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="press border-2 border-border bg-background px-2 py-1 font-mono text-[10px] uppercase tracking-widest"
+            >
+              FCC order ↗
+            </a>
+          )}
+        </div>
       </div>
-      <div className="flex items-baseline gap-3">
-        <span className="font-mono text-lg font-bold">{usd(a.spend)}</span>
-        {a.pdfUrl && (
-          <a
-            href={a.pdfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="press border-2 border-border bg-background px-2 py-1 font-mono text-[10px] uppercase tracking-widest"
-          >
-            FCC order ↗
-          </a>
+      {a.sponsorProfile && <SponsorExplainer p={a.sponsorProfile} />}
+    </div>
+  );
+}
+
+function LeanTag({ lean }: { lean?: string }) {
+  const label =
+    lean === "supports_d"
+      ? "Supports Democrats"
+      : lean === "supports_r"
+        ? "Supports Republicans"
+        : lean === "bipartisan"
+          ? "Bipartisan"
+          : lean === "issue"
+            ? "Issue advocacy"
+            : null;
+  if (!label) return null;
+  return (
+    <span className="border-2 border-border bg-secondary px-1.5 font-mono text-[10px] uppercase tracking-widest text-secondary-foreground">
+      {label}
+    </span>
+  );
+}
+
+/** "Who is this sponsor" disclosure — reviewer-approved, sourced. Native
+ * <details> so it works without client JS on the server-rendered race page. */
+function SponsorExplainer({
+  p,
+}: {
+  p: NonNullable<TvAd["sponsorProfile"]>;
+}) {
+  return (
+    <details className="mt-2 border-t-2 border-dashed border-border pt-2">
+      <summary className="cursor-pointer font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        Who is this? {p.kind ? `· ${p.kind}` : ""}
+      </summary>
+      <div className="mt-2 space-y-2">
+        <div className="flex flex-wrap gap-1.5">
+          <LeanTag lean={p.lean} />
+          {p.disclosesDonors === false && (
+            <span className="border-2 border-border bg-warning px-1.5 font-mono text-[10px] uppercase tracking-widest text-foreground">
+              Dark money · donors not disclosed
+            </span>
+          )}
+        </div>
+        {p.summary && <p className="text-sm">{p.summary}</p>}
+        {p.topDonors && p.topDonors.length > 0 && (
+          <p className="font-mono text-[11px] text-muted-foreground">
+            Top donors:{" "}
+            {p.topDonors
+              .slice(0, 3)
+              .map((d) => `${d.name} (${usd(d.amount)})`)
+              .join(" · ")}
+          </p>
+        )}
+        {p.sources.length > 0 && (
+          <p className="font-mono text-[10px] text-muted-foreground">
+            Sources:{" "}
+            {p.sources.map((s, i) => (
+              <span key={s.url}>
+                {i > 0 && " · "}
+                <a
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline decoration-2 underline-offset-2"
+                >
+                  {s.label}
+                </a>
+              </span>
+            ))}
+          </p>
         )}
       </div>
-    </div>
+    </details>
   );
 }
 

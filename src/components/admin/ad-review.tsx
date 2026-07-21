@@ -6,6 +6,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
 import { Button } from "@/components/retroui/Button";
 import { asMessage, ErrorLine } from "./draft-row";
+import { SponsorResolver } from "./sponsor-resolver";
 
 /**
  * MOO-309 ad attribution. Two reviewers:
@@ -348,6 +349,9 @@ export function AdReviewQueue() {
                     Dismiss
                   </Button>
                 </AttributionControls>
+                {ad.platform === "tv" && (
+                  <SponsorResolver advertiser={ad.pageOrCommittee} />
+                )}
               </li>
             ))}
           </ul>
@@ -429,6 +433,7 @@ export function UnattributedAds() {
                     )
                   }
                 />
+                <SponsorResolver advertiser={ad.pageOrCommittee} />
               </li>
             ))}
           </ul>

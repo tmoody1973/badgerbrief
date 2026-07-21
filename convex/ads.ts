@@ -8,6 +8,7 @@ import {
 } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
+import { normalizeSponsorKey } from "./lib/sponsors";
 import {
   MatchCandidate,
   NormalizedAd,
@@ -861,6 +862,24 @@ export const tvAdsForRace = query({
     const tvRows = rows.filter((r) => r.platform === "tv");
     const out = [];
     for (const r of tvRows) {
+      // Attach the approved "who is this sponsor" profile, if one exists.
+      const sp = await ctx.db
+        .query("sponsors")
+        .withIndex("by_key", (q) =>
+          q.eq("key", normalizeSponsorKey(r.pageOrCommittee)),
+        )
+        .unique();
+      const sponsorProfile =
+        sp && sp.reviewStatus === "approved"
+          ? {
+              kind: sp.kind,
+              lean: sp.lean,
+              summary: sp.summary,
+              disclosesDonors: sp.disclosesDonors,
+              topDonors: sp.topDonors,
+              sources: sp.sources,
+            }
+          : null;
       out.push({
         id: r._id,
         sponsor: r.pageOrCommittee,
@@ -872,6 +891,7 @@ export const tvAdsForRace = query({
         spotCount: r.spotCount,
         flightStart: r.flightStart,
         flightEnd: r.flightEnd,
+        sponsorProfile,
         // Our stored copy (never 403s); FCC's /api/manager host is blocked.
         pdfUrl: r.pdfStorageId
           ? await ctx.storage.getUrl(r.pdfStorageId)
