@@ -23,6 +23,18 @@ async function requireAdmin(ctx: QueryCtx | MutationCtx) {
   }
 }
 
+/** A clickable order-PDF URL for a TV ad: our stored copy (never 403s), else the
+ * working files.fcc.gov fallback. null for non-TV ads. */
+async function tvPdfUrl(
+  ctx: QueryCtx | MutationCtx,
+  ad: Doc<"ads">,
+): Promise<string | null> {
+  if (ad.platform !== "tv") return null;
+  if (ad.pdfStorageId) return await ctx.storage.getUrl(ad.pdfStorageId);
+  const parentId = ad.platformAdId.split("#")[0];
+  return `https://files.fcc.gov/download/${parentId}.pdf`;
+}
+
 /** Candidate picker options with their race office, for the ad reviewers. */
 async function candidatesWithOffice(ctx: QueryCtx | MutationCtx) {
   const cands = await ctx.db.query("candidates").collect();
@@ -280,7 +292,8 @@ export const adQueue = query({
       const ad = id ? await ctx.db.get(id) : null;
       if (!ad) continue;
       const suggestedSlug = task.note?.match(/suggested: ([a-z0-9-]+)/)?.[1];
-      rows.push({ task, ad, suggestedSlug });
+      const pdfUrl = await tvPdfUrl(ctx, ad);
+      rows.push({ task, ad, suggestedSlug, pdfUrl });
     }
     // Biggest spenders first — the highest-impact ads to triage. The client
     // adds search + platform + a likely-attacks filter over this set.
@@ -407,9 +420,11 @@ export const unattributedAds = query({
     // Bounded scan (admin-only). Grows with the ads table; paginate if it gets large.
     const all = await ctx.db.query("ads").collect();
     const un = all.filter((a) => a.candidateSlug === undefined);
-    const rows = un
+    const top = un
       .sort((a, b) => (b.spendUpper ?? 0) - (a.spendUpper ?? 0))
       .slice(0, 60);
+    const rows = [];
+    for (const ad of top) rows.push({ ...ad, pdfUrl: await tvPdfUrl(ctx, ad) });
     return {
       rows,
       candidates: await candidatesWithOffice(ctx),

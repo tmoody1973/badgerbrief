@@ -35,6 +35,15 @@ import { GooglePoliticalAdRow, normalizeGoogleAd } from "./lib/googleAds";
 
 const GRAPH_API_BASE = "https://graph.facebook.com/v21.0";
 
+/** Working FCC download host for a TV order that has no stored PDF yet. The
+ * /api/manager host we scraped is Akamai-blocked (403) to direct clicks;
+ * files.fcc.gov/download/{fileManagerId}.pdf serves 200. For a portfolio order
+ * this is the wrapper (not the unwrapped page), so it's a fallback only. */
+function tvFallbackPdfUrl(platformAdId: string): string {
+  const parentId = platformAdId.split("#")[0];
+  return `https://files.fcc.gov/download/${parentId}.pdf`;
+}
+
 const platformValidator = v.union(
   v.literal("meta"),
   v.literal("google"),
@@ -101,6 +110,30 @@ export const purgeTvAds = internalMutation({
   },
 });
 
+/** TV ads missing a stored PDF — the backfill work-list. */
+export const tvAdsNeedingPdf = internalQuery({
+  args: {},
+  handler: async (
+    ctx,
+  ): Promise<{ adId: Id<"ads">; platformAdId: string }[]> => {
+    const rows = await ctx.db
+      .query("ads")
+      .withIndex("by_platform_ad", (q) => q.eq("platform", "tv"))
+      .collect();
+    return rows
+      .filter((r) => r.pdfStorageId === undefined)
+      .map((r) => ({ adId: r._id, platformAdId: r.platformAdId }));
+  },
+});
+
+/** Attach a stored order-PDF to a TV ad (backfill). */
+export const attachTvPdf = internalMutation({
+  args: { adId: v.id("ads"), pdfStorageId: v.id("_storage") },
+  handler: async (ctx, { adId, pdfStorageId }) => {
+    await ctx.db.patch(adId, { pdfStorageId });
+  },
+});
+
 /** Already-synced TV fileManagerIds (platformAdId) — the sync's dedup set. */
 export const existingTvIds = internalQuery({
   args: {},
@@ -139,6 +172,7 @@ const adWriteFields = {
   flightStart: v.optional(v.string()),
   flightEnd: v.optional(v.string()),
   fccDocUrl: v.optional(v.string()),
+  pdfStorageId: v.optional(v.id("_storage")),
   orderRef: v.optional(v.string()),
 };
 
@@ -173,6 +207,7 @@ export const upsertAd = internalMutation({
       flightStart: args.flightStart,
       flightEnd: args.flightEnd,
       fccDocUrl: args.fccDocUrl,
+      pdfStorageId: args.pdfStorageId,
       orderRef: args.orderRef,
       lastSeenAt: now,
     };
@@ -823,9 +858,10 @@ export const tvAdsForRace = query({
       .query("ads")
       .withIndex("by_candidate", (q) => q.eq("raceId", raceId))
       .collect();
-    return rows
-      .filter((r) => r.platform === "tv")
-      .map((r) => ({
+    const tvRows = rows.filter((r) => r.platform === "tv");
+    const out = [];
+    for (const r of tvRows) {
+      out.push({
         id: r._id,
         sponsor: r.pageOrCommittee,
         candidateSlug: r.candidateSlug,
@@ -836,9 +872,13 @@ export const tvAdsForRace = query({
         spotCount: r.spotCount,
         flightStart: r.flightStart,
         flightEnd: r.flightEnd,
-        fccDocUrl: r.fccDocUrl,
-      }))
-      .sort((a, b) => (b.spend ?? 0) - (a.spend ?? 0));
+        // Our stored copy (never 403s); FCC's /api/manager host is blocked.
+        pdfUrl: r.pdfStorageId
+          ? await ctx.storage.getUrl(r.pdfStorageId)
+          : tvFallbackPdfUrl(r.platformAdId),
+      });
+    }
+    return out.sort((a, b) => (b.spend ?? 0) - (a.spend ?? 0));
   },
 });
 

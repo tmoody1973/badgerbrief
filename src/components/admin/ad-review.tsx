@@ -99,7 +99,7 @@ function Pills<T extends string>({
   );
 }
 
-function AdSummary({ ad }: { ad: Doc<"ads"> }) {
+function AdSummary({ ad, pdfUrl }: { ad: Doc<"ads">; pdfUrl?: string | null }) {
   const { spendLower: lo, spendUpper: hi } = ad;
   const spend =
     lo === undefined && hi === undefined
@@ -140,9 +140,9 @@ function AdSummary({ ad }: { ad: Doc<"ads"> }) {
       {ad.creativeText && (
         <p className="mt-1 line-clamp-3 text-sm">{ad.creativeText}</p>
       )}
-      {isTv && ad.fccDocUrl && (
+      {isTv && pdfUrl && (
         <a
-          href={ad.fccDocUrl}
+          href={pdfUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-1 inline-block font-mono text-xs underline decoration-2 underline-offset-2"
@@ -315,9 +315,9 @@ export function AdReviewQueue() {
             {rows.length} shown · {data.openCount} open (biggest spenders first).
           </p>
           <ul className="mt-3 space-y-3">
-            {rows.map(({ task, ad, suggestedSlug }) => (
+            {rows.map(({ task, ad, suggestedSlug, pdfUrl }) => (
               <li key={task._id} className="border-2 border-border bg-background p-3">
-                <AdSummary ad={ad} />
+                <AdSummary ad={ad} pdfUrl={pdfUrl} />
                 <AttributionControls
                   ad={ad}
                   candidates={candidates}
@@ -412,9 +412,9 @@ export function UnattributedAds() {
             <Pills value={platform} options={PLATFORM_OPTS} onChange={setPlatform} />
           </div>
           <ul className="mt-3 space-y-3">
-            {rows.map((ad) => (
+            {rows.map(({ pdfUrl, ...ad }) => (
               <li key={ad._id} className="border-2 border-border bg-background p-3">
-                <AdSummary ad={ad} />
+                <AdSummary ad={ad} pdfUrl={pdfUrl} />
                 <AttributionControls
                   ad={ad}
                   candidates={candidates}

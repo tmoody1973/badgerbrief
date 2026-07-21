@@ -81,10 +81,11 @@ export const ingestTvDoc = internalAction({
     fileManagerId: v.string(),
     fccDocUrl: v.string(),
     year: v.number(),
+    pdfStorageId: v.optional(v.id("_storage")),
   },
   handler: async (
     ctx,
-    { extraction, fileManagerId, fccDocUrl, year },
+    { extraction, fileManagerId, fccDocUrl, year, pdfStorageId },
   ): Promise<{ adId: Id<"ads">; isPublic: boolean; confidence: number }> => {
     const x = extraction as TvAdExtraction;
     const candidates = await ctx.runQuery(
@@ -107,6 +108,7 @@ export const ingestTvDoc = internalAction({
 
     const adId: Id<"ads"> = await ctx.runMutation(internal.ads.upsertAd, {
       ...write,
+      pdfStorageId,
       candidateSlug: isPublic ? match.candidateSlug : undefined,
       raceId: isPublic ? match.raceId : undefined,
       matchConfidence: match.confidence,
@@ -399,6 +401,49 @@ async function downloadDocs(
   return out;
 }
 
+/**
+ * One-time backfill: store an order PDF for each existing TV ad that has none.
+ * files.fcc.gov/download/{id}.pdf serves 200 to plain fetch (only the
+ * /api/manager host is Akamai-blocked), so this needs no browser. Portfolios are
+ * unwrapped to the embedded order at the ad's #index.
+ */
+export const backfillTvPdfs = internalAction({
+  args: {},
+  handler: async (ctx): Promise<{ stored: number; failed: number }> => {
+    const todo = await ctx.runQuery(internal.ads.tvAdsNeedingPdf, {});
+    let stored = 0;
+    let failed = 0;
+    for (const { adId, platformAdId } of todo) {
+      try {
+        const [parentId, suffix] = platformAdId.split("#");
+        const res = await fetch(`${DOWNLOAD_HOST}/${parentId}.pdf`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const buf = new Uint8Array(await res.arrayBuffer());
+        const embedded = await unwrapPortfolio(buf);
+        let bytes: Uint8Array | undefined;
+        if (embedded) {
+          const idx = suffix !== undefined ? Number(suffix) : 0;
+          bytes = embedded[idx] ?? embedded[0];
+        } else {
+          bytes = buf;
+        }
+        if (!bytes || bytes.length < 1000) {
+          failed++;
+          continue;
+        }
+        const pdfStorageId = await ctx.storage.store(
+          new Blob([Buffer.from(bytes)], { type: "application/pdf" }),
+        );
+        await ctx.runMutation(internal.ads.attachTvPdf, { adId, pdfStorageId });
+        stored++;
+      } catch {
+        failed++;
+      }
+    }
+    return { stored, failed };
+  },
+});
+
 // ---------- orchestration ----------
 
 /**
@@ -520,6 +565,11 @@ export const syncTvAds = internalAction({
                 totals.extractionFailed++;
                 continue;
               }
+              // Store our own copy of the order PDF (the unwrapped, readable
+              // one for portfolios) so the link never hits FCC's blocked host.
+              const pdfStorageId = await ctx.storage.store(
+                new Blob([u.bytes], { type: "application/pdf" }),
+              );
               // TV orders don't carry the market; stamp it from the station.
               const withDma = { ...extraction, station: station.callSign, dma: station.dma };
               await ctx.runAction(internal.adsTv.ingestTvDoc, {
@@ -527,6 +577,7 @@ export const syncTvAds = internalAction({
                 fileManagerId: d.fileManagerId + u.idSuffix,
                 fccDocUrl: d.fccDocUrl,
                 year: YEAR,
+                pdfStorageId,
               });
               totals.ingested++;
             } catch {

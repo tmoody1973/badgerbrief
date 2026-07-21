@@ -51,9 +51,9 @@ function TvAdRow({ a }: { a: TvAd }) {
       </div>
       <div className="flex items-baseline gap-3">
         <span className="font-mono text-lg font-bold">{usd(a.spend)}</span>
-        {a.fccDocUrl && (
+        {a.pdfUrl && (
           <a
-            href={a.fccDocUrl}
+            href={a.pdfUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="press border-2 border-border bg-background px-2 py-1 font-mono text-[10px] uppercase tracking-widest"

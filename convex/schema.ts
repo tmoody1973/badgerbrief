@@ -243,7 +243,10 @@ export default defineSchema({
     spotCount: v.optional(v.number()),
     flightStart: v.optional(v.string()), // YYYY-MM-DD
     flightEnd: v.optional(v.string()), // YYYY-MM-DD
-    fccDocUrl: v.optional(v.string()), // source FCC order PDF
+    fccDocUrl: v.optional(v.string()), // source FCC order PDF (reference; the
+    // /api/manager host is Akamai-blocked to direct clicks — use pdfStorageId)
+    pdfStorageId: v.optional(v.id("_storage")), // our stored copy of the order
+    // PDF (the unwrapped readable order for portfolios) — the clickable link
     orderRef: v.optional(v.string()), // station's contract/order number
     firstSeenAt: v.number(),
     lastSeenAt: v.number(),
