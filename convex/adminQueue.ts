@@ -23,6 +23,21 @@ async function requireAdmin(ctx: QueryCtx | MutationCtx) {
   }
 }
 
+/** Candidate picker options with their race office, for the ad reviewers. */
+async function candidatesWithOffice(ctx: QueryCtx | MutationCtx) {
+  const cands = await ctx.db.query("candidates").collect();
+  const races = await ctx.db.query("races").collect();
+  const officeBy = new Map(races.map((r) => [r.raceId, r.office]));
+  return cands
+    .map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      raceId: c.raceId,
+      office: officeBy.get(c.raceId) ?? "",
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 const stanceLabel = v.union(
   v.literal("support"),
   v.literal("oppose"),
@@ -233,11 +248,11 @@ export const adQueue = query({
     // adds search + a likely-attacks filter over this set.
     rows.sort((a, b) => (b.ad.spendUpper ?? 0) - (a.ad.spendUpper ?? 0));
 
-    const candidates = (await ctx.db.query("candidates").collect())
-      .map((c) => ({ slug: c.slug, name: c.name, raceId: c.raceId }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    return { rows, candidates, openCount: adTasks.length };
+    return {
+      rows,
+      candidates: await candidatesWithOffice(ctx),
+      openCount: adTasks.length,
+    };
   },
 });
 
@@ -338,6 +353,72 @@ export const bulkConfirmOwnCommittee = internalMutation({
       confirmed++;
     }
     return { confirmed, leftForHuman, scanned: tasks.length };
+  },
+});
+
+/**
+ * The biggest ads NOT attributed to any candidate — mostly issue ads / PACs
+ * whose name doesn't contain a candidate (so they never got a review task), but
+ * which a human may still want to attribute (e.g. "A Better Wisconsin Together"
+ * → Tiffany, as an attack). Both platforms, biggest spenders first.
+ */
+export const unattributedAds = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    // Bounded scan (admin-only). Grows with the ads table; paginate if it gets large.
+    const all = await ctx.db.query("ads").collect();
+    const un = all.filter((a) => a.candidateSlug === undefined);
+    const rows = un
+      .sort((a, b) => (b.spendUpper ?? 0) - (a.spendUpper ?? 0))
+      .slice(0, 60);
+    return {
+      rows,
+      candidates: await candidatesWithOffice(ctx),
+      unattributedCount: un.length,
+    };
+  },
+});
+
+/** Attribute an ad directly by id (for the unattributed reviewer — these ads
+ * have no review task). Resolves any stray ad_match task for the ad too. */
+export const attributeAd = mutation({
+  args: {
+    adId: v.id("ads"),
+    candidateSlug: v.string(),
+    stance: v.union(v.literal("support"), v.literal("oppose")),
+  },
+  handler: async (ctx, { adId, candidateSlug, stance }) => {
+    await requireAdmin(ctx);
+    const ad = await ctx.db.get(adId);
+    if (!ad) throw new Error("ad not found");
+    const candidate = await ctx.db
+      .query("candidates")
+      .withIndex("by_slug_only", (q) => q.eq("slug", candidateSlug))
+      .first();
+    if (!candidate) throw new Error(`candidate not found: ${candidateSlug}`);
+    await ctx.db.patch(adId, {
+      candidateSlug: candidate.slug,
+      raceId: candidate.raceId,
+      matchConfidence: 1,
+      stance,
+    });
+    const openForAd = (
+      await ctx.db
+        .query("review_tasks")
+        .withIndex("by_status", (q) => q.eq("status", "open"))
+        .filter((q) => q.eq(q.field("kind"), "ad_match"))
+        .collect()
+    ).filter((t) => t.refId === adId);
+    for (const t of openForAd) {
+      await ctx.db.patch(t._id, { status: "resolved", resolvedAt: Date.now() });
+    }
+    await logAudit(ctx, {
+      action: "ad:attributed",
+      refTable: "ads",
+      refId: adId,
+      detail: `${candidate.slug} (${stance})`,
+    });
   },
 });
 

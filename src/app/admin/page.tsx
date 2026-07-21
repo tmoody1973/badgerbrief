@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Card, CardTitle } from "@/components/retroui/Card";
 import { ReviewQueue } from "@/components/admin/review-queue";
-import { AdReviewQueue } from "@/components/admin/ad-review";
+import { AdReviewQueue, UnattributedAds } from "@/components/admin/ad-review";
 import { ArticleSources } from "@/components/admin/article-sources";
 
 export default async function AdminPage() {
@@ -21,6 +21,7 @@ export default async function AdminPage() {
           Review queue, alerts, and editorial tools.
         </p>
         <AdReviewQueue />
+        <UnattributedAds />
         <ReviewQueue />
         <ArticleSources />
       </Card>
