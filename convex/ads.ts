@@ -9,6 +9,7 @@ import {
 import { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 import { normalizeSponsorKey } from "./lib/sponsors";
+import { isMeaningfulRef } from "./lib/tvExtract";
 import {
   MatchCandidate,
   NormalizedAd,
@@ -944,6 +945,96 @@ export const tvAdsForRace = query({
       });
     }
     return out.sort((a, b) => (b.spend ?? 0) - (a.spend ?? 0));
+  },
+});
+
+/**
+ * Broadcast-TV spending for the public ad tracker, grouped by sponsor. Reports
+ * the public FCC record — exact spend, stations, and what each sponsor's OWN
+ * NAB disclosure says the ads are about (candidates + national issues). This is
+ * the outside-spending story: who is buying Wisconsin's airwaves.
+ */
+export const tvAdsForTracker = query({
+  args: {},
+  handler: async (ctx) => {
+    const rows = (await ctx.db.query("ads").collect()).filter(
+      (r) => r.platform === "tv",
+    );
+    type Group = {
+      key: string;
+      sponsor: string;
+      totalSpend: number;
+      orderCount: number;
+      stations: Set<string>;
+      dmas: Set<string>;
+      candidates: Set<string>;
+      issues: Set<string>;
+      pdfStorageId?: Id<"_storage">;
+      topSpend: number;
+    };
+    const groups = new Map<string, Group>();
+    for (const r of rows) {
+      const key = normalizeSponsorKey(r.pageOrCommittee);
+      let g = groups.get(key);
+      if (!g) {
+        g = {
+          key,
+          sponsor: r.pageOrCommittee,
+          totalSpend: 0,
+          orderCount: 0,
+          stations: new Set(),
+          dmas: new Set(),
+          candidates: new Set(),
+          issues: new Set(),
+          topSpend: 0,
+        };
+        groups.set(key, g);
+      }
+      const spend = r.spendUpper ?? r.spendLower ?? 0;
+      g.totalSpend += spend;
+      g.orderCount += 1;
+      if (r.station) g.stations.add(r.station);
+      if (r.dma) g.dmas.add(r.dma);
+      for (const c of r.disclosure?.candidates ?? [])
+        if (isMeaningfulRef(c)) g.candidates.add(c);
+      if (isMeaningfulRef(r.disclosure?.nationalIssue))
+        g.issues.add(r.disclosure!.nationalIssue!);
+      if (spend >= g.topSpend) {
+        g.topSpend = spend;
+        g.pdfStorageId = r.pdfStorageId;
+      }
+    }
+    const out = [];
+    for (const g of groups.values()) {
+      const sp = await ctx.db
+        .query("sponsors")
+        .withIndex("by_key", (q) => q.eq("key", g.key))
+        .unique();
+      out.push({
+        key: g.key,
+        sponsor: g.sponsor,
+        totalSpend: g.totalSpend,
+        orderCount: g.orderCount,
+        stations: [...g.stations],
+        dmas: [...g.dmas],
+        candidates: [...g.candidates],
+        issues: [...g.issues],
+        pdfUrl: g.pdfStorageId
+          ? await ctx.storage.getUrl(g.pdfStorageId)
+          : null,
+        sponsorProfile:
+          sp && sp.reviewStatus === "approved"
+            ? {
+                kind: sp.kind,
+                lean: sp.lean,
+                summary: sp.summary,
+                disclosesDonors: sp.disclosesDonors,
+                sources: sp.sources,
+              }
+            : null,
+      });
+    }
+    return out.sort((a, b) => b.totalSpend - a.totalSpend);
   },
 });
 

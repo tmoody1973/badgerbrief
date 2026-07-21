@@ -66,6 +66,19 @@ export type TvDisclosure = {
   sponsorLegalName?: string;
 };
 
+/** Drop placeholder values the model sometimes emits instead of leaving empty. */
+export function isMeaningfulRef(s: string | undefined): boolean {
+  if (!s) return false;
+  const t = s.trim().toLowerCase();
+  return (
+    t.length > 0 &&
+    !/^(tbd|n\/?a|none|unknown|not applicable|pending|candidate tbd|n\/a)$/.test(
+      t,
+    ) &&
+    !t.includes("tbd")
+  );
+}
+
 /**
  * Merge the disclosure fields across all pages extracted from one portfolio
  * (the order page has none; the NAB form has them). Returns undefined when no
@@ -79,12 +92,12 @@ export function buildDisclosure(
       exs
         .flatMap((e) => e.refCandidates ?? [])
         .map((s) => s.trim())
-        .filter(Boolean),
+        .filter(isMeaningfulRef),
     ),
   ];
-  const office = exs.map((e) => e.refOffice).find(Boolean);
+  const office = exs.map((e) => e.refOffice).find(isMeaningfulRef);
   const electionDate = exs.map((e) => e.refElectionDate).find(Boolean);
-  const nationalIssue = exs.map((e) => e.refNationalIssue).find(Boolean);
+  const nationalIssue = exs.map((e) => e.refNationalIssue).find(isMeaningfulRef);
   const sponsorOfficers = exs
     .map((e) => e.sponsorOfficers)
     .find((a) => a && a.length);

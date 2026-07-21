@@ -3,7 +3,13 @@ import { AdsAnalytics } from "@/components/guide/ads-analytics";
 import { AdsBrowser } from "@/components/guide/ads-browser";
 import { AdsOverview } from "@/components/guide/ads-overview";
 import { YourRaces } from "@/components/guide/your-races";
-import { candidateDirectory, getAdMoneyOverview, listAds } from "@/lib/data";
+import { TvAdTracker } from "@/components/guide/tv-ad-tracker";
+import {
+  candidateDirectory,
+  getAdMoneyOverview,
+  getTvAdTracker,
+  listAds,
+} from "@/lib/data";
 
 export const revalidate = 300;
 
@@ -14,10 +20,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AdsPage() {
-  const [ads, candidates, overview] = await Promise.all([
+  const [ads, candidates, overview, tvSponsors] = await Promise.all([
     listAds(),
     candidateDirectory(),
     getAdMoneyOverview(),
+    getTvAdTracker(),
   ]);
   const candidateNames = Object.fromEntries(
     candidates.map((c) => [c.slug, c.name]),
@@ -52,6 +59,15 @@ export default async function AdsPage() {
       <YourRaces races={overview.races} />
 
       <AdsOverview overview={overview} />
+
+      {tvSponsors.length > 0 && (
+        <>
+          <hr className="mt-10 border-t-2 border-dashed border-border" />
+          <div className="mt-8">
+            <TvAdTracker sponsors={tvSponsors} />
+          </div>
+        </>
+      )}
 
       <hr className="mt-10 border-t-2 border-dashed border-border" />
       <h2 className="font-display mt-8 text-2xl">Statewide detail</h2>

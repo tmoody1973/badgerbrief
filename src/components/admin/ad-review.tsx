@@ -138,6 +138,23 @@ function AdSummary({ ad, pdfUrl }: { ad: Doc<"ads">; pdfUrl?: string | null }) {
           {tvMeta}
         </p>
       )}
+      {isTv && ad.disclosure && (
+        <p className="mt-1 border-2 border-border bg-secondary/40 px-2 py-1 text-xs">
+          <span className="font-mono font-bold uppercase tracking-widest">
+            FCC disclosure —{" "}
+          </span>
+          {ad.disclosure.candidates.length > 0 && (
+            <>refers to <strong>{ad.disclosure.candidates.join(", ")}</strong></>
+          )}
+          {ad.disclosure.office ? ` · ${ad.disclosure.office}` : ""}
+          {ad.disclosure.nationalIssue
+            ? ` · issue: ${ad.disclosure.nationalIssue}`
+            : ""}
+          {ad.disclosure.candidates.length === 0 &&
+            !ad.disclosure.nationalIssue &&
+            "no candidate/issue named"}
+        </p>
+      )}
       {ad.creativeText && (
         <p className="mt-1 line-clamp-3 text-sm">{ad.creativeText}</p>
       )}
