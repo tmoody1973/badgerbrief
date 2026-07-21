@@ -298,6 +298,47 @@ async function enumerateStation(
   return [...byId.values()];
 }
 
+/**
+ * Many issue-ad "documents" are PDF Portfolios: a container whose visible page
+ * is just an Adobe splash, with the real order(s) as embedded file attachments.
+ * Claude only sees the splash → empty extraction. Unwrap with mupdf: if the PDF
+ * has an EmbeddedFiles name tree, return each embedded order's bytes; else null
+ * (a plain order, extract directly). mupdf is a pure-WASM package — dynamic
+ * import keeps it out of Convex's push-time analyze.
+ */
+async function unwrapPortfolio(
+  pdf: Uint8Array,
+): Promise<Uint8Array[] | null> {
+  const mupdf: any = await import("mupdf");
+  const doc = mupdf.Document.openDocument(pdf, "application/pdf");
+  const asPdf = doc.asPDF ? doc.asPDF() : doc;
+  const ef = asPdf
+    .getTrailer()
+    .get("Root")
+    .get("Names")
+    .get("EmbeddedFiles");
+  if (!ef || ef.isNull?.()) return null;
+  const names = ef.get("Names");
+  const len = names.length ?? 0;
+  const out: Uint8Array[] = [];
+  for (let i = 0; i + 1 < len; i += 2) {
+    try {
+      const filespec = names.get(i + 1);
+      const stream = filespec.get("EF").get("F");
+      const buf = stream.readStream();
+      const bytes: Uint8Array = buf.asUint8Array
+        ? buf.asUint8Array()
+        : new Uint8Array(buf);
+      // Only keep real PDF attachments (skip signatures/NAB xml, etc.).
+      if (bytes.length > 2000 && bytes[0] === 0x25 && bytes[1] === 0x50)
+        out.push(bytes);
+    } catch {
+      // skip a bad attachment
+    }
+  }
+  return out.length ? out : null;
+}
+
 const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
@@ -382,7 +423,13 @@ export const syncTvAds = internalAction({
       .map((c) => normalizeText(c.name).split(" ").pop() ?? "")
       .filter((s) => s.length >= 4);
 
-    const seen = new Set(await ctx.runQuery(internal.ads.existingTvIds, {}));
+    // Stored TV platformAdIds may carry a "#<embeddedIndex>" suffix (portfolio
+    // orders); dedup on the parent fileManagerId so re-syncs skip whole docs.
+    const seen = new Set(
+      (await ctx.runQuery(internal.ads.existingTvIds, {})).map(
+        (id) => id.split("#")[0],
+      ),
+    );
 
     let stations = TV_STATIONS;
     if (callSigns?.length)
@@ -423,28 +470,43 @@ export const syncTvAds = internalAction({
         for (const d of fresh) {
           const bytes = files[d.fileManagerId];
           totals.downloaded++;
-          const pdfBase64 = Buffer.from(bytes).toString("base64");
-          const extraction = await ctx.runAction(
-            internal.tvExtractAgent.extractTvAd,
-            { pdfBase64, hintName: d.name, year: YEAR },
-          );
-          // Guard: extraction can come back empty on scanned / multi-order
-          // packet PDFs. Don't create a junk empty row — skip and count it.
-          if (!extraction?.advertiser?.trim()) {
-            totals.extractionFailed++;
-            seen.add(d.fileManagerId);
-            continue;
+
+          // Many issue-ad docs are PDF portfolios wrapping the real order(s) as
+          // attachments. Unwrap → a unit per embedded order; else the doc itself.
+          const embedded = await unwrapPortfolio(bytes);
+          const units = embedded
+            ? embedded.map((b, i) => ({ bytes: b, idSuffix: `#${i}`, isEmbedded: true }))
+            : [{ bytes, idSuffix: "", isEmbedded: false }];
+
+          for (const u of units) {
+            const extraction = await ctx.runAction(
+              internal.tvExtractAgent.extractTvAd,
+              {
+                pdfBase64: Buffer.from(u.bytes).toString("base64"),
+                hintName: d.name,
+                year: YEAR,
+              },
+            );
+            // Skip junk: no advertiser (unreadable) — and, for a portfolio's
+            // embedded units, no gross (NAB forms / revisions carry no dollars).
+            if (
+              !extraction?.advertiser?.trim() ||
+              (u.isEmbedded && !extraction.grossSpend)
+            ) {
+              totals.extractionFailed++;
+              continue;
+            }
+            // TV orders don't carry the market; stamp it from the station.
+            const withDma = { ...extraction, station: station.callSign, dma: station.dma };
+            await ctx.runAction(internal.adsTv.ingestTvDoc, {
+              extraction: withDma,
+              fileManagerId: d.fileManagerId + u.idSuffix,
+              fccDocUrl: d.fccDocUrl,
+              year: YEAR,
+            });
+            totals.ingested++;
           }
-          // TV orders don't carry the market; stamp it from the station.
-          const withDma = { ...extraction, station: station.callSign, dma: station.dma };
-          await ctx.runAction(internal.adsTv.ingestTvDoc, {
-            extraction: withDma,
-            fileManagerId: d.fileManagerId,
-            fccDocUrl: d.fccDocUrl,
-            year: YEAR,
-          });
           seen.add(d.fileManagerId);
-          totals.ingested++;
         }
         await ctx.runMutation(internal.ads.logSync, {
           url: stationUrl,

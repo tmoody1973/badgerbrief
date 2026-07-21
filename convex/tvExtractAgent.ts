@@ -98,6 +98,12 @@ Extract these fields, transcribing ONLY what the order states — leave anything
 - agency, orderRef: if present
 - confidence: an object mapping each field you filled to a 0..1 confidence.
 
+CRITICAL: every field must come from the order text INSIDE the PDF. A document
+name may be provided as a locating hint — NEVER copy values (advertiser, dates,
+amounts) from that name. If the PDF has no readable order content (e.g. only a
+portfolio/cover splash page such as "open this PDF portfolio in Acrobat"), return
+advertiser as an empty string, grossSpend null, and confidence 0.
+
 Return strictly the requested structure.`;
 
 /** Extract one FCC TV order PDF (base64) into structured fields via Sonnet. */

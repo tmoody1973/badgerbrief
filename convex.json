@@ -1,5 +1,5 @@
 {
   "node": {
-    "externalPackages": ["playwright-core"]
+    "externalPackages": ["playwright-core", "mupdf"]
   }
 }

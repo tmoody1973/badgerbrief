@@ -74,6 +74,33 @@ export const listCandidatesForMatching = internalQuery({
   },
 });
 
+/** Delete all platform:tv ads + their open ad_match review tasks. For a clean
+ * TV re-sync — safe while no TV attribution has been human-resolved. */
+export const purgeTvAds = internalMutation({
+  args: {},
+  handler: async (ctx): Promise<{ ads: number; tasks: number }> => {
+    const tvAds = await ctx.db
+      .query("ads")
+      .withIndex("by_platform_ad", (q) => q.eq("platform", "tv"))
+      .collect();
+    const tvIds = new Set(tvAds.map((a) => a._id));
+    for (const a of tvAds) await ctx.db.delete(a._id);
+    const openTasks = await ctx.db
+      .query("review_tasks")
+      .withIndex("by_status", (q) => q.eq("status", "open"))
+      .filter((q) => q.eq(q.field("kind"), "ad_match"))
+      .collect();
+    let tasks = 0;
+    for (const t of openTasks) {
+      if (t.refTable === "ads" && tvIds.has(t.refId as Id<"ads">)) {
+        await ctx.db.delete(t._id);
+        tasks++;
+      }
+    }
+    return { ads: tvAds.length, tasks };
+  },
+});
+
 /** Already-synced TV fileManagerIds (platformAdId) — the sync's dedup set. */
 export const existingTvIds = internalQuery({
   args: {},
