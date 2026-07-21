@@ -51,6 +51,41 @@ type QueueRow =
   | { task: Doc<"review_tasks">; kind: "quote"; draft: Doc<"quote_drafts"> };
 
 /** Open review tasks joined with their draft docs, newest first. */
+/** Open-work counts for the admin tab bar — one cheap query so each tab shows
+ * its backlog without mounting the section. `tv` is broken out so the new TV
+ * orders are visible at a glance. */
+export const counts = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const open = await ctx.db
+      .query("review_tasks")
+      .withIndex("by_status", (q) => q.eq("status", "open"))
+      .collect();
+    const adMatchTasks = open.filter((t) => t.kind === "ad_match");
+    // How many of those ad_match tasks are TV orders.
+    let tv = 0;
+    for (const t of adMatchTasks) {
+      const id = ctx.db.normalizeId("ads", t.refId);
+      const ad = id ? await ctx.db.get(id) : null;
+      if (ad?.platform === "tv") tv++;
+    }
+    const editorial = open.filter(
+      (t) => t.kind === "position" || t.kind === "quote",
+    ).length;
+    const unattributed = (await ctx.db.query("ads").collect()).filter(
+      (a) => a.candidateSlug === undefined,
+    ).length;
+    const sources = (
+      await ctx.db
+        .query("article_sources")
+        .withIndex("by_status", (q) => q.eq("status", "proposed"))
+        .collect()
+    ).length;
+    return { adMatch: adMatchTasks.length, tv, editorial, unattributed, sources };
+  },
+});
+
 export const list = query({
   args: {},
   handler: async (ctx): Promise<QueueRow[]> => {

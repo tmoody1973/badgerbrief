@@ -18,7 +18,7 @@ import { asMessage, ErrorLine } from "./draft-row";
  */
 
 type Candidate = { slug: string; name: string; raceId: string; office: string };
-type Platform = "all" | "meta" | "google";
+type Platform = "all" | "meta" | "google" | "tv";
 
 // ---------- shared bits ----------
 
@@ -100,10 +100,24 @@ function Pills<T extends string>({
 }
 
 function AdSummary({ ad }: { ad: Doc<"ads"> }) {
+  const { spendLower: lo, spendUpper: hi } = ad;
   const spend =
-    ad.spendLower !== undefined && ad.spendUpper !== undefined
-      ? `$${ad.spendLower.toLocaleString()}–$${ad.spendUpper.toLocaleString()}`
-      : "spend n/a";
+    lo === undefined && hi === undefined
+      ? "spend n/a"
+      : lo === hi // TV spend is exact (lower===upper)
+        ? `$${(hi ?? lo)!.toLocaleString()}`
+        : `$${(lo ?? 0).toLocaleString()}–$${(hi ?? 0).toLocaleString()}`;
+  const isTv = ad.platform === "tv";
+  const tvMeta = [
+    ad.station,
+    ad.dma,
+    ad.spotCount ? `${ad.spotCount} spots` : null,
+    ad.flightStart
+      ? `${ad.flightStart}${ad.flightEnd ? `–${ad.flightEnd}` : ""}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -118,8 +132,23 @@ function AdSummary({ ad }: { ad: Doc<"ads"> }) {
       {ad.fundingEntity && ad.fundingEntity !== ad.pageOrCommittee && (
         <p className="text-xs text-muted-foreground">Paid for by {ad.fundingEntity}</p>
       )}
+      {isTv && tvMeta && (
+        <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+          {tvMeta}
+        </p>
+      )}
       {ad.creativeText && (
         <p className="mt-1 line-clamp-3 text-sm">{ad.creativeText}</p>
+      )}
+      {isTv && ad.fccDocUrl && (
+        <a
+          href={ad.fccDocUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 inline-block font-mono text-xs underline decoration-2 underline-offset-2"
+        >
+          View FCC order ↗
+        </a>
       )}
       {ad.snapshotUrl && (
         <a
@@ -200,6 +229,7 @@ function useBusyRunner() {
 
 const PLATFORM_OPTS = [
   ["all", "All"],
+  ["tv", "TV"],
   ["meta", "Meta"],
   ["google", "Google"],
 ] as const;
