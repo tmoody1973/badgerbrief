@@ -31,7 +31,9 @@ function SponsorCard({ s }: { s: Sponsor }) {
       </div>
       <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
         {s.orderCount} order{s.orderCount === 1 ? "" : "s"}
-        {s.stations.length ? ` · ${s.stations.length} stations` : ""}
+        {s.stations.length
+          ? ` · ${s.stations.length} station${s.stations.length === 1 ? "" : "s"}`
+          : ""}
         {s.dmas.length ? ` · ${s.dmas.join(", ")}` : ""}
       </p>
 
