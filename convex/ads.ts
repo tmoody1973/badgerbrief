@@ -478,6 +478,127 @@ export const syncMetaAds = internalAction({
 
 const GOOGLE_DATASET = "bigquery://google_political_ads.creative_stats";
 
+// geo_targeting_included is a STRING of "zip,State,Country" tuples; WI-targeted
+// ads contain "Wisconsin" there (regions is only country-level, "US").
+const GOOGLE_ADS_SQL = `
+SELECT ad_id, advertiser_id, advertiser_name, ad_type, ad_url,
+       date_range_start, date_range_end,
+       spend_range_min_usd, spend_range_max_usd, impressions
+FROM \`bigquery-public-data.google_political_ads.creative_stats\`
+WHERE geo_targeting_included LIKE '%Wisconsin%'
+  AND date_range_start >= '2026-01-01'
+ORDER BY spend_range_max_usd DESC
+LIMIT 500`;
+
+type ServiceAccount = {
+  client_email: string;
+  private_key: string;
+  token_uri: string;
+  project_id: string;
+};
+
+function b64urlStr(s: string): string {
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function b64urlBytes(buf: ArrayBuffer): string {
+  let bin = "";
+  for (const b of new Uint8Array(buf)) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function pemToPkcs8(pem: string): ArrayBuffer {
+  const b64 = pem
+    .replace(/-----BEGIN PRIVATE KEY-----/, "")
+    .replace(/-----END PRIVATE KEY-----/, "")
+    .replace(/\s+/g, "");
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
+/** Mint a short-lived OAuth token from the service account (RS256 JWT signed
+ * with Web Crypto — no Node runtime, no SDK). */
+async function googleAccessToken(sa: ServiceAccount): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  const header = b64urlStr(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const claims = b64urlStr(
+    JSON.stringify({
+      iss: sa.client_email,
+      scope: "https://www.googleapis.com/auth/bigquery.readonly",
+      aud: sa.token_uri,
+      iat: now,
+      exp: now + 3600,
+    }),
+  );
+  const signingInput = `${header}.${claims}`;
+  const key = await crypto.subtle.importKey(
+    "pkcs8",
+    pemToPkcs8(sa.private_key),
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    new TextEncoder().encode(signingInput),
+  );
+  const jwt = `${signingInput}.${b64urlBytes(sig)}`;
+  const res = await fetch(sa.token_uri, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `grant_type=${encodeURIComponent(
+      "urn:ietf:params:oauth:grant-type:jwt-bearer",
+    )}&assertion=${jwt}`,
+  });
+  const body = (await res.json()) as {
+    access_token?: string;
+    error_description?: string;
+    error?: string;
+  };
+  if (!res.ok || !body.access_token) {
+    throw new Error(`Google auth failed: ${body.error_description ?? body.error ?? res.status}`);
+  }
+  return body.access_token;
+}
+
+/** Run one BigQuery query, capped at maxBytes so it can never cost money. */
+async function queryBigQuery(
+  sa: ServiceAccount,
+  sql: string,
+  maxBytes: number,
+): Promise<GooglePoliticalAdRow[]> {
+  const token = await googleAccessToken(sa);
+  const res = await fetch(
+    `https://bigquery.googleapis.com/bigquery/v2/projects/${sa.project_id}/queries`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: sql,
+        useLegacySql: false,
+        maximumBytesBilled: String(maxBytes),
+        timeoutMs: 60000,
+      }),
+    },
+  );
+  const body = (await res.json()) as {
+    schema?: { fields?: { name: string }[] };
+    rows?: { f: { v: string }[] }[];
+    error?: { message?: string };
+  };
+  if (!res.ok) throw new Error(`BigQuery error: ${body.error?.message ?? res.status}`);
+  const names = (body.schema?.fields ?? []).map((f) => f.name);
+  return (body.rows ?? []).map((r) => {
+    const obj: Record<string, string> = {};
+    r.f.forEach((cell, i) => (obj[names[i]] = cell.v));
+    return obj as GooglePoliticalAdRow;
+  });
+}
+
 export const syncGoogleAds = internalAction({
   args: {
     fixture: v.optional(v.array(v.any())), // GooglePoliticalAdRow[]
@@ -486,11 +607,12 @@ export const syncGoogleAds = internalAction({
   handler: async (ctx, args) => {
     const date = todayISO(Date.now());
     const trackedEntities: TrackedEntity[] = args.trackedEntities ?? [];
+    const saJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
 
     let rows: GooglePoliticalAdRow[];
     if (args.fixture) {
       rows = args.fixture as GooglePoliticalAdRow[];
-    } else if (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+    } else if (!saJson) {
       await ctx.runMutation(internal.ads.logSync, {
         url: GOOGLE_DATASET,
         status: "error",
@@ -499,18 +621,20 @@ export const syncGoogleAds = internalAction({
       });
       return { status: "skipped" as const, reason: "no credentials" };
     } else {
-      // ponytail: the live BigQuery query is the credentials-gated follow-up.
-      // Service-account JWT → OAuth token → jobs.query REST gets wired when the
-      // GCP project exists; it's untestable without real creds, so not built
-      // blind. Everything downstream (normalize → match → upsert → review) is
-      // done and tested via the fixture path. See MOO-315.
-      await ctx.runMutation(internal.ads.logSync, {
-        url: GOOGLE_DATASET,
-        status: "error",
-        error: "credentials present but live BigQuery query not yet wired (MOO-315)",
-        severity: "info",
-      });
-      return { status: "pending_live_query" as const };
+      try {
+        const sa = JSON.parse(saJson) as ServiceAccount;
+        // 10 GB cap (well inside BigQuery's 1 TB/month free tier) — the geo
+        // column scan is larger than the tiny output.
+        rows = await queryBigQuery(sa, GOOGLE_ADS_SQL, 10_000_000_000);
+      } catch (e) {
+        await ctx.runMutation(internal.ads.logSync, {
+          url: GOOGLE_DATASET,
+          status: "error",
+          error: e instanceof Error ? e.message : String(e),
+          severity: "warning",
+        });
+        throw new Error(`Google ads sync failed: ${e instanceof Error ? e.message : e}`);
+      }
     }
 
     const candidates: MatchCandidate[] = await ctx.runQuery(
