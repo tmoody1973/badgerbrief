@@ -1,6 +1,38 @@
 import { describe, expect, test } from "vitest";
-import { parseMoney, parseFlightDates, toAdWrite } from "./tvExtract";
+import {
+  parseMoney,
+  parseFlightDates,
+  toAdWrite,
+  buildDisclosure,
+} from "./tvExtract";
 import type { TvAdExtraction } from "./tvExtract";
+
+describe("buildDisclosure", () => {
+  const order: TvAdExtraction = {
+    advertiser: "Opportunity Wisconsin",
+    station: "WISN-TV",
+    grossSpend: 27430,
+    confidence: {},
+  };
+  const nab: TvAdExtraction = {
+    advertiser: "",
+    station: "WISN-TV",
+    refCandidates: ["Bryan Steil"],
+    refOffice: "Wisconsin's 1st congressional district",
+    refNationalIssue: "Tariffs",
+    sponsorLegalName: "Opportunity Wisconsin",
+    confidence: {},
+  };
+  test("merges NAB target from the disclosure page onto the buy", () => {
+    const d = buildDisclosure([order, nab]);
+    expect(d?.candidates).toEqual(["Bryan Steil"]);
+    expect(d?.office).toBe("Wisconsin's 1st congressional district");
+    expect(d?.nationalIssue).toBe("Tariffs");
+  });
+  test("returns undefined when no page carries disclosure (plain order)", () => {
+    expect(buildDisclosure([order])).toBeUndefined();
+  });
+});
 
 describe("parseMoney", () => {
   test("parses a formatted dollar amount", () => {

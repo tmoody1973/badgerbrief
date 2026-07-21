@@ -24,7 +24,7 @@ import {
   normalizeText,
   type NormalizedAd,
 } from "./lib/adsMatch";
-import { toAdWrite, type TvAdExtraction } from "./lib/tvExtract";
+import { toAdWrite, buildDisclosure, type TvAdExtraction } from "./lib/tvExtract";
 
 const YEAR = 2026;
 const FCC_BASE = "https://publicfiles.fcc.gov";
@@ -82,10 +82,20 @@ export const ingestTvDoc = internalAction({
     fccDocUrl: v.string(),
     year: v.number(),
     pdfStorageId: v.optional(v.id("_storage")),
+    disclosure: v.optional(
+      v.object({
+        candidates: v.array(v.string()),
+        office: v.optional(v.string()),
+        electionDate: v.optional(v.string()),
+        nationalIssue: v.optional(v.string()),
+        sponsorOfficers: v.optional(v.array(v.string())),
+        sponsorLegalName: v.optional(v.string()),
+      }),
+    ),
   },
   handler: async (
     ctx,
-    { extraction, fileManagerId, fccDocUrl, year, pdfStorageId },
+    { extraction, fileManagerId, fccDocUrl, year, pdfStorageId, disclosure },
   ): Promise<{ adId: Id<"ads">; isPublic: boolean; confidence: number }> => {
     const x = extraction as TvAdExtraction;
     const candidates = await ctx.runQuery(
@@ -109,6 +119,7 @@ export const ingestTvDoc = internalAction({
     const adId: Id<"ads"> = await ctx.runMutation(internal.ads.upsertAd, {
       ...write,
       pdfStorageId,
+      disclosure,
       candidateSlug: isPublic ? match.candidateSlug : undefined,
       raceId: isPublic ? match.raceId : undefined,
       matchConfidence: match.confidence,
@@ -444,6 +455,54 @@ export const backfillTvPdfs = internalAction({
   },
 });
 
+/**
+ * Backfill NAB disclosure (what each existing TV ad is ABOUT) onto rows that
+ * lack it. Re-fetches each parent doc via plain files.fcc.gov (only /api/manager
+ * is blocked), unwraps, extracts every page, and merges the disclosure. Cached
+ * per parent so a portfolio is fetched/extracted once.
+ */
+export const backfillTvDisclosure = internalAction({
+  args: {},
+  handler: async (ctx): Promise<{ patched: number; failed: number }> => {
+    const todo = await ctx.runQuery(internal.ads.tvAdsNeedingDisclosure, {});
+    const cache = new Map<string, ReturnType<typeof buildDisclosure>>();
+    let patched = 0;
+    let failed = 0;
+    for (const { adId, platformAdId } of todo) {
+      const parentId = platformAdId.split("#")[0];
+      try {
+        let disclosure = cache.get(parentId);
+        if (!cache.has(parentId)) {
+          const res = await fetch(`${DOWNLOAD_HOST}/${parentId}.pdf`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const buf = new Uint8Array(await res.arrayBuffer());
+          const pages = (await unwrapPortfolio(buf)) ?? [buf];
+          const exs: TvAdExtraction[] = [];
+          for (const b of pages) {
+            const ex = (await ctx.runAction(internal.tvExtractAgent.extractTvAd, {
+              pdfBase64: Buffer.from(b).toString("base64"),
+              year: YEAR,
+            })) as TvAdExtraction;
+            exs.push(ex);
+          }
+          disclosure = buildDisclosure(exs);
+          cache.set(parentId, disclosure);
+        }
+        if (disclosure) {
+          await ctx.runMutation(internal.ads.attachTvDisclosure, {
+            adId,
+            disclosure,
+          });
+          patched++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+    return { patched, failed };
+  },
+});
+
 // ---------- orchestration ----------
 
 /**
@@ -539,52 +598,53 @@ export const syncTvAds = internalAction({
           const bytes = files[d.fileManagerId];
           totals.downloaded++;
 
-          // Many issue-ad docs are PDF portfolios wrapping the real order(s) as
-          // attachments. Unwrap → a unit per embedded order; else the doc itself.
+          // Many issue-ad docs are PDF portfolios wrapping the real order AND a
+          // NAB disclosure form. Unwrap → a unit per embedded page; else the doc.
           const embedded = await unwrapPortfolio(bytes);
           const units = embedded
             ? embedded.map((b, i) => ({ bytes: b, idSuffix: `#${i}`, isEmbedded: true }))
             : [{ bytes, idSuffix: "", isEmbedded: false }];
 
+          // Extract every page once (order pages + NAB disclosure pages).
+          const extracted: { u: (typeof units)[number]; ex: TvAdExtraction }[] = [];
           for (const u of units) {
             try {
-              const extraction = await ctx.runAction(
-                internal.tvExtractAgent.extractTvAd,
-                {
-                  pdfBase64: Buffer.from(u.bytes).toString("base64"),
-                  hintName: d.name,
-                  year: YEAR,
-                },
-              );
-              // Skip junk: no advertiser (unreadable) — and, for a portfolio's
-              // embedded units, no gross (NAB forms / revisions carry no dollars).
-              if (
-                !extraction?.advertiser?.trim() ||
-                (u.isEmbedded && !extraction.grossSpend)
-              ) {
-                totals.extractionFailed++;
-                continue;
-              }
-              // Store our own copy of the order PDF (the unwrapped, readable
-              // one for portfolios) so the link never hits FCC's blocked host.
-              const pdfStorageId = await ctx.storage.store(
-                new Blob([u.bytes], { type: "application/pdf" }),
-              );
-              // TV orders don't carry the market; stamp it from the station.
-              const withDma = { ...extraction, station: station.callSign, dma: station.dma };
-              await ctx.runAction(internal.adsTv.ingestTvDoc, {
-                extraction: withDma,
-                fileManagerId: d.fileManagerId + u.idSuffix,
-                fccDocUrl: d.fccDocUrl,
+              const ex = (await ctx.runAction(internal.tvExtractAgent.extractTvAd, {
+                pdfBase64: Buffer.from(u.bytes).toString("base64"),
+                hintName: d.name,
                 year: YEAR,
-                pdfStorageId,
-              });
-              totals.ingested++;
+              })) as TvAdExtraction;
+              extracted.push({ u, ex });
             } catch {
-              // A single bad PDF (corrupt download / Anthropic rejects it) must
-              // not abort the station — skip this unit and keep going.
+              // A bad PDF (corrupt / rejected) skips this page, not the station.
               totals.extractionFailed++;
             }
+          }
+          // What the ad is ABOUT, merged from the doc's NAB form (if any).
+          const disclosure = buildDisclosure(extracted.map((e) => e.ex));
+
+          for (const { u, ex } of extracted) {
+            // Order pages become ad rows; NAB pages only fed `disclosure`.
+            if (!ex.advertiser?.trim() || (u.isEmbedded && !ex.grossSpend)) {
+              totals.extractionFailed++;
+              continue;
+            }
+            // Store our own copy of the readable order PDF (never hits FCC's
+            // blocked host).
+            const pdfStorageId = await ctx.storage.store(
+              new Blob([u.bytes], { type: "application/pdf" }),
+            );
+            // TV orders don't carry the market; stamp it from the station.
+            const withDma = { ...ex, station: station.callSign, dma: station.dma };
+            await ctx.runAction(internal.adsTv.ingestTvDoc, {
+              extraction: withDma,
+              fileManagerId: d.fileManagerId + u.idSuffix,
+              fccDocUrl: d.fccDocUrl,
+              year: YEAR,
+              pdfStorageId,
+              disclosure,
+            });
+            totals.ingested++;
           }
           seen.add(d.fileManagerId);
         }

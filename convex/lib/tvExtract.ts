@@ -16,6 +16,13 @@ export type TvAdExtraction = {
   netSpend?: number;
   agency?: string;
   orderRef?: string;
+  // From the paired NAB/PB disclosure form (what the ad is ABOUT).
+  refCandidates?: string[];
+  refOffice?: string;
+  refElectionDate?: string;
+  refNationalIssue?: string;
+  sponsorOfficers?: string[];
+  sponsorLegalName?: string;
   confidence: Record<string, number>; // per-field 0..1
 };
 
@@ -47,6 +54,57 @@ export function parseFlightDates(
   const iso = (y: number, mo: number, d: number) =>
     `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
   return { start: iso(year, sM, sD), end: iso(endYear, eM, eD) };
+}
+
+/** What a TV ad is about, from the paired NAB disclosure form. */
+export type TvDisclosure = {
+  candidates: string[];
+  office?: string;
+  electionDate?: string;
+  nationalIssue?: string;
+  sponsorOfficers?: string[];
+  sponsorLegalName?: string;
+};
+
+/**
+ * Merge the disclosure fields across all pages extracted from one portfolio
+ * (the order page has none; the NAB form has them). Returns undefined when no
+ * page carried any disclosure (e.g. a plain candidate order).
+ */
+export function buildDisclosure(
+  exs: TvAdExtraction[],
+): TvDisclosure | undefined {
+  const candidates = [
+    ...new Set(
+      exs
+        .flatMap((e) => e.refCandidates ?? [])
+        .map((s) => s.trim())
+        .filter(Boolean),
+    ),
+  ];
+  const office = exs.map((e) => e.refOffice).find(Boolean);
+  const electionDate = exs.map((e) => e.refElectionDate).find(Boolean);
+  const nationalIssue = exs.map((e) => e.refNationalIssue).find(Boolean);
+  const sponsorOfficers = exs
+    .map((e) => e.sponsorOfficers)
+    .find((a) => a && a.length);
+  const sponsorLegalName = exs.map((e) => e.sponsorLegalName).find(Boolean);
+  if (
+    !candidates.length &&
+    !office &&
+    !nationalIssue &&
+    !sponsorOfficers &&
+    !sponsorLegalName
+  )
+    return undefined;
+  return {
+    candidates,
+    office,
+    electionDate,
+    nationalIssue,
+    sponsorOfficers,
+    sponsorLegalName,
+  };
 }
 
 /** An `ads` write payload (internal.ads.upsertAd shape) for a TV order. */

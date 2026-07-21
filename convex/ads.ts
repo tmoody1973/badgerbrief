@@ -135,6 +135,40 @@ export const attachTvPdf = internalMutation({
   },
 });
 
+/** TV ads missing NAB disclosure — the disclosure-backfill work-list. */
+export const tvAdsNeedingDisclosure = internalQuery({
+  args: {},
+  handler: async (
+    ctx,
+  ): Promise<{ adId: Id<"ads">; platformAdId: string }[]> => {
+    const rows = await ctx.db
+      .query("ads")
+      .withIndex("by_platform_ad", (q) => q.eq("platform", "tv"))
+      .collect();
+    return rows
+      .filter((r) => r.disclosure === undefined)
+      .map((r) => ({ adId: r._id, platformAdId: r.platformAdId }));
+  },
+});
+
+/** Attach a NAB disclosure to a TV ad (backfill). */
+export const attachTvDisclosure = internalMutation({
+  args: {
+    adId: v.id("ads"),
+    disclosure: v.object({
+      candidates: v.array(v.string()),
+      office: v.optional(v.string()),
+      electionDate: v.optional(v.string()),
+      nationalIssue: v.optional(v.string()),
+      sponsorOfficers: v.optional(v.array(v.string())),
+      sponsorLegalName: v.optional(v.string()),
+    }),
+  },
+  handler: async (ctx, { adId, disclosure }) => {
+    await ctx.db.patch(adId, { disclosure });
+  },
+});
+
 /** Already-synced TV fileManagerIds (platformAdId) — the sync's dedup set. */
 export const existingTvIds = internalQuery({
   args: {},
@@ -175,6 +209,16 @@ const adWriteFields = {
   fccDocUrl: v.optional(v.string()),
   pdfStorageId: v.optional(v.id("_storage")),
   orderRef: v.optional(v.string()),
+  disclosure: v.optional(
+    v.object({
+      candidates: v.array(v.string()),
+      office: v.optional(v.string()),
+      electionDate: v.optional(v.string()),
+      nationalIssue: v.optional(v.string()),
+      sponsorOfficers: v.optional(v.array(v.string())),
+      sponsorLegalName: v.optional(v.string()),
+    }),
+  ),
 };
 
 export const upsertAd = internalMutation({
@@ -210,6 +254,7 @@ export const upsertAd = internalMutation({
       fccDocUrl: args.fccDocUrl,
       pdfStorageId: args.pdfStorageId,
       orderRef: args.orderRef,
+      disclosure: args.disclosure,
       lastSeenAt: now,
     };
 

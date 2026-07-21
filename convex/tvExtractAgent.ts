@@ -77,6 +77,25 @@ const extractionSchema = z.object({
   netSpend: z.number().nullable().describe("Net dollar total if stated"),
   agency: z.string().nullable(),
   orderRef: z.string().nullable().describe("Station contract / order number"),
+  // NAB/PB political disclosure form fields (present on the disclosure form, not
+  // the media-buy order). Null on order pages.
+  // Arrays are required ([] when none) — nullable/union params are capped at 16
+  // by Anthropic's constrained decoding, so we spend that budget on the strings.
+  refCandidates: z
+    .array(z.string())
+    .describe("Candidate(s) the ad refers to (NAB form); [] if none"),
+  refOffice: z.string().nullable().describe("Office/district sought (NAB form)"),
+  refNationalIssue: z
+    .string()
+    .nullable()
+    .describe("National issue the ad refers to, e.g. 'Tariffs' (NAB form)"),
+  sponsorOfficers: z
+    .array(z.string())
+    .describe("Sponsor's officers/directors (NAB form); [] if none"),
+  sponsorLegalName: z
+    .string()
+    .nullable()
+    .describe("Sponsor's full FEC-registered legal name (NAB form)"),
   confidence: z
     .number()
     .min(0)
@@ -84,9 +103,9 @@ const extractionSchema = z.object({
     .describe("Overall 0..1 confidence in this extraction"),
 });
 
-const PROMPT = `You are extracting a U.S. broadcast-TV political advertising order from an FCC public-inspection-file PDF (typically WideOrbit-generated).
+const PROMPT = `You are reading a page from a U.S. broadcast-TV political ad filing in an FCC public-inspection file. It is ONE of two document types — fill the fields for whichever it is, leave the rest null.
 
-Extract these fields, transcribing ONLY what the order states — leave anything not present as null. Do not infer or estimate.
+TYPE A — a media-buy ORDER / contract (typically WideOrbit-generated):
 - advertiser: the buyer/committee exactly as printed (e.g. "Barnes/D/Governor")
 - party, office, candidateName: only if explicit or unambiguous from the advertiser line
 - station: the call sign
@@ -96,13 +115,18 @@ Extract these fields, transcribing ONLY what the order states — leave anything
 - grossSpend: the GROSS total in dollars (a number, no $ or commas)
 - netSpend: the NET total if separately stated
 - agency, orderRef: if present
-- confidence: an object mapping each field you filled to a 0..1 confidence.
 
-CRITICAL: every field must come from the order text INSIDE the PDF. A document
-name may be provided as a locating hint — NEVER copy values (advertiser, dates,
-amounts) from that name. If the PDF has no readable order content (e.g. only a
-portfolio/cover splash page such as "open this PDF portfolio in Acrobat"), return
-advertiser as an empty string, grossSpend null, and confidence 0.
+TYPE B — an "ISSUE (Non-candidate) Advertisement Agreement Form" / NAB PB-18/PB-19 disclosure form:
+- refCandidates: every candidate name the ad refers to (the "Name(s) of every candidate referred to" field). [] if N/A.
+- refOffice: the office/district sought (e.g. "Wisconsin's 1st congressional district")
+- refNationalIssue: the political matter / national issue named (e.g. "Tariffs"). null if N/A.
+- sponsorOfficers: the listed chief officers / board / governing group
+- sponsorLegalName: the sponsor's full legal name as disclosed to the FEC
+- station, agency, orderRef: if present
+
+Also always: confidence (overall 0..1).
+
+CRITICAL: transcribe ONLY what the PDF states — do not infer or estimate. A document name may be given as a locating hint — NEVER copy values from that name. If the PDF has no readable content (e.g. only a portfolio/cover splash page such as "open this PDF portfolio in Acrobat"), return advertiser as an empty string, grossSpend null, and confidence 0.
 
 Return strictly the requested structure.`;
 
@@ -211,6 +235,11 @@ function normalize(o: z.infer<typeof extractionSchema>): TvAdExtraction {
     netSpend: u(o.netSpend),
     agency: u(o.agency),
     orderRef: u(o.orderRef),
+    refCandidates: o.refCandidates.length ? o.refCandidates : undefined,
+    refOffice: u(o.refOffice),
+    refNationalIssue: u(o.refNationalIssue),
+    sponsorOfficers: o.sponsorOfficers.length ? o.sponsorOfficers : undefined,
+    sponsorLegalName: u(o.sponsorLegalName),
     confidence: { overall: o.confidence },
   };
 }

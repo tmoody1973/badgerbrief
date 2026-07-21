@@ -275,6 +275,23 @@ export default defineSchema({
     // /api/manager host is Akamai-blocked to direct clicks — use pdfStorageId)
     pdfStorageId: v.optional(v.id("_storage")), // our stored copy of the order
     // PDF (the unwrapped readable order for portfolios) — the clickable link
+    // Reviewer-published issue ad: a national-issue ad with no candidate target
+    // (e.g. "Tariffs"). Set → the ad shows publicly on the outside-spending
+    // surface, framed by this issue + its sponsor, even with no candidateSlug.
+    issueTopic: v.optional(v.string()),
+    // What the ad is ABOUT, from the paired NAB/PB political disclosure form
+    // (which the media-buy order itself usually doesn't say). Powers a one-click
+    // race suggestion for the reviewer. Absent on plain candidate orders.
+    disclosure: v.optional(
+      v.object({
+        candidates: v.array(v.string()), // candidate(s) the ad refers to
+        office: v.optional(v.string()), // office/district sought
+        electionDate: v.optional(v.string()),
+        nationalIssue: v.optional(v.string()),
+        sponsorOfficers: v.optional(v.array(v.string())),
+        sponsorLegalName: v.optional(v.string()), // FEC-registered legal name
+      }),
+    ),
     orderRef: v.optional(v.string()), // station's contract/order number
     firstSeenAt: v.number(),
     lastSeenAt: v.number(),
