@@ -667,7 +667,7 @@ export const syncGoogleAds = internalAction({
 export const listAds = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("ads").order("desc").take(1000);
+    return await ctx.db.query("ads").order("desc").take(2000);
   },
 });
 
