@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AdsAnalytics } from "@/components/guide/ads-analytics";
 import { AdsBrowser } from "@/components/guide/ads-browser";
 import { AdsOverview } from "@/components/guide/ads-overview";
+import { YourRaces } from "@/components/guide/your-races";
 import { candidateDirectory, getAdMoneyOverview, listAds } from "@/lib/data";
 
 export const revalidate = 300;
@@ -47,6 +48,8 @@ export default async function AdsPage() {
           who it really backs.
         </p>
       </section>
+
+      <YourRaces races={overview.races} />
 
       <AdsOverview overview={overview} />
 
