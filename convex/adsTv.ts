@@ -426,7 +426,7 @@ export const syncTvAds = internalAction({
           const pdfBase64 = Buffer.from(bytes).toString("base64");
           const extraction = await ctx.runAction(
             internal.tvExtractAgent.extractTvAd,
-            { pdfBase64, hintName: d.name },
+            { pdfBase64, hintName: d.name, year: YEAR },
           );
           // Guard: extraction can come back empty on scanned / multi-order
           // packet PDFs. Don't create a junk empty row — skip and count it.

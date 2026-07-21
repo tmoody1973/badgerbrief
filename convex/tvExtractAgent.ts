@@ -102,9 +102,26 @@ Return strictly the requested structure.`;
 
 /** Extract one FCC TV order PDF (base64) into structured fields via Sonnet. */
 export const extractTvAd = internalAction({
-  args: { pdfBase64: v.string(), hintName: v.optional(v.string()) },
-  handler: async (ctx, { pdfBase64, hintName }): Promise<TvAdExtraction> => {
+  args: {
+    pdfBase64: v.string(),
+    hintName: v.optional(v.string()),
+    year: v.optional(v.number()),
+  },
+  handler: async (
+    ctx,
+    { pdfBase64, hintName, year },
+  ): Promise<TvAdExtraction> => {
     const telemetry = ensureTelemetry();
+    // Anchor flight-date years: the doc lives in the station's {year} political
+    // file, so dates fall in {year} unless the PDF explicitly shows otherwise.
+    const hints = [
+      hintName ? `Doc name hint: ${hintName}` : "",
+      year
+        ? `This order was filed in the ${year} political file — flight dates are in ${year} unless the document explicitly states another year.`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
     const runOnce = () =>
       generateObject({
         model: anthropic(MODEL),
@@ -115,7 +132,7 @@ export const extractTvAd = internalAction({
             content: [
               {
                 type: "text",
-                text: hintName ? `${PROMPT}\n\nDoc name hint: ${hintName}` : PROMPT,
+                text: hints ? `${PROMPT}\n\n${hints}` : PROMPT,
               },
               {
                 type: "file",
