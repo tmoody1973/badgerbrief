@@ -46,6 +46,7 @@ import type * as scout from "../scout.js";
 import type * as scoutQueries from "../scoutQueries.js";
 import type * as seed from "../seed.js";
 import type * as siteMap from "../siteMap.js";
+import type * as tvSpike from "../tvSpike.js";
 import type * as users from "../users.js";
 import type * as voterHelp from "../voterHelp.js";
 import type * as voterHelpQueries from "../voterHelpQueries.js";
@@ -95,6 +96,7 @@ declare const fullApi: ApiFromModules<{
   scoutQueries: typeof scoutQueries;
   seed: typeof seed;
   siteMap: typeof siteMap;
+  tvSpike: typeof tvSpike;
   users: typeof users;
   voterHelp: typeof voterHelp;
   voterHelpQueries: typeof voterHelpQueries;
