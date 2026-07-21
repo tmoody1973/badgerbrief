@@ -271,8 +271,11 @@ export const adQueue = query({
       .collect();
     const adTasks = allOpen.filter((t) => t.kind === "ad_match");
 
+    // Join EVERY ad_match task, then sort by spend, then cap. Slicing before the
+    // sort (the old bug) truncated in insertion order, so the biggest spenders —
+    // notably the ~dozens of TV orders — fell outside the cap and vanished.
     const rows = [];
-    for (const task of adTasks.slice(0, 300)) {
+    for (const task of adTasks) {
       const id = ctx.db.normalizeId("ads", task.refId);
       const ad = id ? await ctx.db.get(id) : null;
       if (!ad) continue;
@@ -280,11 +283,11 @@ export const adQueue = query({
       rows.push({ task, ad, suggestedSlug });
     }
     // Biggest spenders first — the highest-impact ads to triage. The client
-    // adds search + a likely-attacks filter over this set.
+    // adds search + platform + a likely-attacks filter over this set.
     rows.sort((a, b) => (b.ad.spendUpper ?? 0) - (a.ad.spendUpper ?? 0));
 
     return {
-      rows,
+      rows: rows.slice(0, 300),
       candidates: await candidatesWithOffice(ctx),
       openCount: adTasks.length,
     };
