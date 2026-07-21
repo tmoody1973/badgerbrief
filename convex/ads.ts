@@ -323,6 +323,11 @@ async function ingestAds(
 
 // ---------- Meta sync (MOO-309) ----------
 
+// Only the current election cycle (2025 onward) — the guide tracks 2026 races
+// and their 2025 lead-up. Both platforms filter at the source: Meta via
+// `ad_delivery_date_min`, Google via the `date_range_start` floor in its SQL.
+const AD_CYCLE_START_DATE = "2025-01-01";
+
 const AD_FIELDS =
   "id,page_id,page_name,bylines,ad_creative_bodies,ad_creative_link_captions,ad_snapshot_url,ad_delivery_start_time,ad_delivery_stop_time,spend,impressions,currency,delivery_by_region";
 
@@ -342,6 +347,8 @@ async function fetchAdsArchive(
     `access_token=${token}`,
     "ad_type=POLITICAL_AND_ISSUE_ADS",
     `ad_reached_countries=${encodeURIComponent('["US"]')}`,
+    // Cycle scope: only ads delivered on/after 2025-01-01 (excludes prior cycles).
+    `ad_delivery_date_min=${AD_CYCLE_START_DATE}`,
     `fields=${AD_FIELDS}`,
     `limit=${limit}`,
   ];
@@ -486,7 +493,7 @@ SELECT ad_id, advertiser_id, advertiser_name, ad_type, ad_url,
        spend_range_min_usd, spend_range_max_usd, impressions
 FROM \`bigquery-public-data.google_political_ads.creative_stats\`
 WHERE geo_targeting_included LIKE '%Wisconsin%'
-  AND date_range_start >= '2026-01-01'
+  AND date_range_start >= '${AD_CYCLE_START_DATE}'
 ORDER BY spend_range_max_usd DESC
 LIMIT 500`;
 
