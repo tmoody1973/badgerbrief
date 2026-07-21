@@ -254,17 +254,20 @@ export const purgeAdData = internalMutation({
 });
 
 /**
- * Cycle-scope cleanup: remove ads outside the tracked cycle, preserving the
- * attribution on in-scope rows (unlike purgeAdData, which wipes everything). An
- * ad is off-cycle if its `deliveryStart` is before AD_CYCLE_START_DATE, or is
- * still undefined AFTER a full re-sync — the filtered syncs stamp deliveryStart
- * on every in-scope ad, so a dateless row means it wasn't returned by the 2025+
- * pull (off-cycle or delisted).
+ * Cycle-scope cleanup: remove UNATTRIBUTED ads outside the tracked cycle. An ad
+ * is off-cycle if its `deliveryStart` is before AD_CYCLE_START_DATE, or is still
+ * undefined AFTER a full re-sync — the filtered syncs stamp deliveryStart on every
+ * in-scope ad they return.
  *
- * DEPLOY-TIME ORDER (must hold, or you'll delete in-scope rows): deploy → re-run
- * syncMetaAds + syncGoogleAds → run this with `dryRun: true` and confirm the
- * counts → re-run with `dryRun: false`. `dryRun` defaults to true so a stray call
- * never deletes.
+ * NEVER deletes a human-attributed row (candidateSlug set): attribution is review
+ * work, and the syncs are non-exhaustive (Meta paginates per term, Google caps at
+ * top-500 by spend), so a not-re-fetched attributed ad is undated yet often still
+ * in-cycle. Preserving it keeps the work; off-cycle attributed rows can be pruned
+ * by hand in /admin. purgeAdData remains for a full wipe.
+ *
+ * DEPLOY-TIME ORDER: deploy → re-run syncMetaAds + syncGoogleAds → run with
+ * `dryRun: true` and confirm counts → re-run with `dryRun: false`. `dryRun`
+ * defaults to true so a stray call never deletes.
  *
  * ponytail: single .collect() scan — fine at WI cycle volumes (~1-2k ads, well
  * under Convex's ~16k-doc query limit); batch + self-schedule if it ever grows.
@@ -277,16 +280,19 @@ export const purgeOffCycleAds = internalMutation({
   ): Promise<{
     dryRun: boolean;
     total: number;
+    attributedPreserved: number;
     offCycleDated: number;
     undated: number;
     toRemove: number;
     kept: number;
   }> => {
     const ads = await ctx.db.query("ads").collect();
-    const offCycleDated = ads.filter(
+    // Only unattributed rows are eligible for deletion; attributions are kept.
+    const removable = ads.filter((a) => a.candidateSlug === undefined);
+    const offCycleDated = removable.filter(
       (a) => a.deliveryStart !== undefined && a.deliveryStart < AD_CYCLE_START_DATE,
     );
-    const undated = ads.filter((a) => a.deliveryStart === undefined);
+    const undated = removable.filter((a) => a.deliveryStart === undefined);
     const toRemove = [...offCycleDated, ...undated];
     if (!dryRun) {
       for (const a of toRemove) await ctx.db.delete(a._id);
@@ -294,6 +300,7 @@ export const purgeOffCycleAds = internalMutation({
     return {
       dryRun,
       total: ads.length,
+      attributedPreserved: ads.length - removable.length,
       offCycleDated: offCycleDated.length,
       undated: undated.length,
       toRemove: toRemove.length,

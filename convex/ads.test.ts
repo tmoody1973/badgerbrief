@@ -172,28 +172,31 @@ test("expired token → warning alert and graceful return, no crash", async () =
   expect(alerts[0].severity).toBe("warning");
 });
 
-test("purgeOffCycleAds removes off-cycle + undated ads, keeps in-scope + attribution", async () => {
+test("purgeOffCycleAds removes unattributed off-cycle + undated ads, keeps in-scope + ALL attributed", async () => {
   const t = convexTest(schema, modules);
   const base = { platform: "meta" as const, pageOrCommittee: "X", firstSeenAt: 0, lastSeenAt: 0 };
   await t.run(async (ctx) => {
-    // in-scope 2025+ (one attributed) — must survive
+    // in-scope 2025+ — survive
     await ctx.db.insert("ads", { ...base, platformAdId: "keep1", deliveryStart: "2025-03-01" });
     await ctx.db.insert("ads", { ...base, platformAdId: "keep2", deliveryStart: "2026-07-01", candidateSlug: "tom-tiffany", raceId: "WI-GOV-2026" });
-    // off-cycle dated — must go
+    // unattributed off-cycle dated — must go
     await ctx.db.insert("ads", { ...base, platformAdId: "old1", deliveryStart: "2024-11-01" });
-    // undated (legacy, never re-synced) — must go
+    // unattributed undated (legacy) — must go
     await ctx.db.insert("ads", { ...base, platformAdId: "undated1" });
+    // ATTRIBUTED off-cycle dated — preserved (attribution beats scope)
+    await ctx.db.insert("ads", { ...base, platformAdId: "attr-old", deliveryStart: "2024-05-01", candidateSlug: "rebecca-cooke", stance: "support" });
+    // ATTRIBUTED undated (not re-fetched this run, likely in-cycle) — preserved
+    await ctx.db.insert("ads", { ...base, platformAdId: "attr-undated", candidateSlug: "rebecca-cooke", stance: "support" });
   });
 
   const dry = await t.mutation(internal.ads.purgeOffCycleAds, { dryRun: true });
-  expect(dry).toMatchObject({ dryRun: true, total: 4, offCycleDated: 1, undated: 1, toRemove: 2, kept: 2 });
-  // dry run touched nothing
-  expect(await t.run((ctx) => ctx.db.query("ads").collect())).toHaveLength(4);
+  expect(dry).toMatchObject({ dryRun: true, total: 6, attributedPreserved: 3, offCycleDated: 1, undated: 1, toRemove: 2, kept: 4 });
+  expect(await t.run((ctx) => ctx.db.query("ads").collect())).toHaveLength(6); // dry run touched nothing
 
   const real = await t.mutation(internal.ads.purgeOffCycleAds, { dryRun: false });
-  expect(real).toMatchObject({ dryRun: false, toRemove: 2, kept: 2 });
+  expect(real).toMatchObject({ dryRun: false, toRemove: 2, kept: 4 });
   const remaining = await t.run((ctx) => ctx.db.query("ads").collect());
-  expect(remaining.map((a) => a.platformAdId).sort()).toEqual(["keep1", "keep2"]);
-  // attribution preserved on the surviving in-scope ad
+  // both unattributed off-cycle rows gone; in-scope + all attributed (incl. off-cycle attributed) kept
+  expect(remaining.map((a) => a.platformAdId).sort()).toEqual(["attr-old", "attr-undated", "keep1", "keep2"]);
   expect(remaining.find((a) => a.platformAdId === "keep2")?.candidateSlug).toBe("tom-tiffany");
 });
