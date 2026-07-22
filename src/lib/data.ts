@@ -27,3 +27,5 @@ export const getSponsorScorecard = (key: string) =>
   fetchQuery(api.sponsors.sponsorScorecard, { key });
 export const getSponsorAds = (key: string) =>
   fetchQuery(api.sponsors.sponsorAds, { key });
+export const getEnrichedSponsorKeys = () =>
+  fetchQuery(api.sponsors.enrichedSponsorKeys, {});

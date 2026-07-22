@@ -13,7 +13,7 @@ import {
 } from "@/components/guide/labels";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
-import { getCandidateBySlug, listCandidateSlugs } from "@/lib/data";
+import { getCandidateBySlug, getEnrichedSponsorKeys, listCandidateSlugs } from "@/lib/data";
 import {
   JsonLd,
   breadcrumbNode,
@@ -63,7 +63,10 @@ function Quote({ quote }: { quote: Doc<"quote_published"> }) {
 
 export default async function CandidatePage({ params }: Props) {
   const { slug } = await params;
-  const data = await getCandidateBySlug(slug);
+  const [data, enrichedKeys] = await Promise.all([
+    getCandidateBySlug(slug),
+    getEnrichedSponsorKeys(),
+  ]);
   if (!data) notFound();
   const { candidate, race, positions, quotes, finance, contributions, committeeFunding, ads } = data;
 
@@ -221,7 +224,7 @@ export default async function CandidatePage({ params }: Props) {
             committeeFunding={committeeFunding}
           />
 
-          <CandidateAds ads={ads} candidateName={candidate.name} />
+          <CandidateAds ads={ads} candidateName={candidate.name} enrichedKeys={enrichedKeys} />
 
           <section id="sources" className="mt-10 scroll-mt-16 space-y-3">
             <SourceList sources={candidate.sources} />

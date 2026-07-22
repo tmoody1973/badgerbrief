@@ -1,3 +1,4 @@
+import { SponsorLink } from "@/components/guide/sponsor-link";
 import type { Doc } from "../../../convex/_generated/dataModel";
 
 /**
@@ -29,9 +30,11 @@ function spendRange(ad: Doc<"ads">): string {
 export function CandidateAds({
   ads,
   candidateName,
+  enrichedKeys,
 }: {
   ads: Doc<"ads">[];
   candidateName: string;
+  enrichedKeys: string[];
 }) {
   if (ads.length === 0) return null;
   const support = ads.filter((a) => a.stance === "support");
@@ -83,7 +86,9 @@ export function CandidateAds({
                 {spendRange(ad)}
               </span>
             </div>
-            <p className="mt-2 font-bold">{ad.pageOrCommittee}</p>
+            <p className="mt-2">
+              <SponsorLink name={ad.pageOrCommittee} enrichedKeys={enrichedKeys} className="font-bold" />
+            </p>
             {ad.fundingEntity && ad.fundingEntity !== ad.pageOrCommittee && (
               <p className="text-xs text-muted-foreground">
                 Paid for by {ad.fundingEntity}

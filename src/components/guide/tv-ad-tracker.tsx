@@ -23,7 +23,7 @@ function leanLabel(lean?: string): string | null {
           : null;
 }
 
-function SponsorCard({ s }: { s: Sponsor }) {
+function SponsorCard({ s, enrichedKeys }: { s: Sponsor; enrichedKeys: string[] }) {
   const about = [...s.candidates, ...s.issues];
   const lean = leanLabel(s.sponsorProfile?.lean);
   return (
@@ -95,9 +95,11 @@ function SponsorCard({ s }: { s: Sponsor }) {
             Who is this?{s.sponsorProfile.kind ? ` · ${s.sponsorProfile.kind}` : ""}
           </summary>
           <p className="mt-2 text-sm">{s.sponsorProfile.summary}</p>
-          <Link href={`/sponsors/${sponsorKeyToSlug(normalizeSponsorKey(s.sponsor))}`} className="mt-1 inline-block font-mono text-[11px] font-bold underline decoration-2 underline-offset-2">
-            Full profile →
-          </Link>
+          {enrichedKeys.includes(normalizeSponsorKey(s.sponsor)) && (
+            <Link href={`/sponsors/${sponsorKeyToSlug(normalizeSponsorKey(s.sponsor))}`} className="mt-1 inline-block font-mono text-[11px] font-bold underline decoration-2 underline-offset-2">
+              Full profile →
+            </Link>
+          )}
           {s.sponsorProfile.sources.length > 0 && (
             <p className="mt-1 font-mono text-[10px] text-muted-foreground">
               Sources:{" "}
@@ -125,7 +127,7 @@ function SponsorCard({ s }: { s: Sponsor }) {
 /** Broadcast-TV outside-spending on the ad tracker: who's buying Wisconsin's
  * airwaves, by sponsor, with exact spend and what each sponsor's FCC disclosure
  * says the ads are about. */
-export function TvAdTracker({ sponsors }: { sponsors: Sponsor[] }) {
+export function TvAdTracker({ sponsors, enrichedKeys }: { sponsors: Sponsor[]; enrichedKeys: string[] }) {
   if (sponsors.length === 0) return null;
   const total = sponsors.reduce((s, x) => s + x.totalSpend, 0);
   return (
@@ -139,7 +141,7 @@ export function TvAdTracker({ sponsors }: { sponsors: Sponsor[] }) {
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {sponsors.map((s) => (
-          <SponsorCard key={s.key} s={s} />
+          <SponsorCard key={s.key} s={s} enrichedKeys={enrichedKeys} />
         ))}
       </div>
     </section>

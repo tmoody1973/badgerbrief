@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Doc } from "../../../convex/_generated/dataModel";
+import { SponsorLink } from "@/components/guide/sponsor-link";
 
 type StatusFilter = "all" | "active" | "inactive";
 type MatchFilter = "all" | "matched" | "unverified";
@@ -41,7 +42,7 @@ function spendRange(ad: Doc<"ads">): string {
  * narrow the set; column headers sort it. Scrolls horizontally on small screens
  * inside its own container so the page body never scrolls sideways.
  */
-export function AdsBrowser({ ads }: { ads: Doc<"ads">[] }) {
+export function AdsBrowser({ ads, enrichedKeys }: { ads: Doc<"ads">[]; enrichedKeys: string[] }) {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [match, setMatch] = useState<MatchFilter>("all");
@@ -136,7 +137,7 @@ export function AdsBrowser({ ads }: { ads: Doc<"ads">[] }) {
                   className="border-b-2 border-border last:border-b-0 hover:bg-secondary/40"
                 >
                   <td className="px-3 py-2 align-top">
-                    <span className="font-bold">{ad.pageOrCommittee}</span>
+                    <SponsorLink name={ad.pageOrCommittee} enrichedKeys={enrichedKeys} className="font-bold" />
                     {ad.fundingEntity && ad.fundingEntity !== ad.pageOrCommittee && (
                       <span className="block text-xs text-muted-foreground">
                         Paid for by {ad.fundingEntity}

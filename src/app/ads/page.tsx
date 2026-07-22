@@ -9,6 +9,7 @@ import { SectionNav } from "@/components/guide/section-nav";
 import {
   candidateDirectory,
   getAdMoneyOverview,
+  getEnrichedSponsorKeys,
   getTvAdTracker,
   listAds,
 } from "@/lib/data";
@@ -42,11 +43,12 @@ export default async function AdsPage({
   const needAds = view === "statewide" || view === "browse";
   const needTv = view === "statewide";
 
-  const [overview, ads, tvSponsors, candidates] = await Promise.all([
+  const [overview, ads, tvSponsors, candidates, enrichedKeys] = await Promise.all([
     needOverview ? getAdMoneyOverview() : Promise.resolve(null),
     needAds ? listAds() : Promise.resolve([]),
     needTv ? getTvAdTracker() : Promise.resolve([]),
     needAds ? candidateDirectory() : Promise.resolve([]),
+    needAds ? getEnrichedSponsorKeys() : Promise.resolve([]),
   ]);
   const candidateNames = Object.fromEntries(
     candidates.map((c) => [c.slug, c.name]),
@@ -135,7 +137,7 @@ export default async function AdsPage({
 
           {tvSponsors.length > 0 && (
             <div id="broadcast-tv" className="scroll-mt-28">
-              <TvAdTracker sponsors={tvSponsors} />
+              <TvAdTracker sponsors={tvSponsors} enrichedKeys={enrichedKeys} />
             </div>
           )}
 
@@ -143,7 +145,7 @@ export default async function AdsPage({
             <div id="the-numbers" className="scroll-mt-28">
               <h2 className="font-display text-2xl">The numbers behind it</h2>
               <div className="mt-4">
-                <AdsAnalytics ads={ads} candidateNames={candidateNames} />
+                <AdsAnalytics ads={ads} candidateNames={candidateNames} enrichedKeys={enrichedKeys} />
               </div>
             </div>
           )}
@@ -159,7 +161,7 @@ export default async function AdsPage({
           </p>
           <div className="mt-4">
             {ads.length > 0 ? (
-              <AdsBrowser ads={ads} />
+              <AdsBrowser ads={ads} enrichedKeys={enrichedKeys} />
             ) : (
               <p className="border-2 border-dashed border-border p-6 text-center text-muted-foreground">
                 No ads tracked yet. Check back soon.

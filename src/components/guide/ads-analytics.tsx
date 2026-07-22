@@ -1,4 +1,5 @@
 import { StatTile } from "@/components/guide/stat-tile";
+import { SponsorLink } from "@/components/guide/sponsor-link";
 import type { Doc } from "../../../convex/_generated/dataModel";
 
 /**
@@ -48,9 +49,11 @@ function aggregateBySponsor(ads: Doc<"ads">[]): Agg[] {
 export function AdsAnalytics({
   ads,
   candidateNames,
+  enrichedKeys,
 }: {
   ads: Doc<"ads">[];
   candidateNames: Record<string, string>;
+  enrichedKeys: string[];
 }) {
   const totalSpendLow = ads.reduce((s, a) => s + (a.spendLower ?? 0), 0);
   const totalSpendHigh = ads.reduce((s, a) => s + (a.spendUpper ?? 0), 0);
@@ -81,6 +84,7 @@ export function AdsAnalytics({
       <BarList
         title="Top spenders"
         note="Estimated spend (range midpoints), by sponsor."
+        enrichedKeys={enrichedKeys}
         rows={topSpenders.map((s) => ({
           label: s.sponsor,
           value: s.spend,
@@ -91,6 +95,7 @@ export function AdsAnalytics({
       <BarList
         title="Most reach per dollar"
         note="Impressions per $1 spent — who's stretching their ad budget furthest (min $1k spend)."
+        enrichedKeys={enrichedKeys}
         rows={efficient.map((s) => ({
           label: s.sponsor,
           value: s.perDollar,
@@ -205,10 +210,12 @@ function BarList({
   title,
   note,
   rows,
+  enrichedKeys,
 }: {
   title: string;
   note: string;
   rows: { label: string; value: number; display: string }[];
+  enrichedKeys: string[];
 }) {
   const max = Math.max(...rows.map((r) => r.value), 1);
   return (
@@ -219,7 +226,7 @@ function BarList({
         {rows.map((r) => (
           <li key={r.label} className="flex items-center gap-3">
             <span className="w-36 shrink-0 truncate text-sm sm:w-52" title={r.label}>
-              {r.label}
+              <SponsorLink name={r.label} enrichedKeys={enrichedKeys} />
             </span>
             <span className="h-5 flex-1 border-2 border-border bg-card">
               <span

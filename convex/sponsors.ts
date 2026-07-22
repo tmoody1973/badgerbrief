@@ -346,6 +346,16 @@ export const sponsorAds = query({
   },
 });
 
+/** Keys of sponsors that have a public profile — used to link sponsor names to
+ * /sponsors/[slug] only when the page exists (avoids linking to 404s). */
+export const enrichedSponsorKeys = query({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("sponsors").collect();
+    return rows.filter((s) => s.enrichedAt).map((s) => s.key);
+  },
+});
+
 type PublicProfile = {
   displayName: string;
   kind?: string;
