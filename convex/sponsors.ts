@@ -304,3 +304,23 @@ export const sponsorsToEnrich = internalQuery({
     return out;
   },
 });
+
+/** Support/attack scorecard: rolls up a sponsor's own ads by candidateSlug + stance
+ * with summed spend midpoints, sorted by spend descending. */
+export const sponsorScorecard = query({
+  args: { key: v.string() },
+  handler: async (ctx, { key }) => {
+    const ads = await ctx.db.query("ads").collect();
+    const mine = ads.filter((a) => a.candidateSlug && a.stance && normalizeSponsorKey(a.pageOrCommittee) === key);
+    const roll = (stance: "support" | "oppose") => {
+      const by = new Map<string, { candidateSlug: string; raceId?: string; spend: number; adCount: number }>();
+      for (const a of mine.filter((x) => x.stance === stance)) {
+        const mid = ((a.spendLower ?? 0) + (a.spendUpper ?? 0)) / 2;
+        const cur = by.get(a.candidateSlug!) ?? { candidateSlug: a.candidateSlug!, raceId: a.raceId, spend: 0, adCount: 0 };
+        cur.spend += mid; cur.adCount += 1; by.set(a.candidateSlug!, cur);
+      }
+      return [...by.values()].sort((x, y) => y.spend - x.spend);
+    };
+    return { supported: roll("support"), attacked: roll("oppose") };
+  },
+});

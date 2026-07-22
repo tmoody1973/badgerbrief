@@ -1,6 +1,6 @@
 import { convexTest } from "convex-test";
-import { expect, test } from "vitest";
-import { internal } from "./_generated/api";
+import { expect, test, describe } from "vitest";
+import { api, internal } from "./_generated/api";
 import schema from "./schema";
 
 const modules = import.meta.glob([
@@ -48,4 +48,21 @@ test("upsertEnrichment preserves existing facts and approved narrative when re-r
   expect(row!.narrative).toBe("Acme PAC is a longstanding donor group.");
   expect(row!.narrativeStatus).toBe("approved");
   expect(row!.enrichedAt).toBeGreaterThanOrEqual(now);
+});
+
+describe("sponsorScorecard", () => {
+  test("rolls this sponsor's ads into supported/attacked with summed spend", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      const base = { platform: "meta" as const, firstSeenAt: 0, lastSeenAt: 0, pageOrCommittee: "A Better Wisconsin Together" };
+      await ctx.db.insert("ads", { ...base, platformAdId: "a1", raceId: "R1", candidateSlug: "tom-tiffany", stance: "oppose", spendLower: 60000, spendUpper: 80000 });
+      await ctx.db.insert("ads", { ...base, platformAdId: "a2", raceId: "R1", candidateSlug: "tom-tiffany", stance: "oppose", spendLower: 20000, spendUpper: 20000 });
+      await ctx.db.insert("ads", { ...base, platformAdId: "a3", raceId: "R2", candidateSlug: "rebecca-cooke", stance: "support", spendLower: 10000, spendUpper: 20000 });
+      // Different sponsor — must be excluded.
+      await ctx.db.insert("ads", { platform: "meta", firstSeenAt: 0, lastSeenAt: 0, platformAdId: "b1", pageOrCommittee: "Other PAC", candidateSlug: "x", stance: "support", spendLower: 1, spendUpper: 1 });
+    });
+    const r = await t.query(api.sponsors.sponsorScorecard, { key: "a better wisconsin together" });
+    expect(r.attacked).toEqual([{ candidateSlug: "tom-tiffany", raceId: "R1", spend: 90000, adCount: 2 }]);
+    expect(r.supported).toEqual([{ candidateSlug: "rebecca-cooke", raceId: "R2", spend: 15000, adCount: 1 }]);
+  });
 });
