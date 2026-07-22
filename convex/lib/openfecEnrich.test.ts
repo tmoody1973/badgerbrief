@@ -18,6 +18,21 @@ describe("openfecEnrich parsers", () => {
     const acme = donors.filter((d) => d.name === "Acme LLC");
     expect(acme).toEqual([{ name: "Acme LLC", amount: 200000 }]);
   });
+  test("top donors merge FEC name variants (punctuation/suffix/case) of one entity", () => {
+    const json = { results: [
+      { contributor_name: "KOCH INDUSTRIES INC.", contribution_receipt_amount: 32500000 },
+      { contributor_name: "KOCH INDUSTRIES INC", contribution_receipt_amount: 15000000 },
+      { contributor_name: "STAND TOGETHER CHAMBER OF COMMERCE", contribution_receipt_amount: 25000000 },
+      { contributor_name: "Stand Together Chamber of Commerce, Inc.", contribution_receipt_amount: 15000000 },
+    ] };
+    const donors = parseTopDonors(json);
+    // Koch Industries variants (period vs none) collapse, summed, fullest name kept.
+    expect(donors).toContainEqual({ name: "KOCH INDUSTRIES INC.", amount: 47500000 });
+    // Stand Together variants (case + comma + suffix) collapse to one line too.
+    const stand = donors.filter((d) => d.name.toLowerCase().includes("stand together"));
+    expect(stand).toHaveLength(1);
+    expect(stand[0].amount).toBe(40000000);
+  });
   test("independent expenditures grouped by candidate + support/oppose, summed", () => {
     const ies = parseIndependentExpenditures(scheduleE);
     expect(ies).toContainEqual({ candidate: "TIFFANY, TOM", office: "H", supportOppose: "oppose", amount: 60000 });

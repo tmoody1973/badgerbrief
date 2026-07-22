@@ -21,6 +21,18 @@ export function parseCommitteeTotals(json: unknown) {
   };
 }
 
+/** Collapse FEC contributor-name variants of the same entity to one key:
+ * drop punctuation and common corporate suffixes/articles so
+ * "KOCH INDUSTRIES INC." and "KOCH INDUSTRIES INC" aggregate together. */
+export function donorKey(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[.,&]/g, " ")
+    .replace(/\b(inc|llc|l l c|corp|corporation|co|company|ltd|lp|l p|the)\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function parseTopDonors(json: unknown, limit = 10) {
   const rows = (json as { results?: any[] }).results ?? [];
   const by = new Map<string, { name: string; amount: number }>();
@@ -28,9 +40,12 @@ export function parseTopDonors(json: unknown, limit = 10) {
     const name = String(r.contributor_name ?? "").trim();
     const amount = Number(r.contribution_receipt_amount ?? 0);
     if (!name || amount <= 0) continue;
-    const cur = by.get(name) ?? { name, amount: 0 };
+    const key = donorKey(name) || name.toLowerCase();
+    const cur = by.get(key) ?? { name, amount: 0 };
     cur.amount += amount;
-    by.set(name, cur);
+    // Keep the fullest variant as the display name (most informative).
+    if (name.length > cur.name.length) cur.name = name;
+    by.set(key, cur);
   }
   return [...by.values()].sort((a, b) => b.amount - a.amount).slice(0, limit);
 }
