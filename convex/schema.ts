@@ -254,6 +254,9 @@ export default defineSchema({
       ),
     ),
     financialsAsOf: v.optional(v.string()),
+    // Set when the auto FEC name-match was held as implausible (tracked ad spend
+    // dwarfs the matched committee's receipts → likely a decoy). A reviewer note.
+    factsFlag: v.optional(v.string()),
     enrichedAt: v.optional(v.number()),
     reviewStatus: v.union(v.literal("draft"), v.literal("approved")),
     updatedAt: v.number(),

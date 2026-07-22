@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import totals from "./fixtures/openfec-totals.json";
 import scheduleA from "./fixtures/openfec-schedule-a.json";
 import scheduleE from "./fixtures/openfec-schedule-e.json";
-import { parseCommitteeTotals, parseTopDonors, parseIndependentExpenditures } from "./openfecEnrich";
+import { parseCommitteeTotals, parseTopDonors, parseIndependentExpenditures, isFecMatchImplausible } from "./openfecEnrich";
 
 describe("openfecEnrich parsers", () => {
   test("totals pull receipts/disbursements + coverage date", () => {
@@ -32,6 +32,18 @@ describe("openfecEnrich parsers", () => {
     const stand = donors.filter((d) => d.name.toLowerCase().includes("stand together"));
     expect(stand).toHaveLength(1);
     expect(stand[0].amount).toBe(40000000);
+  });
+  test("isFecMatchImplausible flags decoy committees (spend dwarfs receipts)", () => {
+    // Justice Project: $815k tracked ads vs a $26k name-matched committee → decoy.
+    expect(isFecMatchImplausible(815000, 26000)).toBe(true);
+    // Legit large committee (AFP-style): spend well under receipts → fine.
+    expect(isFecMatchImplausible(1_000_000, 87_000_000)).toBe(false);
+    // Tiny sponsor under the floor → don't flag even if ratio is high.
+    expect(isFecMatchImplausible(500, 100)).toBe(false);
+    // Unknown receipts (no totals) → can't judge, don't flag.
+    expect(isFecMatchImplausible(1_000_000, undefined)).toBe(false);
+    // Just over 2x with meaningful spend → flag.
+    expect(isFecMatchImplausible(120000, 50000)).toBe(true);
   });
   test("independent expenditures grouped by candidate + support/oppose, summed", () => {
     const ies = parseIndependentExpenditures(scheduleE);

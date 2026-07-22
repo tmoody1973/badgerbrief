@@ -33,6 +33,29 @@ export function donorKey(name: string): string {
     .trim();
 }
 
+// Decoy-match guard: the biggest political ad spenders are often dark-money
+// 501(c)(4)/527 groups that DON'T file as FEC PACs, so an FEC name-search can
+// match a small, coincidentally same-named committee and publish its (wrong)
+// facts. You can't spend more on ads than a committee ever raised, so when
+// tracked ad spend dwarfs a name-matched committee's receipts, the match is
+// implausible — hold the facts and flag for verification.
+const FEC_MISMATCH_FACTOR = 2;
+const FEC_MISMATCH_MIN_SPEND = 50_000;
+
+/** True when a NAME-matched FEC committee is too small to be the real sponsor
+ * (tracked ad spend far exceeds its receipts). Only applies to auto/name-search
+ * matches — a reviewer-verified committee id is trusted regardless. */
+export function isFecMatchImplausible(
+  trackedAdSpend: number,
+  committeeReceipts: number | undefined,
+): boolean {
+  if (committeeReceipts === undefined) return false;
+  return (
+    trackedAdSpend >= FEC_MISMATCH_MIN_SPEND &&
+    trackedAdSpend > committeeReceipts * FEC_MISMATCH_FACTOR
+  );
+}
+
 export function parseTopDonors(json: unknown, limit = 10) {
   const rows = (json as { results?: any[] }).results ?? [];
   const by = new Map<string, { name: string; amount: number }>();

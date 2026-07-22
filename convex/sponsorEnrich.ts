@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { action, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { normalizeSponsorKey } from "./lib/sponsors";
-import { fetchOpenFecFacts } from "./lib/openfecEnrich";
+import { fetchOpenFecFacts, isFecMatchImplausible } from "./lib/openfecEnrich";
 import { fetchSponsorNarrative } from "./lib/firecrawlSponsor";
 import { perplexityDescribe, requireAdmin } from "./sponsors";
 
@@ -36,8 +36,31 @@ export const enrichSponsorCore = internalAction({
       fetchSponsorNarrative(advertiser),
     ]);
 
+    // Decoy-match guard (auto/name-search matches only — a reviewer-supplied
+    // fecCommitteeId is trusted): if tracked ad spend dwarfs the matched
+    // committee's receipts, it is implausibly small to be this sponsor. Hold
+    // the FEC facts rather than publish a decoy's numbers, and flag for review.
+    const explicit = !!fecCommitteeId;
+    let factsToUse = facts;
+    let factsFlag: string | undefined;
+    if (facts && !explicit) {
+      const trackedAdSpend: number = await ctx.runQuery(
+        internal.sponsors.trackedSpendForKey,
+        { key },
+      );
+      if (isFecMatchImplausible(trackedAdSpend, facts.totalRaised)) {
+        const recv =
+          facts.totalRaised !== undefined
+            ? ` (~$${Math.round(facts.totalRaised).toLocaleString()})`
+            : "";
+        factsFlag = `Held auto FEC match ${committeeId}: tracked ad spend (~$${Math.round(trackedAdSpend).toLocaleString()}) far exceeds its receipts${recv} — likely a decoy committee. Verify the correct committee, or treat as dark money.`;
+        factsToUse = null;
+        committeeId = undefined; // don't store the decoy committee id
+      }
+    }
+
     let narrativeDraft = narrative.narrative;
-    let sources = [...(facts?.sources ?? []), ...narrative.sources];
+    let sources = [...(factsToUse?.sources ?? []), ...narrative.sources];
     if (!narrativeDraft) {
       const fallback = await perplexityDescribe(advertiser);
       if (fallback.summary && !fallback.summary.startsWith("Unknown")) {
@@ -48,13 +71,14 @@ export const enrichSponsorCore = internalAction({
 
     await ctx.runMutation(internal.sponsors.upsertEnrichment, {
       key, displayName: advertiser,
-      kind: facts?.kind, lean: facts?.lean, fecCommitteeId: committeeId,
-      // A committee this run implies donor disclosure; a miss stays `undefined`
-      // so upsertEnrichment preserves a prior value (never flips true→false).
+      kind: factsToUse?.kind, lean: factsToUse?.lean, fecCommitteeId: committeeId,
+      // A committee this run implies donor disclosure; a miss (or a held decoy)
+      // stays `undefined` so upsertEnrichment preserves a prior value.
       disclosesDonors: committeeId ? true : undefined,
-      totalRaised: facts?.totalRaised, totalSpent: facts?.totalSpent,
-      topDonors: facts?.topDonors, independentExpenditures: facts?.independentExpenditures,
-      financialsAsOf: facts?.financialsAsOf,
+      totalRaised: factsToUse?.totalRaised, totalSpent: factsToUse?.totalSpent,
+      topDonors: factsToUse?.topDonors, independentExpenditures: factsToUse?.independentExpenditures,
+      financialsAsOf: factsToUse?.financialsAsOf,
+      factsFlag,
       narrativeDraft, leadership: narrative.leadership,
       sources,
     });

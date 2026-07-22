@@ -259,6 +259,7 @@ export const upsertEnrichment = internalMutation({
       supportOppose: v.union(v.literal("support"), v.literal("oppose")), amount: v.number(),
     }))),
     financialsAsOf: v.optional(v.string()),
+    factsFlag: v.optional(v.string()),
     narrativeDraft: v.optional(v.string()),
     leadership: v.optional(v.array(v.object({ name: v.string(), role: v.string() }))),
     sources: v.array(v.object({ label: v.string(), url: v.string() })),
@@ -275,6 +276,7 @@ export const upsertEnrichment = internalMutation({
       totalSpent: a.totalSpent ?? existing?.totalSpent,
       independentExpenditures: a.independentExpenditures ?? existing?.independentExpenditures,
       financialsAsOf: a.financialsAsOf ?? existing?.financialsAsOf,
+      factsFlag: a.factsFlag,
       leadership: keepNarrative ? existing?.leadership : (a.leadership ?? existing?.leadership),
       narrative: keepNarrative ? existing?.narrative : (a.narrativeDraft ?? existing?.narrative),
       narrativeStatus: keepNarrative
@@ -353,6 +355,19 @@ export const enrichedSponsorKeys = query({
   handler: async (ctx) => {
     const rows = await ctx.db.query("sponsors").collect();
     return rows.filter((s) => s.enrichedAt).map((s) => s.key);
+  },
+});
+
+/** Total tracked ad spend (range midpoints) for a sponsor — feeds the FEC
+ * decoy-match guard: if this dwarfs a name-matched committee's receipts, the
+ * match is implausible. */
+export const trackedSpendForKey = internalQuery({
+  args: { key: v.string() },
+  handler: async (ctx, { key }) => {
+    const ads = await ctx.db.query("ads").collect();
+    return ads
+      .filter((a) => normalizeSponsorKey(a.pageOrCommittee) === key)
+      .reduce((s, a) => s + ((a.spendLower ?? 0) + (a.spendUpper ?? 0)) / 2, 0);
   },
 });
 
