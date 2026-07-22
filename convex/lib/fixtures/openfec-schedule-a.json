@@ -1,4 +1,5 @@
 { "results": [
   { "contributor_name": "Jane Q. Donor", "contribution_receipt_amount": 250000 },
+  { "contributor_name": "Acme LLC", "contribution_receipt_amount": 100000 },
   { "contributor_name": "Acme LLC", "contribution_receipt_amount": 100000 }
 ] }

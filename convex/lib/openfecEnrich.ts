@@ -23,11 +23,16 @@ export function parseCommitteeTotals(json: unknown) {
 
 export function parseTopDonors(json: unknown, limit = 10) {
   const rows = (json as { results?: any[] }).results ?? [];
-  return rows
-    .map((r) => ({ name: String(r.contributor_name ?? "").trim(), amount: Number(r.contribution_receipt_amount ?? 0) }))
-    .filter((d) => d.name && d.amount > 0)
-    .sort((a, b) => b.amount - a.amount)
-    .slice(0, limit);
+  const by = new Map<string, { name: string; amount: number }>();
+  for (const r of rows) {
+    const name = String(r.contributor_name ?? "").trim();
+    const amount = Number(r.contribution_receipt_amount ?? 0);
+    if (!name || amount <= 0) continue;
+    const cur = by.get(name) ?? { name, amount: 0 };
+    cur.amount += amount;
+    by.set(name, cur);
+  }
+  return [...by.values()].sort((a, b) => b.amount - a.amount).slice(0, limit);
 }
 
 export function parseIndependentExpenditures(json: unknown, limit = 10): OpenFecFacts["independentExpenditures"] {
