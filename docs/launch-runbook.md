@@ -63,10 +63,21 @@ by git revert + `npx convex deploy -y`, and MUST re-run the eval gate
 2. **Alerts**: /admin → resolve or triage everything; launch requires zero
    unresolved critical.
 3. **Snapshot**: `npx convex export --prod --path backups/prod-launch.zip`.
-4. **Domain** (if using a custom domain instead of badgerbrief.vercel.app):
-   Vercel dashboard → Project → Domains → add domain, follow DNS instructions;
-   HTTPS is automatic. Then update `NEXT_PUBLIC_SITE_URL` env in Vercel,
-   redeploy, confirm sitemap.xml/robots.txt emit the new host.
+4. **Domain** — `badgerbrief.org` is **live** (apex + www, HTTPS, serving the
+   app; verified 2026-07-22). Remaining: confirm `NEXT_PUBLIC_SITE_URL` points
+   at `https://badgerbrief.org` and sitemap.xml/robots.txt emit that host.
+4b. **Promote Clerk to a PRODUCTION instance (launch blocker).** Auth currently
+   runs on a Clerk **development** instance (`amazed-hyena-57.accounts.dev`,
+   "Development mode" banner) — dev instances have low rate/user limits, an
+   `accounts.dev` sign-in domain, and the dev banner. Before launch:
+   Clerk dashboard → create/activate the production instance → move OAuth
+   (Google) credentials to prod keys → set the sign-in domain to
+   `accounts.badgerbrief.org` (add the DNS records Clerk provides) → swap
+   `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` + `CLERK_SECRET_KEY` in Vercel to the
+   prod keys → redeploy → verify `/chat` sign-in shows the branded prod flow on
+   the badgerbrief.org domain with no "Development mode" banner.
+   (Surfaced while pre-flighting the launch demo video — the dev sign-in screen
+   also can't appear in the video; film `/chat` already logged in.)
 5. **Search Console**: https://search.google.com/search-console → add property
    for the production domain (DNS or meta-tag verification) → Sitemaps →
    submit `https://<domain>/sitemap.xml` → screenshot "Success" status.
