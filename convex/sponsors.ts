@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import {
   action,
+  internalMutation,
   mutation,
   query,
   ActionCtx,
@@ -92,8 +93,10 @@ async function getFecCommittee(id: string): Promise<FecMatch | null> {
   };
 }
 
-/** Perplexity (web-grounded) → a sourced one-line description + citations. */
-async function perplexityDescribe(
+/** Perplexity (web-grounded) → a sourced one-line description + citations.
+ * Exported for reuse as sponsorEnrich.ts's narrative fallback when Firecrawl
+ * finds nothing. */
+export async function perplexityDescribe(
   name: string,
 ): Promise<{ summary?: string; sources: { label: string; url: string }[] }> {
   const key = process.env.PERPLEXITY_API_KEY;
@@ -227,5 +230,45 @@ export const approvedForNames = query({
       if (s && s.reviewStatus === "approved") out[key] = s;
     }
     return out;
+  },
+});
+
+/** Enrichment writer: exact facts publish immediately; a fresh narrative lands
+ * as a draft (narrativeStatus:"draft") unless one is already approved. */
+export const upsertEnrichment = internalMutation({
+  args: {
+    key: v.string(), displayName: v.string(),
+    kind: v.optional(v.string()), lean: v.optional(leanValidator),
+    fecCommitteeId: v.optional(v.string()), disclosesDonors: v.optional(v.boolean()),
+    totalRaised: v.optional(v.number()), totalSpent: v.optional(v.number()),
+    topDonors: v.optional(v.array(v.object({ name: v.string(), amount: v.number() }))),
+    independentExpenditures: v.optional(v.array(v.object({
+      candidate: v.string(), office: v.optional(v.string()),
+      supportOppose: v.union(v.literal("support"), v.literal("oppose")), amount: v.number(),
+    }))),
+    financialsAsOf: v.optional(v.string()),
+    narrativeDraft: v.optional(v.string()),
+    leadership: v.optional(v.array(v.object({ name: v.string(), role: v.string() }))),
+    sources: v.array(v.object({ label: v.string(), url: v.string() })),
+  },
+  handler: async (ctx, a) => {
+    const existing = await ctx.db.query("sponsors").withIndex("by_key", (q) => q.eq("key", a.key)).unique();
+    const keepNarrative = existing?.narrativeStatus === "approved";
+    const doc = {
+      key: a.key, displayName: existing?.displayName ?? a.displayName,
+      kind: a.kind ?? existing?.kind, lean: a.lean ?? existing?.lean,
+      summary: existing?.summary, fecCommitteeId: a.fecCommitteeId ?? existing?.fecCommitteeId,
+      disclosesDonors: a.disclosesDonors ?? existing?.disclosesDonors,
+      topDonors: a.topDonors, totalRaised: a.totalRaised, totalSpent: a.totalSpent,
+      independentExpenditures: a.independentExpenditures, financialsAsOf: a.financialsAsOf,
+      leadership: keepNarrative ? existing?.leadership : a.leadership,
+      narrative: keepNarrative ? existing?.narrative : a.narrativeDraft,
+      narrativeStatus: keepNarrative ? existing?.narrativeStatus : (a.narrativeDraft ? ("draft" as const) : existing?.narrativeStatus),
+      sources: a.sources.length ? a.sources : (existing?.sources ?? []),
+      reviewStatus: existing?.reviewStatus ?? ("draft" as const),
+      enrichedAt: Date.now(), updatedAt: Date.now(),
+    };
+    if (existing) { await ctx.db.patch(existing._id, doc); return existing._id; }
+    return ctx.db.insert("sponsors", doc);
   },
 });

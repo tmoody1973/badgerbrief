@@ -59,6 +59,7 @@ export async function fetchSponsorNarrative(name: string): Promise<SponsorNarrat
           method: "POST",
           headers: { Authorization: `Bearer ${process.env.FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({ url, formats: [{ type: "json", prompt: PROMPT, schema: SCHEMA }] }),
+          signal: AbortSignal.timeout(30_000),
         });
         if (!res.ok) return { url, json: null };
         const body = (await res.json()) as { data?: { json?: { narrative?: string; leadership?: { name: string; role: string }[] } } };
