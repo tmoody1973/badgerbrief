@@ -1,0 +1,5 @@
+{ "results": [
+  { "candidate_name": "TIFFANY, TOM", "candidate_office": "H", "support_oppose_indicator": "O", "expenditure_amount": 40000 },
+  { "candidate_name": "TIFFANY, TOM", "candidate_office": "H", "support_oppose_indicator": "O", "expenditure_amount": 20000 },
+  { "candidate_name": "COOKE, REBECCA", "candidate_office": "H", "support_oppose_indicator": "S", "expenditure_amount": 15000 }
+] }
