@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/retroui/Button";
@@ -16,23 +16,27 @@ const LEANS: [Lean, string][] = [
   ["issue", "Issue"],
 ];
 
+const money = (n: number) => `$${Math.round(n).toLocaleString()}`;
+
 /**
- * Reviewer-assisted "who is this group" panel for an outside-group ad. Looks the
- * sponsor up (FEC + Perplexity), pre-fills an editable draft, and saves an
- * approved profile reused across every ad from that sponsor. Nothing publishes
- * until saved here.
+ * Reviewer-assisted "who is this group" panel for an outside-group ad. Runs
+ * full enrichment (FEC exact facts + a Firecrawl/Perplexity-sourced
+ * narrative), then lets the reviewer edit + approve before anything
+ * publishes. Exact facts (kind, totals, donors) auto-publish; the narrative
+ * only ever shows publicly once approved here.
  */
 export function SponsorResolver({ advertiser }: { advertiser: string }) {
   const existing = useQuery(api.sponsors.sponsorForName, { advertiser });
-  const lookup = useAction(api.sponsors.lookupSponsor);
+  const enrich = useAction(api.sponsorEnrich.enrichSponsor);
   const save = useMutation(api.sponsors.saveSponsor);
+  const saveNarrativeDraft = useMutation(api.sponsors.saveNarrativeDraft);
+  const approveNarrative = useMutation(api.sponsors.approveNarrative);
 
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
 
-  // Editable draft.
+  // Editable draft (manual facts, saved via saveSponsor).
   const [displayName, setDisplayName] = useState(advertiser);
   const [kind, setKind] = useState("");
   const [lean, setLean] = useState<Lean | "">("");
@@ -41,31 +45,32 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
   const [disclosesDonors, setDisclosesDonors] = useState<boolean | null>(null);
   const [sources, setSources] = useState<Source[]>([]);
 
-  function fillFrom(s: {
-    displayName?: string;
-    kind?: string;
-    lean?: Lean;
-    summary?: string;
-    fecCommitteeId?: string;
-    disclosesDonors?: boolean;
-    sources?: Source[];
-  }) {
-    if (s.displayName) setDisplayName(s.displayName);
-    if (s.kind) setKind(s.kind);
-    if (s.lean) setLean(s.lean);
-    if (s.summary) setSummary(s.summary);
-    if (s.fecCommitteeId) setFecId(s.fecCommitteeId);
-    if (s.disclosesDonors !== undefined) setDisclosesDonors(s.disclosesDonors);
-    if (s.sources) setSources(s.sources);
-  }
+  // Narrative draft (saved via saveNarrativeDraft/approveNarrative).
+  const [narrative, setNarrative] = useState("");
 
-  async function runLookup() {
+  // Sync local edit state whenever the saved row changes (initial load, and
+  // after enrich/save/approve land through Convex's reactive query).
+  useEffect(() => {
+    if (!existing) return;
+    setDisplayName(existing.displayName);
+    if (existing.kind) setKind(existing.kind);
+    if (existing.lean) setLean(existing.lean);
+    if (existing.summary) setSummary(existing.summary);
+    if (existing.fecCommitteeId) setFecId(existing.fecCommitteeId);
+    if (existing.disclosesDonors !== undefined) {
+      setDisclosesDonors(existing.disclosesDonors);
+    }
+    if (existing.sources) setSources(existing.sources);
+    setNarrative(existing.narrative ?? "");
+  }, [existing]);
+
+  const key = existing?.key ?? normalizeKey(advertiser);
+
+  async function runEnrich() {
     setBusy(true);
     setError(null);
     try {
-      const r = await lookup({ advertiser, fecCommitteeId: fecId || undefined });
-      fillFrom({ displayName: r.displayName, ...r.suggested });
-      setLoaded(true);
+      await enrich({ advertiser, fecCommitteeId: fecId || undefined });
     } catch (e) {
       setError(asMessage(e));
     } finally {
@@ -78,7 +83,7 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
     setError(null);
     try {
       await save({
-        key: existing?.key ?? normalizeKey(advertiser),
+        key,
         displayName,
         kind: kind || undefined,
         lean: lean || undefined,
@@ -87,8 +92,31 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
         disclosesDonors: disclosesDonors ?? undefined,
         sources,
       });
-      setLoaded(false);
       setOpen(false);
+    } catch (e) {
+      setError(asMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveDraft() {
+    setBusy(true);
+    setError(null);
+    try {
+      await saveNarrativeDraft({ key, narrative, leadership: existing?.leadership });
+    } catch (e) {
+      setError(asMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function approve() {
+    setBusy(true);
+    setError(null);
+    try {
+      await approveNarrative({ key });
     } catch (e) {
       setError(asMessage(e));
     } finally {
@@ -100,15 +128,13 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
   const savedLabel = existing
     ? `${existing.displayName}${existing.kind ? ` · ${existing.kind}` : ""} ✓`
     : "No sponsor profile yet";
+  const narrativeStatus = existing?.narrativeStatus ?? "none";
 
   return (
     <div className="mt-2 border-t-2 border-dashed border-border pt-2">
       <button
         type="button"
-        onClick={() => {
-          setOpen((o) => !o);
-          if (existing && !loaded) fillFrom(existing);
-        }}
+        onClick={() => setOpen((o) => !o)}
         className="font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground"
       >
         {open ? "▾" : "▸"} Sponsor: {savedLabel}
@@ -117,8 +143,12 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
       {open && (
         <div className="mt-2 space-y-2">
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" disabled={busy} onClick={runLookup}>
-              {busy ? "Looking up…" : loaded ? "Re-look up" : "Look up (FEC + web)"}
+            <Button variant="outline" disabled={busy} onClick={runEnrich}>
+              {busy
+                ? "Enriching…"
+                : existing?.enrichedAt
+                  ? "Re-enrich (FEC + web)"
+                  : "Enrich (FEC + web)"}
             </Button>
             <input
               value={fecId}
@@ -198,6 +228,54 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
           <Button disabled={busy || !displayName} onClick={persist}>
             {busy ? "Saving…" : "Save sponsor profile"}
           </Button>
+
+          {existing && (existing.totalRaised !== undefined || existing.totalSpent !== undefined) && (
+            <p className="font-mono text-[11px] text-muted-foreground">
+              {existing.totalRaised !== undefined && `Raised ${money(existing.totalRaised)}`}
+              {existing.totalRaised !== undefined && existing.totalSpent !== undefined && " · "}
+              {existing.totalSpent !== undefined && `Spent ${money(existing.totalSpent)}`}
+              {existing.financialsAsOf && ` · as of ${existing.financialsAsOf}`}
+            </p>
+          )}
+
+          <div className="border-t-2 border-dashed border-border pt-2">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              Narrative ({narrativeStatus})
+            </p>
+            <textarea
+              value={narrative}
+              onChange={(e) => setNarrative(e.target.value)}
+              placeholder="Sourced narrative shown on the public sponsor profile once approved…"
+              rows={4}
+              className="mt-1 w-full border-2 border-border bg-card px-2 py-1.5 text-sm"
+            />
+            {existing?.leadership && existing.leadership.length > 0 && (
+              <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                Leadership:{" "}
+                {existing.leadership.map((p, i) => (
+                  <span key={`${p.name}-${p.role}`}>
+                    {i > 0 && " · "}
+                    {p.name} ({p.role})
+                  </span>
+                ))}
+              </p>
+            )}
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                disabled={busy || !narrative.trim()}
+                onClick={saveDraft}
+              >
+                {busy ? "Saving…" : "Save narrative draft"}
+              </Button>
+              <Button
+                disabled={busy || !narrative.trim() || narrativeStatus === "approved"}
+                onClick={approve}
+              >
+                {busy ? "Approving…" : "Approve narrative"}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>
