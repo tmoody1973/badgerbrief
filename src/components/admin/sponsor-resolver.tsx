@@ -150,7 +150,7 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
 
   // Collapsed line: show the saved profile (if any) + a toggle.
   const savedLabel = existing
-    ? `${existing.displayName}${existing.kind ? ` · ${existing.kind}` : ""} ✓`
+    ? `${existing.displayName}${existing.kind ? ` · ${existing.kind}` : ""} ${existing.factsFlag ? "⚠" : "✓"}`
     : "No sponsor profile yet";
   const narrativeStatus = existing?.narrativeStatus ?? "none";
 
@@ -172,6 +172,9 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
 
       {open && (
         <div className="mt-2 space-y-2">
+          {/* Decoy-FEC-match warning from auto enrichment — reviewer must see it
+              before trusting the published facts. Same alert styling as errors. */}
+          <ErrorLine message={existing?.factsFlag ?? null} />
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" disabled={busy} onClick={runEnrich}>
               {busy
