@@ -1,6 +1,8 @@
 import { v } from "convex/values";
 import {
   action,
+  internalMutation,
+  internalQuery,
   mutation,
   query,
   ActionCtx,
@@ -17,7 +19,7 @@ import {
 /** Who is behind an outside-group ad. Reviewer-assisted: FEC facts + a
  * Perplexity-sourced one-liner, human-approved before it ever shows publicly. */
 
-async function requireAdmin(ctx: QueryCtx | MutationCtx | ActionCtx) {
+export async function requireAdmin(ctx: QueryCtx | MutationCtx | ActionCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) throw new Error("sponsors require authentication");
   const role = (identity as { metadata?: { role?: string } }).metadata?.role;
@@ -92,8 +94,10 @@ async function getFecCommittee(id: string): Promise<FecMatch | null> {
   };
 }
 
-/** Perplexity (web-grounded) → a sourced one-line description + citations. */
-async function perplexityDescribe(
+/** Perplexity (web-grounded) → a sourced one-line description + citations.
+ * Exported for reuse as sponsorEnrich.ts's narrative fallback when Firecrawl
+ * finds nothing. */
+export async function perplexityDescribe(
   name: string,
 ): Promise<{ summary?: string; sources: { label: string; url: string }[] }> {
   const key = process.env.PERPLEXITY_API_KEY;
@@ -213,6 +217,17 @@ export const sponsorForName = query({
   },
 });
 
+/** Internal: the stored sponsor row for a key (unauthenticated enrichment reads
+ * the prior fecCommitteeId so a name-search miss doesn't lose it). */
+export const sponsorRowByKey = internalQuery({
+  args: { key: v.string() },
+  handler: async (ctx, { key }) =>
+    ctx.db
+      .query("sponsors")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .unique(),
+});
+
 /** Public: approved sponsor profiles for a set of sponsor names (race pages). */
 export const approvedForNames = query({
   args: { names: v.array(v.string()) },
@@ -227,5 +242,192 @@ export const approvedForNames = query({
       if (s && s.reviewStatus === "approved") out[key] = s;
     }
     return out;
+  },
+});
+
+/** Enrichment writer: exact facts publish immediately; a fresh narrative lands
+ * as a draft (narrativeStatus:"draft") unless one is already approved. */
+export const upsertEnrichment = internalMutation({
+  args: {
+    key: v.string(), displayName: v.string(),
+    kind: v.optional(v.string()), lean: v.optional(leanValidator),
+    fecCommitteeId: v.optional(v.string()), disclosesDonors: v.optional(v.boolean()),
+    totalRaised: v.optional(v.number()), totalSpent: v.optional(v.number()),
+    topDonors: v.optional(v.array(v.object({ name: v.string(), amount: v.number() }))),
+    independentExpenditures: v.optional(v.array(v.object({
+      candidate: v.string(), office: v.optional(v.string()),
+      supportOppose: v.union(v.literal("support"), v.literal("oppose")), amount: v.number(),
+    }))),
+    financialsAsOf: v.optional(v.string()),
+    narrativeDraft: v.optional(v.string()),
+    leadership: v.optional(v.array(v.object({ name: v.string(), role: v.string() }))),
+    sources: v.array(v.object({ label: v.string(), url: v.string() })),
+  },
+  handler: async (ctx, a) => {
+    const existing = await ctx.db.query("sponsors").withIndex("by_key", (q) => q.eq("key", a.key)).unique();
+    const keepNarrative = existing?.narrativeStatus === "approved";
+    const doc = {
+      key: a.key, displayName: existing?.displayName ?? a.displayName,
+      kind: a.kind ?? existing?.kind, lean: a.lean ?? existing?.lean,
+      summary: existing?.summary, fecCommitteeId: a.fecCommitteeId ?? existing?.fecCommitteeId,
+      disclosesDonors: a.disclosesDonors ?? existing?.disclosesDonors,
+      topDonors: a.topDonors ?? existing?.topDonors, totalRaised: a.totalRaised ?? existing?.totalRaised,
+      totalSpent: a.totalSpent ?? existing?.totalSpent,
+      independentExpenditures: a.independentExpenditures ?? existing?.independentExpenditures,
+      financialsAsOf: a.financialsAsOf ?? existing?.financialsAsOf,
+      leadership: keepNarrative ? existing?.leadership : (a.leadership ?? existing?.leadership),
+      narrative: keepNarrative ? existing?.narrative : (a.narrativeDraft ?? existing?.narrative),
+      narrativeStatus: keepNarrative
+        ? existing?.narrativeStatus
+        : ((a.narrativeDraft ?? existing?.narrative) ? ("draft" as const) : existing?.narrativeStatus),
+      sources: a.sources.length ? a.sources : (existing?.sources ?? []),
+      reviewStatus: existing?.reviewStatus ?? ("draft" as const),
+      enrichedAt: Date.now(), updatedAt: Date.now(),
+    };
+    if (existing) { await ctx.db.patch(existing._id, doc); return existing._id; }
+    return ctx.db.insert("sponsors", doc);
+  },
+});
+
+/** Distinct sponsor names by tracked spend, newest-stale first — enrichment queue. */
+export const sponsorsToEnrich = internalQuery({
+  args: { limit: v.number(), staleDays: v.number() },
+  handler: async (ctx, { limit, staleDays }) => {
+    const ads = await ctx.db.query("ads").collect();
+    const spendBy = new Map<string, { name: string; spend: number }>();
+    for (const ad of ads) {
+      const name = ad.pageOrCommittee;
+      const key = normalizeSponsorKey(name);
+      const mid = ((ad.spendLower ?? 0) + (ad.spendUpper ?? 0)) / 2;
+      const cur = spendBy.get(key) ?? { name, spend: 0 };
+      cur.spend += mid; spendBy.set(key, cur);
+    }
+    const cutoff = Date.now() - staleDays * 86_400_000;
+    const out: { name: string; key: string }[] = [];
+    for (const [key, { name, spend }] of [...spendBy.entries()].sort((a, b) => b[1].spend - a[1].spend)) {
+      const existing = await ctx.db.query("sponsors").withIndex("by_key", (q) => q.eq("key", key)).unique();
+      if (existing?.enrichedAt && existing.enrichedAt > cutoff) continue;
+      // Skip candidate own-committees once enriched (kind set); include unknowns.
+      if (existing?.kind === "Candidate committee") continue;
+      out.push({ name, key });
+      if (out.length >= limit) break;
+    }
+    return out;
+  },
+});
+
+/** Support/attack scorecard: rolls up a sponsor's own ads by candidateSlug + stance
+ * with summed spend midpoints, sorted by spend descending. */
+export const sponsorScorecard = query({
+  args: { key: v.string() },
+  handler: async (ctx, { key }) => {
+    const ads = await ctx.db.query("ads").collect();
+    const mine = ads.filter((a) => a.candidateSlug && a.stance && normalizeSponsorKey(a.pageOrCommittee) === key);
+    const roll = (stance: "support" | "oppose") => {
+      const by = new Map<string, { candidateSlug: string; raceId?: string; spend: number; adCount: number }>();
+      for (const a of mine.filter((x) => x.stance === stance)) {
+        const mid = ((a.spendLower ?? 0) + (a.spendUpper ?? 0)) / 2;
+        const cur = by.get(a.candidateSlug!) ?? { candidateSlug: a.candidateSlug!, raceId: a.raceId, spend: 0, adCount: 0 };
+        cur.spend += mid; cur.adCount += 1; by.set(a.candidateSlug!, cur);
+      }
+      return [...by.values()].sort((x, y) => y.spend - x.spend);
+    };
+    return { supported: roll("support"), attacked: roll("oppose") };
+  },
+});
+
+/** All ads for a sponsor, sorted by spend descending. */
+export const sponsorAds = query({
+  args: { key: v.string() },
+  handler: async (ctx, { key }) => {
+    const ads = await ctx.db.query("ads").collect();
+    return ads.filter((a) => normalizeSponsorKey(a.pageOrCommittee) === key)
+      .sort((a, b) => (b.spendUpper ?? 0) - (a.spendUpper ?? 0));
+  },
+});
+
+type PublicProfile = {
+  displayName: string;
+  kind?: string;
+  lean?: SponsorLean;
+  disclosesDonors?: boolean;
+  totalRaised?: number;
+  totalSpent?: number;
+  topDonors?: { name: string; amount: number }[];
+  independentExpenditures?: { candidate: string; office?: string; supportOppose: "support" | "oppose"; amount: number }[];
+  financialsAsOf?: string;
+  sources: { label: string; url: string }[];
+  narrative?: string;
+  leadership?: { name: string; role: string }[];
+};
+
+/** Public profile: returns exact facts always; narrative/leadership only when approved. */
+export const sponsorPublicProfile = query({
+  args: { key: v.string() },
+  handler: async (ctx, { key }): Promise<PublicProfile | null> => {
+    const s = await ctx.db.query("sponsors").withIndex("by_key", (q) => q.eq("key", key)).unique();
+    if (!s || !s.enrichedAt) return null;
+    const base: PublicProfile = {
+      displayName: s.displayName, kind: s.kind, lean: s.lean, disclosesDonors: s.disclosesDonors,
+      totalRaised: s.totalRaised, totalSpent: s.totalSpent, topDonors: s.topDonors,
+      independentExpenditures: s.independentExpenditures, financialsAsOf: s.financialsAsOf,
+      sources: s.sources,
+    };
+    if (s.narrativeStatus === "approved") {
+      return { ...base, narrative: s.narrative, leadership: s.leadership };
+    }
+    return base;
+  },
+});
+
+/** Admin: save a narrative draft (reviewer-edited) + optional leadership. */
+export const saveNarrativeDraft = mutation({
+  args: {
+    key: v.string(),
+    narrative: v.string(),
+    leadership: v.optional(v.array(v.object({ name: v.string(), role: v.string() }))),
+  },
+  handler: async (ctx, { key, narrative, leadership }) => {
+    await requireAdmin(ctx);
+    const s = await ctx.db
+      .query("sponsors")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .unique();
+    if (!s) throw new Error("no sponsor row to edit");
+    await ctx.db.patch(s._id, {
+      narrative,
+      leadership,
+      narrativeStatus: "draft" as const,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/** Admin: approve a narrative draft → set narrativeStatus to "approved". */
+export const approveNarrative = mutation({
+  args: { key: v.string() },
+  handler: async (ctx, { key }) => {
+    await requireAdmin(ctx);
+    const s = await ctx.db
+      .query("sponsors")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .unique();
+    if (!s) throw new Error("no sponsor row to approve");
+    await ctx.db.patch(s._id, {
+      narrativeStatus: "approved" as const,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/** Admin: list sponsors with draft narratives pending review. */
+export const pendingNarratives = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const rows = await ctx.db.query("sponsors").collect();
+    return rows
+      .filter((s) => s.narrativeStatus === "draft" && s.narrative)
+      .map((s) => ({ key: s.key, displayName: s.displayName }));
   },
 });

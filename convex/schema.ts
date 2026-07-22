@@ -235,6 +235,26 @@ export default defineSchema({
     ),
     totalRaised: v.optional(v.number()),
     sources: v.array(v.object({ label: v.string(), url: v.string() })),
+    narrative: v.optional(v.string()),
+    narrativeStatus: v.optional(
+      v.union(v.literal("draft"), v.literal("approved")),
+    ),
+    leadership: v.optional(
+      v.array(v.object({ name: v.string(), role: v.string() })),
+    ),
+    totalSpent: v.optional(v.number()),
+    independentExpenditures: v.optional(
+      v.array(
+        v.object({
+          candidate: v.string(),
+          office: v.optional(v.string()),
+          supportOppose: v.union(v.literal("support"), v.literal("oppose")),
+          amount: v.number(),
+        }),
+      ),
+    ),
+    financialsAsOf: v.optional(v.string()),
+    enrichedAt: v.optional(v.number()),
     reviewStatus: v.union(v.literal("draft"), v.literal("approved")),
     updatedAt: v.number(),
   }).index("by_key", ["key"]),

@@ -88,4 +88,13 @@ crons.daily(
   {},
 );
 
+// Monthly, 8:00 UTC on the 1st — batch-enrich the highest-spend outside
+// groups that are stale or unenriched (MOO-318 follow-up).
+crons.monthly(
+  "enrich sponsors",
+  { day: 1, hourUTC: 8, minuteUTC: 0 },
+  internal.sponsorEnrich.enrichOutsideGroups,
+  { limit: 50, staleDays: 30 },
+);
+
 export default crons;

@@ -21,3 +21,9 @@ export const getTvAdsForRace = (raceId: string) =>
 export const getTvAdTracker = () => fetchQuery(api.ads.tvAdsForTracker, {});
 export const candidateDirectory = () =>
   fetchQuery(api.public.candidateDirectory, {});
+export const getSponsorProfile = (key: string) =>
+  fetchQuery(api.sponsors.sponsorPublicProfile, { key });
+export const getSponsorScorecard = (key: string) =>
+  fetchQuery(api.sponsors.sponsorScorecard, { key });
+export const getSponsorAds = (key: string) =>
+  fetchQuery(api.sponsors.sponsorAds, { key });

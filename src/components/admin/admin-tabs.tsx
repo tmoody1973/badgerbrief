@@ -2,15 +2,22 @@
 
 import { useState } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
+import Link from "next/link";
 import { api } from "../../../convex/_generated/api";
 import { AdReviewQueue, UnattributedAds } from "./ad-review";
 import { ReviewQueue } from "./review-queue";
 import { ArticleSources } from "./article-sources";
+import { sponsorKeyToSlug } from "@/lib/site";
 
-type TabKey = "attribution" | "unattributed" | "editorial" | "sources";
+type TabKey =
+  | "attribution"
+  | "unattributed"
+  | "editorial"
+  | "sources"
+  | "narratives";
 
 /**
- * Admin work is four independent queues that used to stack into one long scroll.
+ * Admin work is five independent queues that used to stack into one long scroll.
  * This shell shows one at a time with a live backlog count per tab, so a
  * reviewer jumps straight to the pile they care about (e.g. the TV orders).
  * Only the active section mounts.
@@ -19,6 +26,10 @@ export function AdminTabs() {
   const { isAuthenticated } = useConvexAuth();
   const counts = useQuery(
     api.adminQueue.counts,
+    isAuthenticated ? {} : "skip",
+  );
+  const pendingNarratives = useQuery(
+    api.sponsors.pendingNarratives,
     isAuthenticated ? {} : "skip",
   );
   const [tab, setTab] = useState<TabKey>("attribution");
@@ -33,6 +44,7 @@ export function AdminTabs() {
     { key: "unattributed", label: "Unattributed", count: counts?.unattributed },
     { key: "editorial", label: "Editorial", count: counts?.editorial },
     { key: "sources", label: "Sources", count: counts?.sources },
+    { key: "narratives", label: "Narratives", count: pendingNarratives?.length },
   ];
 
   return (
@@ -82,7 +94,44 @@ export function AdminTabs() {
         {tab === "unattributed" && <UnattributedAds />}
         {tab === "editorial" && <ReviewQueue />}
         {tab === "sources" && <ArticleSources />}
+        {tab === "narratives" && <NarrativeQueue rows={pendingNarratives} />}
       </div>
     </div>
+  );
+}
+
+/** Sponsors with a draft narrative awaiting approval — each links to its
+ * public sponsor page, where the SponsorResolver panel (surfaced via the ad
+ * attribution queues) does the actual editing/approving. */
+function NarrativeQueue({
+  rows,
+}: {
+  rows: { key: string; displayName: string }[] | undefined;
+}) {
+  if (!rows) return null;
+  if (rows.length === 0) {
+    return (
+      <p className="font-mono text-xs text-muted-foreground">
+        No narratives pending review.
+      </p>
+    );
+  }
+  return (
+    <ul className="space-y-2">
+      {rows.map((r) => (
+        <li
+          key={r.key}
+          className="flex items-center justify-between border-2 border-border bg-card px-3 py-2 shadow-[var(--shadow-brutal)]"
+        >
+          <span className="font-mono text-sm font-bold">{r.displayName}</span>
+          <Link
+            href={`/sponsors/${sponsorKeyToSlug(r.key)}`}
+            className="font-mono text-xs font-bold uppercase tracking-widest underline decoration-2 underline-offset-2"
+          >
+            Review →
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
