@@ -121,11 +121,15 @@ export default async function AdsPage({
       {view === "statewide" && overview && (
         <div className="mt-6 space-y-10">
           {/* Jump nav — Statewide is long (race grid + TV tracker + analytics);
-              anchor chips skip between its parts. ponytail: non-sticky on
-              purpose — the tab bar above is the sticky one, and a second
-              top-0 sticky bar would fight it. Make it sticky-below-tabs later
-              if the scroll depth warrants it. */}
-          <nav aria-label="Jump to section" className="flex flex-wrap gap-2 font-mono text-xs font-bold">
+              anchor chips skip between its parts. Sticky just below the view
+              tab bar (which pins at top-0, ~56px tall) with a lower z so the
+              tab bar always wins the overlap. ponytail: top-14 assumes the 3
+              tab chips stay on one row (true ≥360px); they'd wrap on a very
+              narrow phone. */}
+          <nav
+            aria-label="Jump to section"
+            className="sticky top-14 z-10 -mx-4 flex flex-wrap gap-2 border-b-2 border-border bg-background px-4 py-2 font-mono text-xs font-bold"
+          >
             <a href="#by-race" className={jumpChip}>By race</a>
             {tvSponsors.length > 0 && (
               <a href="#broadcast-tv" className={jumpChip}>Broadcast TV</a>
@@ -135,7 +139,7 @@ export default async function AdsPage({
             )}
           </nav>
 
-          <div id="by-race" className="scroll-mt-20">
+          <div id="by-race" className="scroll-mt-28">
             <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               Every tracked ad reaching Wisconsin, race by race
             </p>
@@ -145,13 +149,13 @@ export default async function AdsPage({
           </div>
 
           {tvSponsors.length > 0 && (
-            <div id="broadcast-tv" className="scroll-mt-20">
+            <div id="broadcast-tv" className="scroll-mt-28">
               <TvAdTracker sponsors={tvSponsors} />
             </div>
           )}
 
           {ads.length > 0 && (
-            <div id="the-numbers" className="scroll-mt-20">
+            <div id="the-numbers" className="scroll-mt-28">
               <h2 className="font-display text-2xl">The numbers behind it</h2>
               <div className="mt-4">
                 <AdsAnalytics ads={ads} candidateNames={candidateNames} />
