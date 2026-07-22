@@ -5,6 +5,7 @@ import { AdsBrowser } from "@/components/guide/ads-browser";
 import { AdsOverview } from "@/components/guide/ads-overview";
 import { YourRaces } from "@/components/guide/your-races";
 import { TvAdTracker } from "@/components/guide/tv-ad-tracker";
+import { SectionNav } from "@/components/guide/section-nav";
 import {
   candidateDirectory,
   getAdMoneyOverview,
@@ -26,10 +27,6 @@ const TABS: { view: View; label: string; href: string }[] = [
   { view: "statewide", label: "Statewide", href: "/ads" },
   { view: "browse", label: "Browse", href: "/ads?view=browse" },
 ];
-
-// Shared style for the Statewide in-page jump chips (mirrors SectionNav).
-const jumpChip =
-  "press border-2 border-border bg-card px-3 py-1 uppercase tracking-widest shadow-[var(--shadow-brutal)]";
 
 export default async function AdsPage({
   searchParams,
@@ -54,6 +51,15 @@ export default async function AdsPage({
   const candidateNames = Object.fromEntries(
     candidates.map((c) => [c.slug, c.name]),
   );
+
+  // Statewide jump-nav sections — only the ones that actually render.
+  const statewideSections = [
+    { id: "by-race", label: "By race" },
+    ...(tvSponsors.length > 0
+      ? [{ id: "broadcast-tv", label: "Broadcast TV" }]
+      : []),
+    ...(ads.length > 0 ? [{ id: "the-numbers", label: "The numbers" }] : []),
+  ];
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
@@ -111,41 +117,20 @@ export default async function AdsPage({
 
       {view === "your-ballot" && overview && (
         <div className="mt-6">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-            Ad money in the races on your ballot
-          </p>
           <YourRaces races={overview.races} />
         </div>
       )}
 
       {view === "statewide" && overview && (
         <div className="mt-6 space-y-10">
-          {/* Jump nav — Statewide is long (race grid + TV tracker + analytics);
-              anchor chips skip between its parts. Sticky just below the view
-              tab bar (which pins at top-0, ~56px tall) with a lower z so the
-              tab bar always wins the overlap. ponytail: top-14 assumes the 3
-              tab chips stay on one row (true ≥360px); they'd wrap on a very
-              narrow phone. */}
-          <nav
-            aria-label="Jump to section"
-            className="sticky top-14 z-10 -mx-4 flex flex-wrap gap-2 border-b-2 border-border bg-background px-4 py-2 font-mono text-xs font-bold"
-          >
-            <a href="#by-race" className={jumpChip}>By race</a>
-            {tvSponsors.length > 0 && (
-              <a href="#broadcast-tv" className={jumpChip}>Broadcast TV</a>
-            )}
-            {ads.length > 0 && (
-              <a href="#the-numbers" className={jumpChip}>The numbers</a>
-            )}
-          </nav>
+          {/* Shared jump nav, stacked just below the sticky view tab bar
+              (top-14, lower z so the tab bar wins the overlap). It scroll-spies
+              the sections below. ponytail: top-14 assumes the 3 tab chips stay
+              one row (true ≥360px); they'd wrap on a very narrow phone. */}
+          <SectionNav sections={statewideSections} sticky="sticky top-14 z-10" />
 
           <div id="by-race" className="scroll-mt-28">
-            <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-              Every tracked ad reaching Wisconsin, race by race
-            </p>
-            <div className="mt-2">
-              <AdsOverview overview={overview} />
-            </div>
+            <AdsOverview overview={overview} />
           </div>
 
           {tvSponsors.length > 0 && (

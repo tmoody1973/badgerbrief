@@ -148,14 +148,15 @@ function ForAgainstChart({
         </p>
       ) : (
         <>
+          {/* Legend order mirrors the chart axis: attacks grow left, support right. */}
           <div className="mt-1 flex items-center gap-4 font-mono text-xs">
-            <span className="flex items-center gap-1">
-              <span className="inline-block h-3 w-3 border-2 border-border bg-accent" />
-              Supports
-            </span>
             <span className="flex items-center gap-1">
               <span className="inline-block h-3 w-3 border-2 border-border bg-primary" />
               Attacks
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-3 w-3 border-2 border-border bg-accent" />
+              Supports
             </span>
           </div>
           <ul className="mt-3 space-y-2">
