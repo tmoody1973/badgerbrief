@@ -8,7 +8,31 @@ describe("openfecEnrich parsers", () => {
   test("totals pull receipts/disbursements + coverage date", () => {
     expect(parseCommitteeTotals(totals)).toEqual({
       totalRaised: 6155000, totalSpent: 5400000, financialsAsOf: "2026-06-30",
+      peakReceipts: 6155000,
     });
+  });
+  test("totals expose peak receipts across cycles, display figures stay current-cycle", () => {
+    // A hybrid PAC quiet this cycle but large last cycle (The Justice Project
+    // shape): display the current cycle, but let the decoy guard see the peak.
+    const multi = { results: [
+      { cycle: 2026, receipts: 226731.44, disbursements: 226393.4, coverage_end_date: "2026-06-30" },
+      { cycle: 2024, receipts: 4617845.73, disbursements: 4589924.31, coverage_end_date: "2024-12-31" },
+    ] };
+    expect(parseCommitteeTotals(multi)).toEqual({
+      totalRaised: 226731.44, totalSpent: 226393.4,
+      financialsAsOf: "2026-06-30", peakReceipts: 4617845.73,
+    });
+  });
+  test("a real committee quiet this cycle is not flagged as a decoy", () => {
+    // Regression: the guard is documented as "spend vs what a committee EVER
+    // raised" but was fed one cycle, so C00873513 ($4.6M in 2024) tripped it.
+    const multi = { results: [
+      { cycle: 2026, receipts: 226731.44 },
+      { cycle: 2024, receipts: 4617845.73 },
+    ] };
+    const { totalRaised, peakReceipts } = parseCommitteeTotals(multi);
+    expect(isFecMatchImplausible(1_592_500, totalRaised)).toBe(true); // old behaviour
+    expect(isFecMatchImplausible(1_592_500, peakReceipts)).toBe(false); // fixed
   });
   test("top donors sorted desc, capped", () => {
     expect(parseTopDonors(scheduleA, 1)).toEqual([{ name: "Jane Q. Donor", amount: 250000 }]);

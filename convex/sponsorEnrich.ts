@@ -48,11 +48,12 @@ export const enrichSponsorCore = internalAction({
         internal.sponsors.trackedSpendForKey,
         { key },
       );
-      if (isFecMatchImplausible(trackedAdSpend, facts.totalRaised)) {
+      // Judge against the committee's largest cycle, not just the current one:
+      // a real committee can be quiet this cycle and still be the true sponsor.
+      const scale = facts.peakReceipts ?? facts.totalRaised;
+      if (isFecMatchImplausible(trackedAdSpend, scale)) {
         const recv =
-          facts.totalRaised !== undefined
-            ? ` (~$${Math.round(facts.totalRaised).toLocaleString()})`
-            : "";
+          scale !== undefined ? ` (~$${Math.round(scale).toLocaleString()})` : "";
         factsFlag = `Held auto FEC match ${committeeId}: tracked ad spend (~$${Math.round(trackedAdSpend).toLocaleString()}) far exceeds its receipts${recv} — likely a decoy committee. Verify the correct committee, or treat as dark money.`;
         factsToUse = null;
         committeeId = undefined; // don't store the decoy committee id

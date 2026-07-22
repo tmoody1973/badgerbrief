@@ -6,18 +6,30 @@ export type OpenFecFacts = {
   topDonors?: { name: string; amount: number }[];
   independentExpenditures?: { candidate: string; office?: string; supportOppose: "support" | "oppose"; amount: number }[];
   financialsAsOf?: string; sources: { label: string; url: string }[];
+  /** Largest single-cycle receipts across the cycles fetched. Not displayed —
+   * the decoy guard tests tracked spend against what a committee EVER raised. */
+  peakReceipts?: number;
 };
 
 const OPENFEC = "https://api.open.fec.gov/v1";
 const key = () => process.env.OPENFEC_API_KEY ?? "DEMO_KEY";
 
-export function parseCommitteeTotals(json: unknown) {
-  const r = (json as { results?: any[] }).results?.[0];
+export function parseCommitteeTotals(json: unknown): Pick<
+  OpenFecFacts,
+  "totalRaised" | "totalSpent" | "financialsAsOf" | "peakReceipts"
+> {
+  const rows = (json as { results?: any[] }).results ?? [];
+  const r = rows[0];
   if (!r) return {};
+  // Displayed figures are the CURRENT cycle (what voters should see for "this
+  // election's money"); peakReceipts is the committee's largest cycle across
+  // the rows fetched — the decoy guard needs scale-ever, not scale-this-cycle.
+  const receipts = rows.map((x) => x.receipts).filter((n) => typeof n === "number");
   return {
     totalRaised: typeof r.receipts === "number" ? r.receipts : undefined,
     totalSpent: typeof r.disbursements === "number" ? r.disbursements : undefined,
     financialsAsOf: typeof r.coverage_end_date === "string" ? r.coverage_end_date.slice(0, 10) : undefined,
+    ...(receipts.length ? { peakReceipts: Math.max(...receipts) } : {}),
   };
 }
 
@@ -100,7 +112,7 @@ export async function fetchOpenFecFacts(fecCommitteeId: string): Promise<OpenFec
   const k = key();
   const [committee, totals, scheduleA, scheduleE] = await Promise.all([
     getJson(`${OPENFEC}/committee/${encodeURIComponent(fecCommitteeId)}/?api_key=${k}`),
-    getJson(`${OPENFEC}/committee/${encodeURIComponent(fecCommitteeId)}/totals/?api_key=${k}&per_page=1&sort=-cycle`),
+    getJson(`${OPENFEC}/committee/${encodeURIComponent(fecCommitteeId)}/totals/?api_key=${k}&per_page=3&sort=-cycle`),
     getJson(`${OPENFEC}/schedules/schedule_a/?committee_id=${fecCommitteeId}&api_key=${k}&per_page=10&sort=-contribution_receipt_amount`),
     getJson(`${OPENFEC}/schedules/schedule_e/?committee_id=${fecCommitteeId}&api_key=${k}&per_page=100&sort=-expenditure_amount`),
   ]);
