@@ -106,9 +106,11 @@ export function AdsAnalytics({
   );
 }
 
-/** Diverging for-vs-against spend per candidate — attacks grow left (red),
- * support grows right (green) from a shared center. Polarity is encoded by
- * side (not color alone), with a legend and per-side value labels. */
+/** Diverging for-vs-against spend per candidate — attacks grow left (cardinal),
+ * support grows right (lake) from a shared center. The hue encodes the *action*
+ * (attack vs support), identically for every candidate, so no person or party is
+ * ever colored — polarity is also encoded by side, with a legend and per-side
+ * value labels. Cardinal/lake (not red/green) keeps it colorblind-safe. */
 function ForAgainstChart({
   ads,
   names,
@@ -147,11 +149,11 @@ function ForAgainstChart({
         <>
           <div className="mt-1 flex items-center gap-4 font-mono text-xs">
             <span className="flex items-center gap-1">
-              <span className="inline-block h-3 w-3 border-2 border-border bg-success" />
+              <span className="inline-block h-3 w-3 border-2 border-border bg-accent" />
               Supports
             </span>
             <span className="flex items-center gap-1">
-              <span className="inline-block h-3 w-3 border-2 border-border bg-destructive" />
+              <span className="inline-block h-3 w-3 border-2 border-border bg-primary" />
               Attacks
             </span>
           </div>
@@ -172,14 +174,14 @@ function ForAgainstChart({
                   <span className="flex flex-1 items-center">
                     <span className="flex w-1/2 justify-end">
                       <span
-                        className="block h-4 rounded-l-[3px] bg-destructive"
+                        className="block h-4 bg-primary"
                         style={{ width: `${(r.oppose / max) * 100}%` }}
                       />
                     </span>
                     <span className="h-4 w-px bg-border" />
                     <span className="flex w-1/2 justify-start">
                       <span
-                        className="block h-4 rounded-r-[3px] bg-success"
+                        className="block h-4 bg-accent"
                         style={{ width: `${(r.support / max) * 100}%` }}
                       />
                     </span>
@@ -230,7 +232,7 @@ function BarList({
             </span>
             <span className="h-5 flex-1 border-2 border-border bg-card">
               <span
-                className="block h-full rounded-r-[3px] bg-primary"
+                className="block h-full bg-accent"
                 style={{ width: `${Math.max((r.value / max) * 100, 2)}%` }}
               />
             </span>
