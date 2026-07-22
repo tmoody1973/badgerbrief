@@ -5,6 +5,8 @@ import type { Doc } from "../../../convex/_generated/dataModel";
 
 type StatusFilter = "all" | "active" | "inactive";
 type MatchFilter = "all" | "matched" | "unverified";
+type SortKey = "spend" | "sponsor" | "platform";
+type SortDir = "asc" | "desc";
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "All" },
@@ -17,21 +19,40 @@ const MATCH_OPTIONS: { value: MatchFilter; label: string }[] = [
   { value: "unverified", label: "Unverified" },
 ];
 
-/** Client-side search + filter over synced ads. Sorted by spend (biggest
- * spenders lead — the newsworthy end). */
+const platformLabel = (p: string) =>
+  p === "meta" ? "Meta" : p === "google" ? "Google" : p === "tv" ? "TV" : p;
+
+function money(n: number | undefined): string | null {
+  if (n === undefined) return null;
+  return "$" + n.toLocaleString("en-US");
+}
+function spendRange(ad: Doc<"ads">): string {
+  const lo = money(ad.spendLower);
+  const hi = money(ad.spendUpper);
+  if (!lo && !hi) return "—";
+  if (lo && !hi) return `${lo}+`;
+  if (!lo && hi) return `up to ${hi}`;
+  return lo === hi ? lo! : `${lo}–${hi}`;
+}
+
+/**
+ * The full tracked-ad record as a dense, sortable table — built to scan
+ * hundreds of ads, not a card gallery. Search + status/attribution filters
+ * narrow the set; column headers sort it. Scrolls horizontally on small screens
+ * inside its own container so the page body never scrolls sideways.
+ */
 export function AdsBrowser({ ads }: { ads: Doc<"ads">[] }) {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [match, setMatch] = useState<MatchFilter>("all");
-
-  const sorted = useMemo(
-    () => [...ads].sort((a, b) => (b.spendUpper ?? 0) - (a.spendUpper ?? 0)),
-    [ads],
-  );
+  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
+    key: "spend",
+    dir: "desc",
+  });
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return sorted.filter((a) => {
+    const rows = ads.filter((a) => {
       if (status !== "all" && (a.status ?? "") !== status) return false;
       if (match === "matched" && !a.candidateSlug) return false;
       if (match === "unverified" && a.candidateSlug) return false;
@@ -44,10 +65,25 @@ export function AdsBrowser({ ads }: { ads: Doc<"ads">[] }) {
         return false;
       return true;
     });
-  }, [sorted, q, status, match]);
+    const dir = sort.dir === "asc" ? 1 : -1;
+    return rows.sort((a, b) => {
+      if (sort.key === "spend")
+        return dir * ((a.spendUpper ?? 0) - (b.spendUpper ?? 0));
+      if (sort.key === "platform")
+        return dir * a.platform.localeCompare(b.platform);
+      return dir * a.pageOrCommittee.localeCompare(b.pageOrCommittee);
+    });
+  }, [ads, q, status, match, sort]);
 
-  const CAP = 120;
+  const CAP = 150;
   const shown = filtered.slice(0, CAP);
+
+  const toggleSort = (key: SortKey) =>
+    setSort((s) =>
+      s.key === key
+        ? { key, dir: s.dir === "asc" ? "desc" : "asc" }
+        : { key, dir: key === "spend" ? "desc" : "asc" },
+    );
 
   return (
     <div>
@@ -63,18 +99,8 @@ export function AdsBrowser({ ads }: { ads: Doc<"ads">[] }) {
       </label>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
-        <PillGroup
-          label="Status"
-          value={status}
-          options={STATUS_OPTIONS}
-          onChange={setStatus}
-        />
-        <PillGroup
-          label="Attribution"
-          value={match}
-          options={MATCH_OPTIONS}
-          onChange={setMatch}
-        />
+        <PillGroup label="Status" value={status} options={STATUS_OPTIONS} onChange={setStatus} />
+        <PillGroup label="Attribution" value={match} options={MATCH_OPTIONS} onChange={setMatch} />
       </div>
 
       <p className="mt-3 font-mono text-xs text-muted-foreground">
@@ -83,18 +109,108 @@ export function AdsBrowser({ ads }: { ads: Doc<"ads">[] }) {
         {filtered.length > CAP ? " — refine your search to see more" : ""}
       </p>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {shown.map((ad) => (
-          <AdCard key={ad._id} ad={ad} />
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <p className="mt-8 border-2 border-dashed border-border p-6 text-center text-muted-foreground">
-          No ads match “{q}”.
+      {filtered.length === 0 ? (
+        <p className="mt-4 border-2 border-dashed border-border p-6 text-center text-muted-foreground">
+          No ads match &ldquo;{q}&rdquo;.
         </p>
+      ) : (
+        <div className="mt-4 overflow-x-auto border-2 border-border shadow-[var(--shadow-brutal)]">
+          <table className="w-full min-w-[46rem] border-collapse text-sm">
+            <thead>
+              <tr className="border-b-2 border-border bg-card text-left">
+                <Th label="Sponsor" sortKey="sponsor" sort={sort} onSort={toggleSort} />
+                <Th label="Platform" sortKey="platform" sort={sort} onSort={toggleSort} />
+                <Th label="Spend" sortKey="spend" sort={sort} onSort={toggleSort} align="right" />
+                <th className="px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Attribution
+                </th>
+                <th className="px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Ad
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((ad) => (
+                <tr
+                  key={ad._id}
+                  className="border-b-2 border-border last:border-b-0 hover:bg-secondary/40"
+                >
+                  <td className="px-3 py-2 align-top">
+                    <span className="font-bold">{ad.pageOrCommittee}</span>
+                    {ad.fundingEntity && ad.fundingEntity !== ad.pageOrCommittee && (
+                      <span className="block text-xs text-muted-foreground">
+                        Paid for by {ad.fundingEntity}
+                      </span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 align-top font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+                    {platformLabel(ad.platform)}
+                    {ad.status ? ` · ${ad.status}` : ""}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-right align-top font-mono font-bold">
+                    {spendRange(ad)}
+                  </td>
+                  <td className="px-3 py-2 align-top">
+                    {ad.candidateSlug ? (
+                      <span className="border-2 border-border bg-secondary px-1.5 py-0.5 text-xs font-bold">
+                        {ad.candidateSlug}
+                      </span>
+                    ) : (
+                      <span className="border-2 border-border bg-warning px-1.5 py-0.5 text-xs font-bold text-foreground">
+                        Unverified
+                      </span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 align-top">
+                    {ad.snapshotUrl && (
+                      <a
+                        href={ad.snapshotUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-xs underline decoration-2 underline-offset-2"
+                      >
+                        View ↗
+                      </a>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
+  );
+}
+
+function Th({
+  label,
+  sortKey,
+  sort,
+  onSort,
+  align = "left",
+}: {
+  label: string;
+  sortKey: SortKey;
+  sort: { key: SortKey; dir: SortDir };
+  onSort: (k: SortKey) => void;
+  align?: "left" | "right";
+}) {
+  const active = sort.key === sortKey;
+  return (
+    <th className={`px-3 py-2 ${align === "right" ? "text-right" : "text-left"}`}>
+      <button
+        type="button"
+        onClick={() => onSort(sortKey)}
+        aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}
+        className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground"
+      >
+        {label}
+        <span aria-hidden className={active ? "text-foreground" : "opacity-30"}>
+          {active ? (sort.dir === "asc" ? "▲" : "▼") : "▼"}
+        </span>
+      </button>
+    </th>
   );
 }
 
@@ -128,93 +244,6 @@ function PillGroup<T extends string>({
             {o.label}
           </button>
         ))}
-      </div>
-    </div>
-  );
-}
-
-function money(n: number | undefined): string | null {
-  if (n === undefined) return null;
-  return "$" + n.toLocaleString("en-US");
-}
-
-function spendRange(ad: Doc<"ads">): string {
-  const lo = money(ad.spendLower);
-  const hi = money(ad.spendUpper);
-  if (!lo && !hi) return "Spend not disclosed";
-  if (lo && !hi) return `${lo}+`;
-  if (!lo && hi) return `up to ${hi}`;
-  return lo === hi ? lo! : `${lo}–${hi}`;
-}
-
-function impressionRange(ad: Doc<"ads">): string | null {
-  const lo = ad.impressionsLower;
-  const hi = ad.impressionsUpper;
-  if (lo === undefined && hi === undefined) return null;
-  const f = (n: number) => n.toLocaleString("en-US");
-  if (lo !== undefined && hi !== undefined)
-    return lo === hi ? f(lo) : `${f(lo)}–${f(hi)}`;
-  if (hi !== undefined) return `up to ${f(hi)}`;
-  return `${f(lo!)}+`;
-}
-
-function AdCard({ ad }: { ad: Doc<"ads"> }) {
-  const impressions = impressionRange(ad);
-  return (
-    <div className="flex flex-col border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
-      <div className="flex items-start justify-between gap-2">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-          {ad.platform === "meta" ? "Meta" : "Google"} · {ad.status ?? "—"}
-        </p>
-      </div>
-
-      <h3 className="font-display mt-1 text-base leading-tight">
-        {ad.pageOrCommittee}
-      </h3>
-
-      {ad.fundingEntity && ad.fundingEntity !== ad.pageOrCommittee && (
-        <p className="mt-1 text-xs text-muted-foreground">
-          Paid for by {ad.fundingEntity}
-        </p>
-      )}
-
-      {ad.creativeText && (
-        <p className="mt-2 line-clamp-4 text-sm">{ad.creativeText}</p>
-      )}
-
-      <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs">
-        <div>
-          <dt className="text-muted-foreground">Spend</dt>
-          <dd className="font-bold">{spendRange(ad)}</dd>
-        </div>
-        {impressions && (
-          <div>
-            <dt className="text-muted-foreground">Impressions</dt>
-            <dd className="font-bold">{impressions}</dd>
-          </div>
-        )}
-      </dl>
-
-      <div className="mt-auto flex items-center gap-2 pt-3">
-        {ad.candidateSlug ? (
-          <span className="border-2 border-border bg-secondary px-2 py-0.5 text-xs font-bold">
-            {ad.candidateSlug}
-          </span>
-        ) : (
-          <span className="border-2 border-border bg-warning px-2 py-0.5 text-xs font-bold text-foreground">
-            Unverified sponsor
-          </span>
-        )}
-        {ad.snapshotUrl && (
-          <a
-            href={ad.snapshotUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-auto font-mono text-xs underline decoration-2 underline-offset-2"
-          >
-            View ad ↗
-          </a>
-        )}
       </div>
     </div>
   );
