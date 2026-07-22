@@ -325,6 +325,16 @@ export const sponsorScorecard = query({
   },
 });
 
+/** All ads for a sponsor, sorted by spend descending. */
+export const sponsorAds = query({
+  args: { key: v.string() },
+  handler: async (ctx, { key }) => {
+    const ads = await ctx.db.query("ads").collect();
+    return ads.filter((a) => normalizeSponsorKey(a.pageOrCommittee) === key)
+      .sort((a, b) => (b.spendUpper ?? 0) - (a.spendUpper ?? 0));
+  },
+});
+
 type PublicProfile = {
   displayName: string;
   kind?: string;
