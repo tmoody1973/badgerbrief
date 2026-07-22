@@ -18,21 +18,21 @@ typography:
     fontFamily: "Archivo Black, Impact, sans-serif"
     fontSize: "clamp(2.25rem, 6vw, 3rem)"
     fontWeight: 400
-    lineHeight: 1
-    letterSpacing: "-0.02em"
+    lineHeight: 1.05
+    letterSpacing: "normal"
   headline:
     fontFamily: "Archivo Black, Impact, sans-serif"
     fontSize: "1.5rem"
     fontWeight: 400
-    lineHeight: 1.1
+    lineHeight: 1.33
   body:
     fontFamily: "Public Sans, Arial, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
-    lineHeight: 1.6
+    lineHeight: 1.5
   label:
     fontFamily: "Geist Mono, monospace"
-    fontSize: "0.6875rem"
+    fontSize: "0.75rem"
     fontWeight: 700
     letterSpacing: "0.1em"
 rounded:
@@ -119,11 +119,12 @@ A Wisconsin civic palette: a warm cream ground, charcoal ink, and Badger cardina
 **Character:** A hard contrast pairing — Archivo Black is a single-weight, ultra-heavy grotesque that gives headlines masthead authority; Public Sans is a neutral, highly legible civic workhorse (it descends from the USWDS type family); Geist Mono supplies the "index stamp" labels. The three don't compete because they sit on different axes (heavy display / neutral sans / mono).
 
 ### Hierarchy
-- **Display** (Archivo Black, `clamp(2.25rem, 6vw, 3rem)`, line-height 1, tracking -0.02em): page titles and race/section mastheads. Kept under a ~3rem ceiling — bold, not shouting.
-- **Headline** (Archivo Black, ~1.5rem): section headers within a page.
+_(Values verified against the rendered site.)_
+- **Display** (Archivo Black, renders ~36px / `clamp(2.25rem, 6vw, 3rem)`, line-height ~1.05, tracking **normal**): page titles and race/section mastheads. The black weight carries the emphasis — do **not** apply negative tracking to this face; the letters would touch. Kept under a ~3rem ceiling — bold, not shouting.
+- **Headline** (Archivo Black, ~24px / 1.5rem): section headers within a page.
 - **Title** (Public Sans bold, ~1.125rem): card and candidate names.
-- **Body** (Public Sans, 1rem, line-height 1.6): all prose; cap measure at 65–75ch.
-- **Label** (Geist Mono, ~0.69rem, weight 700, tracking 0.1em, UPPERCASE): metadata stamps — station · market · flight, source lines, counts, filter pills.
+- **Body** (Public Sans, 16px, line-height 1.5): all prose; cap measure at 65–75ch.
+- **Label** (Geist Mono, 12px, weight 700, tracking 0.1em ≈ 1.2px, UPPERCASE): metadata stamps — station · market · flight, source lines, counts, filter pills.
 
 ### Named Rules
 **The Stamp Rule.** Structured metadata (dates, amounts, stations, statuses, source attributions) is set in uppercase Geist Mono at small size — it reads as a record stamp, distinct from prose, and signals "this is data, transcribed." Prose is always Public Sans; the two never blur.
@@ -150,6 +151,12 @@ The system is flat-with-a-block: surfaces have no soft ambient shadow, only a si
 
 ### Labels / Pills / Filters
 - Uppercase Geist Mono, small, `text-muted-foreground`. Filter pills are bordered mini-blocks that fill `bg-primary text-primary-foreground` when active (a `-ml-0.5` overlap makes them read as one segmented control). Count/stamp chips are `border-2` with a `bg-background` fill.
+
+### Inputs / Forms
+- Text, search, and `<select>` inputs are flat blocks: `2px` charcoal border, zero radius, `bg-card`, `px-2 py-1.5`, mono or sans depending on content (mono for IDs/search, sans for prose). No inner shadow, no rounding. Placeholder text must clear 4.5:1 — never the default light gray. Focus shows the cardinal ring instantly (never animate the ring).
+
+### Section navigation
+- Long pages (race, brief) use a **sticky `SectionNav`**: a horizontal row of bordered mono chips that jump to page sections, pinned via `sticky top-0 z-10` with an opaque `bg-card` so content scrolls under it cleanly. Active/available sections only; chips read as the same segmented-control language as filters. Anchor targets set `scroll-mt-16` so the sticky bar never covers the heading.
 
 ### Links to source
 - Every record links out to its source (FCC order, FEC record, article) as a small bordered mono "↗" chip (`FCC order ↗`) or an underlined mono link (`decoration-2 underline-offset-2`). Provenance is always one click away.
