@@ -50,13 +50,13 @@ export function CandidateAds({
 
       <div className="mt-3 flex flex-wrap gap-2 font-mono text-xs font-bold">
         {support.length > 0 && (
-          <span className="border-2 border-border bg-success px-2 py-1 text-white">
+          <span className="border-2 border-border bg-accent px-2 py-1 text-accent-foreground">
             Supporting ~{usd(supportSpend)} · {support.length} ad
             {support.length === 1 ? "" : "s"}
           </span>
         )}
         {attack.length > 0 && (
-          <span className="border-2 border-border bg-destructive px-2 py-1 text-white">
+          <span className="border-2 border-border bg-primary px-2 py-1 text-primary-foreground">
             Attacking ~{usd(attackSpend)} · {attack.length} ad
             {attack.length === 1 ? "" : "s"}
           </span>
@@ -71,8 +71,10 @@ export function CandidateAds({
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span
-                className={`border-2 border-border px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-white ${
-                  ad.stance === "oppose" ? "bg-destructive" : "bg-success"
+                className={`border-2 border-border px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest ${
+                  ad.stance === "oppose"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-accent text-accent-foreground"
                 }`}
               >
                 {ad.stance === "oppose" ? "Attack" : "Support"}
