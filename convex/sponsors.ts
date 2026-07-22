@@ -19,7 +19,7 @@ import {
 /** Who is behind an outside-group ad. Reviewer-assisted: FEC facts + a
  * Perplexity-sourced one-liner, human-approved before it ever shows publicly. */
 
-async function requireAdmin(ctx: QueryCtx | MutationCtx | ActionCtx) {
+export async function requireAdmin(ctx: QueryCtx | MutationCtx | ActionCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) throw new Error("sponsors require authentication");
   const role = (identity as { metadata?: { role?: string } }).metadata?.role;
@@ -215,6 +215,17 @@ export const sponsorForName = query({
       .withIndex("by_key", (q) => q.eq("key", normalizeSponsorKey(advertiser)))
       .unique();
   },
+});
+
+/** Internal: the stored sponsor row for a key (unauthenticated enrichment reads
+ * the prior fecCommitteeId so a name-search miss doesn't lose it). */
+export const sponsorRowByKey = internalQuery({
+  args: { key: v.string() },
+  handler: async (ctx, { key }) =>
+    ctx.db
+      .query("sponsors")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .unique(),
 });
 
 /** Public: approved sponsor profiles for a set of sponsor names (race pages). */

@@ -27,10 +27,33 @@ export function buildSourceUrls(name: string): string[] {
   ];
 }
 
+const NAME_STOPWORDS = new Set(["for", "the", "and", "committee", "pac", "inc", "fund"]);
+
+/** Significant tokens of a sponsor name: lowercased words length >= 4, minus
+ * generic org stopwords. Used to reject wrong-entity extractions. */
+function significantTokens(name: string): string[] {
+  return name
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((t) => t.length >= 4 && !NAME_STOPWORDS.has(t));
+}
+
 export function mergeNarrative(
   results: { url: string; json: { narrative?: string; leadership?: { name: string; role: string }[] } | null }[],
+  name: string,
 ): SponsorNarrative {
-  const live = results.filter((r) => r.json);
+  // Search pages (ProPublica/OpenSecrets) can extract the wrong entity. Require
+  // the narrative to share a significant token with the sponsor name, else drop
+  // the whole result (its leadership too). No significant tokens → skip guard.
+  const tokens = significantTokens(name);
+  const relevant = (r: { json: { narrative?: string } | null }) => {
+    if (!r.json) return false;
+    if (!tokens.length) return true;
+    const narrative = r.json.narrative?.toLowerCase();
+    if (!narrative) return false;
+    return tokens.some((t) => narrative.includes(t));
+  };
+  const live = results.filter(relevant);
   const narrative = live.map((r) => r.json!.narrative).find((n) => n && n.trim());
   const leadership: { name: string; role: string }[] = [];
   const seen = new Set<string>();
@@ -69,5 +92,5 @@ export async function fetchSponsorNarrative(name: string): Promise<SponsorNarrat
       }
     }),
   );
-  return mergeNarrative(results);
+  return mergeNarrative(results, name);
 }

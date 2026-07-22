@@ -1,19 +1,29 @@
 import { v } from "convex/values";
 import { action, internalAction } from "./_generated/server";
-import { api, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { normalizeSponsorKey } from "./lib/sponsors";
 import { fetchOpenFecFacts } from "./lib/openfecEnrich";
 import { fetchSponsorNarrative } from "./lib/firecrawlSponsor";
-import { perplexityDescribe } from "./sponsors";
+import { perplexityDescribe, requireAdmin } from "./sponsors";
 
 /** Full enrichment for one sponsor: OpenFEC exact facts (auto-published) +
  * Firecrawl narrative (draft), falling back to Perplexity when Firecrawl finds
- * no narrative. Resolves the committee by id or name search. */
-export const enrichSponsor = action({
+ * no narrative. Resolves the committee by id or name search.
+ *
+ * INTERNAL: spends paid Firecrawl/Perplexity and writes a public `sponsors`
+ * row, so it must never be reachable unauthenticated. Callers are the
+ * admin-gated `enrichSponsor` action and the `enrichOutsideGroups` cron. */
+export const enrichSponsorCore = internalAction({
   args: { advertiser: v.string(), fecCommitteeId: v.optional(v.string()) },
   handler: async (ctx, { advertiser, fecCommitteeId }): Promise<{ key: string }> => {
     const key = normalizeSponsorKey(advertiser);
     let committeeId = fecCommitteeId;
+    if (!committeeId) {
+      // Reseed from the prior stored committee so a transient name-search miss
+      // this run doesn't drop a committee we already resolved.
+      const existing = await ctx.runQuery(internal.sponsors.sponsorRowByKey, { key });
+      committeeId = existing?.fecCommitteeId;
+    }
     if (!committeeId) {
       const matches: { fecCommitteeId: string }[] = await ctx.runAction(
         internal.sponsorEnrich.searchCommittees,
@@ -39,7 +49,9 @@ export const enrichSponsor = action({
     await ctx.runMutation(internal.sponsors.upsertEnrichment, {
       key, displayName: advertiser,
       kind: facts?.kind, lean: facts?.lean, fecCommitteeId: committeeId,
-      disclosesDonors: facts ? true : false,
+      // A committee this run implies donor disclosure; a miss stays `undefined`
+      // so upsertEnrichment preserves a prior value (never flips true→false).
+      disclosesDonors: committeeId ? true : undefined,
       totalRaised: facts?.totalRaised, totalSpent: facts?.totalSpent,
       topDonors: facts?.topDonors, independentExpenditures: facts?.independentExpenditures,
       financialsAsOf: facts?.financialsAsOf,
@@ -47,6 +59,16 @@ export const enrichSponsor = action({
       sources,
     });
     return { key };
+  },
+});
+
+/** Public entry point for the admin resolver UI — admin-gated, then delegates
+ * to the internal core. */
+export const enrichSponsor = action({
+  args: { advertiser: v.string(), fecCommitteeId: v.optional(v.string()) },
+  handler: async (ctx, args): Promise<{ key: string }> => {
+    await requireAdmin(ctx);
+    return await ctx.runAction(internal.sponsorEnrich.enrichSponsorCore, args);
   },
 });
 
@@ -60,7 +82,7 @@ export const enrichOutsideGroups = internalAction({
       { limit, staleDays },
     );
     for (const t of targets) {
-      await ctx.runAction(api.sponsorEnrich.enrichSponsor, { advertiser: t.name });
+      await ctx.runAction(internal.sponsorEnrich.enrichSponsorCore, { advertiser: t.name });
     }
     return { enriched: targets.length };
   },

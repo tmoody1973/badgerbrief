@@ -2,6 +2,7 @@ import Link from "next/link";
 
 type Profile = Awaited<ReturnType<typeof import("@/lib/data").getSponsorProfile>>;
 type Scorecard = Awaited<ReturnType<typeof import("@/lib/data").getSponsorScorecard>>;
+type Ads = Awaited<ReturnType<typeof import("@/lib/data").getSponsorAds>>;
 
 function usd(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -22,8 +23,8 @@ function leanLabel(lean?: string): string | null {
 }
 
 export function SponsorProfile({
-  profile, scorecard, names,
-}: { profile: NonNullable<Profile>; scorecard: Scorecard; names: Record<string, string> }) {
+  profile, scorecard, ads, names,
+}: { profile: NonNullable<Profile>; scorecard: Scorecard; ads: Ads; names: Record<string, string> }) {
   return (
     <div className="space-y-8">
       <header>
@@ -108,7 +109,7 @@ export function SponsorProfile({
               </div>
               {profile.independentExpenditures && profile.independentExpenditures.length > 0 && (
                 <div>
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Nationally (FEC Schedule E)</p>
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Largest national expenditures (FEC)</p>
                   <ul className="mt-2 space-y-1 text-sm">
                     {profile.independentExpenditures.map((ie) => (
                       <li key={`${ie.candidate}-${ie.supportOppose}`}>
@@ -124,6 +125,33 @@ export function SponsorProfile({
           )}
         </div>
       </section>
+
+      {ads.length > 0 && (
+        <section>
+          <h2 className="font-display text-xl">Their tracked ads</h2>
+          <div className="mt-3 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
+            <ul className="space-y-1 text-sm">
+              {ads.map((ad) => {
+                const link = ad.snapshotUrl ?? ad.creativeLinkUrl ?? ad.fccDocUrl;
+                const low = ad.spendLower ?? 0;
+                const high = ad.spendUpper ?? 0;
+                const spend = high > low ? `${usd(low)}–${usd(high)}` : high > 0 ? usd(high) : "—";
+                return (
+                  <li key={ad._id} className="flex justify-between border-b-2 border-dashed border-border py-1">
+                    <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{ad.platform}</span>
+                    <span className="flex items-center gap-3">
+                      <span className="font-mono font-bold">{spend}</span>
+                      {link && (
+                        <a href={link} target="_blank" rel="noopener noreferrer" className="underline decoration-2 underline-offset-2">View ad ↗</a>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {profile.sources.length > 0 && (
         <p className="font-mono text-[11px] text-muted-foreground">
