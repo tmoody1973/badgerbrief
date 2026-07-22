@@ -40,7 +40,10 @@
   --card: #221e17; /* elevated warm surface */
   --card-foreground: #f5efe2;
   --primary: #e24a50; /* cardinal, brightened for dark */
-  --primary-foreground: #ffffff;
+  --primary-foreground: #17140f; /* dark ink, not white: on the brightened
+       cardinal, white is only 3.94:1 (fails AA for small chip/badge text);
+       dark ink is 4.66:1 and matches how --accent pairs with dark ink in dark
+       mode. Large primary buttons gain contrast too. Always used on bg-primary. */
   --secondary: #2c2718; /* dark warm (was butter) */
   --secondary-foreground: #f5efe2;
   --muted: #2a251d;
