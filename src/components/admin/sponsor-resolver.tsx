@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAction, useMutation, useQuery } from "convex/react";
+import { useState } from "react";
+import { useAction, useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/retroui/Button";
 import { asMessage, ErrorLine } from "./draft-row";
@@ -27,6 +27,7 @@ const money = (n: number) => `$${Math.round(n).toLocaleString()}`;
  */
 export function SponsorResolver({ advertiser }: { advertiser: string }) {
   const existing = useQuery(api.sponsors.sponsorForName, { advertiser });
+  const convex = useConvex();
   const enrich = useAction(api.sponsorEnrich.enrichSponsor);
   const save = useMutation(api.sponsors.saveSponsor);
   const saveNarrativeDraft = useMutation(api.sponsors.saveNarrativeDraft);
@@ -35,6 +36,9 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Guards re-seeding editable state from `existing` — only the first open
+  // (or a fresh save/enrich) should overwrite whatever the reviewer typed.
+  const [seeded, setSeeded] = useState(false);
 
   // Editable draft (manual facts, saved via saveSponsor).
   const [displayName, setDisplayName] = useState(advertiser);
@@ -48,21 +52,29 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
   // Narrative draft (saved via saveNarrativeDraft/approveNarrative).
   const [narrative, setNarrative] = useState("");
 
-  // Sync local edit state whenever the saved row changes (initial load, and
-  // after enrich/save/approve land through Convex's reactive query).
-  useEffect(() => {
-    if (!existing) return;
-    setDisplayName(existing.displayName);
-    if (existing.kind) setKind(existing.kind);
-    if (existing.lean) setLean(existing.lean);
-    if (existing.summary) setSummary(existing.summary);
-    if (existing.fecCommitteeId) setFecId(existing.fecCommitteeId);
-    if (existing.disclosesDonors !== undefined) {
-      setDisclosesDonors(existing.disclosesDonors);
-    }
-    if (existing.sources) setSources(existing.sources);
-    setNarrative(existing.narrative ?? "");
-  }, [existing]);
+  // Seed local edit state from a saved row — called only on explicit events
+  // (panel open, enrich success), never reactively. Reacting to Convex's live
+  // `existing` query here would revert unsaved reviewer edits every time a
+  // narrative save/approve/enrich re-pushes the same row.
+  function fillFrom(s: {
+    displayName?: string;
+    kind?: string;
+    lean?: Lean;
+    summary?: string;
+    fecCommitteeId?: string;
+    disclosesDonors?: boolean;
+    sources?: Source[];
+    narrative?: string;
+  }) {
+    if (s.displayName) setDisplayName(s.displayName);
+    if (s.kind) setKind(s.kind);
+    if (s.lean) setLean(s.lean);
+    if (s.summary) setSummary(s.summary);
+    if (s.fecCommitteeId) setFecId(s.fecCommitteeId);
+    if (s.disclosesDonors !== undefined) setDisclosesDonors(s.disclosesDonors);
+    if (s.sources) setSources(s.sources);
+    if (s.narrative) setNarrative(s.narrative);
+  }
 
   const key = existing?.key ?? normalizeKey(advertiser);
 
@@ -71,6 +83,13 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
     setError(null);
     try {
       await enrich({ advertiser, fecCommitteeId: fecId || undefined });
+      // enrichSponsor only returns { key }; re-fetch the row it just wrote so
+      // the narrative textarea + facts pick up the fresh draft, one-shot.
+      const fresh = await convex.query(api.sponsors.sponsorForName, { advertiser });
+      if (fresh) {
+        fillFrom(fresh);
+        setSeeded(true);
+      }
     } catch (e) {
       setError(asMessage(e));
     } finally {
@@ -92,6 +111,7 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
         disclosesDonors: disclosesDonors ?? undefined,
         sources,
       });
+      setSeeded(false);
       setOpen(false);
     } catch (e) {
       setError(asMessage(e));
@@ -113,9 +133,13 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
   }
 
   async function approve() {
+    if (!narrative.trim()) return;
     setBusy(true);
     setError(null);
     try {
+      // Persist exactly what's on screen first — approving must never publish
+      // a stale last-saved draft while the textarea shows unsaved edits.
+      await saveNarrativeDraft({ key, narrative, leadership: existing?.leadership });
       await approveNarrative({ key });
     } catch (e) {
       setError(asMessage(e));
@@ -134,7 +158,13 @@ export function SponsorResolver({ advertiser }: { advertiser: string }) {
     <div className="mt-2 border-t-2 border-dashed border-border pt-2">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setOpen((o) => !o);
+          if (existing && !seeded) {
+            fillFrom(existing);
+            setSeeded(true);
+          }
+        }}
         className="font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground"
       >
         {open ? "▾" : "▸"} Sponsor: {savedLabel}
