@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import {
   action,
   internalMutation,
+  internalQuery,
   mutation,
   query,
   ActionCtx,
@@ -274,5 +275,32 @@ export const upsertEnrichment = internalMutation({
     };
     if (existing) { await ctx.db.patch(existing._id, doc); return existing._id; }
     return ctx.db.insert("sponsors", doc);
+  },
+});
+
+/** Distinct sponsor names by tracked spend, newest-stale first — enrichment queue. */
+export const sponsorsToEnrich = internalQuery({
+  args: { limit: v.number(), staleDays: v.number() },
+  handler: async (ctx, { limit, staleDays }) => {
+    const ads = await ctx.db.query("ads").collect();
+    const spendBy = new Map<string, { name: string; spend: number }>();
+    for (const ad of ads) {
+      const name = ad.pageOrCommittee;
+      const key = normalizeSponsorKey(name);
+      const mid = ((ad.spendLower ?? 0) + (ad.spendUpper ?? 0)) / 2;
+      const cur = spendBy.get(key) ?? { name, spend: 0 };
+      cur.spend += mid; spendBy.set(key, cur);
+    }
+    const cutoff = Date.now() - staleDays * 86_400_000;
+    const out: { name: string; key: string }[] = [];
+    for (const [key, { name, spend }] of [...spendBy.entries()].sort((a, b) => b[1].spend - a[1].spend)) {
+      const existing = await ctx.db.query("sponsors").withIndex("by_key", (q) => q.eq("key", key)).unique();
+      if (existing?.enrichedAt && existing.enrichedAt > cutoff) continue;
+      // Skip candidate own-committees once enriched (kind set); include unknowns.
+      if (existing?.kind === "Candidate committee") continue;
+      out.push({ name, key });
+      if (out.length >= limit) break;
+    }
+    return out;
   },
 });

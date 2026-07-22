@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { action, internalAction } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { normalizeSponsorKey } from "./lib/sponsors";
 import { fetchOpenFecFacts } from "./lib/openfecEnrich";
 import { fetchSponsorNarrative } from "./lib/firecrawlSponsor";
@@ -47,6 +47,22 @@ export const enrichSponsor = action({
       sources,
     });
     return { key };
+  },
+});
+
+/** Monthly batch enrichment: works the highest-spend, stalest sponsors first
+ * (queue built by sponsors.sponsorsToEnrich). Driven by the cron in crons.ts. */
+export const enrichOutsideGroups = internalAction({
+  args: { limit: v.optional(v.number()), staleDays: v.optional(v.number()) },
+  handler: async (ctx, { limit = 25, staleDays = 30 }): Promise<{ enriched: number }> => {
+    const targets: { name: string; key: string }[] = await ctx.runQuery(
+      internal.sponsors.sponsorsToEnrich,
+      { limit, staleDays },
+    );
+    for (const t of targets) {
+      await ctx.runAction(api.sponsorEnrich.enrichSponsor, { advertiser: t.name });
+    }
+    return { enriched: targets.length };
   },
 });
 
