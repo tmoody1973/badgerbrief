@@ -27,6 +27,10 @@ const TABS: { view: View; label: string; href: string }[] = [
   { view: "browse", label: "Browse", href: "/ads?view=browse" },
 ];
 
+// Shared style for the Statewide in-page jump chips (mirrors SectionNav).
+const jumpChip =
+  "press border-2 border-border bg-card px-3 py-1 uppercase tracking-widest shadow-[var(--shadow-brutal)]";
+
 export default async function AdsPage({
   searchParams,
 }: {
@@ -59,27 +63,12 @@ export default async function AdsPage({
       <h1 className="font-display mt-2 text-4xl leading-none sm:text-5xl">
         Who&apos;s paying to reach you?
       </h1>
-      <p className="mt-4 max-w-2xl text-lg">
-        Every political ad we&apos;ve tracked running to Wisconsin voters — the
-        sponsor, who paid for it, and how much they spent. From the Meta Ad
-        Library, Google&apos;s political ads, and broadcast-TV filings in the FCC
-        public files.
-      </p>
-
-      <section className="mt-8 border-2 border-border bg-warning p-4 text-sm text-foreground shadow-[var(--shadow-brutal)]">
-        <p>
-          <strong>How to read this.</strong> Sponsor names come straight from the
-          Meta and Google ad libraries and FCC orders — a name is <em>not</em> an
-          endorsement, and attribution to a specific candidate only happens after
-          a human verifies the source. Treat the sponsor as reported by the
-          platform, not as our claim about who it really backs.
-        </p>
-      </section>
-
-      {/* Tab bar — URL-addressable (?view=), shareable, back-button native. */}
+      {/* Tab bar — lifted directly under the headline so it's reachable on every
+          load without scrolling past the intro. URL-addressable (?view=),
+          shareable, back-button native, and sticky once you scroll. */}
       <nav
         aria-label="Ad tracker views"
-        className="sticky top-0 z-20 -mx-4 mt-8 flex flex-wrap gap-2 border-b-2 border-border bg-background px-4 py-3"
+        className="sticky top-0 z-20 -mx-4 mt-6 flex flex-wrap gap-2 border-b-2 border-border bg-background px-4 py-3"
       >
         {TABS.map((t) => {
           const active = view === t.view;
@@ -100,6 +89,26 @@ export default async function AdsPage({
         })}
       </nav>
 
+      <p className="mt-4 max-w-2xl text-muted-foreground">
+        Every political ad we&apos;ve tracked reaching Wisconsin voters — the
+        sponsor, who paid for it, and how much they spent — from the Meta Ad
+        Library, Google&apos;s political ads, and broadcast-TV FCC filings.
+      </p>
+
+      {/* Trust note condensed to a details so it stops eating ~90px above the
+          fold on every tab; the full text is one tap away. */}
+      <details className="mt-3 border-2 border-border bg-warning text-foreground shadow-[var(--shadow-brutal)]">
+        <summary className="cursor-pointer px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest">
+          How to read this — a sponsor name is not an endorsement
+        </summary>
+        <p className="px-4 pb-4 text-sm">
+          Sponsor names come straight from the Meta and Google ad libraries and
+          FCC orders. Attribution to a specific candidate only happens after a
+          human verifies the source — treat the sponsor as reported by the
+          platform, not as our claim about who it really backs.
+        </p>
+      </details>
+
       {view === "your-ballot" && overview && (
         <div className="mt-6">
           <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
@@ -111,7 +120,22 @@ export default async function AdsPage({
 
       {view === "statewide" && overview && (
         <div className="mt-6 space-y-10">
-          <div>
+          {/* Jump nav — Statewide is long (race grid + TV tracker + analytics);
+              anchor chips skip between its parts. ponytail: non-sticky on
+              purpose — the tab bar above is the sticky one, and a second
+              top-0 sticky bar would fight it. Make it sticky-below-tabs later
+              if the scroll depth warrants it. */}
+          <nav aria-label="Jump to section" className="flex flex-wrap gap-2 font-mono text-xs font-bold">
+            <a href="#by-race" className={jumpChip}>By race</a>
+            {tvSponsors.length > 0 && (
+              <a href="#broadcast-tv" className={jumpChip}>Broadcast TV</a>
+            )}
+            {ads.length > 0 && (
+              <a href="#the-numbers" className={jumpChip}>The numbers</a>
+            )}
+          </nav>
+
+          <div id="by-race" className="scroll-mt-20">
             <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               Every tracked ad reaching Wisconsin, race by race
             </p>
@@ -120,10 +144,14 @@ export default async function AdsPage({
             </div>
           </div>
 
-          {tvSponsors.length > 0 && <TvAdTracker sponsors={tvSponsors} />}
+          {tvSponsors.length > 0 && (
+            <div id="broadcast-tv" className="scroll-mt-20">
+              <TvAdTracker sponsors={tvSponsors} />
+            </div>
+          )}
 
           {ads.length > 0 && (
-            <div>
+            <div id="the-numbers" className="scroll-mt-20">
               <h2 className="font-display text-2xl">The numbers behind it</h2>
               <div className="mt-4">
                 <AdsAnalytics ads={ads} candidateNames={candidateNames} />
