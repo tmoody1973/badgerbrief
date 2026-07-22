@@ -324,3 +324,37 @@ export const sponsorScorecard = query({
     return { supported: roll("support"), attacked: roll("oppose") };
   },
 });
+
+type PublicProfile = {
+  displayName: string;
+  kind?: string;
+  lean?: SponsorLean;
+  disclosesDonors?: boolean;
+  totalRaised?: number;
+  totalSpent?: number;
+  topDonors?: { name: string; amount: number }[];
+  independentExpenditures?: { candidate: string; office?: string; supportOppose: "support" | "oppose"; amount: number }[];
+  financialsAsOf?: string;
+  sources: { label: string; url: string }[];
+  narrative?: string;
+  leadership?: { name: string; role: string }[];
+};
+
+/** Public profile: returns exact facts always; narrative/leadership only when approved. */
+export const sponsorPublicProfile = query({
+  args: { key: v.string() },
+  handler: async (ctx, { key }): Promise<PublicProfile | null> => {
+    const s = await ctx.db.query("sponsors").withIndex("by_key", (q) => q.eq("key", key)).unique();
+    if (!s || !s.enrichedAt) return null;
+    const base: PublicProfile = {
+      displayName: s.displayName, kind: s.kind, lean: s.lean, disclosesDonors: s.disclosesDonors,
+      totalRaised: s.totalRaised, totalSpent: s.totalSpent, topDonors: s.topDonors,
+      independentExpenditures: s.independentExpenditures, financialsAsOf: s.financialsAsOf,
+      sources: s.sources,
+    };
+    if (s.narrativeStatus === "approved") {
+      return { ...base, narrative: s.narrative, leadership: s.leadership };
+    }
+    return base;
+  },
+});

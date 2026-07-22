@@ -66,3 +66,22 @@ describe("sponsorScorecard", () => {
     expect(r.supported).toEqual([{ candidateSlug: "rebecca-cooke", raceId: "R2", spend: 15000, adCount: 1 }]);
   });
 });
+
+describe("sponsorPublicProfile tiered gate", () => {
+  test("exact facts always public; narrative hidden until approved", async () => {
+    const t = convexTest(schema, modules);
+    const baseDoc = { key: "acme pac", displayName: "Acme PAC", disclosesDonors: true, totalRaised: 100, sources: [], reviewStatus: "draft" as const, updatedAt: 0, enrichedAt: 1, narrative: "Secret story.", leadership: [{ name: "A", role: "CEO" }] };
+    await t.run(async (ctx) => { await ctx.db.insert("sponsors", { ...baseDoc, narrativeStatus: "draft" as const }); });
+    let p = await t.query(api.sponsors.sponsorPublicProfile, { key: "acme pac" });
+    expect(p?.totalRaised).toBe(100);
+    expect(p?.narrative).toBeUndefined();
+    expect(p?.leadership).toBeUndefined();
+    await t.run(async (ctx) => {
+      const row = await ctx.db.query("sponsors").withIndex("by_key", (q) => q.eq("key", "acme pac")).unique();
+      await ctx.db.patch(row!._id, { narrativeStatus: "approved" });
+    });
+    p = await t.query(api.sponsors.sponsorPublicProfile, { key: "acme pac" });
+    expect(p?.narrative).toBe("Secret story.");
+    expect(p?.leadership).toEqual([{ name: "A", role: "CEO" }]);
+  });
+});
