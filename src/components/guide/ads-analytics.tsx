@@ -1,3 +1,4 @@
+import { StatTile } from "@/components/guide/stat-tile";
 import type { Doc } from "../../../convex/_generated/dataModel";
 
 /**
@@ -195,17 +196,6 @@ function ForAgainstChart({
           </ul>
         </>
       )}
-    </div>
-  );
-}
-
-function StatTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-        {label}
-      </p>
-      <p className="font-display mt-1 text-xl leading-none">{value}</p>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { raceIdToSlug } from "@/lib/site";
+import { StatTile } from "@/components/guide/stat-tile";
 import type { getAdMoneyOverview } from "@/lib/data";
 
 type Overview = Awaited<ReturnType<typeof getAdMoneyOverview>>;
@@ -9,16 +10,6 @@ function usd(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${Math.round(n / 1_000)}k`;
   return `$${Math.round(n)}`;
-}
-
-function StatTile({ label, value, note }: { label: string; value: string; note?: string }) {
-  return (
-    <div className="border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
-      <p className="font-mono text-2xl font-bold text-foreground">{value}</p>
-      <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
-      {note && <p className="mt-1 text-xs text-muted-foreground">{note}</p>}
-    </div>
-  );
 }
 
 /** support-vs-attack mini bar for a race card. Lake = for, cardinal = against
