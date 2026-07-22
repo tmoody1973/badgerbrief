@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { getTvAdTracker } from "@/lib/data";
+import { sponsorKeyToSlug } from "@/lib/site";
+import { normalizeSponsorKey } from "../../../convex/lib/sponsors";
 
 type Sponsor = Awaited<ReturnType<typeof getTvAdTracker>>[number];
 
@@ -92,6 +95,9 @@ function SponsorCard({ s }: { s: Sponsor }) {
             Who is this?{s.sponsorProfile.kind ? ` · ${s.sponsorProfile.kind}` : ""}
           </summary>
           <p className="mt-2 text-sm">{s.sponsorProfile.summary}</p>
+          <Link href={`/sponsors/${sponsorKeyToSlug(normalizeSponsorKey(s.sponsor))}`} className="mt-1 inline-block font-mono text-[11px] font-bold underline decoration-2 underline-offset-2">
+            Full profile →
+          </Link>
           {s.sponsorProfile.sources.length > 0 && (
             <p className="mt-1 font-mono text-[10px] text-muted-foreground">
               Sources:{" "}
