@@ -358,3 +358,55 @@ export const sponsorPublicProfile = query({
     return base;
   },
 });
+
+/** Admin: save a narrative draft (reviewer-edited) + optional leadership. */
+export const saveNarrativeDraft = mutation({
+  args: {
+    key: v.string(),
+    narrative: v.string(),
+    leadership: v.optional(v.array(v.object({ name: v.string(), role: v.string() }))),
+  },
+  handler: async (ctx, { key, narrative, leadership }) => {
+    await requireAdmin(ctx);
+    const s = await ctx.db
+      .query("sponsors")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .unique();
+    if (!s) throw new Error("no sponsor row to edit");
+    await ctx.db.patch(s._id, {
+      narrative,
+      leadership,
+      narrativeStatus: "draft" as const,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/** Admin: approve a narrative draft → set narrativeStatus to "approved". */
+export const approveNarrative = mutation({
+  args: { key: v.string() },
+  handler: async (ctx, { key }) => {
+    await requireAdmin(ctx);
+    const s = await ctx.db
+      .query("sponsors")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .unique();
+    if (!s) throw new Error("no sponsor row to approve");
+    await ctx.db.patch(s._id, {
+      narrativeStatus: "approved" as const,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/** Admin: list sponsors with draft narratives pending review. */
+export const pendingNarratives = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const rows = await ctx.db.query("sponsors").collect();
+    return rows
+      .filter((s) => s.narrativeStatus === "draft" && s.narrative)
+      .map((s) => ({ key: s.key, displayName: s.displayName }));
+  },
+});
