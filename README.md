@@ -12,9 +12,26 @@ Key capabilities:
 - **Campaign finance** — receipts, disbursements, and donors from the FEC (OpenFEC) and the Wisconsin Ethics Commission ("Sunshine"), including second-hop committee funding.
 - **Political ad tracking** — sponsor, spend, and reach from the **Meta Ad Library**, **Google political ads**, and **broadcast TV** (FCC political files), with reviewer-approved **sponsor profiles** ("who is this group?") and outside-spending analysis.
 - **Coverage & source transparency** (`/news`) — tracked reporting on the 2026 races from Wisconsin newsrooms, linked out to the outlet that reported it. We don't summarize or rate the journalism; we do show who owns and funds each outlet. Only dates read from an article's own publication metadata are ever displayed.
+- **Candidate interviews** — WisconsinEye's Campaign 2026 sit-downs, transcribed with speaker diarization so answers are separated from the interviewer's questions, quoted verbatim and timestamped to the recording. Every candidate in a race answers the same interviewer, so the answers are directly comparable.
 - **Personalized brief** (`/brief`) — an agent assembles a per-voter summary of their ballot.
 - **Voter Help chat** (`/chat`) — a streaming assistant for ballot questions, gated by an evaluation suite.
 - **Editorial pipeline** — article discovery, extraction, QA scoring, and a `/admin` review queue; every model call is traced in Arize and gated by a golden-dataset eval before deploy.
+
+## Adapting this to another state
+
+Most of this project isn't about Wisconsin. The schema, the draft→review→publish gates, the
+coverage scout, the ad trackers, and the interview-transcript pipeline are all
+state-agnostic; the Wisconsin-specific surface is a short list of files.
+
+**→ [PORTING.md](./PORTING.md)** is a phase-by-phase guide to rebuilding it for your state,
+written to be worked through with a coding agent (Claude Code, Cursor, Codex, etc.). Each
+phase has a scoped prompt and — more importantly — a verification step, since the common
+failure is an agent reporting success on a config change that produced no data.
+
+Start with its Phase 0 checklist: whether your state publishes bulk campaign-finance data
+and a certified candidate list is what decides if this is a two-week or two-month project.
+Federal and national sources (OpenFEC, Meta Ad Library, Google political ads, FCC political
+files) need no porting at all.
 
 ## Tech Stack
 
@@ -82,7 +99,8 @@ badgerbrief/
 │   ├── lib/                 # pure, unit-tested helpers
 │   └── _generated/          # Convex codegen (do not edit)
 ├── docs/                    # specs, handoffs, runbooks, plans
-├── scripts/                 # eval gate/monitor, brief-contract generator
+├── scripts/                 # eval gate/monitor, data importers, transcription
+├── PORTING.md               # adapting this to another state
 └── convex.json              # Convex config (Node externalPackages)
 ```
 
@@ -96,6 +114,7 @@ badgerbrief/
 | `NEXT_PUBLIC_CONVEX_URL` | Convex deployment URL | Yes |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key | Yes |
 | `CLERK_SECRET_KEY` | Clerk secret key | Yes |
+| `DEEPGRAM_API_KEY` | Interview transcription + diarization. Read by `scripts/transcribe-deepgram.mjs`, which runs **locally** — the backend never sees it | For interview quotes |
 
 **Backend** — set in the **Convex dashboard** (`npx convex env set KEY value`), not in `.env.local`:
 
@@ -116,6 +135,7 @@ badgerbrief/
 
 - **Broadcast TV ads (MOO-318):** FCC political files are Akamai-blocked to plain requests, so a Browserbase browser enumerates each station's folders and downloads order PDFs; `mupdf` unwraps PDF-portfolio filings; Claude extracts the order + the NAB disclosure (which candidate/issue the ad is about). TV spend is exact and every order links to its stored source PDF.
 - **Coverage discovery:** a daily scout asks Perplexity for reporting on each tracked candidate, bounded by an allowlist of Wisconsin newsrooms in `convex/lib/scoutParse.ts` (`WI_OUTLETS`) — Milwaukee and Madison dailies, public media, the commercial and PBS TV stations, and the statewide nonprofits. That one list is the single source of truth for three things: Perplexity's `search_domain_filter`, the URL gate on everything we store, and the display name shown as credit. **Perplexity silently truncates the domain filter past 20 entries**, so the list is capped and asserted at import — adding a 21st outlet must be a deliberate swap, not a silent no-op. Outlets discovered this way are created as `draft` and render nothing until a human approves them in `/admin → Outlets`.
+- **Interview quotes:** audio is downloaded by hand through WisconsinEye's own terms gate and transcribed **locally** (Deepgram `nova-3` with diarization), so their media never enters the app and no media URL is ever stored — their terms prohibit sharing the download link, and `convex/quoteIngest.ts` enforces that in code. Every extracted quote must appear verbatim in the diarized turn it claims or it is discarded; a human still approves each one. Quotes are **not** paired with the interviewer's question: diarization is reliable for who is speaking but not for where an exchange ends, and a wrong question above a quote is fabricated context.
 - **Sponsor profiles:** OpenFEC committee facts + a Perplexity-sourced, cited one-liner, confirmed by a human — so voters see "who is House Majority PAC?" with sources.
 - **Trust posture:** ad→candidate attribution and editorial claims are always human-reviewed; low-confidence matches route to `/admin`, never auto-published.
 
