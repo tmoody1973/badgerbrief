@@ -388,9 +388,16 @@ export default defineSchema({
     // metadata — and quotes follow it.
     date: v.optional(v.string()),
     sourceUrl: v.string(),
+    // Our own hosted copy of the few seconds being quoted, so a reader can hear
+    // the candidate say it. WisconsinEye permits clip sharing (2-5 min ceiling;
+    // ours run ~10-30s) provided their watermark survives — their bug and lower
+    // third are burned into every frame, so clips are never cropped or letterboxed.
+    // We host the clip ourselves; their generated media link is never stored.
+    clipStorageId: v.optional(v.id("_storage")),
     draftId: v.id("quote_drafts"),
     publishedAt: v.number(),
-  }).index("by_candidate", ["raceId", "candidateSlug"]),
+  }).index("by_candidate", ["raceId", "candidateSlug"])
+    .index("by_sourceUrl", ["sourceUrl"]),
 
   // ---------- article-source discovery (MOO-322) ----------
   article_sources: defineTable({

@@ -111,11 +111,21 @@ export const getCandidateBySlug = query({
         ),
       )
     ).filter((f) => f !== null);
+    // Resolve hosted interview clips to signed URLs. We serve our own copy from
+    // Convex storage — WisconsinEye's generated media link is never stored or
+    // returned (see convex/interviewClips.ts).
+    const quotesWithClips = await Promise.all(
+      quotes.map(async (q) => ({
+        ...q,
+        clipUrl: q.clipStorageId ? await ctx.storage.getUrl(q.clipStorageId) : null,
+      })),
+    );
+
     return {
       candidate,
       race,
       positions,
-      quotes,
+      quotes: quotesWithClips,
       finance,
       contributions,
       committeeFunding,

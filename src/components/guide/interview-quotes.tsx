@@ -15,11 +15,14 @@ import { formatTimestamp, timestampSeconds } from "@/lib/interview-quote";
  * Lake (not cardinal) carries the accent: this marks provenance, and cardinal
  * is rationed for genuine emphasis.
  */
+/** Published quote plus the signed URL of our hosted clip, when one is cut. */
+export type InterviewQuote = Doc<"quote_published"> & { clipUrl?: string | null };
+
 export function InterviewQuotes({
   quotes,
   candidateName,
 }: {
-  quotes: Doc<"quote_published">[];
+  quotes: InterviewQuote[];
   candidateName: string;
 }) {
   if (quotes.length === 0) return null;
@@ -70,6 +73,27 @@ export function InterviewQuotes({
                     &ldquo;{q.text}&rdquo;
                   </p>
                 </blockquote>
+                {/* The clip turns the quote from an assertion into evidence —
+                    you can hear them say it. Never cropped or letterboxed:
+                    WisconsinEye's bug and lower third are burned into the frame
+                    and their terms require the watermark survive. */}
+                {q.clipUrl && (
+                  <video
+                    controls
+                    // `metadata` + the #t=0.5 media fragment makes the browser
+                    // paint a real first frame instead of a dead black box —
+                    // which also puts WisconsinEye's watermark on screen before
+                    // anyone presses play. Cheaper than generating and storing a
+                    // poster image for every clip.
+                    preload="metadata"
+                    playsInline
+                    src={`${q.clipUrl}#t=0.5`}
+                    className="mt-3 w-full max-w-[480px] border-2 border-border bg-black"
+                  >
+                    Your browser can&rsquo;t play this clip.{" "}
+                    <a href={q.sourceUrl}>Watch it on WisconsinEye</a>.
+                  </video>
+                )}
                 <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
                   {/* The timestamp is shown as text, not only buried in the href:
                       it has to stay useful even if wiseye.org ignores ?t=. */}

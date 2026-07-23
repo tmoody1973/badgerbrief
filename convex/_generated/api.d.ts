@@ -22,6 +22,7 @@ import type * as crons from "../crons.js";
 import type * as demoWorkflow from "../demoWorkflow.js";
 import type * as finance from "../finance.js";
 import type * as helloAgent from "../helloAgent.js";
+import type * as interviewClips from "../interviewClips.js";
 import type * as lib_adMoney from "../lib/adMoney.js";
 import type * as lib_adsMatch from "../lib/adsMatch.js";
 import type * as lib_agentTelemetry from "../lib/agentTelemetry.js";
@@ -88,6 +89,7 @@ declare const fullApi: ApiFromModules<{
   demoWorkflow: typeof demoWorkflow;
   finance: typeof finance;
   helloAgent: typeof helloAgent;
+  interviewClips: typeof interviewClips;
   "lib/adMoney": typeof lib_adMoney;
   "lib/adsMatch": typeof lib_adsMatch;
   "lib/agentTelemetry": typeof lib_agentTelemetry;
