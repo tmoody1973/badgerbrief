@@ -271,9 +271,10 @@ export const listArticleSources = query({
 
     const out = [];
     for (const row of sorted) {
+      if (!row.candidateSlug) continue;
       const candidate = await ctx.db
         .query("candidates")
-        .withIndex("by_slug_only", (q) => q.eq("slug", row.candidateSlug))
+        .withIndex("by_slug_only", (q) => q.eq("slug", row.candidateSlug!))
         .first();
       out.push({
         ...row,

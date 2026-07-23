@@ -390,26 +390,58 @@ export default defineSchema({
 
   // ---------- article-source discovery (MOO-322) ----------
   article_sources: defineTable({
-    candidateSlug: v.string(),
-    raceId: v.string(),
+    candidateSlug: v.optional(v.string()), // optional: race-level / statewide coverage
+    raceId: v.optional(v.string()),
     url: v.string(),
-    outlet: v.string(),            // e.g. "Urban Milwaukee"
-    // MOO-326: own-site policy subpages auto-registered by the campaign-site
-    // mapper. Undefined means "article" — every pre-MOO-326 row.
+    outlet: v.string(),
+    outletKey: v.optional(v.string()),     // normalizeOutletKey(outlet) → outlets.key
     sourceKind: v.optional(
       v.union(v.literal("article"), v.literal("campaign_site")),
     ),
     headline: v.string(),
-    publishedAt: v.optional(v.string()), // ISO date if the scout found one
+    publishedAt: v.optional(v.string()),
     whyRelevant: v.string(),
+    relevanceScore: v.optional(v.number()),   // from the hub relevance gate
+    relevanceReason: v.optional(v.string()),
     status: v.union(v.literal("proposed"), v.literal("approved"), v.literal("rejected")),
+    hubStatus: v.optional(v.union(v.literal("auto"), v.literal("hidden"))), // /news visibility
     proposedAt: v.number(),
     decidedAt: v.optional(v.number()),
-    traceId: v.optional(v.string()), // Arize trace of the scout run
+    traceId: v.optional(v.string()),
   })
     .index("by_url", ["url"])
     .index("by_status", ["status"])
-    .index("by_candidate", ["candidateSlug"]),
+    .index("by_candidate", ["candidateSlug"])
+    .index("by_race", ["raceId"])
+    .index("by_hubStatus", ["hubStatus"]),
+
+  outlets: defineTable({
+    key: v.string(),
+    displayName: v.string(),
+    domain: v.optional(v.string()),
+    type: v.union(
+      v.literal("nonprofit"), v.literal("public_media"), v.literal("corporate_daily"),
+      v.literal("wire"), v.literal("trade"), v.literal("tv"),
+      v.literal("national"), v.literal("other"),
+    ),
+    ownership: v.optional(v.string()),
+    fundingNote: v.optional(v.string()),
+    ownershipSourceUrl: v.optional(v.string()),
+    // Data-ready for v2; NEVER rendered in v1 (Global Constraints).
+    thirdPartyRatings: v.optional(v.array(v.object({
+      provider: v.union(
+        v.literal("AllSides"), v.literal("AdFontes"),
+        v.literal("MBFC"), v.literal("NewsGuard"),
+      ),
+      biasBand: v.optional(v.string()),
+      factuality: v.optional(v.string()),
+      url: v.string(),
+      fetchedAt: v.number(),
+    }))),
+    reviewStatus: v.union(v.literal("draft"), v.literal("approved")),
+    enrichedAt: v.optional(v.number()),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
 
   // Every scout attempt for a candidate, any outcome (proposed/empty/error) —
   // rotation keys off this so a candidate that yields zero new URLs still

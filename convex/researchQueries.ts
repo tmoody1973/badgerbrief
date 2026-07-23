@@ -131,6 +131,7 @@ export const backfillCampaignSourceKind = internalMutation({
 
     for (const row of rows) {
       if (row.sourceKind) continue;
+      if (!row.candidateSlug) continue;
       const homepage = homeBySlug.get(row.candidateSlug);
       if (!homepage) {
         if (row.outlet.toLowerCase().includes("campaign site")) {
@@ -179,6 +180,7 @@ export const listResearchTargets = internalQuery({
       .withIndex("by_status", (q) => q.eq("status", "approved"))
       .collect();
     for (const a of approvedArticles) {
+      if (!a.candidateSlug || !a.raceId) continue;
       const name = nameBySlug.get(a.candidateSlug);
       if (!name) continue; // orphaned row (candidate removed) — skip rather than emit a bad target
       // MOO-326: own-site subpages carry the campaign-site prompt + citation

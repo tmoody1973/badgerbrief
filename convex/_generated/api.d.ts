@@ -34,6 +34,7 @@ import type * as lib_googleAdsFixture from "../lib/googleAdsFixture.js";
 import type * as lib_metaAds from "../lib/metaAds.js";
 import type * as lib_metaAdsFixture from "../lib/metaAdsFixture.js";
 import type * as lib_openfecEnrich from "../lib/openfecEnrich.js";
+import type * as lib_outlets from "../lib/outlets.js";
 import type * as lib_qa from "../lib/qa.js";
 import type * as lib_scoutParse from "../lib/scoutParse.js";
 import type * as lib_sponsors from "../lib/sponsors.js";
@@ -91,6 +92,7 @@ declare const fullApi: ApiFromModules<{
   "lib/metaAds": typeof lib_metaAds;
   "lib/metaAdsFixture": typeof lib_metaAdsFixture;
   "lib/openfecEnrich": typeof lib_openfecEnrich;
+  "lib/outlets": typeof lib_outlets;
   "lib/qa": typeof lib_qa;
   "lib/scoutParse": typeof lib_scoutParse;
   "lib/sponsors": typeof lib_sponsors;
