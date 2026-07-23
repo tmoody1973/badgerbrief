@@ -373,6 +373,33 @@ export const confirmAdMatch = mutation({
 });
 
 /**
+ * Un-attribute an ad from a candidate: clear candidateSlug/raceId/stance so it
+ * leaves the candidate page and returns to the unattributed pool. Use to undo a
+ * wrong match (e.g. a hostile attack ad mislabeled as "support"). The ad row
+ * survives on the outside-spending tracker under its own sponsor/committee.
+ */
+export const unattributeAd = mutation({
+  args: { adId: v.id("ads") },
+  handler: async (ctx, { adId }) => {
+    await requireAdmin(ctx);
+    const ad = await ctx.db.get(adId);
+    if (!ad) throw new Error("ad not found");
+    await ctx.db.patch(adId, {
+      candidateSlug: undefined,
+      raceId: undefined,
+      stance: undefined,
+      matchConfidence: undefined,
+    });
+    await logAudit(ctx, {
+      action: "ad:unattributed",
+      refTable: "ads",
+      refId: adId,
+      detail: `was ${ad.candidateSlug ?? "?"} (${ad.stance ?? "?"}) — ${ad.pageOrCommittee}`,
+    });
+  },
+});
+
+/**
  * Confirm a TV ad as an ISSUE ad — a national-issue buy with no candidate to
  * attribute (e.g. "Tariffs"). Stamps issueTopic + resolves the task, so it
  * clears the queue and reads as human-reviewed on the outside-spending tracker.
