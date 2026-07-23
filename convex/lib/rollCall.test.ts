@@ -115,16 +115,16 @@ describe("parseAssemblyVotes", () => {
     const testLines = [
       "AYES - 2",
       "Y",
-      "O'CONNOR",
+      "O’CONNOR",
       "R",
       "N",
-      "O'CONNOR",
+      "O’CONNOR",
       "D",
       "VACANT DISTRICTS",
     ];
     const result = parseAssemblyVotes(testLines);
     expect(result).toHaveLength(2);
-    expect(result[0].name).toBe("O'CONNOR");
+    expect(result[0].name).toBe("O’CONNOR");
     expect(result[0].position).toBe("aye");
     expect(result[1].name).toBe("O'CONNOR");
     expect(result[1].position).toBe("nay");
