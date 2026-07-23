@@ -53,6 +53,7 @@ import type * as publish from "../publish.js";
 import type * as publishedDateSync from "../publishedDateSync.js";
 import type * as qa from "../qa.js";
 import type * as qaQueries from "../qaQueries.js";
+import type * as quoteIngest from "../quoteIngest.js";
 import type * as research from "../research.js";
 import type * as researchQueries from "../researchQueries.js";
 import type * as scout from "../scout.js";
@@ -118,6 +119,7 @@ declare const fullApi: ApiFromModules<{
   publishedDateSync: typeof publishedDateSync;
   qa: typeof qa;
   qaQueries: typeof qaQueries;
+  quoteIngest: typeof quoteIngest;
   research: typeof research;
   researchQueries: typeof researchQueries;
   scout: typeof scout;
