@@ -47,9 +47,9 @@ The four pre-2023 legislators need earlier Assembly sessions ingested:
 | Legislator | Slug | Chamber | Sessions to cover | Currently coverable? |
 |---|---|---|---|---|
 | Mandela Barnes | `mandela-barnes` | Assembly (Dist 11) | 2013, 2015 | **No — both pre-2019** |
-| Brett Hulsey | *(check slug)* | Assembly (77→78) | 2011, 2013 | **No — both pre-2019** |
+| Brett Hulsey | `brett-hulsey` | Assembly (77→78) | 2011, 2013 | **No — both pre-2019** |
 | David Crowley | `david-crowley` | Assembly (Dist 17) | 2017, 2019 | 2019 only |
-| JoCasta Zamarripa | *(check slug)* | Assembly (Dist 8) | 2011,2013,2015,2017,2019 | 2019 only |
+| JoCasta Zamarripa | `jocasta-zamarripa` | Assembly (Dist 8) | 2011,2013,2015,2017,2019 | 2019 only |
 
 (Service years verified via Perplexity + ballotpedia this session. All four are **Assembly**, none Senate.)
 
