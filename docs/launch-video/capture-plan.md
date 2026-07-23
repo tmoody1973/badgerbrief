@@ -19,17 +19,22 @@ Footage is the critical path: HyperFrames composites it, it can't generate it. C
 
 ## Shot list (mapped to script beats)
 
-| Shot | Beat | Source | Action | Notes |
-|------|------|--------|--------|-------|
-| A | 1 | `/` home | Slow load, hero settle | 5s hold for title-card overlay |
-| B | 2 | `/` ballot finder | Type decoy address → submit → races resolve | Record the resolve twice; pick the cleanest |
-| C | 3 | `/ads?view=browse` | Sort table by spend, scroll | Steady scroll, no jitter |
-| D | 3 | `/ads?view=analytics` | Reveal spend bars, top spender | cardinal/lake bars (verify no red/green) |
-| E | 4 | `/sponsors/[slug]` | Scroll profile: kind, totals, donors, source link | Use AFP or corrected JP |
-| F | 5 | `/chat` (CDP, logged in) | Type question → answer streams → citations | THE hero shot. Record 3+ takes. Path is `/chat` (nav "Voter Help"). START recording already logged-in — see Clerk landmine |
-| G | 6 | — | (motion-only end card, no footage) | Built in HyperFrames |
+Capture length rule: record **2–3× the final on-screen time**, plus head/tail padding, so post can trim, speed-ramp, and reframe without upscaling. "Final" = seconds in the cut; "Capture" = wall-clock to actually record including retakes.
 
-**Beat-5 question (locked):** *"Who's spending the most in the Supreme Court race, and who are they for?"* — verify the chat actually answers this well against current data **before** the record session.
+| Shot | Beat | Source | Action | Final | **Capture** | Notes |
+|------|------|--------|--------|-------|-------------|-------|
+| A | 1 | `/` home | Hero settle, then **slow scroll to reveal the full race grid** | ~12s | **~30s** | 1 clean settle + 1 full slow scroll top→bottom; ~one screen / 2s |
+| B | 2 | `/` ballot finder | Type decoy address → submit → races resolve | ~15s | **~45s** | Typing is slow + resolve latency; record the resolve 2×, pick cleanest |
+| C | 2b | `/races/[slug]` → `/candidates/[slug]` | Click candidate → scroll the **positions** (SUPPORT/OPPOSE + sourced detail) | ~18s | **~60s** | Richest page — tabs Background · Money · Ads · Issues · Quotes · Sources. Navigate + scroll full issues, 2 takes. **Candidate WITH a photo**, not SUSPENDED/WITHDRAWN |
+| D | 3 | `/ads?view=browse` | Sort table by spend, scroll | ~10s | **~30s** | Steady scroll, no jitter |
+| E | 3 | `/ads?view=analytics` | Reveal spend bars, top spender | ~8s | **~25s** | cardinal/lake bars (verify no red/green) |
+| F | 4 | `/sponsors/americans-for-prosperity` | Scroll profile: kind, totals, donors, source link | ~12s | **~30s** | **AFP** — verified hero |
+| G | 5 | `/chat` (CDP, logged in) | Type question → answer streams → citations | ~18s | **~90s ×3 takes ≈ 4–5 min** | THE hero shot. First-token + full stream latency is unpredictable — record long, speed-ramp dead air. Path `/chat`. START already logged-in (Clerk landmine) |
+| H | 6 | — | (motion-only end card) | ~20s | **0 (no capture)** | Built in HyperFrames |
+
+**Total raw footage to record: ~12–14 min** (≈ 8–9 min of A–F + ~4–5 min of chat takes) → cut to a ~2:32 final.
+
+**Beat-5 chat question (locked):** *"Who's spending the most in the Supreme Court race, and who are they for?"* — verify the chat answers this well against current data **before** the record session.
 
 ## Sequence of work
 
