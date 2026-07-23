@@ -2,20 +2,28 @@ import { v } from "convex/values";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireAdmin } from "./sponsors";
+import { cleanPublishedAt } from "./lib/outlets";
 
 async function withOutlet(ctx: QueryCtx, article: Doc<"article_sources">) {
   const key = article.outletKey;
   const outlet = key
     ? await ctx.db.query("outlets").withIndex("by_key", (q) => q.eq("key", key)).unique()
     : null;
-  return { article, outlet: outlet && outlet.reviewStatus === "approved" ? outlet : null };
+  return {
+    // Sanitize on read so a bad stored date can never reach a page, whatever
+    // the scout wrote. Unverifiable → undefined, and the UI omits it.
+    article: { ...article, publishedAt: cleanPublishedAt(article.publishedAt) },
+    outlet: outlet && outlet.reviewStatus === "approved" ? outlet : null,
+  };
 }
 
-/** Sort key: `publishedAt` is an optional free-text date. Undated (or
- * unparseable) rows fall back to `proposedAt` so they stay in the recency
- * window instead of sinking below every dated row and getting sliced off. */
-const when = (r: Doc<"article_sources">) =>
-  (r.publishedAt ? Date.parse(r.publishedAt) || r.proposedAt : r.proposedAt);
+/** Sort key: `publishedAt` is LLM-extracted and often dirty. Only a VERIFIABLE
+ * date sorts; anything unparseable or in the future falls back to when we found
+ * the article, so a hallucinated future date can't hijack the top of the feed. */
+const when = (r: Doc<"article_sources">) => {
+  const clean = cleanPublishedAt(r.publishedAt);
+  return clean ? Date.parse(clean) : r.proposedAt;
+};
 
 const byRecency = (a: Doc<"article_sources">, b: Doc<"article_sources">) => when(b) - when(a);
 

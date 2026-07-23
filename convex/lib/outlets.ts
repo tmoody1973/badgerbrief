@@ -35,6 +35,27 @@ export function scoreRelevance(
   return { score: 0, reason: "no candidate/race/election match" };
 }
 
+/**
+ * `publishedAt` comes from an LLM reading a page, so it arrives dirty: literal
+ * "N/A", truncated "2026-06-", or a hallucinated date months in the future.
+ * A date we cannot verify must never be displayed or sorted on — return
+ * undefined and let callers fall back to when WE found the article.
+ * Accepts one day of skew for timezone/clock differences.
+ */
+export function cleanPublishedAt(
+  raw: string | undefined,
+  now: number = Date.now(),
+): string | undefined {
+  if (!raw) return undefined;
+  // Require a full YYYY-MM-DD. Date.parse is lenient enough to turn the
+  // truncated "2026-06-" into June 1st — inventing a day we were never told.
+  if (!/^\d{4}-\d{2}-\d{2}(?:[T ]|$)/.test(raw.trim())) return undefined;
+  const t = Date.parse(raw.trim());
+  if (Number.isNaN(t)) return undefined;
+  if (t > now + 86_400_000) return undefined; // impossible: published in the future
+  return new Date(t).toISOString().slice(0, 10);
+}
+
 /** Stamp a discovered article with its outlet key + hub relevance. Lives here
  * (pure lib) rather than in scout.ts so BOTH the "use node" scout action and
  * plain mutations (e.g. the backfill) share one implementation — a mutation
