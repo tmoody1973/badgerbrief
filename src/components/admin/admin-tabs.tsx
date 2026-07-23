@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useConvexAuth, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { AdReviewQueue, UnattributedAds } from "./ad-review";
 import { ReviewQueue } from "./review-queue";
 import { ArticleSources } from "./article-sources";
 import { OutletEditor } from "./outlet-editor";
+import { asMessage, ErrorLine } from "./draft-row";
+import { Button } from "@/components/retroui/Button";
 import type { OutletType } from "../../../convex/lib/outlets";
 import { sponsorKeyToSlug } from "@/lib/site";
 
@@ -37,6 +40,10 @@ export function AdminTabs() {
   );
   const draftOutlets = useQuery(
     api.outlets.listDraftOutlets,
+    isAuthenticated ? {} : "skip",
+  );
+  const hubRows = useQuery(
+    api.coverage.hubModerationList,
     isAuthenticated ? {} : "skip",
   );
   const [tab, setTab] = useState<TabKey>("attribution");
@@ -103,7 +110,12 @@ export function AdminTabs() {
         {tab === "editorial" && <ReviewQueue />}
         {tab === "sources" && <ArticleSources />}
         {tab === "narratives" && <NarrativeQueue rows={pendingNarratives} />}
-        {tab === "outlets" && <OutletQueue rows={draftOutlets} />}
+        {tab === "outlets" && (
+          <div className="space-y-6">
+            <OutletQueue rows={draftOutlets} />
+            <HubModerationQueue rows={hubRows} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -141,6 +153,94 @@ function OutletQueue({
       {rows.map((o) => (
         <OutletEditor key={o.key} outlet={o} />
       ))}
+    </div>
+  );
+}
+
+/** Rows currently live on /news ("auto") or previously taken down ("hidden")
+ * — the full moderatable set from `coverage.hubModerationList`, so a hidden
+ * row stays visible here and can be flipped back. */
+function HubModerationQueue({
+  rows,
+}: {
+  rows:
+    | {
+        article: {
+          _id: Id<"article_sources">;
+          headline: string;
+          outlet: string;
+          publishedAt?: string;
+          hubStatus?: "auto" | "hidden";
+        };
+        outlet: { displayName: string } | null;
+      }[]
+    | undefined;
+}) {
+  const setHubStatus = useMutation(api.coverage.setHubStatus);
+  const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const toggle = async (
+    articleId: Id<"article_sources">,
+    hubStatus: "auto" | "hidden",
+  ) => {
+    setBusyId(articleId);
+    setError(null);
+    try {
+      await setHubStatus({ articleId, hubStatus });
+    } catch (err) {
+      setError(asMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (!rows) return null;
+  return (
+    <div>
+      <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        Hub coverage (/news)
+      </p>
+      <ErrorLine message={error} />
+      {rows.length === 0 ? (
+        <p className="mt-2 font-mono text-xs text-muted-foreground">
+          No hub-scored articles yet.
+        </p>
+      ) : (
+        <ul className="mt-2 space-y-2">
+          {rows.map((r) => (
+            <li
+              key={r.article._id}
+              className="flex flex-wrap items-center justify-between gap-2 border-2 border-border bg-card px-3 py-2 shadow-[var(--shadow-brutal)]"
+            >
+              <span className="text-sm">
+                <span className="font-bold">
+                  {r.outlet?.displayName ?? r.article.outlet}
+                </span>{" "}
+                — {r.article.headline}
+                {r.article.publishedAt && ` (${r.article.publishedAt})`}
+              </span>
+              {r.article.hubStatus === "auto" ? (
+                <Button
+                  variant="outline"
+                  disabled={busyId === r.article._id}
+                  onClick={() => toggle(r.article._id, "hidden")}
+                >
+                  {busyId === r.article._id ? "Working…" : "Hide from hub"}
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  disabled={busyId === r.article._id}
+                  onClick={() => toggle(r.article._id, "auto")}
+                >
+                  {busyId === r.article._id ? "Working…" : "Unhide"}
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

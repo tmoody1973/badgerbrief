@@ -42,6 +42,23 @@ export const inTheNewsForRace = query({
   },
 });
 
+/** Admin moderation view: every row currently on-hub ("auto") or previously
+ * hidden ("hidden") — i.e. the whole moderatable set, unlike the public
+ * `hubArticles` which only ever shows "auto". Two indexed lookups, no
+ * full-table `.collect()`. */
+export const hubModerationList = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit }) => {
+    await requireAdmin(ctx);
+    const auto = await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "auto")).collect();
+    const hidden = await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "hidden")).collect();
+    const rows = [...auto, ...hidden]
+      .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
+      .slice(0, limit ?? 100);
+    return Promise.all(rows.map((a) => withOutlet(ctx, a)));
+  },
+});
+
 export const setHubStatus = mutation({
   args: { articleId: v.id("article_sources"), hubStatus: v.union(v.literal("auto"), v.literal("hidden")) },
   handler: async (ctx, { articleId, hubStatus }) => {
