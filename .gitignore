@@ -53,3 +53,5 @@ docs/video/seg/
 
 # Superpowers brainstorm companion (local mockups)
 .superpowers/
+transcripts/
+.transcribe-tmp/

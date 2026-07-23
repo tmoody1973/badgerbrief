@@ -1,0 +1,60 @@
+{
+  "_comment": [
+    "WisconsinEye 'Campaign 2026' one-on-one interviews, Governor's race.",
+    "Audio is downloaded MANUALLY through WisconsinEye's own terms gate — we do",
+    "not scrape it. Their archive is account-gated behind Cloudflare and their",
+    "terms prohibit sharing the generated media location link, so no media URL",
+    "ever appears in this file, in Convex, or in any client payload. Only the",
+    "PUBLIC program permalink below is stored and rendered.",
+    "",
+    "audioFile is matched case-insensitively against the download directory.",
+    "candidateSlug is the BadgerBrief slug and is NOT always a slugify of the",
+    "name WisconsinEye uses — 'Andrew Manske' is 'andy-manske' here."
+  ],
+  "raceId": "WI-GOV-2026",
+  "outlet": "WisconsinEye",
+  "programs": [
+    {
+      "candidateSlug": "mandela-barnes",
+      "audioFile": "mandela barnes.mp3",
+      "date": "2026-07-13",
+      "programUrl": "https://wiseye.org/2026/07/13/campaign-2026-lt-gov-mandela-barnes-d-candidate-for-governor/",
+      "title": "Campaign 2026: Lt. Gov. Mandela Barnes (D) – Candidate for Governor"
+    },
+    {
+      "candidateSlug": "joel-brennan",
+      "audioFile": "Joel Brennan.mp3",
+      "date": "2026-07-08",
+      "programUrl": "https://wiseye.org/2026/07/08/campaign-2026-joel-brennan-d-candidate-for-governor/",
+      "title": "Campaign 2026: Joel Brennan (D) – Candidate for Governor"
+    },
+    {
+      "candidateSlug": "david-crowley",
+      "audioFile": "David Crowley.mp3",
+      "date": "2026-07-22",
+      "programUrl": "https://wiseye.org/2026/07/22/campaign-2026-david-crowley-d-candidate-for-governor/",
+      "title": "Campaign 2026: David Crowley (D) – Candidate for Governor"
+    },
+    {
+      "candidateSlug": "francesca-hong",
+      "audioFile": "Francesca Hong.mp3",
+      "date": "2026-07-13",
+      "programUrl": "https://wiseye.org/2026/07/13/campaign-2026-rep-francesca-hong-d-candidate-for-governor/",
+      "title": "Campaign 2026: Rep. Francesca Hong (D) – Candidate for Governor"
+    },
+    {
+      "candidateSlug": "andy-manske",
+      "audioFile": "Andrew Manske.mp3",
+      "date": "2026-07-17",
+      "programUrl": "https://wiseye.org/2026/07/17/campaign-2026-andrew-manske-r-candidate-for-governor/",
+      "title": "Campaign 2026: Andrew Manske (R) – Candidate for Governor"
+    },
+    {
+      "candidateSlug": "kelda-roys",
+      "audioFile": "Kelda Roys.mp3",
+      "date": "2026-07-14",
+      "programUrl": "https://wiseye.org/2026/07/14/campaign-2026-sen-kelda-roys-d-candidate-for-governor/",
+      "title": "Campaign 2026: Sen. Kelda Roys (D) – Candidate for Governor"
+    }
+  ]
+}
