@@ -103,6 +103,51 @@ describe("storeRollCall", () => {
       expect(await ctx.db.query("legislator_votes").collect()).toHaveLength(0);
     });
   });
+
+  test("two candidates with same surname but different exact names each receive only their own vote", async () => {
+    // Regression test: two different members can share a surname (e.g. ANDERSON, C and ANDERSON, J).
+    // The matching must be exact-string, not prefix/substring. If the predicate were changed to
+    // startsWith() or other fuzzy matching, both votes would incorrectly attach to both candidates.
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("candidates", {
+        slug: "cynthia-anderson",
+        raceId: "WI-GOV-2026",
+        name: "Cynthia Anderson",
+        sources: [],
+        dataAsOf: "2026-07-23",
+        legislatorName: { name: "ANDERSON, C", chamber: "assembly", sessions: ["2023"] },
+      });
+      await ctx.db.insert("candidates", {
+        slug: "john-anderson",
+        raceId: "WI-GOV-2026",
+        name: "John Anderson",
+        sources: [],
+        dataAsOf: "2026-07-23",
+        legislatorName: { name: "ANDERSON, J", chamber: "assembly", sessions: ["2023"] },
+      });
+    });
+    const rollCall = {
+      ...ROLL_CALL,
+      votes: [
+        { name: "ANDERSON, C", party: "D", position: "aye" as const },
+        { name: "ANDERSON, J", party: "R", position: "nay" as const },
+        { name: "SMITH", party: "D", position: "aye" as const },
+      ],
+    };
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall });
+
+    await t.run(async (ctx) => {
+      const positions = await ctx.db.query("legislator_votes").collect();
+      expect(positions).toHaveLength(2);
+      const cynthia = positions.find((p) => p.candidateSlug === "cynthia-anderson");
+      const john = positions.find((p) => p.candidateSlug === "john-anderson");
+      expect(cynthia).toBeDefined();
+      expect(john).toBeDefined();
+      expect(cynthia!.position).toBe("aye");
+      expect(john!.position).toBe("nay");
+    });
+  });
 });
 
 describe("ingestedKeys", () => {
