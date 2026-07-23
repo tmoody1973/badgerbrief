@@ -22,7 +22,11 @@ const byRecency = (a: Doc<"article_sources">, b: Doc<"article_sources">) => when
 export const hubArticles = query({
   args: { limit: v.optional(v.number()), raceId: v.optional(v.string()) },
   handler: async (ctx, { limit, raceId }) => {
-    const rows = await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "auto")).collect();
+    const rows = (await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "auto")).collect())
+      // A candidate's own campaign site is not news — the entity queries below
+      // exclude it, and the hub must too, or a campaign page appears as
+      // "coverage" with its campaign framed as a rated outlet.
+      .filter((r) => r.sourceKind !== "campaign_site");
     const filtered = (raceId ? rows.filter((r) => r.raceId === raceId) : rows)
       .sort(byRecency)
       .slice(0, limit ?? 60);
@@ -58,7 +62,10 @@ export const hubModerationList = query({
     await requireAdmin(ctx);
     const auto = await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "auto")).collect();
     const hidden = await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "hidden")).collect();
-    const rows = [...auto, ...hidden].sort(byRecency).slice(0, limit ?? 100);
+    const rows = [...auto, ...hidden]
+      .filter((r) => r.sourceKind !== "campaign_site") // same rule as the hub
+      .sort(byRecency)
+      .slice(0, limit ?? 100);
     return Promise.all(rows.map((a) => withOutlet(ctx, a)));
   },
 });

@@ -43,6 +43,35 @@ async function seed(c: ReturnType<typeof t>) {
   });
 }
 
+test("campaign sites are never decorated, never become outlets, never hit the hub", async () => {
+  const c = t();
+  await seed(c);
+  await c.run(async (ctx) => {
+    await ctx.db.insert("article_sources", {
+      url: "https://hongforwi.com/issues",
+      outlet: "Francesca Hong (campaign site)",
+      headline: "Francesca Hong on housing", // would otherwise score 1.0
+      whyRelevant: "r",
+      status: "approved",
+      sourceKind: "campaign_site",
+      proposedAt: Date.now(),
+    } as never);
+  });
+  const res = await c.mutation(internal.coverageBackfill.backfillCoverage, {
+    dryRun: false,
+  });
+  expect(res.scanned).toBe(2); // the campaign-site row is skipped
+  const hub = await c.query(api.coverage.hubArticles, {});
+  expect(hub).toHaveLength(1);
+  expect(hub[0].article.sourceKind).not.toBe("campaign_site");
+  await c.run(async (ctx) => {
+    const outlets = await ctx.db.query("outlets").collect();
+    expect(outlets.map((o) => o.displayName)).not.toContain(
+      "Francesca Hong (campaign site)",
+    );
+  });
+});
+
 test("dryRun reports counts without writing", async () => {
   const c = t();
   await seed(c);

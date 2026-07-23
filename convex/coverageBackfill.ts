@@ -25,6 +25,9 @@ export const backfillCoverage = internalMutation({
     // Only rows never decorated — re-running is a no-op on already-stamped rows.
     const pending = (await ctx.db.query("article_sources").collect())
       .filter((r) => r.outletKey === undefined)
+      // A candidate's own campaign site is not news and its campaign is not a
+      // media outlet — never decorate it or mint an `outlets` row for it.
+      .filter((r) => r.sourceKind !== "campaign_site")
       .slice(0, limit ?? 5000);
 
     let hubAuto = 0;
@@ -65,6 +68,45 @@ export const backfillCoverage = internalMutation({
       wouldSetHubAuto: hubAuto,
       distinctOutlets: keys.size,
       outletsCreated,
+    };
+  },
+});
+
+/**
+ * Repair pass for rows written before campaign sites were excluded: clears
+ * `hubStatus`/`outletKey` on campaign_site articles and deletes any `outlets`
+ * row that no real news article references. dryRun defaults to TRUE.
+ */
+export const cleanupCampaignSiteOutlets = internalMutation({
+  args: { dryRun: v.optional(v.boolean()) },
+  handler: async (ctx, { dryRun = true }) => {
+    const all = await ctx.db.query("article_sources").collect();
+
+    // 1. Un-decorate campaign-site rows so they leave the hub entirely.
+    const campaignRows = all.filter(
+      (r) => r.sourceKind === "campaign_site" && r.outletKey !== undefined,
+    );
+    if (!dryRun) {
+      for (const r of campaignRows) {
+        await ctx.db.patch(r._id, { hubStatus: undefined, outletKey: undefined });
+      }
+    }
+
+    // 2. Drop outlets no genuine (non-campaign) article points at.
+    const realKeys = new Set(
+      all
+        .filter((r) => r.sourceKind !== "campaign_site" && r.outletKey)
+        .map((r) => r.outletKey as string),
+    );
+    const outlets = await ctx.db.query("outlets").collect();
+    const orphans = outlets.filter((o) => !realKeys.has(o.key));
+    if (!dryRun) for (const o of orphans) await ctx.db.delete(o._id);
+
+    return {
+      dryRun,
+      campaignRowsCleared: campaignRows.length,
+      outletsDeleted: orphans.length,
+      outletsKept: outlets.length - orphans.length,
     };
   },
 });
