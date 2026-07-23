@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { internalAction, internalMutation, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { extractPublishedDate } from "./lib/publishedDate";
+import { extractPublishedDate, extractOgImage } from "./lib/publishedDate";
 
 /** Articles we have not yet tried to verify a publication date for. */
 export const unverifiedArticles = internalQuery({
@@ -27,9 +27,11 @@ export const recordPublishedDate = internalMutation({
     id: v.id("article_sources"),
     publishedAt: v.optional(v.string()),
     verified: v.boolean(),
+    imageUrl: v.optional(v.string()),
   },
-  handler: async (ctx, { id, publishedAt, verified }): Promise<null> => {
+  handler: async (ctx, { id, publishedAt, verified, imageUrl }): Promise<null> => {
     await ctx.db.patch(id, {
+      imageUrl,
       // A verified read replaces the LLM's guess. A miss clears the guess
       // rather than leaving an unverifiable date in place.
       publishedAt: verified ? publishedAt : undefined,
@@ -51,7 +53,7 @@ export const syncPublishedDates = internalAction({
   handler: async (
     ctx,
     { limit, force },
-  ): Promise<{ scanned: number; verified: number; noMetadata: number; fetchFailed: number }> => {
+  ): Promise<{ scanned: number; verified: number; noMetadata: number; fetchFailed: number; withImage: number }> => {
     const targets = await ctx.runQuery(internal.publishedDateSync.unverifiedArticles, {
       limit: limit ?? 60,
       force,
@@ -60,9 +62,11 @@ export const syncPublishedDates = internalAction({
     let verified = 0;
     let noMetadata = 0;
     let fetchFailed = 0;
+    let withImage = 0;
 
     for (const t of targets) {
       let date: string | undefined;
+      let image: string | undefined;
       try {
         const res = await fetch(t.url, {
           redirect: "follow",
@@ -81,7 +85,9 @@ export const syncPublishedDates = internalAction({
           });
           continue;
         }
-        date = extractPublishedDate(await res.text());
+        const html = await res.text();
+        date = extractPublishedDate(html);
+        image = extractOgImage(html);
       } catch {
         fetchFailed++;
         await ctx.runMutation(internal.publishedDateSync.recordPublishedDate, {
@@ -92,11 +98,12 @@ export const syncPublishedDates = internalAction({
 
       if (date) verified++;
       else noMetadata++;
+      if (image) withImage++;
       await ctx.runMutation(internal.publishedDateSync.recordPublishedDate, {
-        id: t.id, publishedAt: date, verified: !!date,
+        id: t.id, publishedAt: date, verified: !!date, imageUrl: image,
       });
     }
 
-    return { scanned: targets.length, verified, noMetadata, fetchFailed };
+    return { scanned: targets.length, verified, noMetadata, fetchFailed, withImage };
   },
 });

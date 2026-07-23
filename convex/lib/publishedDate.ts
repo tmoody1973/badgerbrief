@@ -14,6 +14,30 @@ import { cleanPublishedAt } from "./outlets";
  * everywhere else: strict YYYY-MM-DD, never a future date. Returns undefined
  * when the page states no date we can trust — the honest answer.
  */
+/**
+ * The image the publisher itself declared for link previews (og:image /
+ * twitter:image). We never scrape an image out of the article body — only the
+ * one the outlet published FOR this purpose. Returns undefined when absent or
+ * not an absolute http(s) URL.
+ */
+export function extractOgImage(html: string): string | undefined {
+  if (!html) return undefined;
+  const patterns: RegExp[] = [
+    /<meta[^>]+(?:property|name)=["']og:image(?::url)?["'][^>]+content=["']([^"']+)["']/i,
+    /<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']og:image(?::url)?["']/i,
+    /<meta[^>]+(?:property|name)=["']twitter:image["'][^>]+content=["']([^"']+)["']/i,
+  ];
+  for (const re of patterns) {
+    const m = html.match(re);
+    if (!m) continue;
+    const url = m[1].trim().replace(/&amp;/g, "&");
+    // Absolute https(s) only — a relative or data: URL can't be allowlisted
+    // by next/image, and we will not guess the origin.
+    if (/^https?:\/\/\S+$/i.test(url)) return url;
+  }
+  return undefined;
+}
+
 export function extractPublishedDate(
   html: string,
   now: number = Date.now(),

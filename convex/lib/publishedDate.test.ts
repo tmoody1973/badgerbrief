@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { extractPublishedDate } from "./publishedDate";
+import { extractPublishedDate, extractOgImage } from "./publishedDate";
 
 const NOW = Date.parse("2026-07-22T12:00:00Z");
 
@@ -50,5 +50,26 @@ describe("extractPublishedDate", () => {
       <meta property="article:published_time" content="2027-01-01">
       <script type="application/ld+json">{"datePublished":"2026-02-10"}</script>`;
     expect(extractPublishedDate(html, NOW)).toBe("2026-02-10");
+  });
+});
+
+describe("extractOgImage", () => {
+  test("reads og:image", () => {
+    const html = `<meta property="og:image" content="https://urbanmilwaukee.com/wp/x.jpg">`;
+    expect(extractOgImage(html)).toBe("https://urbanmilwaukee.com/wp/x.jpg");
+  });
+  test("handles reversed attribute order and unescapes &amp;", () => {
+    const html = `<meta content="https://o.com/i.jpg?a=1&amp;b=2" property="og:image">`;
+    expect(extractOgImage(html)).toBe("https://o.com/i.jpg?a=1&b=2");
+  });
+  test("falls back to twitter:image", () => {
+    expect(extractOgImage(`<meta name="twitter:image" content="https://o.com/t.png">`))
+      .toBe("https://o.com/t.png");
+  });
+  test("rejects relative, data: and missing URLs — we never guess an origin", () => {
+    expect(extractOgImage(`<meta property="og:image" content="/local/x.jpg">`)).toBeUndefined();
+    expect(extractOgImage(`<meta property="og:image" content="data:image/png;base64,AAA">`)).toBeUndefined();
+    expect(extractOgImage("<html><body>nothing</body></html>")).toBeUndefined();
+    expect(extractOgImage("")).toBeUndefined();
   });
 });

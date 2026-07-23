@@ -405,6 +405,9 @@ export default defineSchema({
     // schema.org). Only a verified date is ever displayed.
     publishedAtVerified: v.optional(v.boolean()),
     publishedAtCheckedAt: v.optional(v.number()),
+    // The publisher's own og:image, read in the same pass. Never scraped from
+    // the article body — only the image the outlet declared for link previews.
+    imageUrl: v.optional(v.string()),
     whyRelevant: v.string(),
     relevanceScore: v.optional(v.number()),   // from the hub relevance gate
     relevanceReason: v.optional(v.string()),

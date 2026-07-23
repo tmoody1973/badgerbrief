@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { SourceTransparencyCard } from "./source-transparency-card";
+import { ArticleThumb } from "./article-thumb";
 
 type Row = { article: Doc<"article_sources">; outlet: Doc<"outlets"> | null };
 
@@ -54,15 +55,18 @@ export function NewsFeed({ items }: { items: Row[] }) {
       ) : (
         <ul className="mt-4 space-y-3">
           {visible.map(({ article, outlet }) => (
-            <li key={article._id} className="border-2 border-border bg-card p-3">
-              <a href={article.url} target="_blank" rel="noopener noreferrer" className="font-bold underline">
-                {article.headline}&nbsp;↗
-              </a>
-              {article.publishedAt ? (
-                <span className="ml-2 font-mono text-xs text-muted-foreground">{article.publishedAt}</span>
-              ) : null}
-              <div className="mt-1">
-                <SourceTransparencyCard outlet={outlet} outletName={article.outlet} />
+            <li key={article._id} className="flex gap-3 border-2 border-border bg-card p-3">
+              <ArticleThumb src={article.imageUrl} />
+              <div className="min-w-0 flex-1">
+                <a href={article.url} target="_blank" rel="noopener noreferrer" className="font-bold underline">
+                  {article.headline}&nbsp;↗
+                </a>
+                {article.publishedAt ? (
+                  <span className="ml-2 font-mono text-xs text-muted-foreground">{article.publishedAt}</span>
+                ) : null}
+                <div className="mt-1">
+                  <SourceTransparencyCard outlet={outlet} outletName={article.outlet} />
+                </div>
               </div>
             </li>
           ))}
