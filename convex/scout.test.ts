@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { decorateCoverageRow } from "./scout";
+import { decorateCoverageRow } from "./lib/outlets";
 
 describe("decorateCoverageRow", () => {
   const ctx = { candidateNames: ["Francesca Hong"], raceKeywords: ["governor"] };

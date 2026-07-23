@@ -19,7 +19,7 @@ import {
 } from "@arizeai/openinference-vercel";
 import { SEMRESATTRS_PROJECT_NAME } from "@arizeai/openinference-semantic-conventions";
 import { ALLOWED_DOMAINS, isAllowedUrl, parseScoutResponse, sortByRotation } from "./lib/scoutParse";
-import { normalizeOutletKey, scoreRelevance, HUB_RELEVANCE_MIN } from "./lib/outlets";
+import { decorateCoverageRow } from "./lib/outlets";
 
 const AGENT_NAME = "article-scout";
 const DEFAULT_LIMIT = 3;
@@ -90,18 +90,9 @@ type ScoutCandidate = { slug: string; name: string; raceId: string; lastProposed
 
 /** Pure per-row enrichment: outlet key + hub-relevance gate. Exported for
  * testing without the network — called for each article before insert. */
-export function decorateCoverageRow(
-  row: { outlet: string; headline: string },
-  ctx: { candidateNames: string[]; raceKeywords: string[] },
-): { outletKey: string; relevanceScore: number; relevanceReason: string; hubStatus?: "auto" } {
-  const { score, reason } = scoreRelevance(row.headline, ctx);
-  return {
-    outletKey: normalizeOutletKey(row.outlet),
-    relevanceScore: score,
-    relevanceReason: reason,
-    ...(score >= HUB_RELEVANCE_MIN ? { hubStatus: "auto" as const } : {}),
-  };
-}
+// decorateCoverageRow lives in ./lib/outlets (imported above) so plain mutations
+// — e.g. coverageBackfill — can use it too: a mutation cannot import from this
+// "use node" module.
 
 type CandidateSummary = {
   slug: string;

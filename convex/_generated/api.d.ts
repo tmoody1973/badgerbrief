@@ -17,6 +17,7 @@ import type * as briefAgent from "../briefAgent.js";
 import type * as briefWorkflow from "../briefWorkflow.js";
 import type * as briefs from "../briefs.js";
 import type * as coverage from "../coverage.js";
+import type * as coverageBackfill from "../coverageBackfill.js";
 import type * as crons from "../crons.js";
 import type * as demoWorkflow from "../demoWorkflow.js";
 import type * as finance from "../finance.js";
@@ -79,6 +80,7 @@ declare const fullApi: ApiFromModules<{
   briefWorkflow: typeof briefWorkflow;
   briefs: typeof briefs;
   coverage: typeof coverage;
+  coverageBackfill: typeof coverageBackfill;
   crons: typeof crons;
   demoWorkflow: typeof demoWorkflow;
   finance: typeof finance;

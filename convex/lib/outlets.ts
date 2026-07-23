@@ -35,6 +35,23 @@ export function scoreRelevance(
   return { score: 0, reason: "no candidate/race/election match" };
 }
 
+/** Stamp a discovered article with its outlet key + hub relevance. Lives here
+ * (pure lib) rather than in scout.ts so BOTH the "use node" scout action and
+ * plain mutations (e.g. the backfill) share one implementation — a mutation
+ * cannot import from a "use node" module. */
+export function decorateCoverageRow(
+  row: { outlet: string; headline: string },
+  ctx: { candidateNames: string[]; raceKeywords: string[] },
+): { outletKey: string; relevanceScore: number; relevanceReason: string; hubStatus?: "auto" } {
+  const { score, reason } = scoreRelevance(row.headline, ctx);
+  return {
+    outletKey: normalizeOutletKey(row.outlet),
+    relevanceScore: score,
+    relevanceReason: reason,
+    ...(score >= HUB_RELEVANCE_MIN ? { hubStatus: "auto" as const } : {}),
+  };
+}
+
 /** Turn a raw Firecrawl/Perplexity payload into typed transparency fields.
  * Unknown/missing `type` falls back to "other" rather than throwing. */
 export function parseOutletTransparency(raw: unknown): {
