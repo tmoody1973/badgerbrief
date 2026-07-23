@@ -94,6 +94,14 @@ body {
   font-family: var(--font-public-sans), Arial, Helvetica, sans-serif;
 }
 
+/* Root guard: nothing may scroll the page sideways on a phone. `clip`, not
+   `hidden` — `hidden` makes the root a scroll container and would break the
+   sticky SectionNav on race and brief pages. */
+html,
+body {
+  overflow-x: clip;
+}
+
 .font-display {
   font-family: var(--font-archivo-black), Impact, sans-serif;
 }
