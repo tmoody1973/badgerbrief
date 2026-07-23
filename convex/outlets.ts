@@ -1,12 +1,6 @@
 import { v } from "convex/values";
-import { internalMutation, internalQuery, mutation, query, type QueryCtx, type MutationCtx } from "./_generated/server";
-
-async function requireAdmin(ctx: QueryCtx | MutationCtx) {
-  const id = await ctx.auth.getUserIdentity();
-  if ((id?.metadata as { role?: string } | undefined)?.role !== "admin") {
-    throw new Error("admin only");
-  }
-}
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { requireAdmin } from "./sponsors";
 
 const outletFields = {
   displayName: v.string(),
@@ -29,7 +23,9 @@ export const upsertOutlet = internalMutation({
   handler: async (ctx, a) => {
     const existing = await ctx.db.query("outlets").withIndex("by_key", (q) => q.eq("key", a.key)).unique();
     const doc = {
-      key: a.key, displayName: a.displayName, type: a.type,
+      key: a.key, displayName: a.displayName,
+      // A failed enrich yields "other"; never let that clobber a hand-set type.
+      type: existing && a.type === "other" ? existing.type : a.type,
       ownership: a.ownership ?? existing?.ownership,
       fundingNote: a.fundingNote ?? existing?.fundingNote,
       ownershipSourceUrl: a.ownershipSourceUrl ?? existing?.ownershipSourceUrl,

@@ -9,7 +9,10 @@ export function InTheNews({ items, heading }: { items: Row[]; heading: string })
     <section id="news" className="mt-8">
       <h2 className="text-xl font-bold">{heading}</h2>
       <p className="mt-1 font-mono text-xs text-muted-foreground">
-        Coverage a BadgerBrief editor confirmed is about this race. We link out — we don&rsquo;t summarize.
+        Coverage a BadgerBrief editor reviewed and confirmed belongs here. We link out — we don&rsquo;t summarize.{" "}
+        <a href="/news/about" className="underline">
+          How we handle coverage&nbsp;↗
+        </a>
       </p>
       <ul className="mt-3 space-y-3">
         {items.map(({ article, outlet }) => (

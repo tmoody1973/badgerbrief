@@ -33,15 +33,18 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     ),
   },
   {
-    heading: "Outlet transparency from public records",
+    heading: "Where outlet transparency comes from",
     body: (
       <>
-        Next to each news outlet, you&apos;ll see a label showing ownership or
-        funding type—whether it&apos;s commercial broadcast, newspaper,
-        nonprofit, public radio, or partisan. This information comes from public
-        records, SEC filings, organizational documents, or published editorial
-        policies. Every label is human-reviewed before it appears on
-        BadgerBrief.
+        Next to each news outlet you&apos;ll see one of eight type
+        labels—nonprofit, public media, daily paper, wire service, trade press,
+        broadcast TV, national, or other—plus, when we have it, a short note on
+        who owns the outlet and how it&apos;s funded. That information is drawn
+        from the outlet&apos;s own about/ownership pages and public reference
+        sources, and a person reviews it before it appears on BadgerBrief. Each
+        profile links to the page we drew it from, so you can check us. Until
+        that review happens, the outlet shows as &ldquo;profile
+        pending&rdquo;—we&apos;d rather show you nothing than guess.
       </>
     ),
   },

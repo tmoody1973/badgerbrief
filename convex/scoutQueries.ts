@@ -136,6 +136,26 @@ export const insertProposed = internalMutation({
         traceId,
       });
     }
+
+    // Every distinct outletKey needs a row in `outlets` or the transparency
+    // card has nothing to render. New keys land as "draft" — the enrichment
+    // queue + admin Outlets tab both read drafts (spec §4 step 3).
+    const keys = new Set(rows.map((r) => r.outletKey).filter((k): k is string => !!k));
+    for (const key of keys) {
+      const existing = await ctx.db
+        .query("outlets")
+        .withIndex("by_key", (q) => q.eq("key", key))
+        .unique();
+      if (existing) continue;
+      await ctx.db.insert("outlets", {
+        key,
+        displayName: rows.find((r) => r.outletKey === key)!.outlet,
+        type: "other",
+        reviewStatus: "draft",
+        updatedAt: Date.now(),
+      });
+    }
+
     return rows.length;
   },
 });

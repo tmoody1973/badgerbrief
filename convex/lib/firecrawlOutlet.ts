@@ -11,14 +11,15 @@ const SCHEMA = {
 const PROMPT =
   "For a nonpartisan voter guide, extract a neutral factual profile of this news outlet: its ownership structure, its funding model, and its outlet type. Only use what the page states.";
 
-/** Ordered civic-source allowlist for one outlet name. */
+/** Ordered civic-source allowlist for one outlet name: the outlet's own site,
+ * then Wikipedia. No search-engine fallback — a SERP URL would be stored as
+ * `ownershipSourceUrl` and rendered to voters as the ownership citation.
+ * If both fail, returning nothing ("profile pending") is the honest outcome. */
 export function buildOutletSourceUrls(name: string, url?: string): string[] {
-  const q = encodeURIComponent(name);
   const wiki = name.trim().replace(/\s+/g, "_");
   return [
     ...(url ? [url] : []),
     `https://en.wikipedia.org/wiki/${wiki}`,
-    `https://www.google.com/search?q=${q}+ownership+funding`,
   ];
 }
 

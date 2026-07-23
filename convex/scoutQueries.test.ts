@@ -234,4 +234,72 @@ describe("insertProposed", () => {
       expect(row.traceId).toBe("trace-123");
     }
   });
+
+  test("creates one draft outlet per distinct outletKey, and never a duplicate", async () => {
+    const t = setup();
+    const row = {
+      candidateSlug: "joel-brennan",
+      raceId: "WI-GOV-2026",
+      outlet: "Wisconsin Public Radio",
+      outletKey: "wisconsin public radio",
+      headline: "One",
+      whyRelevant: "r",
+    };
+
+    await t.mutation(internal.scoutQueries.insertProposed, {
+      rows: [
+        { ...row, url: "https://wpr.org/one" },
+        // same outlet, second article in the same batch → still one outlet row
+        { ...row, url: "https://wpr.org/two", headline: "Two" },
+        // no outletKey → no outlet row
+        { ...row, url: "https://blog.example/x", outlet: "Unkeyed", outletKey: undefined },
+      ],
+    });
+
+    let outlets = await t.run((ctx) => ctx.db.query("outlets").collect());
+    expect(outlets).toHaveLength(1);
+    expect(outlets[0]).toMatchObject({
+      key: "wisconsin public radio",
+      displayName: "Wisconsin Public Radio",
+      type: "other",
+      reviewStatus: "draft",
+    });
+
+    // a later batch with the same key must not create a second row
+    await t.mutation(internal.scoutQueries.insertProposed, {
+      rows: [{ ...row, url: "https://wpr.org/three", headline: "Three" }],
+    });
+    outlets = await t.run((ctx) => ctx.db.query("outlets").collect());
+    expect(outlets).toHaveLength(1);
+  });
+
+  test("does not downgrade an already-approved outlet back to draft", async () => {
+    const t = setup();
+    await t.run((ctx) =>
+      ctx.db.insert("outlets", {
+        key: "wisconsin public radio",
+        displayName: "Wisconsin Public Radio",
+        type: "public_media",
+        reviewStatus: "approved",
+        updatedAt: Date.now(),
+      }),
+    );
+
+    await t.mutation(internal.scoutQueries.insertProposed, {
+      rows: [{
+        candidateSlug: "joel-brennan",
+        raceId: "WI-GOV-2026",
+        url: "https://wpr.org/one",
+        outlet: "Wisconsin Public Radio",
+        outletKey: "wisconsin public radio",
+        headline: "One",
+        whyRelevant: "r",
+      }],
+    });
+
+    const outlets = await t.run((ctx) => ctx.db.query("outlets").collect());
+    expect(outlets).toHaveLength(1);
+    expect(outlets[0].reviewStatus).toBe("approved");
+    expect(outlets[0].type).toBe("public_media");
+  });
 });

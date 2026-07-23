@@ -24,3 +24,39 @@ test("upsertOutlet dedups by key; publicOutlet hides drafts", async () => {
   await c.withIdentity(admin).mutation(api.outlets.approveOutlet, { key: "urban milwaukee" });
   expect((await c.query(api.outlets.publicOutlet, { key: "urban milwaukee" }))?.displayName).toBe("Urban Milwaukee");
 });
+
+test("upsertOutlet never clobbers a hand-set type with the enrich fallback", async () => {
+  const c = t();
+  await c.withIdentity(admin).mutation(api.outlets.saveOutlet, {
+    key: "wisconsin watch", displayName: "Wisconsin Watch", type: "nonprofit",
+  });
+  // a failed enrich returns type "other" — must not overwrite the human value
+  await c.mutation(internal.outlets.upsertOutlet, {
+    key: "wisconsin watch", displayName: "Wisconsin Watch", type: "other",
+  });
+  expect((await c.query(internal.outlets.outletByKey, { key: "wisconsin watch" }))?.type).toBe("nonprofit");
+  // an explicit non-fallback type still wins
+  await c.mutation(internal.outlets.upsertOutlet, {
+    key: "wisconsin watch", displayName: "Wisconsin Watch", type: "public_media",
+  });
+  expect((await c.query(internal.outlets.outletByKey, { key: "wisconsin watch" }))?.type).toBe("public_media");
+});
+
+test("outlet admin surfaces reject a non-admin identity", async () => {
+  const c = t();
+  await c.withIdentity(admin).mutation(api.outlets.saveOutlet, {
+    key: "x", displayName: "X", type: "other",
+  });
+  const asEditor = c.withIdentity({ metadata: { role: "editor" } });
+
+  await expect(asEditor.mutation(api.outlets.approveOutlet, { key: "x" })).rejects.toThrow();
+  await expect(asEditor.mutation(api.outlets.saveOutlet, { key: "x", displayName: "X", type: "other" })).rejects.toThrow();
+  await expect(asEditor.query(api.outlets.listDraftOutlets, {})).rejects.toThrow();
+
+  // anonymous is rejected too
+  await expect(c.mutation(api.outlets.approveOutlet, { key: "x" })).rejects.toThrow();
+  await expect(c.query(api.outlets.listDraftOutlets, {})).rejects.toThrow();
+
+  // and the gate actually held: still a draft
+  expect(await c.query(api.outlets.publicOutlet, { key: "x" })).toBeNull();
+});

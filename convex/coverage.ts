@@ -1,24 +1,30 @@
 import { v } from "convex/values";
-import { mutation, query, type QueryCtx, type MutationCtx } from "./_generated/server";
+import { mutation, query, type QueryCtx } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
+import { requireAdmin } from "./sponsors";
 
-async function requireAdmin(ctx: QueryCtx | MutationCtx) {
-  const id = await ctx.auth.getUserIdentity();
-  if ((id?.metadata as { role?: string } | undefined)?.role !== "admin") throw new Error("admin only");
-}
-
-async function withOutlet(ctx: QueryCtx, article: any) {
-  const outlet = article.outletKey
-    ? await ctx.db.query("outlets").withIndex("by_key", (q) => q.eq("key", article.outletKey)).unique()
+async function withOutlet(ctx: QueryCtx, article: Doc<"article_sources">) {
+  const key = article.outletKey;
+  const outlet = key
+    ? await ctx.db.query("outlets").withIndex("by_key", (q) => q.eq("key", key)).unique()
     : null;
-  return { article, status: article.status, outlet: outlet && outlet.reviewStatus === "approved" ? outlet : null };
+  return { article, outlet: outlet && outlet.reviewStatus === "approved" ? outlet : null };
 }
+
+/** Sort key: `publishedAt` is an optional free-text date. Undated (or
+ * unparseable) rows fall back to `proposedAt` so they stay in the recency
+ * window instead of sinking below every dated row and getting sliced off. */
+const when = (r: Doc<"article_sources">) =>
+  (r.publishedAt ? Date.parse(r.publishedAt) || r.proposedAt : r.proposedAt);
+
+const byRecency = (a: Doc<"article_sources">, b: Doc<"article_sources">) => when(b) - when(a);
 
 export const hubArticles = query({
   args: { limit: v.optional(v.number()), raceId: v.optional(v.string()) },
   handler: async (ctx, { limit, raceId }) => {
     const rows = await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "auto")).collect();
     const filtered = (raceId ? rows.filter((r) => r.raceId === raceId) : rows)
-      .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
+      .sort(byRecency)
       .slice(0, limit ?? 60);
     return Promise.all(filtered.map((a) => withOutlet(ctx, a)));
   },
@@ -52,9 +58,7 @@ export const hubModerationList = query({
     await requireAdmin(ctx);
     const auto = await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "auto")).collect();
     const hidden = await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "hidden")).collect();
-    const rows = [...auto, ...hidden]
-      .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
-      .slice(0, limit ?? 100);
+    const rows = [...auto, ...hidden].sort(byRecency).slice(0, limit ?? 100);
     return Promise.all(rows.map((a) => withOutlet(ctx, a)));
   },
 });

@@ -10,19 +10,24 @@ const TYPE_LABEL: Record<string, string> = {
   nonprofit: "Nonprofit", public_media: "Public media",
   corporate_daily: "Daily paper", wire: "Wire service", trade: "Trade press",
   tv: "Broadcast TV", national: "National", other: "Other",
+  // Not a taxonomy type: the bucket for articles whose outlet has no
+  // approved profile yet. Never collapse these into "Other" — unrated is
+  // not a rating.
+  pending: "Profile pending",
 };
 
 export function NewsFeed({ items }: { items: Row[] }) {
   const [filter, setFilter] = useState<string | null>(null);
-  const types = Array.from(new Set(items.map((r) => r.outlet?.type ?? "other")));
-  const visible = filter ? items.filter((r) => (r.outlet?.type ?? "other") === filter) : items;
+  const types = Array.from(new Set(items.map((r) => r.outlet?.type ?? "pending")));
+  const visible = filter ? items.filter((r) => (r.outlet?.type ?? "pending") === filter) : items;
 
   return (
     <section className="mt-8">
       {types.length > 1 ? (
-        <div className="flex flex-wrap gap-2">
+        <div role="group" aria-label="Filter by outlet type" className="flex flex-wrap gap-2">
           <button
             type="button"
+            aria-pressed={filter === null}
             onClick={() => setFilter(null)}
             className={`border-2 border-border px-2 py-1 font-mono text-xs ${filter === null ? "bg-foreground text-background" : "bg-card"}`}
           >
@@ -32,10 +37,11 @@ export function NewsFeed({ items }: { items: Row[] }) {
             <button
               key={type}
               type="button"
+              aria-pressed={filter === type}
               onClick={() => setFilter(type)}
               className={`border-2 border-border px-2 py-1 font-mono text-xs ${filter === type ? "bg-foreground text-background" : "bg-card"}`}
             >
-              {TYPE_LABEL[type] ?? "Other"}
+              {TYPE_LABEL[type] ?? type}
             </button>
           ))}
         </div>
