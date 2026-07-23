@@ -4,7 +4,8 @@
  * cannot import from (same split as scout.ts / scoutQueries.ts).
  */
 import { v } from "convex/values";
-import { internalMutation, internalQuery } from "./_generated/server";
+import { internalMutation, internalQuery, mutation } from "./_generated/server";
+import { requireAdmin } from "./sponsors";
 
 const positionValidator = v.union(
   v.literal("aye"),
@@ -95,5 +96,25 @@ export const ingestedKeys = internalQuery({
       )
       .collect();
     return rows.map((r) => r.voteId).sort();
+  },
+});
+
+/** Attach a hand-verified roll-call surname to a candidate. */
+export const setLegislatorName = mutation({
+  args: {
+    slug: v.string(),
+    name: v.string(),
+    chamber: chamberValidator,
+    sessions: v.array(v.string()),
+  },
+  handler: async (ctx, { slug, name, chamber, sessions }) => {
+    await requireAdmin(ctx);
+    const candidate = await ctx.db
+      .query("candidates")
+      .withIndex("by_slug_only", (q) => q.eq("slug", slug))
+      .first();
+    if (!candidate) throw new Error(`no candidate with slug "${slug}"`);
+    await ctx.db.patch(candidate._id, { legislatorName: { name, chamber, sessions } });
+    return { slug, name };
   },
 });
