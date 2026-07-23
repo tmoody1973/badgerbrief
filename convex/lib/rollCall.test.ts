@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { htmlToLines, parseHeader, parseTallies, parseVacantSeats, parseVoteDate, parseAssemblyVotes } from "./rollCall";
+import { htmlToLines, parseHeader, parseTallies, parseVacantSeats, parseVoteDate, parseAssemblyVotes, type Position } from "./rollCall";
 
 const fixture = (name: string) =>
   readFileSync(join(__dirname, "fixtures", name), "utf8");
@@ -104,9 +104,29 @@ describe("parseAssemblyVotes", () => {
   });
 
   test("positions sum to the document's own tallies", () => {
-    const count = (p) => votes.filter((v) => v.position === p).length;
+    const count = (p: Position) => votes.filter((v) => v.position === p).length;
     expect(count("aye")).toBe(62);
     expect(count("nay")).toBe(35);
     expect(count("not_voting")).toBe(2);
+  });
+
+  test("accepts member names with curly apostrophes", () => {
+    // Verify NAME_RE accepts both straight (') and curly (') apostrophes.
+    const testLines = [
+      "AYES - 2",
+      "Y",
+      "O'CONNOR",
+      "R",
+      "N",
+      "O'CONNOR",
+      "D",
+      "VACANT DISTRICTS",
+    ];
+    const result = parseAssemblyVotes(testLines);
+    expect(result).toHaveLength(2);
+    expect(result[0].name).toBe("O'CONNOR");
+    expect(result[0].position).toBe("aye");
+    expect(result[1].name).toBe("O'CONNOR");
+    expect(result[1].position).toBe("nay");
   });
 });

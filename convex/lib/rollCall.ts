@@ -99,6 +99,9 @@ export function parseVacantSeats(lines: string[]): number {
 
 export type MemberVote = { name: string; party?: string; position: Position };
 
+/** Maps vote marks to their position. The "x" mark was discovered via real document
+ * inspection; the original reference code assumed "NV". Note: "NV" appears only as a
+ * COLUMN HEADER in documents, never as a data mark, so is currently unused. */
 const POSITION_BY_MARK: Record<string, Position> = {
   Y: "aye",
   N: "nay",
@@ -107,7 +110,7 @@ const POSITION_BY_MARK: Record<string, Position> = {
 };
 
 /** A member name cell: surname, optionally with a disambiguating first initial. */
-const NAME_RE = /^[A-Z][A-Z''.\- ]*(?:,\s?[A-Z])?$/;
+const NAME_RE = /^[A-Z][A-Z'\u2019.\- ]*(?:,\s?[A-Z])?$/;
 
 const MONTHS: Record<string, number> = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
