@@ -35,6 +35,7 @@ function useArticleSources() {
 export function ArticleSources() {
   const rows = useArticleSources();
   const decide = useMutation(api.adminQueue.decideArticleSource);
+  const setHubStatus = useMutation(api.coverage.setHubStatus);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -46,6 +47,24 @@ export function ArticleSources() {
     setError(null);
     try {
       await decide({ sourceId, decision });
+    } catch (err) {
+      setError(asMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  // Moderate a row that already surfaced on /news (hubStatus "auto") — hide it
+  // (or reverse a mistaken hide). Rows never scored into the hub have no
+  // hubStatus and get no button here.
+  const handleHub = async (
+    articleId: Id<"article_sources">,
+    hubStatus: "auto" | "hidden",
+  ) => {
+    setBusyId(articleId);
+    setError(null);
+    try {
+      await setHubStatus({ articleId, hubStatus });
     } catch (err) {
       setError(asMessage(err));
     } finally {
@@ -125,6 +144,24 @@ export function ArticleSources() {
                       ? "Dismiss"
                       : "Reject"}
                 </Button>
+                {row.hubStatus === "auto" && (
+                  <Button
+                    variant="outline"
+                    disabled={busyId === row._id}
+                    onClick={() => handleHub(row._id, "hidden")}
+                  >
+                    {busyId === row._id ? "Working…" : "Hide from hub"}
+                  </Button>
+                )}
+                {row.hubStatus === "hidden" && (
+                  <Button
+                    variant="outline"
+                    disabled={busyId === row._id}
+                    onClick={() => handleHub(row._id, "auto")}
+                  >
+                    {busyId === row._id ? "Working…" : "Unhide"}
+                  </Button>
+                )}
               </div>
             </li>
           ))}

@@ -7,6 +7,8 @@ import { api } from "../../../convex/_generated/api";
 import { AdReviewQueue, UnattributedAds } from "./ad-review";
 import { ReviewQueue } from "./review-queue";
 import { ArticleSources } from "./article-sources";
+import { OutletEditor } from "./outlet-editor";
+import type { OutletType } from "../../../convex/lib/outlets";
 import { sponsorKeyToSlug } from "@/lib/site";
 
 type TabKey =
@@ -14,7 +16,8 @@ type TabKey =
   | "unattributed"
   | "editorial"
   | "sources"
-  | "narratives";
+  | "narratives"
+  | "outlets";
 
 /**
  * Admin work is five independent queues that used to stack into one long scroll.
@@ -32,6 +35,10 @@ export function AdminTabs() {
     api.sponsors.pendingNarratives,
     isAuthenticated ? {} : "skip",
   );
+  const draftOutlets = useQuery(
+    api.outlets.listDraftOutlets,
+    isAuthenticated ? {} : "skip",
+  );
   const [tab, setTab] = useState<TabKey>("attribution");
 
   const tabs: { key: TabKey; label: string; count?: number; hint?: string }[] = [
@@ -45,6 +52,7 @@ export function AdminTabs() {
     { key: "editorial", label: "Editorial", count: counts?.editorial },
     { key: "sources", label: "Sources", count: counts?.sources },
     { key: "narratives", label: "Narratives", count: pendingNarratives?.length },
+    { key: "outlets", label: "Outlets", count: draftOutlets?.length },
   ];
 
   return (
@@ -95,7 +103,44 @@ export function AdminTabs() {
         {tab === "editorial" && <ReviewQueue />}
         {tab === "sources" && <ArticleSources />}
         {tab === "narratives" && <NarrativeQueue rows={pendingNarratives} />}
+        {tab === "outlets" && <OutletQueue rows={draftOutlets} />}
       </div>
+    </div>
+  );
+}
+
+/** Draft outlets (transparency facts pending review) — each row is an
+ * OutletEditor panel; approving is what makes the outlet's ownership/funding
+ * facts public on /sponsors-style outlet pages and article bylines. */
+function OutletQueue({
+  rows,
+}: {
+  rows:
+    | {
+        key: string;
+        displayName: string;
+        type: OutletType;
+        ownership?: string;
+        fundingNote?: string;
+        ownershipSourceUrl?: string;
+        domain?: string;
+        reviewStatus: "draft" | "approved";
+      }[]
+    | undefined;
+}) {
+  if (!rows) return null;
+  if (rows.length === 0) {
+    return (
+      <p className="font-mono text-xs text-muted-foreground">
+        No draft outlets pending review.
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-2">
+      {rows.map((o) => (
+        <OutletEditor key={o.key} outlet={o} />
+      ))}
     </div>
   );
 }
