@@ -109,8 +109,17 @@ const POSITION_BY_MARK: Record<string, Position> = {
   x: "not_voting",
 };
 
-/** A member name cell: surname, optionally with a disambiguating first initial. */
-const NAME_RE = /^[A-Z][A-Z'\u2019.\- ]*(?:,\s?[A-Z])?$/;
+/**
+ * A member name cell: surname, optionally with a disambiguating first initial.
+ * Requires 2+ letters \u2014 no real surname is one character, and a bare mark
+ * (e.g. a stray "N") must never be mistaken for a name. This matters: when a
+ * name cell is emptied out from the source HTML, htmlToLines drops the empty
+ * line entirely, which shifts a neighboring mark letter into the name slot.
+ * Without the 2+ floor that phantom row keeps the same party/position as the
+ * real row it replaced, so the tally counts stay balanced and the
+ * reconciliation gate in parseRollCall would miss it.
+ */
+const NAME_RE = /^[A-Z][A-Z'\u2019.\- ]+(?:,\s?[A-Z])?$/;
 
 const MONTHS: Record<string, number> = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
@@ -156,4 +165,111 @@ export function parseAssemblyVotes(lines: string[]): MemberVote[] {
     i++; // party line consumed
   }
   return out;
+}
+
+const GROUP_HEADERS: { re: RegExp; position: Position }[] = [
+  { re: /^AYES\s*-\s*\d+/i, position: "aye" },
+  { re: /^NAYS\s*-\s*\d+/i, position: "nay" },
+  { re: /^NOT VOTING\s*-\s*\d+/i, position: "not_voting" },
+];
+
+/** Lines that follow the name groups and must not be read as members. */
+const SENATE_STOP = /^(VACANT|NO VACANT|PRESIDING|SEQUENCE NO|PAIRED)/i;
+
+/**
+ * Senate roll calls list names in groups under each tally header — no vote
+ * column and no party, unlike the Assembly. Entirely different markup for the
+ * same data, which is why there are two parsers.
+ */
+export function parseSenateVotes(lines: string[]): MemberVote[] {
+  const out: MemberVote[] = [];
+  let position: Position | null = null;
+  for (const line of lines) {
+    const header = GROUP_HEADERS.find((h) => h.re.test(line));
+    if (header) {
+      position = header.position;
+      continue;
+    }
+    if (position === null) continue;
+    if (SENATE_STOP.test(line)) break;
+    if (NAME_RE.test(line)) out.push({ name: line, position });
+  }
+  return out;
+}
+
+export type RollCall = {
+  voteKey: string;
+  session: string;
+  chamber: Chamber;
+  voteId: string;
+  billNumber: string;
+  billTitle: string;
+  voteType: string;
+  votedOn: string;
+  ayes: number;
+  nays: number;
+  notVoting: number;
+  vacantSeats: number;
+  sourceUrl: string;
+  votes: MemberVote[];
+};
+
+export const rollCallUrl = (session: string, chamber: Chamber, voteId: string) =>
+  `https://docs.legis.wisconsin.gov/${session}/related/votes/${chamber}/${voteId}`;
+
+/**
+ * Parse and RECONCILE. A roll call is only returned when the parsed rows agree
+ * with the document's own numbers — parsed positions must equal the printed
+ * tallies, and rows plus vacant seats must equal the chamber's seat count.
+ *
+ * Anything else returns { error } and the caller must not store it. The failure
+ * mode this guards is a parser silently mis-reading a page, which no amount of
+ * human review of the output would catch.
+ */
+export function parseRollCall(
+  html: string,
+  ref: { session: string; chamber: Chamber; voteId: string },
+): RollCall | { error: string } {
+  const lines = htmlToLines(html);
+  const tallies = parseTallies(lines);
+  if (!tallies) return { error: "no AYES/NAYS/NOT VOTING tallies found" };
+  const header = parseHeader(lines);
+  if (!header) return { error: "no bill number / title / vote type found" };
+  const votedOn = parseVoteDate(lines);
+  if (!votedOn) return { error: "no vote date found" };
+
+  const vacantSeats = parseVacantSeats(lines);
+  const votes =
+    ref.chamber === "assembly" ? parseAssemblyVotes(lines) : parseSenateVotes(lines);
+
+  const count = (p: Position) => votes.filter((v) => v.position === p).length;
+  if (
+    count("aye") !== tallies.ayes ||
+    count("nay") !== tallies.nays ||
+    count("not_voting") !== tallies.notVoting
+  ) {
+    return {
+      error:
+        `parsed ${count("aye")}/${count("nay")}/${count("not_voting")} does not match ` +
+        `printed ${tallies.ayes}/${tallies.nays}/${tallies.notVoting}`,
+    };
+  }
+  if (votes.length + vacantSeats !== SEATS[ref.chamber]) {
+    return {
+      error: `${votes.length} rows + ${vacantSeats} vacant != ${SEATS[ref.chamber]} seats`,
+    };
+  }
+
+  return {
+    voteKey: `${ref.session}-${ref.chamber}-${ref.voteId}`,
+    session: ref.session,
+    chamber: ref.chamber,
+    voteId: ref.voteId,
+    ...header,
+    votedOn,
+    ...tallies,
+    vacantSeats,
+    sourceUrl: rollCallUrl(ref.session, ref.chamber, ref.voteId),
+    votes,
+  };
 }

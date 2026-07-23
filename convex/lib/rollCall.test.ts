@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { htmlToLines, parseHeader, parseTallies, parseVacantSeats, parseVoteDate, parseAssemblyVotes, type Position } from "./rollCall";
+import { htmlToLines, parseHeader, parseTallies, parseVacantSeats, parseVoteDate, parseAssemblyVotes, parseRollCall, parseSenateVotes, type Position } from "./rollCall";
 
 const fixture = (name: string) =>
   readFileSync(join(__dirname, "fixtures", name), "utf8");
@@ -118,7 +118,7 @@ describe("parseAssemblyVotes", () => {
       "O’CONNOR",
       "R",
       "N",
-      "O’CONNOR",
+      "O'CONNOR",
       "D",
       "VACANT DISTRICTS",
     ];
@@ -128,5 +128,81 @@ describe("parseAssemblyVotes", () => {
     expect(result[0].position).toBe("aye");
     expect(result[1].name).toBe("O'CONNOR");
     expect(result[1].position).toBe("nay");
+  });
+});
+
+describe("parseSenateVotes", () => {
+  const votes = parseSenateVotes(senLines);
+
+  test("returns every member who voted, grouped under the tally headers", () => {
+    // 33 seats minus one vacancy.
+    expect(votes).toHaveLength(32);
+  });
+
+  test("reads a named senator's position", () => {
+    expect(votes.find((v) => v.name === "ROYS")).toEqual({
+      name: "ROYS",
+      position: "nay",
+    });
+    expect(votes.find((v) => v.name === "BALLWEG")).toEqual({
+      name: "BALLWEG",
+      position: "aye",
+    });
+  });
+
+  test("carries no party — the Senate document does not print one", () => {
+    expect(votes.every((v) => v.party === undefined)).toBe(true);
+  });
+});
+
+describe("parseRollCall", () => {
+  test("parses a complete Assembly roll call", () => {
+    const rc = parseRollCall(fixture("wi-assembly-av0083.html"), {
+      session: "2023",
+      chamber: "assembly",
+      voteId: "av0083",
+    });
+    expect("error" in rc).toBe(false);
+    if ("error" in rc) return;
+    expect(rc.billNumber).toBe("AB 388");
+    expect(rc.voteType).toBe("PASSAGE");
+    expect(rc.votedOn).toBe("2023-09-14");
+    expect(rc.votes).toHaveLength(99);
+    expect(rc.sourceUrl).toBe(
+      "https://docs.legis.wisconsin.gov/2023/related/votes/assembly/av0083",
+    );
+  });
+
+  test("parses a Senate roll call taken during a vacancy", () => {
+    const rc = parseRollCall(fixture("wi-senate-sv0260.html"), {
+      session: "2023",
+      chamber: "senate",
+      voteId: "sv0260",
+    });
+    expect("error" in rc).toBe(false);
+    if ("error" in rc) return;
+    expect(rc.voteType).toBe("CONCURRENCE");
+    expect(rc.vacantSeats).toBe(1);
+    expect(rc.votes).toHaveLength(32);
+  });
+
+  test("REJECTS a roll call whose rows do not match its own tallies", () => {
+    // Drop one member row; the parse must fail rather than store 98 of 99.
+    const broken = fixture("wi-assembly-av0083.html").replace(">HONG<", "><");
+    const rc = parseRollCall(broken, {
+      session: "2023",
+      chamber: "assembly",
+      voteId: "av0083",
+    });
+    expect("error" in rc).toBe(true);
+  });
+
+  test("rejects a document with no tallies at all", () => {
+    const rc = parseRollCall("<html><body>Not a roll call</body></html>", {
+      session: "2023",
+      chamber: "assembly",
+      voteId: "av9999",
+    });
+    expect("error" in rc).toBe(true);
   });
 });
