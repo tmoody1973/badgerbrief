@@ -97,6 +97,18 @@ export function parseVacantSeats(lines: string[]): number {
   return (after.match(/\d+/g) ?? []).length;
 }
 
+export type MemberVote = { name: string; party?: string; position: Position };
+
+const POSITION_BY_MARK: Record<string, Position> = {
+  Y: "aye",
+  N: "nay",
+  NV: "not_voting",
+  x: "not_voting",
+};
+
+/** A member name cell: surname, optionally with a disambiguating first initial. */
+const NAME_RE = /^[A-Z][A-Z''.\- ]*(?:,\s?[A-Z])?$/;
+
 const MONTHS: Record<string, number> = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
   July: 7, August: 8, September: 9, October: 10, November: 11, December: 12,
@@ -112,4 +124,33 @@ export function parseVoteDate(lines: string[]): string | null {
     return `${m[3]}-${String(month).padStart(2, "0")}-${String(Number(m[2])).padStart(2, "0")}`;
   }
   return null;
+}
+
+/**
+ * Assembly roll calls are a table: a Y/N/NV mark in one of three columns,
+ * then the member name, then the party.
+ *
+ * The Speaker is listed as the literal string "SPEAKER" rather than by surname,
+ * so a Speaker's own vote cannot be attributed by name. No tracked candidate
+ * has held the office; if that changes, map their slug to "SPEAKER" for the
+ * sessions they presided.
+ */
+export function parseAssemblyVotes(lines: string[]): MemberVote[] {
+  const start = lines.findIndex((l) => TALLY_RE.test(l));
+  if (start === -1) return [];
+  const out: MemberVote[] = [];
+  for (let i = start + 1; i < lines.length; i++) {
+    const name = lines[i];
+    const party = lines[i + 1];
+    if (!NAME_RE.test(name) || !["R", "D", "I"].includes(party)) continue;
+    // The mark sits in one of the up-to-three cells before the name.
+    const mark = lines
+      .slice(Math.max(0, i - 3), i)
+      .reverse()
+      .find((c) => c in POSITION_BY_MARK);
+    if (!mark) continue;
+    out.push({ name, party, position: POSITION_BY_MARK[mark] });
+    i++; // party line consumed
+  }
+  return out;
 }
