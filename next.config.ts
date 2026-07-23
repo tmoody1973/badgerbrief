@@ -1,56 +1,68 @@
 import type { NextConfig } from "next";
 
+/**
+ * Article thumbnails come from the publisher's own og:image. This is an
+ * ALLOWLIST on purpose: only outlets we've reviewed can render an image on
+ * BadgerBrief, and next/image fetches + resizes + caches them on our side
+ * rather than hotlinking a full-size hero off the publisher.
+ *
+ * `**.example.com` requires at least one subdomain label — it does NOT match
+ * the apex. Listing only the wildcard silently 404s every publisher that
+ * serves images off its bare domain (this bit wisconsinexaminer.com). So
+ * domains go through `withSubdomains`, which always emits both forms, and
+ * hosts that are exact (an S3 bucket, a single image server) are listed as
+ * literals below.
+ */
+const withSubdomains = (...domains: string[]) =>
+  domains.flatMap((hostname) => [
+    { protocol: "https" as const, hostname },
+    { protocol: "https" as const, hostname: `**.${hostname}` },
+  ]);
+
+const exactHosts = (...hostnames: string[]) =>
+  hostnames.map((hostname) => ({ protocol: "https" as const, hostname }));
+
 const nextConfig: NextConfig = {
   images: {
-    // Article thumbnails come from the publisher's own og:image. This is an
-    // ALLOWLIST on purpose: only outlets we've reviewed can render an image on
-    // BadgerBrief, and next/image fetches + resizes + caches them on our side
-    // rather than hotlinking a full-size hero off the publisher.
-    // Add a host here when its outlet is approved in /admin → Outlets.
     remotePatterns: [
-      { protocol: "https", hostname: "urbanmilwaukee.com" },
-      { protocol: "https", hostname: "**.urbanmilwaukee.com" },
-      { protocol: "https", hostname: "wpr.org" },
-      { protocol: "https", hostname: "**.wpr.org" },
-      { protocol: "https", hostname: "wuwm.com" },
-      { protocol: "https", hostname: "**.wuwm.com" },
-      { protocol: "https", hostname: "jsonline.com" },
-      { protocol: "https", hostname: "**.jsonline.com" },
-      { protocol: "https", hostname: "**.gannett-cdn.com" },
-      // WPR/WUWM serve their images off NPR's Brightspot CDN, not their own host.
-      { protocol: "https", hostname: "**.brightspotcdn.com" },
-
-      // --- Madison + statewide + TV (added with the widened scout allowlist) ---
-      // The article host is usually NOT the image host, so these are mostly CDN
-      // entries. Broadcast groups standardised hard: Scripps/Hearst/Gray/Allen
-      // all serve off Brightspot (already covered above), Nexstar and Sinclair
-      // off their own clouds, and Lee's papers off TownNews.
-      { protocol: "https", hostname: "**.lee.net" },          // madison.com / captimes.com (Lee)
-      { protocol: "https", hostname: "**.townnews.com" },     // Lee's TownNews image service
-      { protocol: "https", hostname: "**.wiscnews.com" },
-      { protocol: "https", hostname: "channel3000.com" },
-      { protocol: "https", hostname: "**.channel3000.com" },
-      { protocol: "https", hostname: "**.wkow.com" },
-      { protocol: "https", hostname: "**.wmtv15news.com" },
-      { protocol: "https", hostname: "**.isthmus.com" },
-      { protocol: "https", hostname: "**.pbswisconsin.org" },
-      { protocol: "https", hostname: "**.tmj4.com" },
-      { protocol: "https", hostname: "**.wisn.com" },
-      { protocol: "https", hostname: "**.fox6now.com" },
-      { protocol: "https", hostname: "**.cbs58.com" },
-      { protocol: "https", hostname: "**.wbay.com" },
-      { protocol: "https", hostname: "**.wisconsinwatch.org" },
-      { protocol: "https", hostname: "**.wisconsinexaminer.com" },
-      { protocol: "https", hostname: "**.wispolitics.com" },
-      { protocol: "https", hostname: "**.wiseye.org" },
-      // Observed image hosts, read off real `imageUrl` values after the first
-      // ingest rather than guessed — every one of these is a host we would not
-      // have predicted from the article domain, and each was 404ing.
-      { protocol: "https", hostname: "image.pbs.org" },                            // PBS Wisconsin
-      { protocol: "https", hostname: "wisconsinpublictv.s3.us-east-2.amazonaws.com" }, // PBS Wisconsin's own S3
-      { protocol: "https", hostname: "newscdn2.weigelbroadcasting.com" },          // CBS 58 (Weigel)
-      { protocol: "https", hostname: "**.gtv-cdn.com" },                           // Gray stations (WBAY)
-      { protocol: "https", hostname: "images.foxtv.com" },                         // FOX6 (Fox Corp)
+      ...withSubdomains(
+        // --- outlet domains (mirrors WI_OUTLETS in convex/lib/scoutParse.ts) ---
+        "urbanmilwaukee.com",
+        "wpr.org",
+        "wuwm.com",
+        "jsonline.com",
+        "madison.com",
+        "captimes.com",
+        "channel3000.com",
+        "wkow.com",
+        "wmtv15news.com",
+        "isthmus.com",
+        "pbswisconsin.org",
+        "tmj4.com",
+        "wisn.com",
+        "fox6now.com",
+        "cbs58.com",
+        "wbay.com",
+        "wisconsinwatch.org",
+        "wisconsinexaminer.com",
+        "wispolitics.com",
+        "wiseye.org",
+        // --- shared CDNs (the image host is usually NOT the article host) ---
+        "gannett-cdn.com",
+        "brightspotcdn.com", // NPR/WPR/WUWM + the Scripps & Hearst station groups
+        "gtv-cdn.com",       // Gray stations (WBAY)
+        "lee.net",           // Lee Enterprises (madison.com, captimes.com)
+        "townnews.com",      // Lee's TownNews image service
+        "wiscnews.com",
+      ),
+      // Single image servers observed on real `imageUrl` values after ingest —
+      // none of these are guessable from the article domain.
+      ...exactHosts(
+        "image.pbs.org",                             // PBS Wisconsin
+        "wisconsinpublictv.s3.us-east-2.amazonaws.com", // PBS Wisconsin's own S3
+        "newscdn2.weigelbroadcasting.com",           // CBS 58 (Weigel)
+        "images.foxtv.com",                          // FOX6 (Fox Corp)
+      ),
     ],
   },
 };
