@@ -13,6 +13,7 @@ import {
 } from "@/components/guide/labels";
 import { InTheNews } from "@/components/guide/in-the-news";
 import { InterviewQuotes } from "@/components/guide/interview-quotes";
+import { VotingRecord } from "@/components/guide/voting-record";
 import { isInterviewQuote } from "@/lib/interview-quote";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
@@ -79,7 +80,7 @@ export default async function CandidatePage({ params }: Props) {
     getInTheNewsForCandidate(slug),
   ]);
   if (!data) notFound();
-  const { candidate, race, positions, quotes, finance, contributions, committeeFunding, ads } = data;
+  const { candidate, race, positions, quotes, finance, contributions, committeeFunding, ads, votingRecord } = data;
 
   // WisconsinEye interview answers get their own section: every candidate in
   // the race sat for the same interview, so the answers are comparable across
@@ -109,6 +110,9 @@ export default async function CandidatePage({ params }: Props) {
       : []),
     ...(otherQuotes.length > 0
       ? [{ id: "quotes", label: "Quotes", count: otherQuotes.length }]
+      : []),
+    ...(votingRecord.length > 0
+      ? [{ id: "votes", label: "Voting record", count: votingRecord.length }]
       : []),
     ...(inTheNews.length > 0
       ? [{ id: "news", label: "In the news", count: inTheNews.length }]
@@ -218,6 +222,8 @@ export default async function CandidatePage({ params }: Props) {
         )}
 
         <InterviewQuotes quotes={interviewQuotes} candidateName={candidate.name} />
+
+        <VotingRecord votes={votingRecord} candidateName={candidate.name} />
 
         {otherQuotes.length > 0 && (
           <section id="quotes" className="mt-6 scroll-mt-16">
