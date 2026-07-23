@@ -5,6 +5,7 @@
  */
 import { v } from "convex/values";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { matchesQuery } from "./lib/votingRecord";
 import { requireAdmin } from "./sponsors";
 
 const positionValidator = v.union(
@@ -143,24 +144,8 @@ export const votingRecord = query({
       rows.push({ vote, position: p.position });
     }
 
-    // Word-set match, not one contiguous substring: an agent-phrased query like
-    // "child care center loan" is not a literal substring of the official title
-    // "CHILD CARE CENTER RENOVATIONS LOAN PROGRAM" (the word "renovations" sits
-    // between them), so requiring every word to appear (any order) instead of
-    // one exact run of characters is what lets natural-language queries match.
-    // Each word is boundary-anchored (not a raw substring test) so a query
-    // word like "aid" cannot silently match inside an unrelated word like
-    // "paid" — this doesn't cost any natural-language recall since bill
-    // titles and query words are always matched whole-word anyway.
-    const needleWords = search?.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    const matched = needleWords?.length
-      ? rows.filter((r) => {
-          const haystack = `${r.vote.billTitle} ${r.vote.billNumber}`.toLowerCase();
-          return needleWords.every((w) => {
-            const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-            return new RegExp(`\\b${escaped}\\b`).test(haystack);
-          });
-        })
+    const matched = search?.trim()
+      ? rows.filter((r) => matchesQuery(r.vote.billTitle, r.vote.billNumber, search))
       : rows;
 
     // Count every recorded vote we hold on the SAME bill, so an answer can
