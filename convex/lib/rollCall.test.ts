@@ -27,6 +27,17 @@ describe("parseHeader", () => {
       voteType: "CONCURRENCE",
     });
   });
+
+  test("reads an amendment vote's extra trailing 'OFFERED BY' line as neither title nor vote type", () => {
+    // wi-senate-sv0050.html header runs: SB 330 / BY STROEBEL / title /
+    // "REJECT AMENDMENT" / "SA5 OFFERED BY LARSON". The vote type is the
+    // SECOND line after the sponsor, not the last line in the header.
+    expect(parseHeader(senNoVacancy)).toEqual({
+      billNumber: "SB 330",
+      billTitle: "CHARTER AND CHOICE PER PUPIL PAYMENTS (REVENUE CEI",
+      voteType: "REJECT AMENDMENT",
+    });
+  });
 });
 
 describe("parseTallies", () => {
@@ -56,5 +67,12 @@ describe("parseVoteDate", () => {
   test("reads the date from the document footer", () => {
     expect(parseVoteDate(asmLines)).toBe("2023-09-14");
     expect(parseVoteDate(senLines)).toBe("2024-02-13");
+    expect(parseVoteDate(senNoVacancy)).toBe("2023-06-14");
+  });
+});
+
+describe("htmlToLines", () => {
+  test("normalizes a non-breaking space (U+00A0) to a regular space", () => {
+    expect(htmlToLines("<p>AYES\u00A0-\u00A05</p>")).toEqual(["AYES - 5"]);
   });
 });

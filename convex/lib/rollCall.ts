@@ -21,11 +21,14 @@ export function htmlToLines(html: string): string[] {
   return html
     .replace(/<[^>]+>/g, "\n")
     .split("\n")
-    .map((s) => s.replace(/ /g, " ").trim())
+    .map((s) => s.replace(/\u00A0/g, " ").trim())
     .filter((s) => s.length > 0);
 }
 
 const TALLY_RE = /^AYES\s*-\s*(\d+)/i;
+/** Marks the footer that follows the member rows: vacancy note, presiding
+ * officer, or the "SEQUENCE NO." line — whichever comes first. */
+const FOOTER_RE = /VACANT\s+DISTRICTS?|^PRESIDING|SEQUENCE\s+NO\.?/i;
 
 /** Index of the line carrying the AYES tally — the boundary between header and rows. */
 function talliesIndex(lines: string[]): number {
@@ -37,8 +40,11 @@ export function parseTallies(
 ): { ayes: number; nays: number; notVoting: number } | null {
   const i = talliesIndex(lines);
   if (i === -1) return null;
+  const rest = lines.slice(i);
+  const footerIdx = rest.findIndex((l) => FOOTER_RE.test(l));
+  const end = footerIdx === -1 ? rest.length : footerIdx;
   // Assembly puts all three on one line; the Senate splits them across lines.
-  const joined = lines.slice(i, i + 60).join(" ");
+  const joined = rest.slice(0, end).join(" ");
   const num = (label: string) => {
     const m = joined.match(new RegExp(`${label}\\s*-\\s*(\\d+)`, "i"));
     return m ? Number(m[1]) : null;
@@ -52,8 +58,12 @@ export function parseTallies(
 
 /**
  * Bill number, title and vote type, taken from the lines above the tally.
- * The last all-caps line before the tally is the vote type (PASSAGE,
- * CONCURRENCE, ADOPTION); the line before it is the title.
+ * After the bill number and its "BY <sponsor>" line, the FIRST all-caps line
+ * is the title and the SECOND is the vote type (PASSAGE, CONCURRENCE,
+ * ADOPTION, REJECT AMENDMENT, ...). Amendment votes can carry a further
+ * trailing line naming who offered the amendment (e.g. "SA5 OFFERED BY
+ * LARSON" in wi-senate-sv0050.html) — that line is neither the title nor the
+ * vote type, so anything past the second line is ignored.
  */
 export function parseHeader(
   lines: string[],
@@ -67,8 +77,8 @@ export function parseHeader(
   if (after.length < 2) return null;
   return {
     billNumber: head[billIdx],
-    billTitle: after[after.length - 2],
-    voteType: after[after.length - 1],
+    billTitle: after[0],
+    voteType: after[1],
   };
 }
 
