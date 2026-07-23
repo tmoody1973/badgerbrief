@@ -148,19 +148,30 @@ export const votingRecord = query({
     // "CHILD CARE CENTER RENOVATIONS LOAN PROGRAM" (the word "renovations" sits
     // between them), so requiring every word to appear (any order) instead of
     // one exact run of characters is what lets natural-language queries match.
+    // Each word is boundary-anchored (not a raw substring test) so a query
+    // word like "aid" cannot silently match inside an unrelated word like
+    // "paid" — this doesn't cost any natural-language recall since bill
+    // titles and query words are always matched whole-word anyway.
     const needleWords = search?.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const matched = needleWords?.length
       ? rows.filter((r) => {
           const haystack = `${r.vote.billTitle} ${r.vote.billNumber}`.toLowerCase();
-          return needleWords.every((w) => haystack.includes(w));
+          return needleWords.every((w) => {
+            const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            return new RegExp(`\\b${escaped}\\b`).test(haystack);
+          });
         })
       : rows;
 
-    // Count every recorded vote we hold on each bill, so an answer can disclose
-    // that procedural votes exist rather than quietly showing one of several.
+    // Count every recorded vote we hold on the SAME bill, so an answer can
+    // disclose that procedural votes exist rather than quietly showing one of
+    // several. Keyed by session+billNumber: Wisconsin bill numbers reset each
+    // biennium, so "AB 388" in 2023 and "AB 388" in 2025 are different bills
+    // and must never be counted against each other.
     const perBill = new Map<string, number>();
     for (const r of rows) {
-      perBill.set(r.vote.billNumber, (perBill.get(r.vote.billNumber) ?? 0) + 1);
+      const key = `${r.vote.session}-${r.vote.billNumber}`;
+      perBill.set(key, (perBill.get(key) ?? 0) + 1);
     }
 
     return matched
@@ -181,7 +192,7 @@ export const votingRecord = query({
         ayes: r.vote.ayes,
         nays: r.vote.nays,
         sourceUrl: r.vote.sourceUrl,
-        otherVotesOnBill: (perBill.get(r.vote.billNumber) ?? 1) - 1,
+        otherVotesOnBill: (perBill.get(`${r.vote.session}-${r.vote.billNumber}`) ?? 1) - 1,
       }));
   },
 });

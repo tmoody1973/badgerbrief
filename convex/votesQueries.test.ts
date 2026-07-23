@@ -229,4 +229,102 @@ describe("votingRecord", () => {
     // The reader is told the other recorded vote exists.
     expect(rows[0].otherVotesOnBill).toBe(1);
   });
+
+  test("otherVotesOnBill is not inflated across sessions sharing a bill number", async () => {
+    // Regression test: Wisconsin bill numbers reset every biennium, so "AB 388"
+    // in 2023 and "AB 388" in 2025 are unrelated bills. A legislator who voted
+    // on both must not have one session's vote counted as "another vote on the
+    // same bill" for the other.
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("candidates", {
+        slug: "francesca-hong",
+        raceId: "WI-GOV-2026",
+        name: "Francesca Hong",
+        sources: [],
+        dataAsOf: "2026-07-23",
+        legislatorName: { name: "HONG", chamber: "assembly", sessions: ["2023", "2025"] },
+      });
+    });
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall: ROLL_CALL });
+    await t.mutation(internal.votesQueries.storeRollCall, {
+      rollCall: {
+        ...ROLL_CALL,
+        voteKey: "2025-assembly-av0083",
+        session: "2025",
+        voteId: "av0083-2025",
+        votedOn: "2025-09-14",
+      },
+    });
+
+    const rows = await t.query(api.votesQueries.votingRecord, {
+      candidateSlug: "francesca-hong",
+    });
+    expect(rows).toHaveLength(2);
+    for (const row of rows) {
+      expect(row.otherVotesOnBill).toBe(0);
+    }
+  });
+
+  test("word-set search returns both bills when the query words match two different titles", async () => {
+    // Regression test: a query whose words appear in two unrelated bill titles
+    // must return BOTH rows, each with its own billNumber/billTitle/position —
+    // never collapse them into one row or cross a position between them.
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("candidates", {
+        slug: "francesca-hong",
+        raceId: "WI-GOV-2026",
+        name: "Francesca Hong",
+        sources: [],
+        dataAsOf: "2026-07-23",
+        legislatorName: { name: "HONG", chamber: "assembly", sessions: ["2023"] },
+      });
+    });
+    await t.mutation(internal.votesQueries.storeRollCall, {
+      rollCall: { ...ROLL_CALL, votes: [{ name: "HONG", party: "D", position: "aye" as const }] },
+    });
+    await t.mutation(internal.votesQueries.storeRollCall, {
+      rollCall: {
+        ...ROLL_CALL,
+        voteKey: "2023-assembly-av0090",
+        voteId: "av0090",
+        billNumber: "SB 210",
+        billTitle: "STUDENT LOAN REFINANCING ASSISTANCE",
+        votes: [{ name: "HONG", party: "D", position: "nay" as const }],
+      },
+    });
+
+    const rows = await t.query(api.votesQueries.votingRecord, {
+      candidateSlug: "francesca-hong",
+      query: "loan",
+    });
+    expect(rows).toHaveLength(2);
+
+    const childCare = rows.find((r) => r.billNumber === "AB 388");
+    const studentLoan = rows.find((r) => r.billNumber === "SB 210");
+    expect(childCare).toBeDefined();
+    expect(studentLoan).toBeDefined();
+    expect(childCare).toMatchObject({
+      billTitle: "CHILD CARE CENTER RENOVATIONS LOAN PROGRAM",
+      position: "aye",
+    });
+    expect(studentLoan).toMatchObject({
+      billTitle: "STUDENT LOAN REFINANCING ASSISTANCE",
+      position: "nay",
+    });
+  });
+
+  test("boundary-anchored word match: 'aid' does not match a title containing only 'paid'", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    await t.mutation(internal.votesQueries.storeRollCall, {
+      rollCall: { ...ROLL_CALL, billTitle: "REQUIRING WAGES BE PAID PROMPTLY" },
+    });
+    const rows = await t.query(api.votesQueries.votingRecord, {
+      candidateSlug: "francesca-hong",
+      query: "aid",
+    });
+    expect(rows).toHaveLength(0);
+  });
 });
