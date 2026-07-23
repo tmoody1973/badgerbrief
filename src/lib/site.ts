@@ -1,5 +1,5 @@
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://badgerbrief.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://badgerbrief.org";
 
 export const SITE_NAME = "BadgerBrief";
 export const SITE_DESCRIPTION =
