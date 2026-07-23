@@ -68,6 +68,7 @@ import type * as tvExtractAgent from "../tvExtractAgent.js";
 import type * as users from "../users.js";
 import type * as voterHelp from "../voterHelp.js";
 import type * as voterHelpQueries from "../voterHelpQueries.js";
+import type * as votes from "../votes.js";
 import type * as votesQueries from "../votesQueries.js";
 
 import type {
@@ -137,6 +138,7 @@ declare const fullApi: ApiFromModules<{
   users: typeof users;
   voterHelp: typeof voterHelp;
   voterHelpQueries: typeof voterHelpQueries;
+  votes: typeof votes;
   votesQueries: typeof votesQueries;
 }>;
 

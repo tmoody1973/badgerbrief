@@ -97,4 +97,14 @@ crons.monthly(
   { limit: 50, staleDays: 30 },
 );
 
+// Sundays 12:00 UTC — the Legislature posts roll calls within a day or two of a
+// floor session, and already-ingested vote ids are skipped, so a weekly full
+// pass costs one index fetch per chamber when nothing is new.
+crons.weekly(
+  "ingest legislative roll calls",
+  { dayOfWeek: "sunday", hourUTC: 12, minuteUTC: 0 },
+  internal.votes.ingest,
+  {},
+);
+
 export default crons;
