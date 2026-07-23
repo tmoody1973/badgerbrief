@@ -165,8 +165,11 @@ a link to the official roll call.
 
 ## Out of scope
 
-- **Federal votes.** Tiffany, Pocan and Grothman serve in Congress; that needs the
-  Congress.gov API and is a separate project.
+- **Federal votes — [MOO-396](https://linear.app/moodyco/issue/MOO-396).** Eight tracked
+  candidates sit in the U.S. House: Moore, Pocan, Grothman, Tiffany, Steil, Van Orden,
+  Fitzgerald and Wied. Comparable in value to the state work, but a different source
+  (Congress.gov), different identifiers (Bioguide IDs, so no surname-collision problem to
+  solve) and a much larger vote volume. Separate ticket, blocked on this shipping first.
 - **Committee votes.** Floor roll calls only. Committee votes are not in the session vote
   index and are reported in the bill history without per-member records.
 - **Scorecards, ratings, or vote-based scoring of any kind.** That is characterization, not
