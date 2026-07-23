@@ -133,10 +133,28 @@ const tasks = axJson(["tasks", "list", "--space", SPACE, "-o", "json"]);
 const task = (tasks.tasks ?? tasks).find((t) => t.name === `gate-${name}`);
 console.log(`scoring with judges (task ${task.id})…`);
 if (!reportOnly) axTolerant(["tasks", "trigger-run", task.id, "--experiment-ids", exp.id, "--wait"]);
+
+// `ax tasks list-runs` is a landmine: the server now returns a `failure_reason`
+// field on TaskRun that ax's client-side model doesn't know, so it throws on
+// deserialization even though the run completed fine server-side (see
+// docs/eval-gate.md ax CLI landmines). Poll the REST endpoint instead — same
+// API the score-fetch below already uses.
+const apiKey = (() => {
+  const toml = readFileSync(`${process.env.HOME}/.arize/profiles/default.toml`, "utf8");
+  const match = toml.match(/api_key\s*=\s*"([^"]+)"/);
+  if (!match) throw new Error("no api_key in ~/.arize/profiles/default.toml");
+  return match[1];
+})();
+async function fetchTaskRuns(taskId) {
+  const res = await fetch(`https://api.arize.com/v2/tasks/${taskId}/runs?limit=5`, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+  if (!res.ok) throw new Error(`task runs fetch failed: ${res.status}`);
+  return (await res.json()).task_runs;
+}
 // poll until the run reaches a terminal state (trigger --wait may have bailed early)
 for (let i = 0; i < 60; i++) {
-  const runsList = axJson(["tasks", "list-runs", task.id, "-o", "json"]);
-  const rl = runsList.task_runs ?? runsList.runs ?? [];
+  const rl = await fetchTaskRuns(task.id);
   const latest = rl[0];
   if (latest && ["COMPLETED", "FAILED", "CANCELLED"].includes(latest.status)) {
     console.log(`judge run ${latest.status}`);
@@ -149,12 +167,6 @@ for (let i = 0; i < 60; i++) {
 // 5. Pull scores and compute pass rates.
 // `ax experiments export` omits task-attached evals; the REST runs endpoint
 // carries them as flat `eval.<name>.label` columns — read those instead.
-const apiKey = (() => {
-  const toml = readFileSync(`${process.env.HOME}/.arize/profiles/default.toml`, "utf8");
-  const match = toml.match(/api_key\s*=\s*"([^"]+)"/);
-  if (!match) throw new Error("no api_key in ~/.arize/profiles/default.toml");
-  return match[1];
-})();
 async function fetchRuns(expId) {
   const res = await fetch(`https://api.arize.com/v2/experiments/${expId}/runs?limit=200`, {
     headers: { Authorization: `Bearer ${apiKey}` },
