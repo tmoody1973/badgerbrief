@@ -34,3 +34,20 @@ export function scoreRelevance(
   if (wi) return { score: 0.3, reason: "WI-election term only" };
   return { score: 0, reason: "no candidate/race/election match" };
 }
+
+/** Turn a raw Firecrawl/Perplexity payload into typed transparency fields.
+ * Unknown/missing `type` falls back to "other" rather than throwing. */
+export function parseOutletTransparency(raw: unknown): {
+  type: OutletType; ownership?: string; fundingNote?: string; ownershipSourceUrl?: string;
+} {
+  const r = (raw ?? {}) as Record<string, unknown>;
+  const rawType = String(r.type ?? "").toLowerCase();
+  const type = (OUTLET_TYPES as readonly string[]).includes(rawType) ? (rawType as OutletType) : "other";
+  const str = (x: unknown) => (typeof x === "string" && x.trim() ? x.trim() : undefined);
+  return {
+    type,
+    ownership: str(r.ownership),
+    fundingNote: str(r.funding) ?? str(r.fundingNote),
+    ownershipSourceUrl: str(r.sourceUrl) ?? str(r.ownershipSourceUrl),
+  };
+}

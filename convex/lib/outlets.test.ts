@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { normalizeOutletKey, OUTLET_TYPES, scoreRelevance, HUB_RELEVANCE_MIN } from "./outlets";
+import { normalizeOutletKey, OUTLET_TYPES, scoreRelevance, HUB_RELEVANCE_MIN, parseOutletTransparency } from "./outlets";
+import outletRaw from "./fixtures/outlet-firecrawl.json";
 
 describe("normalizeOutletKey", () => {
   test("lowercases, strips punctuation, collapses spaces", () => {
@@ -31,4 +32,14 @@ describe("scoreRelevance", () => {
     const r = scoreRelevance("Wisconsin governor race heats up", ctx);
     expect(r.score).toBeGreaterThanOrEqual(HUB_RELEVANCE_MIN);
   });
+});
+
+test("parseOutletTransparency maps a payload to transparency fields", () => {
+  const p = parseOutletTransparency(outletRaw);
+  expect(p.type).toBe("nonprofit");
+  expect(p.ownership).toMatch(/nonprofit/i);
+  expect(p.ownershipSourceUrl).toMatch(/^https?:\/\//);
+});
+test("parseOutletTransparency falls back to 'other' on unknown type", () => {
+  expect(parseOutletTransparency({ type: "??", ownership: "x", sourceUrl: "https://a" }).type).toBe("other");
 });
