@@ -6,8 +6,10 @@
  * members can share a surname on the same vote (ANDERSON, C and ANDERSON, J).
  * A candidate omitted here simply shows no voting record.
  *
- * Sessions are those covered by our ingest (2023, 2025). A legislator who
- * served earlier has votes we do not have; the UI says which sessions it covers.
+ * Sessions listed per mapping are those the candidate served AND that our
+ * ingest covers (2011–2025 Assembly, 2023–2025 Senate). A legislator who
+ * served outside that range has votes we do not have; the UI says which
+ * sessions it covers.
  *
  * *** ORDERING CONSTRAINT — READ BEFORE ADDING A MAPPING ***
  * Names here MUST be seeded BEFORE `votes:ingest` runs for the sessions/
@@ -42,6 +44,14 @@ const IDENTITY = JSON.stringify({ metadata: { role: "admin" } });
 const MAPPINGS = [
   { slug: "francesca-hong", name: "HONG", chamber: "assembly", sessions: ["2023", "2025"] },
   { slug: "kelda-roys", name: "ROYS", chamber: "senate", sessions: ["2023", "2025"] },
+  // Pre-2019 Assembly service. Each surname verified as the SINGLE, party-D
+  // entry in every session served (no same-surname collision) against a real
+  // roll call from that session: Barnes 2013/2015, Hulsey 2011/2013, Crowley
+  // 2017/2019, Zamarripa 2011/2013/2015/2017/2019.
+  { slug: "mandela-barnes", name: "BARNES", chamber: "assembly", sessions: ["2013", "2015"] },
+  { slug: "brett-hulsey", name: "HULSEY", chamber: "assembly", sessions: ["2011", "2013"] },
+  { slug: "david-crowley", name: "CROWLEY", chamber: "assembly", sessions: ["2017", "2019"] },
+  { slug: "jocasta-zamarripa", name: "ZAMARRIPA", chamber: "assembly", sessions: ["2011", "2013", "2015", "2017", "2019"] },
 ];
 
 for (const m of MAPPINGS) {
