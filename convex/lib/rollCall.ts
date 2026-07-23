@@ -111,13 +111,14 @@ const POSITION_BY_MARK: Record<string, Position> = {
 
 /**
  * A member name cell: surname, optionally with a disambiguating first initial.
- * Requires 2+ letters \u2014 no real surname is one character, and a bare mark
- * (e.g. a stray "N") must never be mistaken for a name. This matters: when a
- * name cell is emptied out from the source HTML, htmlToLines drops the empty
- * line entirely, which shifts a neighboring mark letter into the name slot.
- * Without the 2+ floor that phantom row keeps the same party/position as the
- * real row it replaced, so the tally counts stay balanced and the
- * reconciliation gate in parseRollCall would miss it.
+ * Requires 2+ letters \u2014 no real surname is one character, so a bare "Y"/"N"/"x"
+ * mark shifted into the name slot by a blanked name cell is not read as a name.
+ *
+ * The 2+ floor is a HEURISTIC, not an invariant: "NV" is both a mark and a
+ * literal column header, and would satisfy this pattern. What actually closes
+ * the shifted-phantom class is the once-only mark consumption in
+ * parseAssemblyVotes \u2014 a phantom row has no unspent mark of its own, so it is
+ * dropped and the seat count no longer reconciles.
  */
 const NAME_RE = /^[A-Z][A-Z'\u2019.\- ]+(?:,\s?[A-Z])?$/;
 
@@ -151,17 +152,28 @@ export function parseAssemblyVotes(lines: string[]): MemberVote[] {
   const start = lines.findIndex((l) => TALLY_RE.test(l));
   if (start === -1) return [];
   const out: MemberVote[] = [];
+  // Every mark is consumed AT MOST ONCE. htmlToLines drops empty lines, so a row
+  // whose own mark cell is blank would otherwise scan back into the previous row
+  // and steal its mark — silently attributing the wrong position to a real
+  // member while the tallies and the seat count both still reconcile.
+  let lastMark = -1;
   for (let i = start + 1; i < lines.length; i++) {
     const name = lines[i];
     const party = lines[i + 1];
     if (!NAME_RE.test(name) || !["R", "D", "I"].includes(party)) continue;
-    // The mark sits in one of the up-to-three cells before the name.
-    const mark = lines
-      .slice(Math.max(0, i - 3), i)
-      .reverse()
-      .find((c) => c in POSITION_BY_MARK);
-    if (!mark) continue;
-    out.push({ name, party, position: POSITION_BY_MARK[mark] });
+    // The mark sits in one of the up-to-three cells before the name, and never
+    // at or before a mark already spent on an earlier row.
+    const floor = Math.max(0, i - 3, lastMark + 1);
+    let markIdx = -1;
+    for (let j = i - 1; j >= floor; j--) {
+      if (lines[j] in POSITION_BY_MARK) {
+        markIdx = j;
+        break;
+      }
+    }
+    if (markIdx === -1) continue;
+    out.push({ name, party, position: POSITION_BY_MARK[lines[markIdx]] });
+    lastMark = markIdx;
     i++; // party line consumed
   }
   return out;
@@ -230,6 +242,13 @@ export function parseRollCall(
   html: string,
   ref: { session: string; chamber: Chamber; voteId: string },
 ): RollCall | { error: string } {
+  // Every real document prints its own canonical path. Without this the ref is
+  // taken on faith and a Senate page can be stored under an Assembly vote key.
+  const canonicalPath = `/${ref.session}/related/votes/${ref.chamber}/${ref.voteId}`;
+  if (!html.includes(canonicalPath)) {
+    return { error: `document does not identify itself as ${canonicalPath}` };
+  }
+
   const lines = htmlToLines(html);
   const tallies = parseTallies(lines);
   if (!tallies) return { error: "no AYES/NAYS/NOT VOTING tallies found" };
@@ -259,6 +278,11 @@ export function parseRollCall(
       error: `${votes.length} rows + ${vacantSeats} vacant != ${SEATS[ref.chamber]} seats`,
     };
   }
+  // One member cell carrying another member's name keeps every count balanced,
+  // so only the names themselves reveal it.
+  const names = votes.map((v) => v.name);
+  const duplicate = names.find((n, i) => names.indexOf(n) !== i);
+  if (duplicate) return { error: `duplicate member name: ${duplicate}` };
 
   return {
     voteKey: `${ref.session}-${ref.chamber}-${ref.voteId}`,

@@ -110,6 +110,17 @@ describe("parseAssemblyVotes", () => {
     expect(count("not_voting")).toBe(2);
   });
 
+  test("never spends one mark on two rows", () => {
+    // htmlToLines drops empty lines, so a row with a blank mark cell would
+    // otherwise scan back into the previous row and consume its mark a second
+    // time. Here BROWN has no mark of its own: it must be dropped, not given
+    // SMITH's "Y".
+    const testLines = ["AYES - 1", "Y", "SMITH", "R", "BROWN", "D", "VACANT DISTRICTS"];
+    expect(parseAssemblyVotes(testLines)).toEqual([
+      { name: "SMITH", party: "R", position: "aye" },
+    ]);
+  });
+
   test("accepts member names with curly apostrophes", () => {
     // Verify NAME_RE accepts both straight (') and curly (') apostrophes.
     const testLines = [
@@ -153,15 +164,42 @@ describe("parseSenateVotes", () => {
   test("carries no party — the Senate document does not print one", () => {
     expect(votes.every((v) => v.party === undefined)).toBe(true);
   });
+
+  test("STOPS at the footer rather than skipping it and reading on", () => {
+    // SENATE_STOP must BREAK, not merely skip the matched line. A footer group
+    // such as PAIRED is followed by more all-caps names; skipping the header
+    // would file each of them under the last tally group's position — here
+    // BROWN and JONES would both be recorded as voting nay.
+    expect(parseSenateVotes(["NAYS - 1", "SMITH", "PAIRED - 2", "BROWN", "JONES"])).toEqual([
+      { name: "SMITH", position: "nay" },
+    ]);
+    expect(parseSenateVotes(senNoVacancy)).toHaveLength(33);
+  });
 });
 
 describe("parseRollCall", () => {
+  const asmRef = { session: "2023", chamber: "assembly" as const, voteId: "av0083" };
+  const senateRef = (voteId: string) => ({
+    session: "2023",
+    chamber: "senate" as const,
+    voteId,
+  });
+
+  /** Empty a row's three leading mark cells, leaving its name and party intact. */
+  const blankMarkCells = (html: string, name: string) => {
+    const row = html.match(
+      new RegExp(`<tr>(?:\\s*<td>[^<]*</td>){3}\\s*<td class="name">${name}</td>[\\s\\S]*?</tr>`),
+    );
+    if (!row) throw new Error(`no row for ${name}`);
+    const nameAt = row[0].indexOf('class="name"');
+    return html.replace(
+      row[0],
+      row[0].replace(/<td>[^<]*<\/td>/g, (td, off: number) => (off < nameAt ? "<td></td>" : td)),
+    );
+  };
+
   test("parses a complete Assembly roll call", () => {
-    const rc = parseRollCall(fixture("wi-assembly-av0083.html"), {
-      session: "2023",
-      chamber: "assembly",
-      voteId: "av0083",
-    });
+    const rc = parseRollCall(fixture("wi-assembly-av0083.html"), asmRef);
     expect("error" in rc).toBe(false);
     if ("error" in rc) return;
     expect(rc.billNumber).toBe("AB 388");
@@ -173,12 +211,31 @@ describe("parseRollCall", () => {
     );
   });
 
-  test("parses a Senate roll call taken during a vacancy", () => {
-    const rc = parseRollCall(fixture("wi-senate-sv0260.html"), {
-      session: "2023",
-      chamber: "senate",
-      voteId: "sv0260",
+  test("REJECTS offsetting blank mark cells that would flip two members' votes", () => {
+    // The demonstrated attack: blanking ARMSTRONG's and ANDERSON, C's mark cells
+    // made each row consume its predecessor's mark, storing ARMSTRONG (aye) as
+    // nay and ANDERSON, C (nay) as aye — with 99 rows, matching tallies and a
+    // passing seat check.
+    let broken = blankMarkCells(fixture("wi-assembly-av0083.html"), "ARMSTRONG");
+    broken = blankMarkCells(broken, "ANDERSON, C");
+    expect(parseRollCall(broken, asmRef)).toEqual({
+      error: "parsed 61/34/2 does not match printed 62/35/2",
     });
+  });
+
+  test("REJECTS a blank mark cell on ANY row", () => {
+    // Sweeps every Assembly row: none may be accepted with its mark removed.
+    const html = fixture("wi-assembly-av0083.html");
+    const names = [...html.matchAll(/<td class="name">([^<]*)<\/td>/g)].map((m) => m[1]);
+    expect(names).toHaveLength(99);
+    const accepted = names.filter(
+      (n) => !("error" in parseRollCall(blankMarkCells(html, n), asmRef)),
+    );
+    expect(accepted).toEqual([]);
+  });
+
+  test("parses a Senate roll call taken during a vacancy", () => {
+    const rc = parseRollCall(fixture("wi-senate-sv0260.html"), senateRef("sv0260"));
     expect("error" in rc).toBe(false);
     if ("error" in rc) return;
     expect(rc.voteType).toBe("CONCURRENCE");
@@ -186,23 +243,78 @@ describe("parseRollCall", () => {
     expect(rc.votes).toHaveLength(32);
   });
 
+  test("parses a Senate roll call with no vacancy", () => {
+    const rc = parseRollCall(fixture("wi-senate-sv0050.html"), senateRef("sv0050"));
+    expect("error" in rc).toBe(false);
+    if ("error" in rc) return;
+    expect(rc.vacantSeats).toBe(0);
+    expect(rc.votes).toHaveLength(33);
+  });
+
   test("REJECTS a roll call whose rows do not match its own tallies", () => {
     // Drop one member row; the parse must fail rather than store 98 of 99.
+    // The exact message pins WHICH gate fired — asserting only that some error
+    // came back leaves the tally check free to be deleted.
     const broken = fixture("wi-assembly-av0083.html").replace(">HONG<", "><");
-    const rc = parseRollCall(broken, {
-      session: "2023",
-      chamber: "assembly",
-      voteId: "av0083",
+    expect(parseRollCall(broken, asmRef)).toEqual({
+      error: "parsed 62/34/2 does not match printed 62/35/2",
     });
-    expect("error" in rc).toBe(true);
+  });
+
+  test("REJECTS a roll call whose rows do not fill the chamber", () => {
+    // Internally consistent tallies (22/10/0 parsed AND printed) that leave a
+    // seat unaccounted for once the vacancy note is removed. Only the seat
+    // check can catch this; the tally check sees nothing wrong.
+    const broken = fixture("wi-senate-sv0260.html").replace(
+      "VACANT DISTRICTS: 4",
+      "NO VACANT DISTRICTS",
+    );
+    expect(parseRollCall(broken, senateRef("sv0260"))).toEqual({
+      error: "32 rows + 0 vacant != 33 seats",
+    });
+  });
+
+  test("REJECTS a document where one member's cell carries another's name", () => {
+    // Every count still balances — only the names reveal that HONG's vote was
+    // filed under HAYWOOD, who now appears twice.
+    const broken = fixture("wi-assembly-av0083.html").replace(">HONG<", ">HAYWOOD<");
+    expect(parseRollCall(broken, asmRef)).toEqual({
+      error: "duplicate member name: HAYWOOD",
+    });
+  });
+
+  test("REJECTS a Senate document with a duplicated senator", () => {
+    const broken = fixture("wi-senate-sv0050.html").replace(">ROYS<", ">AGARD<");
+    expect(parseRollCall(broken, senateRef("sv0050"))).toEqual({
+      error: "duplicate member name: AGARD",
+    });
+  });
+
+  test("REJECTS a document whose own identity contradicts the ref", () => {
+    // Every real page prints its canonical path. Without the cross-check a
+    // Senate page is happily stored under an Assembly vote key.
+    expect(
+      parseRollCall(fixture("wi-senate-sv0260.html"), {
+        session: "9999",
+        chamber: "senate",
+        voteId: "av0260",
+      }),
+    ).toEqual({ error: "document does not identify itself as /9999/related/votes/senate/av0260" });
+  });
+
+  test("REJECTS a document with no vote date", () => {
+    const broken = fixture("wi-assembly-av0083.html").replace(
+      "Thursday, September 14, 2023<br>",
+      "",
+    );
+    expect(parseRollCall(broken, asmRef)).toEqual({ error: "no vote date found" });
   });
 
   test("rejects a document with no tallies at all", () => {
-    const rc = parseRollCall("<html><body>Not a roll call</body></html>", {
-      session: "2023",
-      chamber: "assembly",
-      voteId: "av9999",
-    });
-    expect("error" in rc).toBe(true);
+    const rc = parseRollCall(
+      "<html><body>/2023/related/votes/assembly/av9999 Not a roll call</body></html>",
+      { session: "2023", chamber: "assembly", voteId: "av9999" },
+    );
+    expect(rc).toEqual({ error: "no AYES/NAYS/NOT VOTING tallies found" });
   });
 });
