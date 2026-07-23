@@ -25,42 +25,55 @@ const CHAMBERS: Chamber[] = ["assembly", "senate"];
 const UA = "BadgerBrief/1.0 (nonpartisan voter guide; +https://badgerbrief.org)";
 
 async function fetchText(url: string): Promise<string | null> {
-  const res = await fetch(url, { headers: { "User-Agent": UA } });
-  if (!res.ok) return null;
-  return await res.text();
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": UA } });
+    if (!res.ok) return null;
+    return await res.text();
+  } catch (error) {
+    return null;
+  }
 }
 
 export const ingest = internalAction({
   args: {
     sessions: v.optional(v.array(v.string())),
-    chambers: v.optional(v.array(v.string())),
+    chambers: v.optional(v.array(v.union(v.literal("assembly"), v.literal("senate")))),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, args): Promise<{ stored: number; skipped: number; rejected: number }> => {
+  handler: async (ctx, args): Promise<{ stored: number; skipped: number; rejected: number; fetchFailed: number; deferred: number }> => {
     const sessions = args.sessions ?? SESSIONS;
-    const chambers = (args.chambers as Chamber[] | undefined) ?? CHAMBERS;
+    const chambers = args.chambers ?? CHAMBERS;
     let stored = 0;
     let skipped = 0;
     let rejected = 0;
+    let fetchFailed = 0;
+    let deferred = 0;
 
     for (const session of sessions) {
       for (const chamber of chambers) {
-        const indexHtml = await fetchText(voteIndexUrl(session, chamber));
+        const indexUrl = voteIndexUrl(session, chamber);
+        const indexHtml = await fetchText(indexUrl);
         if (!indexHtml) {
-          console.warn(`vote index unavailable: ${session} ${chamber}`);
+          console.warn(`vote index fetch failed: ${indexUrl}`);
+          fetchFailed++;
           continue;
         }
         const ids = parseVoteIndex(indexHtml, chamber);
         const done = new Set(
           await ctx.runQuery(internal.votesQueries.ingestedKeys, { session, chamber }),
         );
-        const todo = ids.filter((id) => !done.has(id)).slice(0, args.limit ?? 10_000);
-        skipped += ids.length - todo.length;
+        const limit = args.limit ?? 10_000;
+        const filtered = ids.filter((id) => !done.has(id));
+        skipped += done.size;
+        deferred += Math.max(0, filtered.length - limit);
+        const todo = filtered.slice(0, limit);
 
         for (const voteId of todo) {
-          const html = await fetchText(rollCallUrl(session, chamber, voteId));
+          const rollUrl = rollCallUrl(session, chamber, voteId);
+          const html = await fetchText(rollUrl);
           if (!html) {
-            rejected++;
+            console.warn(`vote fetch failed: ${rollUrl}`);
+            fetchFailed++;
             continue;
           }
           const parsed = parseRollCall(html, { session, chamber, voteId });
@@ -78,6 +91,6 @@ export const ingest = internalAction({
         }
       }
     }
-    return { stored, skipped, rejected };
+    return { stored, skipped, rejected, fetchFailed, deferred };
   },
 });
