@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { internalAction, internalMutation, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { extractPublishedDate, extractOgImage } from "./lib/publishedDate";
+import { extractPublishedDate, extractOgImage, dateFromUrlPath } from "./lib/publishedDate";
 
 /** Articles we have not yet tried to verify a publication date for. */
 export const unverifiedArticles = internalQuery({
@@ -80,18 +80,23 @@ export const syncPublishedDates = internalAction({
         });
         if (!res.ok) {
           fetchFailed++;
+          // Blocked or 404 — the permalink itself may still state the date.
+          const fromUrl = dateFromUrlPath(t.url);
+          if (fromUrl) verified++;
           await ctx.runMutation(internal.publishedDateSync.recordPublishedDate, {
-            id: t.id, verified: false,
+            id: t.id, publishedAt: fromUrl, verified: !!fromUrl,
           });
           continue;
         }
         const html = await res.text();
-        date = extractPublishedDate(html);
+        date = extractPublishedDate(html) ?? dateFromUrlPath(t.url);
         image = extractOgImage(html);
       } catch {
         fetchFailed++;
+        const fromUrl = dateFromUrlPath(t.url);
+        if (fromUrl) verified++;
         await ctx.runMutation(internal.publishedDateSync.recordPublishedDate, {
-          id: t.id, verified: false,
+          id: t.id, publishedAt: fromUrl, verified: !!fromUrl,
         });
         continue;
       }

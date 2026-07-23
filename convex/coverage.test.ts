@@ -60,7 +60,7 @@ test("rejecting an article also hides it from the hub; approving leaves hubStatu
   expect(hub.map((r) => r.article.headline)).toEqual(["stays"]);
 });
 
-test("undated rows are not buried below dated ones — they sort by proposedAt", async () => {
+test("dated coverage leads the feed; undated still appears, ordered by proposedAt", async () => {
   const c = t();
   const day = 86_400_000;
   const now = Date.now();
@@ -74,5 +74,7 @@ test("undated rows are not buried below dated ones — they sort by proposedAt",
   await seedArticle(c, { headline: "stale-undated", hubStatus: "auto", proposedAt: now - 30 * day });
 
   const hub = await c.query(api.coverage.hubArticles, {});
-  expect(hub.map((r) => r.article.headline)).toEqual(["fresh-undated", "dated", "stale-undated"]);
+  // Verified-dated coverage leads. Undated rows are NOT dropped — they follow,
+  // ordered among themselves by when we found them.
+  expect(hub.map((r) => r.article.headline)).toEqual(["dated", "fresh-undated", "stale-undated"]);
 });

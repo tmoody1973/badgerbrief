@@ -64,3 +64,19 @@ export function extractPublishedDate(
   }
   return undefined;
 }
+
+/**
+ * Many publishers encode the publication date in the permalink itself
+ * (`urbanmilwaukee.com/2026/06/14/some-headline/`). That is the outlet's own
+ * canonical URL, not a model's guess — a legitimate fallback when the page
+ * ships no date metadata. Requires a full /YYYY/MM/DD/ path segment, so a
+ * lone year or an id like /2026/ is ignored.
+ */
+export function dateFromUrlPath(
+  url: string,
+  now: number = Date.now(),
+): string | undefined {
+  const m = url.match(/\/(20\d{2})\/(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])(?:\/|-|_)/);
+  if (!m) return undefined;
+  return cleanPublishedAt(`${m[1]}-${m[2]}-${m[3]}`, now);
+}

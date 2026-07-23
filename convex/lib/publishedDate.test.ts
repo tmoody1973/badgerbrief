@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { extractPublishedDate, extractOgImage } from "./publishedDate";
+import { extractPublishedDate, extractOgImage, dateFromUrlPath } from "./publishedDate";
 
 const NOW = Date.parse("2026-07-22T12:00:00Z");
 
@@ -71,5 +71,19 @@ describe("extractOgImage", () => {
     expect(extractOgImage(`<meta property="og:image" content="data:image/png;base64,AAA">`)).toBeUndefined();
     expect(extractOgImage("<html><body>nothing</body></html>")).toBeUndefined();
     expect(extractOgImage("")).toBeUndefined();
+  });
+});
+
+describe("dateFromUrlPath", () => {
+  const NOW2 = Date.parse("2026-07-22T12:00:00Z");
+  test("reads the date out of a publisher permalink", () => {
+    expect(dateFromUrlPath("https://urbanmilwaukee.com/2026/06/14/im-about-the-economy/", NOW2)).toBe("2026-06-14");
+    expect(dateFromUrlPath("https://x.com/2026/07/07/murphys-law", NOW2)).toBe("2026-07-07");
+  });
+  test("ignores paths without a full Y/M/D and impossible dates", () => {
+    expect(dateFromUrlPath("https://urbanmilwaukee.com/pressrelease/foo/", NOW2)).toBeUndefined();
+    expect(dateFromUrlPath("https://x.com/2026/06/story", NOW2)).toBeUndefined();
+    expect(dateFromUrlPath("https://x.com/2026/13/40/bad/", NOW2)).toBeUndefined();
+    expect(dateFromUrlPath("https://x.com/2027/01/01/future/", NOW2)).toBeUndefined();
   });
 });

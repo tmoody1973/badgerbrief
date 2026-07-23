@@ -31,7 +31,16 @@ const when = (r: Doc<"article_sources">) => {
   return clean ? Date.parse(clean) : r.proposedAt;
 };
 
-const byRecency = (a: Doc<"article_sources">, b: Doc<"article_sources">) => when(b) - when(a);
+/** Articles with a verified publication date lead the feed, newest first;
+ * undated ones follow (ordered by when we found them). Ranking undated rows on
+ * `proposedAt` alone floated every one of them above genuinely recent dated
+ * coverage — the whole top of /news carried no date at all. They are still
+ * shown, just not ahead of coverage we can actually date. */
+const dated = (r: Doc<"article_sources">) =>
+  r.publishedAtVerified && cleanPublishedAt(r.publishedAt) ? 1 : 0;
+
+const byRecency = (a: Doc<"article_sources">, b: Doc<"article_sources">) =>
+  dated(b) - dated(a) || when(b) - when(a);
 
 export const hubArticles = query({
   args: { limit: v.optional(v.number()), raceId: v.optional(v.string()) },
