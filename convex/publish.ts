@@ -42,7 +42,18 @@ export const publishQuote = mutation({
     const speaker = requireNonEmpty(draft.speaker, "speaker");
     const text = requireNonEmpty(draft.text, "text (excerpt)");
     const context = requireNonEmpty(draft.context, "context");
-    const date = requireNonEmpty(draft.date, "date");
+    // Date is NOT required. Campaign sites routinely publish no date, and
+    // demanding one there leaves a reviewer two bad options: block a real quote,
+    // or type in a date nobody can source. /news already settled this for
+    // coverage — a date is shown only when read from the source's own metadata,
+    // never guessed — and quotes follow the same rule.
+    //
+    // But when a date IS present it must be a strict YYYY-MM-DD. Loose parsing
+    // is how "2026-06-" silently becomes June 1st (see cleanPublishedAt).
+    const date = draft.date?.trim() || undefined;
+    if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      throw new ConvexError(`publish gate: date must be YYYY-MM-DD, got "${date}"`);
+    }
     const sourceUrl = requireNonEmpty(draft.sourceUrl, "sourceUrl");
     if (!sourceUrl.startsWith("http")) {
       throw new ConvexError("publish gate: sourceUrl must be a valid URL");

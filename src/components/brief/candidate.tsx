@@ -64,7 +64,7 @@ export function QuoteCardView({ candidateSlug }: { candidateSlug: string }) {
         >
           <p className="text-sm">&ldquo;{q.text}&rdquo;</p>
           <footer className="mt-2 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-            — {q.speaker}, {q.date} ·{" "}
+            — {q.speaker}{q.date ? `, ${q.date}` : ""} ·{" "}
             <a href={q.sourceUrl} className="underline" rel="noopener noreferrer" target="_blank">
               {sourceLabel(q.sourceUrl, q.outlet)}
             </a>

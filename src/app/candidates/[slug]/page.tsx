@@ -55,7 +55,9 @@ function Quote({ quote }: { quote: Doc<"quote_published"> }) {
     <blockquote className="border-l-4 border-primary bg-card p-3">
       <p className="max-w-[54ch] text-sm">&ldquo;{quote.text}&rdquo;</p>
       <footer className="mt-2 font-mono text-xs text-muted-foreground">
-        — {quote.speaker}, {quote.date} ·{" "}
+        {/* A campaign-site quote often has no publication date. Show the
+            separator only when there is a date to separate. */}
+        — {quote.speaker}{quote.date ? `, ${quote.date}` : ""} ·{" "}
         <a
           href={quote.sourceUrl}
           className="underline"
@@ -79,10 +81,10 @@ export default async function CandidatePage({ params }: Props) {
   if (!data) notFound();
   const { candidate, race, positions, quotes, finance, contributions, committeeFunding, ads } = data;
 
-  // WisconsinEye interview answers get their own section: they carry the
-  // question the candidate was asked, and every candidate in the race answered
-  // the same interviewer. Mixing them into the general quote list would throw
-  // that away and bury a whole sit-down under article one-liners.
+  // WisconsinEye interview answers get their own section: every candidate in
+  // the race sat for the same interview, so the answers are comparable across
+  // the field. Mixing them into the general quote list would throw that away
+  // and bury a whole sit-down under article one-liners.
   const interviewQuotes = quotes.filter(isInterviewQuote);
   const otherQuotes = quotes.filter((q) => !isInterviewQuote(q));
 

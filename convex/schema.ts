@@ -382,7 +382,11 @@ export default defineSchema({
     text: v.string(),
     context: v.string(),
     outlet: v.optional(v.string()),
-    date: v.string(),
+    // Optional: a campaign site usually publishes no date, and the alternative
+    // to an absent date is a reviewer inventing one. /news already settled this
+    // rule for coverage — show a date only when it came from the source's own
+    // metadata — and quotes follow it.
+    date: v.optional(v.string()),
     sourceUrl: v.string(),
     draftId: v.id("quote_drafts"),
     publishedAt: v.number(),

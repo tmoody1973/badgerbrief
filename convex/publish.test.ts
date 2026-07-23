@@ -60,6 +60,33 @@ describe("quote publish gate", () => {
     expect(published).toHaveLength(1);
   });
 
+  test("quote WITHOUT a date publishes — campaign sites rarely carry one", async () => {
+    // Requiring a date here left a reviewer two bad options: block a real,
+    // sourced quote, or type in a date nobody can source. Absent beats invented.
+    const t = setup();
+    const draftId = await t.run((ctx) =>
+      ctx.db.insert("quote_drafts", { ...validQuoteDraft, date: undefined }),
+    );
+    const id = await t.withIdentity(ADMIN).mutation(api.publish.publishQuote, { draftId });
+    expect(id).toBeDefined();
+    const [row] = await t.run((ctx) => ctx.db.query("quote_published").collect());
+    expect(row.date).toBeUndefined();
+  });
+
+  test("a malformed date is still rejected", async () => {
+    // Optional does not mean unvalidated: Date.parse("2026-06-") silently
+    // invents June 1st, so a partial date must never reach a published row.
+    const t = setup();
+    for (const date of ["2026-06-", "June 1, 2026", "2026/06/01"]) {
+      const draftId = await t.run((ctx) =>
+        ctx.db.insert("quote_drafts", { ...validQuoteDraft, date }),
+      );
+      await expect(
+        t.withIdentity(ADMIN).mutation(api.publish.publishQuote, { draftId }),
+      ).rejects.toThrow(/YYYY-MM-DD/);
+    }
+  });
+
   test("quote without source URL is rejected", async () => {
     const t = setup();
     const draftId = await t.run((ctx) =>
