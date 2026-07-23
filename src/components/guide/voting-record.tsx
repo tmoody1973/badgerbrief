@@ -75,7 +75,7 @@ export function VotingRecord({
     <section id="votes" className="mt-6 scroll-mt-16">
       <h2 className="font-display text-xl">Voting record</h2>
       <p className="mt-1 max-w-[60ch] text-sm text-muted-foreground">
-        Recorded votes {candidateName} cast on bills in the Wisconsin Legislature, most
+        Recorded floor votes {candidateName} cast in the Wisconsin Legislature, most
         recent first, from the {sessions.join(" and ")} session
         {sessions.length > 1 ? "s" : ""}. Every entry links to its official roll call.
         We don&rsquo;t rate or score votes.
