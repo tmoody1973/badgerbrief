@@ -14,9 +14,9 @@
  *     from. A paraphrase is dropped, not corrected. This is a deterministic
  *     string check, not a judgement — the model cannot talk its way past it.
  *
- * `context` is the interviewer's preceding question, which diarization gives us
- * for free and which is the honest framing for any answer: a reader sees what
- * the candidate was actually asked.
+ * `context` records the program, date and timestamp only. It deliberately does
+ * NOT carry the interviewer's question — see the note at the context assignment
+ * below for why that was tried and abandoned.
  *
  * Nothing here publishes. Drafts land in /admin for review, and
  * publish.publishQuote still gates on human approval.
@@ -166,9 +166,19 @@ for (const file of files) {
       continue;
     }
 
-    // Context = the interviewer's question immediately before this turn.
-    const idx = turns.indexOf(turn);
-    const question = [...turns.slice(0, idx)].reverse().find((t) => t.role === "host" && t.text.split(/\s+/).length >= 5);
+    // No interviewer question is shown. Two attempts at reconstructing "what
+    // was asked" from the diarized turns produced confidently WRONG pairs — a
+    // Green Bay prison question above an answer about police funding, and then
+    // mid-sentence fragments merged across exchanges. Diarization is reliable
+    // for WHO is speaking, not for where one exchange ends and the next begins,
+    // and a question printed above an answer is a claim about what the
+    // candidate was responding to. A wrong one is fabricated context.
+    //
+    // So context states only what is verifiable: the program, the date, and the
+    // timestamp. publishQuote requires a non-empty context; this gives it one
+    // that asserts nothing we cannot show.
+    const mm = Math.floor(turn.start / 60);
+    const ss = String(Math.floor(turn.start % 60)).padStart(2, "0");
 
     accepted.push({
       candidateSlug: doc.candidateSlug,
@@ -177,9 +187,7 @@ for (const file of files) {
       // candidate. Resolved from the slug; a reviewer confirms the display name.
       speaker: doc.candidateSlug.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join(" "),
       text: q.text.trim(),
-      context: question
-        ? `Asked on ${doc.outlet}'s "${doc.title}": ${question.text.trim()}`
-        : `From ${doc.outlet}'s "${doc.title}" (${q.topic ?? "interview"}).`,
+      context: `From ${doc.outlet}'s "${doc.title}", recorded ${doc.date}, at ${mm}:${ss}.`,
       outlet: doc.outlet,
       date: doc.date,
       sourceUrl: `${doc.programUrl}?t=${Math.floor(turn.start)}`,

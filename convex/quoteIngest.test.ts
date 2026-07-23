@@ -31,7 +31,7 @@ const ingest = (t: ReturnType<typeof convexTest>, quotes: ReturnType<typeof quot
 describe("ingestTranscriptQuotes", () => {
   test("inserts a draft plus an open review task", async () => {
     const t = convexTest(schema, modules);
-    expect(await ingest(t, [quote()])).toEqual({ inserted: 1, duplicates: 0 });
+    expect(await ingest(t, [quote()])).toEqual({ inserted: 1, duplicates: 0, refreshed: 0 });
 
     await t.run(async (ctx) => {
       const drafts = await ctx.db.query("quote_drafts").collect();
@@ -53,7 +53,37 @@ describe("ingestTranscriptQuotes", () => {
   test("re-running extraction does not duplicate the same quote", async () => {
     const t = convexTest(schema, modules);
     await ingest(t, [quote()]);
-    expect(await ingest(t, [quote()])).toEqual({ inserted: 0, duplicates: 1 });
+    expect(await ingest(t, [quote()])).toEqual({ inserted: 0, duplicates: 1, refreshed: 0 });
+  });
+
+  test("refreshes context on a pending draft when extraction improves", async () => {
+    const t = convexTest(schema, modules);
+    await ingest(t, [quote({ context: "Asked on WisconsinEye's \"X\": wrong question" })]);
+    const res = await ingest(t, [quote({ context: "Asked on WisconsinEye's \"X\": right question" })]);
+    expect(res).toEqual({ inserted: 0, duplicates: 0, refreshed: 1 });
+    await t.run(async (ctx) => {
+      const [d] = await ctx.db.query("quote_drafts").collect();
+      expect(d.context).toContain("right question");
+    });
+  });
+
+  test("never rewrites a draft a reviewer has already acted on", async () => {
+    const t = convexTest(schema, modules);
+    await ingest(t, [quote({ context: "Asked on WisconsinEye's \"X\": original" })]);
+    await t.run(async (ctx) => {
+      const [d] = await ctx.db.query("quote_drafts").collect();
+      await ctx.db.patch(d._id, { reviewStatus: "approved" });
+    });
+    // Rewriting context under an approval would publish text no human read.
+    expect(await ingest(t, [quote({ context: "Asked on WisconsinEye's \"X\": changed" })])).toEqual({
+      inserted: 0,
+      duplicates: 1,
+      refreshed: 0,
+    });
+    await t.run(async (ctx) => {
+      const [d] = await ctx.db.query("quote_drafts").collect();
+      expect(d.context).toContain("original");
+    });
   });
 
   // The gate that matters: WisconsinEye's terms prohibit sharing the media

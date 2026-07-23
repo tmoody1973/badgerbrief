@@ -66,6 +66,7 @@ export const ingestTranscriptQuotes = mutation({
 
     let inserted = 0;
     let duplicates = 0;
+    let refreshed = 0;
     for (const q of quotes) {
       const text = nonEmpty(q.text, "text");
       // publishQuote requires all of these later; failing here means a reviewer
@@ -87,6 +88,24 @@ export const ingestTranscriptQuotes = mutation({
         .filter((x) => x.eq(x.field("text"), text))
         .first();
       if (duplicate) {
+        // Re-running extraction with improved context should refresh a draft
+        // nobody has looked at yet — otherwise a fix to how we derive the
+        // interviewer's question can never reach rows already queued.
+        //
+        // Only while `pending`. Once a reviewer has approved or rejected it the
+        // row is theirs, and silently rewriting the context under an approval
+        // would republish something a human never actually read.
+        if (
+          duplicate.reviewStatus === "pending" &&
+          (duplicate.context !== q.context.trim() || duplicate.sourceUrl !== q.sourceUrl)
+        ) {
+          await ctx.db.patch(duplicate._id, {
+            context: q.context.trim(),
+            sourceUrl: q.sourceUrl,
+          });
+          refreshed++;
+          continue;
+        }
         duplicates++;
         continue;
       }
@@ -114,6 +133,6 @@ export const ingestTranscriptQuotes = mutation({
       inserted++;
     }
 
-    return { inserted, duplicates };
+    return { inserted, duplicates, refreshed };
   },
 });

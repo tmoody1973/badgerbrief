@@ -12,6 +12,8 @@ import {
   StatusBadge,
 } from "@/components/guide/labels";
 import { InTheNews } from "@/components/guide/in-the-news";
+import { InterviewQuotes } from "@/components/guide/interview-quotes";
+import { isInterviewQuote } from "@/lib/interview-quote";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
 import {
@@ -77,11 +79,18 @@ export default async function CandidatePage({ params }: Props) {
   if (!data) notFound();
   const { candidate, race, positions, quotes, finance, contributions, committeeFunding, ads } = data;
 
+  // WisconsinEye interview answers get their own section: they carry the
+  // question the candidate was asked, and every candidate in the race answered
+  // the same interviewer. Mixing them into the general quote list would throw
+  // that away and bury a whole sit-down under article one-liners.
+  const interviewQuotes = quotes.filter(isInterviewQuote);
+  const otherQuotes = quotes.filter((q) => !isInterviewQuote(q));
+
   // Quotes past this point fold away — the section grows without bound as
   // extraction publishes more (MOO-330).
   const VISIBLE_QUOTES = 5;
-  const shownQuotes = quotes.slice(0, VISIBLE_QUOTES);
-  const foldedQuotes = quotes.slice(VISIBLE_QUOTES);
+  const shownQuotes = otherQuotes.slice(0, VISIBLE_QUOTES);
+  const foldedQuotes = otherQuotes.slice(VISIBLE_QUOTES);
 
   const navSections: NavSection[] = [
     ...(candidate.background ? [{ id: "bio", label: "Background" }] : []),
@@ -93,8 +102,11 @@ export default async function CandidatePage({ params }: Props) {
     ...(positions.length > 0
       ? [{ id: "positions", label: "Issues", count: positions.length }]
       : []),
-    ...(quotes.length > 0
-      ? [{ id: "quotes", label: "Quotes", count: quotes.length }]
+    ...(interviewQuotes.length > 0
+      ? [{ id: "interview", label: "The interview", count: interviewQuotes.length }]
+      : []),
+    ...(otherQuotes.length > 0
+      ? [{ id: "quotes", label: "Quotes", count: otherQuotes.length }]
       : []),
     ...(inTheNews.length > 0
       ? [{ id: "news", label: "In the news", count: inTheNews.length }]
@@ -203,7 +215,9 @@ export default async function CandidatePage({ params }: Props) {
           </section>
         )}
 
-        {quotes.length > 0 && (
+        <InterviewQuotes quotes={interviewQuotes} candidateName={candidate.name} />
+
+        {otherQuotes.length > 0 && (
           <section id="quotes" className="mt-6 scroll-mt-16">
             <h2 className="font-display text-xl">In their own words</h2>
             <div className="mt-3 space-y-3">
@@ -214,7 +228,7 @@ export default async function CandidatePage({ params }: Props) {
             {foldedQuotes.length > 0 && (
               <details className="mt-3">
                 <summary className="cursor-pointer font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Show all {quotes.length} quotes
+                  Show all {otherQuotes.length} quotes
                 </summary>
                 <div className="mt-3 space-y-3">
                   {foldedQuotes.map((q) => (
