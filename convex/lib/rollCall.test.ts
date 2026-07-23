@@ -121,6 +121,24 @@ describe("parseAssemblyVotes", () => {
     ]);
   });
 
+  test("never lets the FIRST data row consume the table's own column headers", () => {
+    // The <th> texts are A / N / NV / NAME, and "N" and "NV" are also vote
+    // marks. Row 1 sits directly under them, so without a floor at the header
+    // an unmarked first row reaches back and steals one — the single row the
+    // once-only invariant does not cover. Both must yield no member at all.
+    expect(
+      parseAssemblyVotes(["AYES - 1", "A", "N", "NV", "NAME", "ALLEN", "R", "VACANT DISTRICTS"]),
+    ).toEqual([]);
+    expect(parseAssemblyVotes(["AYES - 1", "A", "N", "NAME", "ALLEN", "R"])).toEqual([]);
+  });
+
+  test("still reads the first data row when it has a mark of its own", () => {
+    // The header floor must not swallow row 1's legitimate mark.
+    expect(
+      parseAssemblyVotes(["AYES - 1", "A", "N", "NV", "NAME", "Y", "ALLEN", "R"]),
+    ).toEqual([{ name: "ALLEN", party: "R", position: "aye" }]);
+  });
+
   test("accepts member names with curly apostrophes", () => {
     // Verify NAME_RE accepts both straight (') and curly (') apostrophes.
     const testLines = [
@@ -300,6 +318,55 @@ describe("parseRollCall", () => {
         voteId: "av0260",
       }),
     ).toEqual({ error: "document does not identify itself as /9999/related/votes/senate/av0260" });
+  });
+
+  test("REJECTS a voteId that is only a PREFIX of the printed one", () => {
+    // A bare substring test accepts "av008" (and "") against the av0083 page,
+    // then builds voteKey and sourceUrl from the unvalidated ref — 99 correct
+    // votes filed under another vote's id, linking to a URL that 404s.
+    const html = fixture("wi-assembly-av0083.html");
+    for (const voteId of ["av008", ""]) {
+      expect(parseRollCall(html, { ...asmRef, voteId })).toEqual({
+        error: `document does not identify itself as /2023/related/votes/assembly/${voteId}`,
+      });
+    }
+  });
+
+  test("still accepts each real fixture's own exact voteId", () => {
+    // The boundary must not reject the documents it was added to protect.
+    expect("error" in parseRollCall(fixture("wi-assembly-av0083.html"), asmRef)).toBe(false);
+    expect(
+      "error" in parseRollCall(fixture("wi-senate-sv0260.html"), senateRef("sv0260")),
+    ).toBe(false);
+    expect(
+      "error" in parseRollCall(fixture("wi-senate-sv0050.html"), senateRef("sv0050")),
+    ).toBe(false);
+  });
+
+  test("REJECTS a document whose printed AYES tally is off by one", () => {
+    // Pins the ayes clause of the tally check on its own.
+    const broken = fixture("wi-assembly-av0083.html").replace("AYES - 62", "AYES - 61");
+    expect(parseRollCall(broken, asmRef)).toEqual({
+      error: "parsed 62/35/2 does not match printed 61/35/2",
+    });
+  });
+
+  test("REJECTS a document whose printed NOT VOTING tally is off by one", () => {
+    // Pins the not_voting clause of the tally check on its own.
+    const broken = fixture("wi-assembly-av0083.html").replace("NOT VOTING - 2", "NOT VOTING - 1");
+    expect(parseRollCall(broken, asmRef)).toEqual({
+      error: "parsed 62/35/2 does not match printed 62/35/1",
+    });
+  });
+
+  test("REJECTS a document with no bill number / title / vote type", () => {
+    // Without this branch the header spread is `...null`, which yields nothing:
+    // the roll call is returned with billNumber/billTitle/voteType absent while
+    // still typed as string, and a candidate profile shows an undefined bill.
+    const broken = fixture("wi-assembly-av0083.html").replace(">AB 388<", "><");
+    expect(parseRollCall(broken, asmRef)).toEqual({
+      error: "no bill number / title / vote type found",
+    });
   });
 
   test("REJECTS a document with no vote date", () => {

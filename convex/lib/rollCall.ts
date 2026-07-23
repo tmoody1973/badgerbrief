@@ -117,8 +117,10 @@ const POSITION_BY_MARK: Record<string, Position> = {
  * The 2+ floor is a HEURISTIC, not an invariant: "NV" is both a mark and a
  * literal column header, and would satisfy this pattern. What actually closes
  * the shifted-phantom class is the once-only mark consumption in
- * parseAssemblyVotes \u2014 a phantom row has no unspent mark of its own, so it is
- * dropped and the seat count no longer reconciles.
+ * parseAssemblyVotes, plus the floor seeded at each "NAME" column header \u2014
+ * together they leave a phantom row with no unspent mark to reach, on the
+ * first data row of every column table as well as on rows 2..n, so the row is
+ * dropped and the tallies no longer reconcile.
  */
 const NAME_RE = /^[A-Z][A-Z'\u2019.\- ]+(?:,\s?[A-Z])?$/;
 
@@ -156,9 +158,19 @@ export function parseAssemblyVotes(lines: string[]): MemberVote[] {
   // whose own mark cell is blank would otherwise scan back into the previous row
   // and steal its mark — silently attributing the wrong position to a real
   // member while the tallies and the seat count both still reconcile.
+  //
+  // The table's own <th> texts are "A", "N", "NV", "NAME", and two of those are
+  // themselves vote marks. Without a floor at the header, the FIRST data row of
+  // each of the three column tables reaches back and consumes "NV" or "N" from
+  // its header — the one row not covered by the once-only invariant. Seeding
+  // lastMark at each "NAME" header puts the header row out of reach.
   let lastMark = -1;
   for (let i = start + 1; i < lines.length; i++) {
     const name = lines[i];
+    if (name === "NAME") {
+      lastMark = i;
+      continue;
+    }
     const party = lines[i + 1];
     if (!NAME_RE.test(name) || !["R", "D", "I"].includes(party)) continue;
     // The mark sits in one of the up-to-three cells before the name, and never
@@ -237,6 +249,25 @@ export const rollCallUrl = (session: string, chamber: Chamber, voteId: string) =
  * Anything else returns { error } and the caller must not store it. The failure
  * mode this guards is a parser silently mis-reading a page, which no amount of
  * human review of the output would catch.
+ *
+ * WHAT THIS GATE CANNOT SEE. It REPLACES human review — nothing else checks a
+ * roll call before it appears on a real candidate's public profile — so its
+ * blind spot matters. Every check here is arithmetic against the document's own
+ * printed numbers, so a document that is internally consistent with WRONG
+ * content is accepted. Two demonstrated cases, both correctly accepted today:
+ * swapping two Assembly members' marks in the source with the tallies left
+ * untouched, and swapping two senators between the AYES and NAYS groups. Counts
+ * balance, seats fill, names stay unique — and both members are published with
+ * the opposite of their real vote. No arithmetic gate can catch this class.
+ * Catching it needs a second, independent source for the same vote.
+ *
+ * THIS GATE FAILS CLOSED, BY DESIGN. It rejects the whole document rather than
+ * storing part of it. A legitimate future document with an unmarked member, two
+ * bare identical surnames, or a different column order WILL be rejected. Those
+ * rejections are the gate working, not bugs: the right response is to teach the
+ * parser the new shape and re-run the fixtures, never to loosen a check so the
+ * document passes. A loosened check silently publishes wrong votes; a rejected
+ * document publishes nothing.
  */
 export function parseRollCall(
   html: string,
@@ -244,8 +275,16 @@ export function parseRollCall(
 ): RollCall | { error: string } {
   // Every real document prints its own canonical path. Without this the ref is
   // taken on faith and a Senate page can be stored under an Assembly vote key.
+  //
+  // The match must end on a boundary. A bare substring test accepts any prefix
+  // of the printed id — "av008" and even "" match the page for av0083 — and
+  // voteKey and sourceUrl are built from the ref, not from the page, so the
+  // result would be 99 correctly-read votes filed under another vote's id with
+  // a source link that does not resolve. Every printed occurrence is followed
+  // by a quote or a "<", so a non-alphanumeric lookahead closes it.
   const canonicalPath = `/${ref.session}/related/votes/${ref.chamber}/${ref.voteId}`;
-  if (!html.includes(canonicalPath)) {
+  const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (!new RegExp(esc(canonicalPath) + "(?![A-Za-z0-9])").test(html)) {
     return { error: `document does not identify itself as ${canonicalPath}` };
   }
 
