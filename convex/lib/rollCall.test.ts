@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { htmlToLines, parseHeader, parseTallies, parseVacantSeats, parseVoteDate, parseAssemblyVotes, parseRollCall, parseSenateVotes, type Position } from "./rollCall";
+import { htmlToLines, parseHeader, parseTallies, parseVacantSeats, parseVoteDate, parseAssemblyVotes, parseRollCall, parseSenateVotes, parseVoteIndex, type Position } from "./rollCall";
 
 const fixture = (name: string) =>
   readFileSync(join(__dirname, "fixtures", name), "utf8");
@@ -383,5 +383,26 @@ describe("parseRollCall", () => {
       { session: "2023", chamber: "assembly", voteId: "av9999" },
     );
     expect(rc).toEqual({ error: "no AYES/NAYS/NOT VOTING tallies found" });
+  });
+});
+
+describe("parseVoteIndex", () => {
+  test("extracts unique, sorted vote ids for the chamber", () => {
+    const html = `
+      <a href="/2023/related/votes/assembly/av0083">Assembly Vote 83</a>
+      <a href="/2023/related/votes/assembly/av0001">Assembly Vote 1</a>
+      <a href="/2023/related/votes/assembly/av0083">dup</a>
+      <a href="/2023/related/votes/senate/sv0260">Senate Vote 260</a>`;
+    expect(parseVoteIndex(html, "assembly")).toEqual(["av0001", "av0083"]);
+  });
+
+  test("ignores the other chamber", () => {
+    const html = `<a href="/2023/related/votes/senate/sv0260">x</a>`;
+    expect(parseVoteIndex(html, "assembly")).toEqual([]);
+    expect(parseVoteIndex(html, "senate")).toEqual(["sv0260"]);
+  });
+
+  test("returns an empty list rather than throwing on junk", () => {
+    expect(parseVoteIndex("", "assembly")).toEqual([]);
   });
 });

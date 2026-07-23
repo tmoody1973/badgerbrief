@@ -241,6 +241,22 @@ export type RollCall = {
 export const rollCallUrl = (session: string, chamber: Chamber, voteId: string) =>
   `https://docs.legis.wisconsin.gov/${session}/related/votes/${chamber}/${voteId}`;
 
+export const voteIndexUrl = (session: string, chamber: Chamber) =>
+  `https://docs.legis.wisconsin.gov/${session}/related/votes/${chamber}`;
+
+/**
+ * Vote ids linked from a session index page. Verified volume: 233 Assembly
+ * roll calls in 2023 and 302 in 2025, so a full crawl is ~1,000 documents
+ * across both chambers and sessions.
+ */
+export function parseVoteIndex(html: string, chamber: Chamber): string[] {
+  const prefix = chamber === "assembly" ? "av" : "sv";
+  const re = new RegExp(`/votes/${chamber}/(${prefix}\\d{4})`, "g");
+  const ids = new Set<string>();
+  for (const m of html.matchAll(re)) ids.add(m[1]);
+  return [...ids].sort();
+}
+
 /**
  * Parse and RECONCILE. A roll call is only returned when the parsed rows agree
  * with the document's own numbers — parsed positions must equal the printed
