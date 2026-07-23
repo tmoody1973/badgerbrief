@@ -117,6 +117,13 @@ const POSITION_BY_MARK: Record<string, Position> = {
  * Requires 2+ letters \u2014 no real surname is one character, so a bare "Y"/"N"/"x"
  * mark shifted into the name slot by a blanked name cell is not read as a name.
  *
+ * The initial may carry a trailing period: 2023/2025 print it bare ("ANDERSON,
+ * C") but pre-2019 documents print it dotted ("OTT, A." / "OTT, J."). Without
+ * the optional "\." those dotted rows fail to match and are dropped \u2014 the
+ * sole reason every 2011\u20132017 Assembly roll call parsed two short (both
+ * Otts sat together through 2015; by 2019 only one remained, printed as a plain
+ * "OTT", which is why 2019 already parsed).
+ *
  * The 2+ floor is a HEURISTIC, not an invariant: "NV" is both a mark and a
  * literal column header, and would satisfy this pattern. What actually closes
  * the shifted-phantom class is the once-only mark consumption in
@@ -125,7 +132,7 @@ const POSITION_BY_MARK: Record<string, Position> = {
  * first data row of every column table as well as on rows 2..n, so the row is
  * dropped and the tallies no longer reconcile.
  */
-const NAME_RE = /^[A-Z][A-Z'\u2019.\- ]+(?:,\s?[A-Z])?$/;
+const NAME_RE = /^[A-Z][A-Z'\u2019.\- ]+(?:,\s?[A-Z]\.?)?$/;
 
 const MONTHS: Record<string, number> = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,

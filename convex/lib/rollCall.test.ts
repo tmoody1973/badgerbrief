@@ -10,6 +10,7 @@ const asmLines = htmlToLines(fixture("wi-assembly-av0083.html"));
 const senLines = htmlToLines(fixture("wi-senate-sv0260.html"));
 const senNoVacancy = htmlToLines(fixture("wi-senate-sv0050.html"));
 const resolutionLines = htmlToLines(fixture("wi-assembly-av0003-sjr.html"));
+const oldAsmLines = htmlToLines(fixture("wi-assembly-av0100-2013.html"));
 
 describe("parseHeader", () => {
   test("reads bill, title and vote type from an Assembly roll call", () => {
@@ -187,6 +188,35 @@ describe("parseAssemblyVotes", () => {
     ).toEqual([{ name: "ALLEN", party: "R", position: "aye" }]);
   });
 
+  test("reads a dotted disambiguating initial from a pre-2019 document", () => {
+    // 2023/2025 print "ANDERSON, C"; pre-2019 print the initial with a trailing
+    // period: "OTT, A." / "OTT, J.". Both Otts sat together through 2015, so
+    // dropping the dotted rows made every 2011–2017 roll call parse two short.
+    const otts = parseAssemblyVotes(oldAsmLines).filter((v) => v.name.startsWith("OTT"));
+    expect(otts).toEqual([
+      { name: "OTT, A.", party: "R", position: "aye" },
+      { name: "OTT, J.", party: "R", position: "aye" },
+    ]);
+  });
+
+  test("a bare dotted initial pins the NAME_RE widening independent of any fixture", () => {
+    // Guards against a future edit dropping the "\\." and silently losing the
+    // dotted-initial rows again.
+    const testLines = ["AYES - 1", "Y", "OTT, A.", "R", "VACANT DISTRICTS"];
+    expect(parseAssemblyVotes(testLines)).toEqual([
+      { name: "OTT, A.", party: "R", position: "aye" },
+    ]);
+  });
+
+  test("old-format Assembly roll call reconciles to a full 99 seats", () => {
+    const votes = parseAssemblyVotes(oldAsmLines);
+    expect(votes).toHaveLength(99);
+    const count = (p: Position) => votes.filter((v) => v.position === p).length;
+    expect(count("aye")).toBe(57);
+    expect(count("nay")).toBe(37);
+    expect(count("not_voting")).toBe(5);
+  });
+
   test("accepts member names with curly apostrophes", () => {
     // Verify NAME_RE accepts both straight (') and curly (') apostrophes.
     const testLines = [
@@ -328,6 +358,38 @@ describe("parseRollCall", () => {
     expect(names.length).toBeGreaterThan(0);
     const rc = parseRollCall(blankMarkCells(html, names[0]), resolutionRef);
     expect("error" in rc).toBe(true);
+  });
+
+  test("parses a real pre-2019 Assembly roll call end to end", () => {
+    // 2013 av0100 (AB 181, TABLE AMENDMENT) is the old document format whose
+    // dotted-initial rows (OTT, A. / OTT, J.) the parser previously dropped,
+    // making the whole document fail the reconciliation gate. It must now flow
+    // through cleanly and fill all 99 seats.
+    const oldRef = { session: "2013", chamber: "assembly" as const, voteId: "av0100" };
+    const rc = parseRollCall(fixture("wi-assembly-av0100-2013.html"), oldRef);
+    expect("error" in rc).toBe(false);
+    if ("error" in rc) return;
+    expect(rc.billNumber).toBe("AB 181");
+    expect(rc.voteType).toBe("TABLE AMENDMENT");
+    expect(rc.votedOn).toBe("2013-06-06");
+    expect(rc.votes).toHaveLength(99);
+    expect(rc.ayes).toBe(57);
+    // The two Otts specifically — the rows the fix restores — are present.
+    expect(rc.votes.filter((v) => v.name.startsWith("OTT"))).toHaveLength(2);
+  });
+
+  test("REJECTS a blank mark cell on ANY row of the pre-2019 format too", () => {
+    // The gate must still fail closed on the old format: sweep every row and
+    // confirm none is accepted with its mark removed. Proves the NAME_RE
+    // widening did not open a hole in the reconciliation guard for old docs.
+    const oldRef = { session: "2013", chamber: "assembly" as const, voteId: "av0100" };
+    const html = fixture("wi-assembly-av0100-2013.html");
+    const names = [...html.matchAll(/<td class="name">([^<]*)<\/td>/g)].map((m) => m[1]);
+    expect(names).toHaveLength(99);
+    const accepted = names.filter(
+      (n) => !("error" in parseRollCall(blankMarkCells(html, n), oldRef)),
+    );
+    expect(accepted).toEqual([]);
   });
 
   test("parses a Senate roll call taken during a vacancy", () => {
