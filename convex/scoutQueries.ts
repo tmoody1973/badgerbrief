@@ -59,6 +59,19 @@ export const listScoutCandidates = internalQuery({
   },
 });
 
+/** Lowercased `office` for each given raceId — race keywords for the hub
+ * relevance gate (scoreRelevance in lib/outlets.ts). */
+export const listRaceOffices = internalQuery({
+  args: { raceIds: v.array(v.string()) },
+  handler: async (ctx, { raceIds }) => {
+    const races = await ctx.db.query("races").collect();
+    const offices = races
+      .filter((r) => raceIds.includes(r.raceId))
+      .map((r) => r.office.toLowerCase());
+    return [...new Set(offices)];
+  },
+});
+
 /** Subset of `urls` already known — either an existing article_sources row (any status) or a candidate's campaign_website. */
 export const knownSourceUrls = internalQuery({
   args: { urls: v.array(v.string()) },
@@ -105,6 +118,10 @@ export const insertProposed = internalMutation({
         headline: v.string(),
         publishedAt: v.optional(v.string()),
         whyRelevant: v.string(),
+        outletKey: v.optional(v.string()),
+        relevanceScore: v.optional(v.number()),
+        relevanceReason: v.optional(v.string()),
+        hubStatus: v.optional(v.union(v.literal("auto"), v.literal("hidden"))),
       }),
     ),
     traceId: v.optional(v.string()),
