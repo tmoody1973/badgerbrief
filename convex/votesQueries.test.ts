@@ -328,3 +328,34 @@ describe("votingRecord", () => {
     expect(rows).toHaveLength(0);
   });
 });
+
+describe("legislator_votes.session", () => {
+  test("storeRollCall records the session on the legislator_votes row", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall: ROLL_CALL });
+    await t.run(async (ctx) => {
+      const [p] = await ctx.db.query("legislator_votes").collect();
+      expect(p.session).toBe("2023");
+    });
+  });
+
+  test("backfillLegislatorSession fills rows missing a session from the voteKey prefix", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    // Simulate a pre-migration row: session omitted.
+    await t.run(async (ctx) => {
+      await ctx.db.insert("legislator_votes", {
+        voteKey: "2013-assembly-av0100",
+        candidateSlug: "francesca-hong",
+        position: "aye",
+      });
+    });
+    const res = await t.mutation(internal.votesQueries.backfillLegislatorSession, {});
+    expect(res.updated).toBe(1);
+    await t.run(async (ctx) => {
+      const [p] = await ctx.db.query("legislator_votes").collect();
+      expect(p.session).toBe("2013");
+    });
+  });
+});

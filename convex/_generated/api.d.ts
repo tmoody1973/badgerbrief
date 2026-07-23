@@ -45,6 +45,7 @@ import type * as lib_rollCall from "../lib/rollCall.js";
 import type * as lib_scoutParse from "../lib/scoutParse.js";
 import type * as lib_sponsors from "../lib/sponsors.js";
 import type * as lib_tvExtract from "../lib/tvExtract.js";
+import type * as lib_votingRecord from "../lib/votingRecord.js";
 import type * as monitor from "../monitor.js";
 import type * as monitorQueries from "../monitorQueries.js";
 import type * as outletEnrich from "../outletEnrich.js";
@@ -115,6 +116,7 @@ declare const fullApi: ApiFromModules<{
   "lib/scoutParse": typeof lib_scoutParse;
   "lib/sponsors": typeof lib_sponsors;
   "lib/tvExtract": typeof lib_tvExtract;
+  "lib/votingRecord": typeof lib_votingRecord;
   monitor: typeof monitor;
   monitorQueries: typeof monitorQueries;
   outletEnrich: typeof outletEnrich;

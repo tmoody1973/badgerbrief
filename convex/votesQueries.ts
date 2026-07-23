@@ -80,10 +80,29 @@ export const storeRollCall = internalMutation({
         voteKey: rollCall.voteKey,
         candidateSlug: c.slug,
         position: row.position,
+        session: rollCall.session,
       });
       matched++;
     }
     return { stored: true, matched };
+  },
+});
+
+/**
+ * One-time (idempotent) fill of legislator_votes.session for rows written
+ * before the field existed. session is the first "-"-delimited part of voteKey.
+ */
+export const backfillLegislatorSession = internalMutation({
+  args: {},
+  handler: async (ctx): Promise<{ updated: number }> => {
+    const rows = await ctx.db.query("legislator_votes").collect();
+    let updated = 0;
+    for (const r of rows) {
+      if (r.session) continue;
+      await ctx.db.patch(r._id, { session: r.voteKey.split("-")[0] });
+      updated++;
+    }
+    return { updated };
   },
 });
 
