@@ -118,6 +118,16 @@ export default defineSchema({
     notableEndorsements: v.optional(v.array(v.string())),
     notes: v.optional(v.string()),
     fecCandidateId: v.optional(v.string()),
+    // Exact surname as printed on roll calls ("HONG", "ANDERSON, C"), with the
+    // chamber and sessions served. Hand-entered: matching is never fuzzy,
+    // because two members can share a surname on the same vote.
+    legislatorName: v.optional(
+      v.object({
+        name: v.string(),
+        chamber: v.union(v.literal("assembly"), v.literal("senate")),
+        sessions: v.array(v.string()),
+      }),
+    ),
     photoUrl: v.optional(v.string()),
     photoSource: v.optional(v.string()),
     socialMedia: v.optional(v.record(v.string(), v.string())),
@@ -529,4 +539,36 @@ export default defineSchema({
     detail: v.optional(v.string()),
     at: v.number(),
   }).index("by_ref", ["refTable", "refId"]),
+
+  // ---------- legislative voting records ----------
+  legislative_votes: defineTable({
+    voteKey: v.string(), // "2023-assembly-av0083" — natural key
+    session: v.string(),
+    chamber: v.union(v.literal("assembly"), v.literal("senate")),
+    voteId: v.string(),
+    billNumber: v.string(),
+    // Verbatim from THIS roll call. The same bill carries different titles in
+    // each chamber, so there is no canonical per-bill title.
+    billTitle: v.string(),
+    voteType: v.string(), // PASSAGE, CONCURRENCE, ADOPTION — verbatim, never paraphrased
+    votedOn: v.string(), // YYYY-MM-DD
+    ayes: v.number(),
+    nays: v.number(),
+    notVoting: v.number(),
+    sourceUrl: v.string(),
+    ingestedAt: v.number(),
+  })
+    .index("by_voteKey", ["voteKey"])
+    .index("by_session_chamber", ["session", "chamber"])
+    .index("by_bill", ["billNumber"]),
+
+  // Only legislators we track. ~1,000 roll calls stay a few thousand rows
+  // instead of ~100,000.
+  legislator_votes: defineTable({
+    voteKey: v.string(),
+    candidateSlug: v.string(),
+    position: v.union(v.literal("aye"), v.literal("nay"), v.literal("not_voting")),
+  })
+    .index("by_candidate", ["candidateSlug"])
+    .index("by_vote", ["voteKey"]),
 });
