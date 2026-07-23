@@ -67,7 +67,9 @@ test("undated rows are not buried below dated ones — they sort by proposedAt",
   const iso = (t: number) => new Date(t).toISOString().slice(0, 10);
   // seeded dated-first so the old ""-localeCompare comparator would have kept
   // both undated rows pinned below it regardless of how recent they are.
-  await seedArticle(c, { headline: "dated", hubStatus: "auto", publishedAt: iso(now - 3 * day), proposedAt: now });
+  // publishedAtVerified: only a date read from the article's own metadata is
+  // trusted for display or sorting — an unverified LLM guess is ignored.
+  await seedArticle(c, { headline: "dated", hubStatus: "auto", publishedAt: iso(now - 3 * day), publishedAtVerified: true, proposedAt: now });
   await seedArticle(c, { headline: "fresh-undated", hubStatus: "auto", proposedAt: now - day });
   await seedArticle(c, { headline: "stale-undated", hubStatus: "auto", proposedAt: now - 30 * day });
 

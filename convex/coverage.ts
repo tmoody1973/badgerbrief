@@ -10,9 +10,15 @@ async function withOutlet(ctx: QueryCtx, article: Doc<"article_sources">) {
     ? await ctx.db.query("outlets").withIndex("by_key", (q) => q.eq("key", key)).unique()
     : null;
   return {
-    // Sanitize on read so a bad stored date can never reach a page, whatever
-    // the scout wrote. Unverifiable → undefined, and the UI omits it.
-    article: { ...article, publishedAt: cleanPublishedAt(article.publishedAt) },
+    // Only a date we read from the article's OWN publication metadata is
+    // displayed (publishedAtVerified). The scout's LLM guess is never shown,
+    // and cleanPublishedAt is still applied as a belt-and-braces sanity gate.
+    article: {
+      ...article,
+      publishedAt: article.publishedAtVerified
+        ? cleanPublishedAt(article.publishedAt)
+        : undefined,
+    },
     outlet: outlet && outlet.reviewStatus === "approved" ? outlet : null,
   };
 }
@@ -21,7 +27,7 @@ async function withOutlet(ctx: QueryCtx, article: Doc<"article_sources">) {
  * date sorts; anything unparseable or in the future falls back to when we found
  * the article, so a hallucinated future date can't hijack the top of the feed. */
 const when = (r: Doc<"article_sources">) => {
-  const clean = cleanPublishedAt(r.publishedAt);
+  const clean = r.publishedAtVerified ? cleanPublishedAt(r.publishedAt) : undefined;
   return clean ? Date.parse(clean) : r.proposedAt;
 };
 

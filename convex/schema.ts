@@ -400,6 +400,11 @@ export default defineSchema({
     ),
     headline: v.string(),
     publishedAt: v.optional(v.string()),
+    // The scout's publishedAt is an LLM guess. These record whether we fetched
+    // the article and read its OWN publication metadata (OpenGraph /
+    // schema.org). Only a verified date is ever displayed.
+    publishedAtVerified: v.optional(v.boolean()),
+    publishedAtCheckedAt: v.optional(v.number()),
     whyRelevant: v.string(),
     relevanceScore: v.optional(v.number()),   // from the hub relevance gate
     relevanceReason: v.optional(v.string()),
