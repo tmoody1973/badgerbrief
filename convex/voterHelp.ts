@@ -133,6 +133,26 @@ const getCoverage = createTool({
     }),
 });
 
+const getVotingRecord = createTool({
+  description:
+    'How a candidate who serves or served in the Wisconsin Legislature voted. Pass candidateSlug (e.g. "francesca-hong") and an optional query matching a bill number ("AB 388") or words from its official title ("child care"). Returns the deciding vote first, the candidate\'s position, the tally, and the official roll-call link. Wisconsin Legislature only — not Congress. Read-only.',
+  inputSchema: z.object({
+    candidateSlug: z.string().describe('Candidate slug such as "francesca-hong"'),
+    query: z.string().optional().describe('Bill number or words from its official title'),
+  }),
+  execute: async (ctx, { candidateSlug, query }): Promise<string> =>
+    withToolSpan("getVotingRecord", ctx.threadId, { candidateSlug, query }, async () => {
+      const rows = await ctx.runQuery(api.votesQueries.votingRecord, {
+        candidateSlug,
+        ...(query ? { query } : {}),
+      });
+      if (rows.length === 0) {
+        return `No voting record for "${candidateSlug}" matching that. BadgerBrief covers Wisconsin Legislature floor votes from the 2023 and 2025 sessions only — say so plainly rather than guessing, and note we don't cover Congress.`;
+      }
+      return JSON.stringify(rows.slice(0, 8));
+    }),
+});
+
 const handoffOfficialLink = createTool({
   description:
     "The canonical official link for a voting action (register, absentee, pollingPlace, myBallot, voterId, electionsCommission, general). Use for every procedural handoff and whenever you lack data — never invent a URL.",
@@ -157,6 +177,7 @@ Rules, in priority order:
 6. NO ENDORSEMENTS. Never recommend a candidate or party, never rank candidates, never characterize one as better. Present published positions neutrally, with citations.
 7. getCoverage is reporting ABOUT a candidate — credit the outlet, never present a headline as the candidate's own position.
 8. If a quote has a clipUrl, follow it with a link whose text is exactly "Watch the clip".
+9. Voting records: state the passage/concurrence/adoption vote's position and tally, name the official bill title, and flag otherVotesOnBill>0.
 
 Keep answers short — a few sentences plus links. Use getMyBallot for "my ballot" / "who's on my ballot" questions; if it reports districts: null, tell the user to save their address on the Brief page first.`;
 
@@ -165,7 +186,7 @@ function makeVoterHelpAgent(model: string, instructions: string = INSTRUCTIONS) 
     name: AGENT_NAME,
     languageModel: anthropic(model),
     instructions,
-    tools: { getVotingInfo, getMyBallot, getRaceInfo, getCandidateInfo, getCoverage, handoffOfficialLink },
+    tools: { getVotingInfo, getMyBallot, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, handoffOfficialLink },
     stopWhen: stepCountIs(8),
   });
 }

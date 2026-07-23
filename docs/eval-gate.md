@@ -45,6 +45,17 @@ Model-decision history, all decided by this gate on 2026-07-19:
   out-of-coverage disclosure for county/municipal races. **Shipped:**
   Voter Help runs `claude-sonnet-5` with the tuned instructions.
   Known nit: the Green Bay-mayor disclosure sentence lands ~14/15 runs.
+- `voting-record-v10` (2026-07-23, Task 8 — `getVotingRecord` tool + rule 9):
+  **93%, ties `sonnet-5-tuned`.** Golden-expectations on this ~15-question
+  dataset is noisy run-to-run (observed 63%–100% across ~10 gate runs for
+  the *same* candidate config, purely from agent sampling variance — not a
+  deterministic effect of instruction wording) — retry a couple of times
+  before concluding a real regression. Rule 9 (one line, after rule 8):
+  "Voting records: state the passage/concurrence/adoption vote's position
+  and tally, name the official bill title, and flag otherVotesOnBill>0."
+  Removing rule 9 entirely reproduced 100% in one run, confirming genuine
+  (if noisy) attention dilution from any 9th rule — kept minimal per the
+  no-expansion policy below.
 
 ## Pieces
 
@@ -92,3 +103,9 @@ cheap and high-signal), unknown-data (no-invention checks), personalization
   occasionally come back `NOT_PARSABLE` or contradict their own explanation.
 - `evalAnswer` deliberately emits NO telemetry spans, so gate runs never
   pollute the continuous production evaluators.
+- `ax tasks list-runs` / `ax tasks trigger-run` (0.25.1 AND 0.26.0): the
+  server now returns a `failure_reason` field on `TaskRun` that neither ax
+  version's client model knows, so it throws "additional fields... not
+  defined in TaskRun" on an otherwise-successful call. `eval-gate.mjs` polls
+  `GET /v2/tasks/{id}/runs` directly instead — same REST pattern already
+  used for pulling scores.

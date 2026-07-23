@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 import { query } from "./_generated/server";
 
 /** Read-only queries for the public guide. Published/seeded data only. */
@@ -121,6 +122,26 @@ export const getCandidateBySlug = query({
       })),
     );
 
+    // Voting record for candidates with a hand-verified roll-call mapping.
+    // Everyone else gets an empty array and renders no section. The explicit
+    // annotation works around a TS circularity: this function's own return
+    // type feeds `api`, and `api` is what resolves `api.votesQueries.*`.
+    const votingRecord: Array<{
+      billNumber: string;
+      billTitle: string;
+      voteType: string;
+      votedOn: string;
+      chamber: "assembly" | "senate";
+      session: string;
+      position: "aye" | "nay" | "not_voting";
+      ayes: number;
+      nays: number;
+      sourceUrl: string;
+      otherVotesOnBill: number;
+    }> = await ctx.runQuery(api.votesQueries.votingRecord, {
+      candidateSlug: slug,
+    });
+
     return {
       candidate,
       race,
@@ -130,6 +151,7 @@ export const getCandidateBySlug = query({
       contributions,
       committeeFunding,
       ads,
+      votingRecord,
     };
   },
 });

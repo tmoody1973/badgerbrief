@@ -41,6 +41,7 @@ import type * as lib_openfecEnrich from "../lib/openfecEnrich.js";
 import type * as lib_outlets from "../lib/outlets.js";
 import type * as lib_publishedDate from "../lib/publishedDate.js";
 import type * as lib_qa from "../lib/qa.js";
+import type * as lib_rollCall from "../lib/rollCall.js";
 import type * as lib_scoutParse from "../lib/scoutParse.js";
 import type * as lib_sponsors from "../lib/sponsors.js";
 import type * as lib_tvExtract from "../lib/tvExtract.js";
@@ -67,6 +68,8 @@ import type * as tvExtractAgent from "../tvExtractAgent.js";
 import type * as users from "../users.js";
 import type * as voterHelp from "../voterHelp.js";
 import type * as voterHelpQueries from "../voterHelpQueries.js";
+import type * as votes from "../votes.js";
+import type * as votesQueries from "../votesQueries.js";
 
 import type {
   ApiFromModules,
@@ -108,6 +111,7 @@ declare const fullApi: ApiFromModules<{
   "lib/outlets": typeof lib_outlets;
   "lib/publishedDate": typeof lib_publishedDate;
   "lib/qa": typeof lib_qa;
+  "lib/rollCall": typeof lib_rollCall;
   "lib/scoutParse": typeof lib_scoutParse;
   "lib/sponsors": typeof lib_sponsors;
   "lib/tvExtract": typeof lib_tvExtract;
@@ -134,6 +138,8 @@ declare const fullApi: ApiFromModules<{
   users: typeof users;
   voterHelp: typeof voterHelp;
   voterHelpQueries: typeof voterHelpQueries;
+  votes: typeof votes;
+  votesQueries: typeof votesQueries;
 }>;
 
 /**
