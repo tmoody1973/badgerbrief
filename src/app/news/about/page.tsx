@@ -81,9 +81,14 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     body: (
       <>
         If a headline is wrong, an outlet label is inaccurate, or something
-        doesn&apos;t belong, email{" "}
-        <a href="mailto:tarik@radiomilwaukee.org" className="underline">
-          tarik@radiomilwaukee.org
+        doesn&apos;t belong,{" "}
+        <a
+          href="https://github.com/tmoody1973/badgerbrief/issues/new"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+        >
+          open an issue
         </a>{" "}
         with a link to the article and what&apos;s incorrect. We&apos;ll review
         it and correct it.

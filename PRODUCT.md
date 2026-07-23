@@ -8,7 +8,7 @@ product
 
 **Primary — Wisconsin voters.** People preparing for the 2026 Wisconsin election who are short on time and long on questions: What's on my ballot? Where do these candidates actually stand? Who's funding this race, and who's paying to reach me? They arrive overwhelmed, often mid-decision, frequently on a phone, and they need a trustworthy answer fast without wading through spin or bureaucracy.
 
-**Secondary — Radio Milwaukee editors.** Staff working the `/admin` review queue who approve AI-drafted content, attribute political ads to races/candidates, and resolve sponsor identities before anything reaches the public. Their context is a triage workflow: high volume, needs to be scannable, every action must be reversible and sourced.
+**Secondary — the editor.** Whoever is working the `/admin` review queue: approving AI-drafted content, attributing political ads to races/candidates, and resolving sponsor identities before anything reaches the public. Their context is a triage workflow: high volume, needs to be scannable, every action must be reversible and sourced.
 
 ## Product Purpose
 

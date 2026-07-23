@@ -146,12 +146,31 @@ Adding an outlet also means adding its **image** host to `remotePatterns` in `ne
 
 ## Contributing
 
-This is an internal project of Radio Milwaukee. Before committing:
+A personal project by [Tarik Moody](https://github.com/tmoody1973). Issues and pull
+requests are welcome — the editorial rules below are not negotiable, because the
+whole point of the project is that nothing goes live unsourced.
 
 1. Read `AGENTS.md` / `CLAUDE.md` and `convex/_generated/ai/guidelines.md` (Convex rules override training-data assumptions).
 2. Keep the Vitest suite green; run `pnpm eval:gate` before deploying agent/chat changes.
-3. Use the neo-brutalist semantic tokens (no hex, no `dark:` classes).
+3. Use the neo-brutalist semantic tokens (no hex, no `dark:` classes) — see `DESIGN.md`.
+4. **Never widen what publishes without review.** AI drafts content; a human approves
+   it. Don't add a path that writes straight to a public table, and don't loosen a
+   verbatim or source gate to make a test pass.
 
 ## License
 
-Proprietary — © Radio Milwaukee. All rights reserved. _(Add a formal license file if this changes.)_
+[MIT](LICENSE) — © 2026 Tarik Moody.
+
+The **code** is MIT. The **data it collects is not ours to relicense**, and some of
+it carries its own terms:
+
+- **WisconsinEye** interview material — their archive is account-gated and their terms
+  restrict redistribution. This repo stores only quote text plus the public program
+  permalink; audio and transcripts are gitignored and never committed. If you fork
+  this, get your own account and follow their terms.
+- **Candidate coverage** links out to the publisher and is never republished in full.
+  Outlet logos, article text, and images belong to those outlets.
+- **FEC / Wisconsin Ethics Commission** filings are public record.
+
+Running this yourself needs your own API keys (see Environment Variables). Several
+are paid.
