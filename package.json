@@ -2,6 +2,8 @@
   "name": "bb",
   "version": "0.1.0",
   "private": true,
+  "description": "A nonpartisan Wisconsin 2026 voter guide \u2014 races, candidates, campaign money, and political ads \u2014 built on a human-reviewed AI research pipeline.",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
