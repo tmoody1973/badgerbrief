@@ -9,6 +9,7 @@ const fixture = (name: string) =>
 const asmLines = htmlToLines(fixture("wi-assembly-av0083.html"));
 const senLines = htmlToLines(fixture("wi-senate-sv0260.html"));
 const senNoVacancy = htmlToLines(fixture("wi-senate-sv0050.html"));
+const resolutionLines = htmlToLines(fixture("wi-assembly-av0003-sjr.html"));
 
 describe("parseHeader", () => {
   test("reads bill, title and vote type from an Assembly roll call", () => {
@@ -32,6 +33,53 @@ describe("parseHeader", () => {
     // wi-senate-sv0050.html header runs: SB 330 / BY STROEBEL / title /
     // "REJECT AMENDMENT" / "SA5 OFFERED BY LARSON". The vote type is the
     // SECOND line after the sponsor, not the last line in the header.
+    expect(parseHeader(senNoVacancy)).toEqual({
+      billNumber: "SB 330",
+      billTitle: "CHARTER AND CHOICE PER PUPIL PAYMENTS (REVENUE CEI",
+      voteType: "REJECT AMENDMENT",
+    });
+  });
+
+  test("reads a resolution's measure number, title and vote type (SJR, not a bill)", () => {
+    // 2023 Assembly av0003 is a real recorded vote on a Joint Resolution, not a
+    // bill. Same document structure, different measure-type prefix — this pins
+    // the regex widening that lets AJR/SJR/AR/SR through parseHeader.
+    expect(parseHeader(resolutionLines)).toEqual({
+      billNumber: "SJR 1",
+      billTitle: "SESSION SCHEDULE FOR 2023-2024 LEGISLATIVE SESSION",
+      voteType: "CONCURRENCE",
+    });
+  });
+
+  test("accepts AJR/SJR/AR/SR measure numbers and still parses existing AB/SB fixtures unchanged", () => {
+    // Pins the regex widening directly, independent of any fixture, and
+    // guards against a future edit narrowing it back to bills only.
+    const header = (billLine: string) => [
+      "WISCONSIN ASSEMBLY",
+      billLine,
+      "BY COMMITTEE",
+      "SOME TITLE",
+      "ADOPTION",
+      "AYES - 1",
+    ];
+    expect(parseHeader(header("AJR 15"))?.billNumber).toBe("AJR 15");
+    expect(parseHeader(header("SJR 1"))?.billNumber).toBe("SJR 1");
+    expect(parseHeader(header("AR 3"))?.billNumber).toBe("AR 3");
+    expect(parseHeader(header("SR 2"))?.billNumber).toBe("SR 2");
+    // "AJR 5" must be read whole, never mis-split as if "AR" matched a prefix.
+    expect(parseHeader(header("AJR 5"))?.billNumber).toBe("AJR 5");
+
+    // Regression: existing bill fixtures parse exactly as before.
+    expect(parseHeader(asmLines)).toEqual({
+      billNumber: "AB 388",
+      billTitle: "CHILD CARE CENTER RENOVATIONS LOAN PROGRAM",
+      voteType: "PASSAGE",
+    });
+    expect(parseHeader(senLines)).toEqual({
+      billNumber: "AB 388",
+      billTitle: "CHILD CARE CENTER LOAN PROGRAM",
+      voteType: "CONCURRENCE",
+    });
     expect(parseHeader(senNoVacancy)).toEqual({
       billNumber: "SB 330",
       billTitle: "CHARTER AND CHOICE PER PUPIL PAYMENTS (REVENUE CEI",
@@ -250,6 +298,36 @@ describe("parseRollCall", () => {
       (n) => !("error" in parseRollCall(blankMarkCells(html, n), asmRef)),
     );
     expect(accepted).toEqual([]);
+  });
+
+  test("parses a real resolution roll call (SJR) all the way through the gate", () => {
+    // Resolutions take recorded floor votes exactly like bills; this fixture
+    // (2023 Assembly av0003, SJR 1) proves one now flows through parseRollCall
+    // end to end instead of being rejected by the bill-only header regex.
+    const rc = parseRollCall(
+      fixture("wi-assembly-av0003-sjr.html"),
+      { session: "2023", chamber: "assembly" as const, voteId: "av0003" },
+    );
+    expect("error" in rc).toBe(false);
+    if ("error" in rc) return;
+    expect(rc.billNumber).toBe("SJR 1");
+    expect(rc.billTitle).toBe("SESSION SCHEDULE FOR 2023-2024 LEGISLATIVE SESSION");
+    expect(rc.voteType).toBe("CONCURRENCE");
+    expect(rc.votes).toHaveLength(99);
+    expect(rc.ayes).toBe(99);
+    expect(rc.nays).toBe(0);
+    expect(rc.notVoting).toBe(0);
+  });
+
+  test("REJECTS a corrupted resolution exactly as it rejects a corrupted bill", () => {
+    // The reconciliation gate must bite on resolutions too: blanking one
+    // member's mark cell on the SJR fixture must still fail the tally check.
+    const resolutionRef = { session: "2023", chamber: "assembly" as const, voteId: "av0003" };
+    const html = fixture("wi-assembly-av0003-sjr.html");
+    const names = [...html.matchAll(/<td class="name">([^<]*)<\/td>/g)].map((m) => m[1]);
+    expect(names.length).toBeGreaterThan(0);
+    const rc = parseRollCall(blankMarkCells(html, names[0]), resolutionRef);
+    expect("error" in rc).toBe(true);
   });
 
   test("parses a Senate roll call taken during a vacancy", () => {

@@ -71,7 +71,10 @@ export function parseHeader(
   const end = talliesIndex(lines);
   if (end === -1) return null;
   const head = lines.slice(0, end);
-  const billIdx = head.findIndex((l) => /^[AS]B\s+\d+$/.test(l));
+  // Bills (AB/SB) and resolutions (AJR/SJR/AR/SR) both take recorded floor
+  // votes and share an identical document structure — only the measure type
+  // differs. Anchored with ^...$ and \s so "AR" cannot mis-match "AJR 5".
+  const billIdx = head.findIndex((l) => /^(?:AB|SB|AJR|SJR|AR|SR)\s+\d+$/.test(l));
   if (billIdx === -1) return null;
   const after = head.slice(billIdx + 1).filter((l) => !/^BY\s/i.test(l));
   if (after.length < 2) return null;
