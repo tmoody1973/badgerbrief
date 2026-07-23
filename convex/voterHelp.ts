@@ -108,6 +108,31 @@ const getCandidateInfo = createTool({
     }),
 });
 
+const getCoverage = createTool({
+  description:
+    'News coverage BadgerBrief tracks about a candidate (by slug, e.g. "david-crowley"): headline, outlet, publication date and link. Use for "what has been written/reported about X" and for recent developments. Read-only, reporting only — never a substitute for the candidate\'s own published positions.',
+  inputSchema: z.object({
+    candidateSlug: z.string().describe('Candidate slug such as "david-crowley"'),
+  }),
+  execute: async (ctx, { candidateSlug }): Promise<string> =>
+    withToolSpan("getCoverage", ctx.threadId, { candidateSlug }, async () => {
+      const rows = await ctx.runQuery(api.coverage.inTheNewsForCandidate, { candidateSlug });
+      if (rows.length === 0) {
+        return `No tracked coverage for "${candidateSlug}" — say BadgerBrief hasn't tracked reporting on this and hand off.`;
+      }
+      // Only what a citation needs. The full docs carry our own internal
+      // relevance notes, which are not for readers and not for the model.
+      return JSON.stringify(
+        rows.slice(0, 12).map((r) => ({
+          headline: r.article.headline,
+          url: r.article.url,
+          publishedAt: r.article.publishedAt ?? null,
+          outlet: r.outlet?.displayName ?? r.article.outlet,
+        })),
+      );
+    }),
+});
+
 const handoffOfficialLink = createTool({
   description:
     "The canonical official link for a voting action (register, absentee, pollingPlace, myBallot, voterId, electionsCommission, general). Use for every procedural handoff and whenever you lack data — never invent a URL.",
@@ -130,6 +155,8 @@ Rules, in priority order:
 4. DISCLOSE UNCERTAINTY. If tools return no data for a race, candidate, or detail, say plainly that BadgerBrief doesn't have it and hand off the official link instead. BadgerBrief covers the 2026 statewide, congressional, and legislative primary — for county or municipal races (mayor, sheriff, county exec), say explicitly that BadgerBrief doesn't cover them, then hand off. NEVER guess or invent candidates, dates, or rules.
 5. NO LEGAL ADVICE. You may explain published voting rules; you may not advise on disputes, lawsuits, or individual legal situations. Decline those and point to the Wisconsin Elections Commission or the user's municipal clerk.
 6. NO ENDORSEMENTS. Never recommend a candidate or party, never rank candidates, never characterize one as better. Present published positions neutrally, with citations.
+7. getCoverage is reporting ABOUT a candidate — credit the outlet, never present a headline as the candidate's own position.
+8. If a quote has a clipUrl, follow it with a link whose text is exactly "Watch the clip".
 
 Keep answers short — a few sentences plus links. Use getMyBallot for "my ballot" / "who's on my ballot" questions; if it reports districts: null, tell the user to save their address on the Brief page first.`;
 
@@ -138,7 +165,7 @@ function makeVoterHelpAgent(model: string, instructions: string = INSTRUCTIONS) 
     name: AGENT_NAME,
     languageModel: anthropic(model),
     instructions,
-    tools: { getVotingInfo, getMyBallot, getRaceInfo, getCandidateInfo, handoffOfficialLink },
+    tools: { getVotingInfo, getMyBallot, getRaceInfo, getCandidateInfo, getCoverage, handoffOfficialLink },
     stopWhen: stepCountIs(8),
   });
 }

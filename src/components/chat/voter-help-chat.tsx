@@ -29,22 +29,56 @@ function asMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
+/**
+ * Is this a link to an interview clip in OUR OWN Convex storage?
+ *
+ * Deliberately strict. The agent chooses what to link, so this decides whether
+ * model output gets rendered as an embedded player — it must be impossible to
+ * make the chat embed an arbitrary URL. Only our exact storage origin and path
+ * qualify; anything else stays an ordinary link.
+ */
+function isOwnClipUrl(href?: string): href is string {
+  if (!href) return false;
+  const base = process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (!base) return false;
+  try {
+    const url = new URL(href);
+    const ours = new URL(base);
+    return (
+      url.protocol === "https:" &&
+      url.host === ours.host &&
+      url.pathname.startsWith("/api/storage/")
+    );
+  } catch {
+    return false;
+  }
+}
+
 /** Assistant markdown → styled elements. react-markdown renders NO raw HTML by
  * default, so LLM output can't inject markup; links open safely in a new tab. */
 const markdownComponents: Components = {
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
   strong: ({ children }) => <strong className="font-bold">{children}</strong>,
   em: ({ children }) => <em className="italic">{children}</em>,
-  a: ({ href, children }) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="underline decoration-2 underline-offset-2"
-    >
-      {children}
-    </a>
-  ),
+  a: ({ href, children }) =>
+    isOwnClipUrl(href) ? (
+      <video
+        controls
+        preload="metadata"
+        playsInline
+        src={`${href}#t=0.5`}
+        className="my-2 w-full max-w-[380px] border-2 border-border bg-black"
+      />
+    ) : (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline decoration-2 underline-offset-2"
+      >
+        {children}
+      </a>
+    ),
   ul: ({ children }) => (
     <ul className="mb-2 list-disc space-y-1 pl-5 last:mb-0">{children}</ul>
   ),
