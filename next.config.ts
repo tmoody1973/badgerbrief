@@ -43,8 +43,14 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.wisconsinexaminer.com" },
       { protocol: "https", hostname: "**.wispolitics.com" },
       { protocol: "https", hostname: "**.wiseye.org" },
-      { protocol: "https", hostname: "**.files.wordpress.com" }, // WP-hosted media (Examiner, WisEye)
-      { protocol: "https", hostname: "**.cloudfront.net" },      // Nexstar/Sinclair station clouds
+      // Observed image hosts, read off real `imageUrl` values after the first
+      // ingest rather than guessed — every one of these is a host we would not
+      // have predicted from the article domain, and each was 404ing.
+      { protocol: "https", hostname: "image.pbs.org" },                            // PBS Wisconsin
+      { protocol: "https", hostname: "wisconsinpublictv.s3.us-east-2.amazonaws.com" }, // PBS Wisconsin's own S3
+      { protocol: "https", hostname: "newscdn2.weigelbroadcasting.com" },          // CBS 58 (Weigel)
+      { protocol: "https", hostname: "**.gtv-cdn.com" },                           // Gray stations (WBAY)
+      { protocol: "https", hostname: "images.foxtv.com" },                         // FOX6 (Fox Corp)
     ],
   },
 };
