@@ -19,6 +19,7 @@ import {
 } from "@arizeai/openinference-vercel";
 import { SEMRESATTRS_PROJECT_NAME } from "@arizeai/openinference-semantic-conventions";
 import { ALLOWED_DOMAINS, isAllowedUrl, parseScoutResponse, sortByRotation } from "./lib/scoutParse";
+import { normalizeOutletKey, scoreRelevance, HUB_RELEVANCE_MIN } from "./lib/outlets";
 
 const AGENT_NAME = "article-scout";
 const DEFAULT_LIMIT = 3;
@@ -87,6 +88,21 @@ const SCOUT_JSON_SCHEMA = {
 
 type ScoutCandidate = { slug: string; name: string; raceId: string; lastProposedAt?: number };
 
+/** Pure per-row enrichment: outlet key + hub-relevance gate. Exported for
+ * testing without the network — called for each article before insert. */
+export function decorateCoverageRow(
+  row: { outlet: string; headline: string },
+  ctx: { candidateNames: string[]; raceKeywords: string[] },
+): { outletKey: string; relevanceScore: number; relevanceReason: string; hubStatus?: "auto" } {
+  const { score, reason } = scoreRelevance(row.headline, ctx);
+  return {
+    outletKey: normalizeOutletKey(row.outlet),
+    relevanceScore: score,
+    relevanceReason: reason,
+    ...(score >= HUB_RELEVANCE_MIN ? { hubStatus: "auto" as const } : {}),
+  };
+}
+
 type CandidateSummary = {
   slug: string;
   status: "proposed" | "empty" | "error";
@@ -145,6 +161,15 @@ export const run = internalAction({
       0,
       limit ?? DEFAULT_LIMIT,
     );
+
+    // Hub-relevance gate context (lib/outlets.ts scoreRelevance): candidate
+    // names come from the pool already queried above for rotation; race
+    // keywords need one small races lookup (nothing else in `run` touches
+    // that table yet).
+    const candidateNames = pool.map((c) => c.name);
+    const raceKeywords: string[] = await ctx.runQuery(internal.scoutQueries.listRaceOffices, {
+      raceIds: [...new Set(pool.map((c) => c.raceId))],
+    });
 
     const summaries: CandidateSummary[] = [];
 
@@ -228,6 +253,10 @@ export const run = internalAction({
           headline: a.headline,
           publishedAt: a.publishedAt,
           whyRelevant: a.whyRelevant,
+          ...decorateCoverageRow(
+            { outlet: a.outlet, headline: a.headline },
+            { candidateNames, raceKeywords },
+          ),
         }));
 
         const inserted: number = await ctx.runMutation(internal.scoutQueries.insertProposed, {

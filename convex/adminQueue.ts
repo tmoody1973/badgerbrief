@@ -271,9 +271,10 @@ export const listArticleSources = query({
 
     const out = [];
     for (const row of sorted) {
+      if (!row.candidateSlug) continue;
       const candidate = await ctx.db
         .query("candidates")
-        .withIndex("by_slug_only", (q) => q.eq("slug", row.candidateSlug))
+        .withIndex("by_slug_only", (q) => q.eq("slug", row.candidateSlug!))
         .first();
       out.push({
         ...row,
@@ -562,7 +563,13 @@ export const decideArticleSource = mutation({
     await requireAdmin(ctx);
     const source = await ctx.db.get(sourceId);
     if (!source) throw new Error("article source not found");
-    await ctx.db.patch(sourceId, { status: decision, decidedAt: Date.now() });
+    // A human reject is the strongest takedown signal there is: also pull it
+    // off the /news hub. Approve deliberately leaves hubStatus alone.
+    await ctx.db.patch(sourceId, {
+      status: decision,
+      decidedAt: Date.now(),
+      ...(decision === "rejected" ? { hubStatus: "hidden" as const } : {}),
+    });
     await logAudit(ctx, {
       action: `source:${decision}`,
       refTable: "article_sources",

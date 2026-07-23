@@ -2,6 +2,7 @@
 export const NAV_LINKS = [
   { href: "/races/wi-gov-2026", label: "Races" },
   { href: "/ads", label: "Ad Tracker" },
+  { href: "/news", label: "News" },
   { href: "/vote", label: "How to vote" },
   { href: "/chat", label: "Voter Help" },
   { href: "/brief", label: "My Brief" },
