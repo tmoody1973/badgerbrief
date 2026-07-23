@@ -9,6 +9,28 @@
  * Sessions are those covered by our ingest (2023, 2025). A legislator who
  * served earlier has votes we do not have; the UI says which sessions it covers.
  *
+ * *** ORDERING CONSTRAINT — READ BEFORE ADDING A MAPPING ***
+ * Names here MUST be seeded BEFORE `votes:ingest` runs for the sessions/
+ * chambers involved. `storeRollCall` matches each roll call's per-member
+ * votes against candidates' legislatorName AT INGEST TIME ONLY — it inserts a
+ * `legislator_votes` row for whichever candidates are mapped at that instant,
+ * then discards the per-member vote list. `legislative_votes` persists only
+ * the aggregate tally (ayes/nays/notVoting), never per-member names, so
+ * nothing later can recover who voted which way on an already-ingested roll
+ * call. There is no reconcile-from-DB path: it is not merely unbuilt, it is
+ * impossible with what's stored.
+ *
+ * Consequence: adding a mapping AFTER the backfill ingest already ran means
+ * that candidate's votes on already-stored roll calls are gone for good. The
+ * only fix is a forced re-ingest that re-fetches and re-parses those roll
+ * calls from docs.legis.wisconsin.gov (source data still exists there) —
+ * `storeRollCall` dedupes on `voteKey`, so simply calling `votes:ingest` again
+ * will skip everything already stored via `ingestedKeys`. To actually pick up
+ * a newly-added name you must delete the affected `legislative_votes` rows
+ * for that session+chamber first (or add a force flag to `votes:ingest` that
+ * bypasses the `ingestedKeys` filter) and then re-run ingest so
+ * `storeRollCall` re-matches against the now-present mapping.
+ *
  * Usage: node scripts/seed-legislator-names.mjs [--prod]
  */
 import { execFileSync } from "node:child_process";
