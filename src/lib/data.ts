@@ -29,3 +29,7 @@ export const getSponsorAds = (key: string) =>
   fetchQuery(api.sponsors.sponsorAds, { key });
 export const getEnrichedSponsorKeys = () =>
   fetchQuery(api.sponsors.enrichedSponsorKeys, {});
+export const getInTheNewsForCandidate = (candidateSlug: string) =>
+  fetchQuery(api.coverage.inTheNewsForCandidate, { candidateSlug });
+export const getInTheNewsForRace = (raceId: string) =>
+  fetchQuery(api.coverage.inTheNewsForRace, { raceId });

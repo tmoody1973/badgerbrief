@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Doc } from "../../../../convex/_generated/dataModel";
 import { CandidateCard } from "@/components/guide/cards";
 import { RaceFinanceTable } from "@/components/guide/finance";
+import { InTheNews } from "@/components/guide/in-the-news";
 import { LastUpdated } from "@/components/guide/labels";
 import { RaceAdMoney } from "@/components/guide/race-ad-money";
 import { RaceTvAds } from "@/components/guide/race-tv-ads";
@@ -15,6 +16,7 @@ import { SourceList } from "@/components/guide/sources";
 import { isOnBallot, partySectionId } from "@/lib/ballot-status";
 import {
   getAdMoneyForRace,
+  getInTheNewsForRace,
   getRace,
   getTvAdsForRace,
   listRaces,
@@ -81,6 +83,7 @@ export default async function RacePage({ params }: Props) {
   const { race, candidates, finance } = data;
   const adMoney = await getAdMoneyForRace(slugToRaceId(slug));
   const tvAds = await getTvAdsForRace(slugToRaceId(slug));
+  const inTheNews = await getInTheNewsForRace(race.raceId);
 
   const parties = [
     ...new Set(candidates.map((c) => c.primaryParty).filter(Boolean)),
@@ -114,6 +117,9 @@ export default async function RacePage({ params }: Props) {
     ...(finance.length > 0 ? [{ id: "money", label: "The money" }] : []),
     ...(adMoney.candidates.length > 0 ? [{ id: "ad-money", label: "Ad money" }] : []),
     ...(tvAds.length > 0 ? [{ id: "tv-ads", label: "TV ads" }] : []),
+    ...(inTheNews.length > 0
+      ? [{ id: "news", label: "In the news", count: inTheNews.length }]
+      : []),
     { id: "sources", label: "Sources" },
   ];
 
@@ -197,6 +203,8 @@ export default async function RacePage({ params }: Props) {
       <RaceAdMoney data={adMoney} />
 
       <RaceTvAds ads={tvAds} />
+
+      <InTheNews items={inTheNews} heading={`In the news about the ${race.office} race`} />
 
       {candidates.length > 1 && (
         <div className="mt-8">

@@ -11,9 +11,15 @@ import {
   PartyBadge,
   StatusBadge,
 } from "@/components/guide/labels";
+import { InTheNews } from "@/components/guide/in-the-news";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
-import { getCandidateBySlug, getEnrichedSponsorKeys, listCandidateSlugs } from "@/lib/data";
+import {
+  getCandidateBySlug,
+  getEnrichedSponsorKeys,
+  getInTheNewsForCandidate,
+  listCandidateSlugs,
+} from "@/lib/data";
 import {
   JsonLd,
   breadcrumbNode,
@@ -63,9 +69,10 @@ function Quote({ quote }: { quote: Doc<"quote_published"> }) {
 
 export default async function CandidatePage({ params }: Props) {
   const { slug } = await params;
-  const [data, enrichedKeys] = await Promise.all([
+  const [data, enrichedKeys, inTheNews] = await Promise.all([
     getCandidateBySlug(slug),
     getEnrichedSponsorKeys(),
+    getInTheNewsForCandidate(slug),
   ]);
   if (!data) notFound();
   const { candidate, race, positions, quotes, finance, contributions, committeeFunding, ads } = data;
@@ -88,6 +95,9 @@ export default async function CandidatePage({ params }: Props) {
       : []),
     ...(quotes.length > 0
       ? [{ id: "quotes", label: "Quotes", count: quotes.length }]
+      : []),
+    ...(inTheNews.length > 0
+      ? [{ id: "news", label: "In the news", count: inTheNews.length }]
       : []),
     { id: "sources", label: "Sources" },
   ];
@@ -225,6 +235,8 @@ export default async function CandidatePage({ params }: Props) {
           />
 
           <CandidateAds ads={ads} candidateName={candidate.name} enrichedKeys={enrichedKeys} />
+
+          <InTheNews items={inTheNews} heading={`In the news about ${candidate.name}`} />
 
           <section id="sources" className="mt-10 scroll-mt-16 space-y-3">
             <SourceList sources={candidate.sources} />
