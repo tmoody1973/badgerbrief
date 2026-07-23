@@ -88,18 +88,34 @@ export function InterviewQuotes({
           })}
         </ol>
 
-        <div className="border-t-2 border-dashed border-border px-4 py-2">
-          <a
-            href={programUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-mono text-[11px] uppercase tracking-[0.1em] underline decoration-2 underline-offset-2"
-          >
-            Full program on wiseye.org ↗
-          </a>
-          <p className="mt-1 text-xs text-muted-foreground">
+        <div className="border-t-2 border-dashed border-border px-4 py-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <a
+              href={programUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[11px] uppercase tracking-[0.1em] underline decoration-2 underline-offset-2"
+            >
+              Full program on wiseye.org ↗
+            </a>
+            {/* WisconsinEye is a nonprofit and this coverage exists because they
+                recorded it. Pointing at their donate page is crediting the
+                source, not an endorsement — they are nonpartisan public-affairs
+                infrastructure, and their own terms ask for a link back. */}
+            <a
+              href="https://wiseye.org/donate/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[11px] uppercase tracking-[0.1em] underline decoration-2 underline-offset-2"
+            >
+              Support WisconsinEye ↗
+            </a>
+          </div>
+          <p className="mt-2 max-w-[70ch] text-xs text-muted-foreground">
             Quotes are transcribed verbatim from the recording and checked against it
             before publication. Watching the video requires a free WisconsinEye account.
+            WisconsinEye is a nonprofit that records Wisconsin government and campaigns
+            gavel-to-gavel; this interview exists because they were in the room.
           </p>
         </div>
       </div>

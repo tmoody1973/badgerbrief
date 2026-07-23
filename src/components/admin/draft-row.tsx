@@ -7,6 +7,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { Button } from "@/components/retroui/Button";
 import { arizeTraceUrl } from "@/lib/arize";
+import { formatTimestamp, isInterviewQuote, timestampSeconds } from "@/lib/interview-quote";
 
 /** MOO-327: one row per draft in the review queue — compact by default, full detail on expand. */
 
@@ -65,6 +66,21 @@ function draftFormFields(row: QueueRow): Record<string, string> {
 function qaSummary(row: QueueRow) {
   const qa = row.task.qaScores as { claimSupport: number } | undefined;
   return qa ? Math.round(qa.claimSupport * 100) : null;
+}
+
+/**
+ * Short source label for the collapsed row: the outlet, plus the recording
+ * timestamp for interview quotes so a reviewer can jump to the audio and
+ * confirm by ear without opening anything. Positions already show their source
+ * in `summaryLine`, so this is quotes only.
+ */
+function sourceChip(row: QueueRow): string | null {
+  if (row.kind !== "quote") return null;
+  const outlet = row.draft.outlet?.trim();
+  if (!outlet) return null;
+  if (!isInterviewQuote(row.draft)) return outlet;
+  const seconds = timestampSeconds(row.draft.sourceUrl);
+  return seconds !== null ? `${outlet} ${formatTimestamp(seconds)}` : outlet;
 }
 
 function summaryLine(row: QueueRow) {
@@ -285,6 +301,16 @@ export function DraftRow({ row }: { row: QueueRow }) {
           {row.kind}
         </span>
         <span className="font-bold">{row.draft.candidateSlug}</span>
+        {/* Which source a quote came from, without expanding the row. The queue
+            mixes article quotes with whole interview batches, and the collapsed
+            line previously showed only the text — so 48 WisconsinEye drafts
+            were indistinguishable from each other and from everything else.
+            Position drafts already carry their source name for this reason. */}
+        {sourceChip(row) && (
+          <span className="border-2 border-border bg-secondary px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-secondary-foreground">
+            {sourceChip(row)}
+          </span>
+        )}
         <span className="text-sm text-muted-foreground">{summaryLine(row)}</span>
         {qaScore !== null && (
           <span
