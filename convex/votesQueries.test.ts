@@ -1,6 +1,6 @@
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import schema from "./schema";
 
 const modules = import.meta.glob([
@@ -160,5 +160,73 @@ describe("ingestedKeys", () => {
       chamber: "assembly",
     });
     expect(keys).toEqual(["av0083"]);
+  });
+});
+
+describe("votingRecord", () => {
+  test("returns the candidate's position with the bill and tally", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall: ROLL_CALL });
+    const rows = await t.query(api.votesQueries.votingRecord, {
+      candidateSlug: "francesca-hong",
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      billNumber: "AB 388",
+      billTitle: "CHILD CARE CENTER RENOVATIONS LOAN PROGRAM",
+      voteType: "PASSAGE",
+      position: "nay",
+      ayes: 62,
+      nays: 35,
+      sourceUrl: "https://docs.legis.wisconsin.gov/2023/related/votes/assembly/av0083",
+    });
+  });
+
+  test("keyword search matches the official title, case-insensitively", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall: ROLL_CALL });
+    expect(
+      await t.query(api.votesQueries.votingRecord, {
+        candidateSlug: "francesca-hong",
+        query: "child care",
+      }),
+    ).toHaveLength(1);
+    expect(
+      await t.query(api.votesQueries.votingRecord, {
+        candidateSlug: "francesca-hong",
+        query: "AB 388",
+      }),
+    ).toHaveLength(1);
+    // No match returns nothing rather than a guess.
+    expect(
+      await t.query(api.votesQueries.votingRecord, {
+        candidateSlug: "francesca-hong",
+        query: "transportation budget",
+      }),
+    ).toHaveLength(0);
+  });
+
+  test("passage votes sort ahead of procedural ones on the same bill", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall: ROLL_CALL });
+    await t.mutation(internal.votesQueries.storeRollCall, {
+      rollCall: {
+        ...ROLL_CALL,
+        voteKey: "2023-assembly-av0082",
+        voteId: "av0082",
+        voteType: "TABLE",
+        votedOn: "2023-09-14",
+      },
+    });
+    const rows = await t.query(api.votesQueries.votingRecord, {
+      candidateSlug: "francesca-hong",
+      query: "AB 388",
+    });
+    expect(rows[0].voteType).toBe("PASSAGE");
+    // The reader is told the other recorded vote exists.
+    expect(rows[0].otherVotesOnBill).toBe(1);
   });
 });
