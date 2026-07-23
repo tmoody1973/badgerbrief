@@ -86,7 +86,13 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     body: (
       <>
         See something wrong? Every fact on the site links to its source so you
-        can check it yourself — and if we got it wrong,{" "}
+        can check it yourself — and if we got it wrong, email{" "}
+        <a href="mailto:tarikjmoody@gmail.com" className="underline">
+          tarikjmoody@gmail.com
+        </a>{" "}
+        with a link to the page and what&apos;s incorrect. We&apos;ll review it
+        against the source and correct it. If you&apos;d rather file it
+        publicly, the code is open source and you can{" "}
         <a
           href="https://github.com/tmoody1973/badgerbrief/issues/new"
           target="_blank"
@@ -94,9 +100,8 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
           className="underline"
         >
           open an issue
-        </a>{" "}
-        with a link to the page and what&apos;s incorrect. We&apos;ll review it
-        against the source and correct it.
+        </a>
+        .
       </>
     ),
   },
