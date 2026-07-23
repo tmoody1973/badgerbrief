@@ -17,6 +17,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "jsonline.com" },
       { protocol: "https", hostname: "**.jsonline.com" },
       { protocol: "https", hostname: "**.gannett-cdn.com" },
+      // WPR/WUWM serve their images off NPR's Brightspot CDN, not their own host.
+      { protocol: "https", hostname: "**.brightspotcdn.com" },
     ],
   },
 };
