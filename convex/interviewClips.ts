@@ -79,11 +79,24 @@ export const attachClip = mutation({
       return { attached: 0 };
     }
 
-    for (const row of rows) {
-      // Replacing a clip: drop the old file so re-runs don't accumulate.
-      if (row.clipStorageId && row.clipStorageId !== storageId) {
-        await ctx.storage.delete(row.clipStorageId);
+    // Replacing a clip: drop the superseded file so re-runs don't accumulate.
+    // Collect DISTINCT ids first — several rows quoting the same moment share
+    // one clip, and deleting the same file once per row throws on the second
+    // call. Tolerate an already-missing file for the same reason.
+    const superseded = new Set(
+      rows
+        .map((r) => r.clipStorageId)
+        .filter((id): id is NonNullable<typeof id> => !!id && id !== storageId),
+    );
+    for (const id of superseded) {
+      try {
+        await ctx.storage.delete(id);
+      } catch {
+        // Already gone — nothing to reclaim, and not a reason to fail the attach.
       }
+    }
+
+    for (const row of rows) {
       await ctx.db.patch(row._id, { clipStorageId: storageId });
     }
     return { attached: rows.length };
