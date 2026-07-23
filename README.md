@@ -11,6 +11,7 @@ Key capabilities:
 - **Race & candidate guides** — every 2026 Wisconsin race (Governor, statewide, U.S. House, Legislature, Supreme Court) with candidate profiles, positions, and ballot status.
 - **Campaign finance** — receipts, disbursements, and donors from the FEC (OpenFEC) and the Wisconsin Ethics Commission ("Sunshine"), including second-hop committee funding.
 - **Political ad tracking** — sponsor, spend, and reach from the **Meta Ad Library**, **Google political ads**, and **broadcast TV** (FCC political files), with reviewer-approved **sponsor profiles** ("who is this group?") and outside-spending analysis.
+- **Coverage & source transparency** (`/news`) — tracked reporting on the 2026 races from Wisconsin newsrooms, linked out to the outlet that reported it. We don't summarize or rate the journalism; we do show who owns and funds each outlet. Only dates read from an article's own publication metadata are ever displayed.
 - **Personalized brief** (`/brief`) — an agent assembles a per-voter summary of their ballot.
 - **Voter Help chat** (`/chat`) — a streaming assistant for ballot questions, gated by an evaluation suite.
 - **Editorial pipeline** — article discovery, extraction, QA scoring, and a `/admin` review queue; every model call is traced in Arize and gated by a golden-dataset eval before deploy.
@@ -68,6 +69,7 @@ badgerbrief/
 │   │   ├── candidates/[slug]# candidate profile
 │   │   ├── compare/[slug]/  # side-by-side candidate compare
 │   │   ├── ads/             # ad tracker (Meta/Google/TV spending)
+│   │   ├── news/            # coverage hub + /news/about methodology
 │   │   ├── brief/           # personalized voter brief
 │   │   ├── chat/            # Voter Help chat (gated)
 │   │   ├── vote/            # voting info
@@ -113,10 +115,13 @@ badgerbrief/
 ## Features & Data Sources
 
 - **Broadcast TV ads (MOO-318):** FCC political files are Akamai-blocked to plain requests, so a Browserbase browser enumerates each station's folders and downloads order PDFs; `mupdf` unwraps PDF-portfolio filings; Claude extracts the order + the NAB disclosure (which candidate/issue the ad is about). TV spend is exact and every order links to its stored source PDF.
+- **Coverage discovery:** a daily scout asks Perplexity for reporting on each tracked candidate, bounded by an allowlist of Wisconsin newsrooms in `convex/lib/scoutParse.ts` (`WI_OUTLETS`) — Milwaukee and Madison dailies, public media, the commercial and PBS TV stations, and the statewide nonprofits. That one list is the single source of truth for three things: Perplexity's `search_domain_filter`, the URL gate on everything we store, and the display name shown as credit. **Perplexity silently truncates the domain filter past 20 entries**, so the list is capped and asserted at import — adding a 21st outlet must be a deliberate swap, not a silent no-op. Outlets discovered this way are created as `draft` and render nothing until a human approves them in `/admin → Outlets`.
 - **Sponsor profiles:** OpenFEC committee facts + a Perplexity-sourced, cited one-liner, confirmed by a human — so voters see "who is House Majority PAC?" with sources.
 - **Trust posture:** ad→candidate attribution and editorial claims are always human-reviewed; low-confidence matches route to `/admin`, never auto-published.
 
 ## Testing & Evaluation
+
+> There is **no `pnpm test` script** in this repo — it silently no-ops. Use the commands below; run a single file with `npx vitest run <path>`.
 
 ```bash
 pnpm exec vitest run        # unit + convex-test suite
@@ -133,7 +138,11 @@ npx convex deploy -y        # deploy backend to production
 npx vercel deploy --prod --yes   # deploy frontend
 ```
 
+**Deploy both halves.** Shipping the frontend while a newly-added Convex function is missing from production returns a 500 (this has bitten `/news` once).
+
 Public pages use ISR (`revalidate = 300`). Daily Convex crons refresh finance, ads, article sources, and TV filings.
+
+Adding an outlet also means adding its **image** host to `remotePatterns` in `next.config.ts`, or its thumbnails 404. The image host is often not the article host — WPR serves off `npr.brightspotcdn.com`, and the Scripps/Hearst/Gray station groups use Brightspot too, while Lee's papers (madison.com, captimes.com) serve off TownNews. Audit the real `imageUrl` hosts after an ingest rather than assuming.
 
 ## Contributing
 

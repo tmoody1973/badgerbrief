@@ -1,3 +1,5 @@
+import { WI_OUTLETS } from "./scoutParse";
+
 export const OUTLET_TYPES = [
   "nonprofit", "public_media", "corporate_daily", "wire",
   "trade", "tv", "national", "other",
@@ -6,6 +8,22 @@ export type OutletType = (typeof OUTLET_TYPES)[number];
 
 /** Collapse outlet name/domain variants to one key. Mirrors
  * normalizeSponsorKey so the two enrichment pipelines behave identically. */
+/** The outlet's canonical display name when its URL is on a domain we know,
+ *  otherwise whatever name the caller supplied (campaign sites, one-offs). */
+export function canonicalOutletName(outlet: string, url?: string): string {
+  if (!url) return outlet;
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return outlet;
+  }
+  for (const [domain, name] of Object.entries(WI_OUTLETS)) {
+    if (host === domain || host.endsWith(`.${domain}`)) return name;
+  }
+  return outlet;
+}
+
 export function normalizeOutletKey(name: string): string {
   return name
     .toLowerCase()
@@ -61,12 +79,19 @@ export function cleanPublishedAt(
  * plain mutations (e.g. the backfill) share one implementation — a mutation
  * cannot import from a "use node" module. */
 export function decorateCoverageRow(
-  row: { outlet: string; headline: string },
+  row: { outlet: string; headline: string; url?: string },
   ctx: { candidateNames: string[]; raceKeywords: string[] },
 ): { outletKey: string; relevanceScore: number; relevanceReason: string; hubStatus?: "auto" } {
   const { score, reason } = scoreRelevance(row.headline, ctx);
   return {
-    outletKey: normalizeOutletKey(row.outlet),
+    // Key off the URL's domain when we recognise it, falling back to the name.
+    // `row.outlet` is a string the LLM wrote, so the same newsroom arrives as
+    // "TMJ4", "TMJ4 News" or "WTMJ-TV" on different runs — three keys, three
+    // half-populated outlet rows, and a transparency stamp that renders only
+    // sometimes. The domain is in the URL and cannot vary.
+    // Safe for existing rows: canonicalOutletName returns the same four names
+    // already stored, so their keys are unchanged and no backfill is needed.
+    outletKey: normalizeOutletKey(canonicalOutletName(row.outlet, row.url)),
     relevanceScore: score,
     relevanceReason: reason,
     ...(score >= HUB_RELEVANCE_MIN ? { hubStatus: "auto" as const } : {}),

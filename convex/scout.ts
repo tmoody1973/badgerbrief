@@ -18,7 +18,7 @@ import {
   OpenInferenceSimpleSpanProcessor,
 } from "@arizeai/openinference-vercel";
 import { SEMRESATTRS_PROJECT_NAME } from "@arizeai/openinference-semantic-conventions";
-import { ALLOWED_DOMAINS, isAllowedUrl, parseScoutResponse, sortByRotation } from "./lib/scoutParse";
+import { ALLOWED_DOMAINS, WI_OUTLETS, isAllowedUrl, parseScoutResponse, sortByRotation } from "./lib/scoutParse";
 import { decorateCoverageRow } from "./lib/outlets";
 
 const AGENT_NAME = "article-scout";
@@ -62,8 +62,13 @@ function ensureTelemetry(): NodeTracerProvider | null {
 
 const tracer = () => trace.getTracer("badgerbrief-agents");
 
+// Derived from WI_OUTLETS so the prompt can never drift from the domain filter.
+// It used to name four outlets in prose; when the allowlist widened, a stale
+// hardcoded sentence would have told the model to ignore every new newsroom.
 const SCOUT_SYSTEM =
-  "You find news articles for a non-partisan Wisconsin voter guide. Return ONLY articles from these outlets: WUWM (wuwm.com), Wisconsin Public Radio (wpr.org), Urban Milwaukee (urbanmilwaukee.com), Milwaukee Journal Sentinel (jsonline.com). Each article must substantively cover the named candidate. You return article METADATA only — never summarize positions or facts.";
+  "You find news articles for a non-partisan Wisconsin voter guide. Return ONLY articles from these outlets: " +
+  Object.entries(WI_OUTLETS).map(([domain, name]) => `${name} (${domain})`).join(", ") +
+  ". Each article must substantively cover the named candidate. You return article METADATA only — never summarize positions or facts.";
 
 const SCOUT_JSON_SCHEMA = {
   type: "object",
@@ -245,7 +250,7 @@ export const run = internalAction({
           publishedAt: a.publishedAt,
           whyRelevant: a.whyRelevant,
           ...decorateCoverageRow(
-            { outlet: a.outlet, headline: a.headline },
+            { outlet: a.outlet, headline: a.headline, url: a.url },
             { candidateNames, raceKeywords },
           ),
         }));

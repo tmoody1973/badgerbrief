@@ -1,14 +1,50 @@
 import { describe, expect, test } from "vitest";
-import { ALLOWED_DOMAINS, isAllowedUrl, parseScoutResponse, sortByRotation } from "./scoutParse";
+import {
+  ALLOWED_DOMAINS,
+  MAX_SEARCH_DOMAINS,
+  isAllowedUrl,
+  parseScoutResponse,
+  sortByRotation,
+} from "./scoutParse";
 
 describe("ALLOWED_DOMAINS", () => {
-  test("matches the four approved outlets", () => {
-    expect(ALLOWED_DOMAINS).toEqual([
-      "wuwm.com",
-      "wpr.org",
-      "urbanmilwaukee.com",
-      "jsonline.com",
-    ]);
+  // The guard that matters most: Perplexity truncates search_domain_filter past
+  // 20 WITHOUT erroring, so a 21st outlet would look added but never be
+  // searched. Import-time throw + this test make that impossible to ship.
+  test("stays within Perplexity's search_domain_filter cap", () => {
+    expect(ALLOWED_DOMAINS.length).toBeLessThanOrEqual(MAX_SEARCH_DOMAINS);
+  });
+
+  test("has no duplicates — a repeat silently wastes a capped slot", () => {
+    expect(new Set(ALLOWED_DOMAINS).size).toBe(ALLOWED_DOMAINS.length);
+  });
+
+  test("lists bare registrable domains, not URLs or hosts with www", () => {
+    for (const d of ALLOWED_DOMAINS) {
+      expect(d).toMatch(/^[a-z0-9-]+(\.[a-z0-9-]+)+$/);
+      expect(d.startsWith("www.")).toBe(false);
+    }
+  });
+
+  test("covers Milwaukee, Madison and statewide newsrooms", () => {
+    // Regression lock on the discovery gap this list was widened to fix: a
+    // 4-outlet allowlist made most of the state's political press invisible.
+    for (const d of [
+      "jsonline.com", "urbanmilwaukee.com", "wuwm.com", "wpr.org", // pre-existing
+      "madison.com", "captimes.com", "channel3000.com", "wkow.com", // Madison
+      "wmtv15news.com", "isthmus.com", "pbswisconsin.org",
+      "tmj4.com", "wisn.com", "fox6now.com", "cbs58.com",           // Milwaukee TV
+      "wisconsinwatch.org", "wisconsinexaminer.com", "wispolitics.com", "wiseye.org",
+    ]) {
+      expect(ALLOWED_DOMAINS).toContain(d);
+    }
+  });
+
+  test("uses the host articles publish on, not the vanity redirect", () => {
+    // nbc15.com 301s to wmtv15news.com and wisconsineye.org 301s to wiseye.org;
+    // filtering on the pre-redirect host matches zero article URLs.
+    expect(ALLOWED_DOMAINS).not.toContain("nbc15.com");
+    expect(ALLOWED_DOMAINS).not.toContain("wisconsineye.org");
   });
 });
 

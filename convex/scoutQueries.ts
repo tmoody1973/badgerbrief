@@ -5,6 +5,16 @@
  */
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
+import { canonicalOutletName } from "./lib/outlets";
+
+/** Bare hostname for the outlet's `domain` field; undefined if unparseable. */
+const hostOf = (url: string): string | undefined => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return undefined;
+  }
+};
 
 /** Races the scout actively hunts coverage for. */
 export const CONTESTED_RACE_IDS = [
@@ -147,9 +157,14 @@ export const insertProposed = internalMutation({
         .withIndex("by_key", (q) => q.eq("key", key))
         .unique();
       if (existing) continue;
+      const row = rows.find((r) => r.outletKey === key)!;
       await ctx.db.insert("outlets", {
         key,
-        displayName: rows.find((r) => r.outletKey === key)!.outlet,
+        // Canonical name, matching how `key` was derived — otherwise a row
+        // keyed "tmj4 news" could be labelled with whatever variant the LLM
+        // happened to write on the run that created it.
+        displayName: canonicalOutletName(row.outlet, row.url),
+        domain: hostOf(row.url),
         type: "other",
         reviewStatus: "draft",
         updatedAt: Date.now(),

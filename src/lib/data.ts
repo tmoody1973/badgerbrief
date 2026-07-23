@@ -33,5 +33,8 @@ export const getInTheNewsForCandidate = (candidateSlug: string) =>
   fetchQuery(api.coverage.inTheNewsForCandidate, { candidateSlug });
 export const getInTheNewsForRace = (raceId: string) =>
   fetchQuery(api.coverage.inTheNewsForRace, { raceId });
+/** `hubArticles` defaults to 60; /news is the complete tracked record, so it
+ *  asks for everything. The cap stays as a runaway guard, just far above the
+ *  real corpus rather than quietly trimming the tail off the page. */
 export const getHubArticles = (raceId?: string) =>
-  fetchQuery(api.coverage.hubArticles, raceId ? { raceId } : {});
+  fetchQuery(api.coverage.hubArticles, { limit: 500, ...(raceId ? { raceId } : {}) });

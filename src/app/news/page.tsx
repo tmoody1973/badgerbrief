@@ -9,6 +9,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/news" },
 };
 
+/** Mirrors the `limit` getHubArticles asks for. If the corpus ever reaches it
+ *  the masthead says "500+ stories" rather than reporting a truncated array
+ *  length as the whole tracked record — the count must never claim more
+ *  completeness than we actually rendered. */
+const HUB_FETCH_LIMIT = 500;
+
 export default async function NewsPage() {
   const [items, races] = await Promise.all([getHubArticles(), listRaces()]);
   // raceId → office, so the race filter chips read "Governor" not "WI-GOV-2026".
@@ -26,7 +32,9 @@ export default async function NewsPage() {
       <header className="border-b-2 border-border pb-3">
         <h1 className="font-display text-[clamp(1.75rem,7vw,3rem)] leading-none">Election news</h1>
         <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-          Wisconsin 2026 · {items.length} {items.length === 1 ? "story" : "stories"} tracked
+          Wisconsin 2026 · {items.length}
+          {items.length >= HUB_FETCH_LIMIT ? "+" : ""}{" "}
+          {items.length === 1 ? "story" : "stories"} tracked
           {dateline ? ` · updated ${dateline}` : ""}
         </p>
       </header>

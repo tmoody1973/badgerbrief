@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
-import { decorateCoverageRow } from "./lib/outlets";
+import { canonicalOutletName, decorateCoverageRow } from "./lib/outlets";
 
 /**
  * One-off backfill: `outletKey` / `relevanceScore` / `hubStatus` are new fields,
@@ -34,11 +34,13 @@ export const backfillCoverage = internalMutation({
     const keys = new Map<string, string>(); // outletKey -> displayName
     for (const row of pending) {
       const d = decorateCoverageRow(
-        { outlet: row.outlet, headline: row.headline },
+        { outlet: row.outlet, headline: row.headline, url: row.url },
         decorateCtx,
       );
       if (d.hubStatus === "auto") hubAuto++;
-      if (d.outletKey) keys.set(d.outletKey, row.outlet);
+      // Draft outlets must be named with the SAME canonical name the key was
+      // derived from, or the row says "TMJ4" while its key says "tmj4 news".
+      if (d.outletKey) keys.set(d.outletKey, canonicalOutletName(row.outlet, row.url));
       if (!dryRun) await ctx.db.patch(row._id, d);
     }
 

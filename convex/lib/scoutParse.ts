@@ -5,7 +5,67 @@
  * mirroring the researchQueries.ts split (db-touching code lives elsewhere).
  */
 
-export const ALLOWED_DOMAINS = ["wuwm.com", "wpr.org", "urbanmilwaukee.com", "jsonline.com"];
+/**
+ * Wisconsin newsrooms the scout is allowed to surface. This list does double
+ * duty and BOTH uses matter:
+ *
+ *  1. `search_domain_filter` on the Perplexity call — it bounds what the model
+ *     is even allowed to search, so an outlet absent here is undiscoverable.
+ *     A four-domain list was the real reason a major development (Crowley
+ *     re-entering the governor's race) landed with a single source: three
+ *     quarters of the state's political press could not be seen.
+ *  2. `isAllowedUrl` — the post-hoc gate on every URL we store.
+ *
+ * Perplexity caps `search_domain_filter` at 20 entries (docs.perplexity.ai,
+ * search-domain-filters, checked 2026-07-23) and SILENTLY truncates past that,
+ * which would drop outlets off the end of this array with no error. That is
+ * why the list is capped and asserted below rather than left to grow freely —
+ * adding a 21st outlet must be a deliberate swap, not an invisible no-op.
+ *
+ * Use the domain articles actually live on, which is not always the brand's
+ * vanity domain: NBC15 Madison publishes on wmtv15news.com, and WisconsinEye
+ * redirects wisconsineye.org → wiseye.org.
+ */
+export const WI_OUTLETS: Record<string, string> = {
+  // --- Milwaukee ---
+  "jsonline.com": "Milwaukee Journal Sentinel",
+  "urbanmilwaukee.com": "Urban Milwaukee",
+  "wuwm.com": "WUWM",
+  "tmj4.com": "TMJ4 News",
+  "wisn.com": "WISN 12 News",
+  "fox6now.com": "FOX6 News Milwaukee",
+  "cbs58.com": "CBS 58 News",
+  // --- Madison ---
+  "madison.com": "Wisconsin State Journal",
+  "captimes.com": "The Capital Times",
+  "channel3000.com": "News 3 Now",
+  "wkow.com": "WKOW 27 News",
+  "wmtv15news.com": "NBC15 Madison", // nbc15.com 301s here
+  "isthmus.com": "Isthmus",
+  "pbswisconsin.org": "PBS Wisconsin",
+  // --- Statewide ---
+  "wpr.org": "Wisconsin Public Radio",
+  "wisconsinwatch.org": "Wisconsin Watch",
+  "wisconsinexaminer.com": "Wisconsin Examiner",
+  "wispolitics.com": "WisPolitics",
+  "wiseye.org": "WisconsinEye", // wisconsineye.org 301s here
+  // --- Other markets ---
+  "wbay.com": "WBAY Action 2 News",
+};
+
+export const ALLOWED_DOMAINS = Object.keys(WI_OUTLETS);
+
+/** Perplexity's hard cap on `search_domain_filter`. Past this it truncates
+ *  without erroring, so we fail loudly at import instead. */
+export const MAX_SEARCH_DOMAINS = 20;
+
+if (ALLOWED_DOMAINS.length > MAX_SEARCH_DOMAINS) {
+  throw new Error(
+    `ALLOWED_DOMAINS has ${ALLOWED_DOMAINS.length} entries; Perplexity's ` +
+      `search_domain_filter caps at ${MAX_SEARCH_DOMAINS} and truncates the rest ` +
+      `silently. Swap an outlet out rather than appending.`,
+  );
+}
 
 /** Exact host or subdomain of an allowed outlet, http(s) schemes only. */
 export function isAllowedUrl(url: string): boolean {
