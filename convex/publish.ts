@@ -77,6 +77,9 @@ export const publishQuote = mutation({
       outlet: draft.outlet,
       date,
       sourceUrl,
+      // Carry the reviewed clip across — the reader sees the same few seconds
+      // the reviewer watched before approving, not a different cut.
+      clipStorageId: draft.clipStorageId,
       draftId,
       publishedAt: Date.now(),
     });

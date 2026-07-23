@@ -79,7 +79,14 @@ const stanceLabel = v.union(
 
 type QueueRow =
   | { task: Doc<"review_tasks">; kind: "position"; draft: Doc<"candidate_positions_drafts"> }
-  | { task: Doc<"review_tasks">; kind: "quote"; draft: Doc<"quote_drafts"> };
+  | {
+      task: Doc<"review_tasks">;
+      kind: "quote";
+      draft: Doc<"quote_drafts">;
+      /** Signed URL of the clip of this moment, so a reviewer can watch and hear
+       *  the quote instead of trusting the transcript. null when none is cut. */
+      clipUrl: string | null;
+    };
 
 /** Open review tasks joined with their draft docs, newest first. */
 /** Open-work counts for the admin tab bar — one cheap query so each tab shows
@@ -135,7 +142,12 @@ export const list = query({
       } else if (task.kind === "quote") {
         const id = ctx.db.normalizeId("quote_drafts", task.refId);
         const draft = id ? await ctx.db.get(id) : null;
-        if (draft) rows.push({ task, kind: "quote", draft });
+        if (draft) {
+          const clipUrl = draft.clipStorageId
+            ? await ctx.storage.getUrl(draft.clipStorageId)
+            : null;
+          rows.push({ task, kind: "quote", draft, clipUrl });
+        }
       }
       // ad_match / other: no draft table to join yet — surfaced elsewhere.
     }

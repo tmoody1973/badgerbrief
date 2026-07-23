@@ -3,6 +3,7 @@
 import { type MouseEvent, useRef, useState } from "react";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
+import type { FunctionReturnType } from "convex/server";
 import { api } from "../../../convex/_generated/api";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { Button } from "@/components/retroui/Button";
@@ -11,9 +12,9 @@ import { formatTimestamp, isInterviewQuote, timestampSeconds } from "@/lib/inter
 
 /** MOO-327: one row per draft in the review queue — compact by default, full detail on expand. */
 
-export type QueueRow =
-  | { task: Doc<"review_tasks">; kind: "position"; draft: Doc<"candidate_positions_drafts"> }
-  | { task: Doc<"review_tasks">; kind: "quote"; draft: Doc<"quote_drafts"> };
+/** Derived from the query rather than restated here. The two copies had already
+ *  drifted once — adminQueue.list gained `clipUrl` and this file didn't know. */
+export type QueueRow = FunctionReturnType<typeof api.adminQueue.list>[number];
 
 function useAudit(refTable: string | undefined, refId: string | undefined) {
   const { isAuthenticated } = useConvexAuth();
@@ -342,6 +343,29 @@ export function DraftRow({ row }: { row: QueueRow }) {
         <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           status: {row.draft.reviewStatus}
         </p>
+
+        {/* The clip sits above the fields, before the decision: for an interview
+            quote the fastest and most reliable check is watching the candidate
+            say it. Transcripts mishear; the recording doesn't. */}
+        {row.kind === "quote" && row.clipUrl && (
+          <div className="mt-3">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Watch the quote
+            </p>
+            <video
+              controls
+              preload="metadata"
+              playsInline
+              src={`${row.clipUrl}#t=0.5`}
+              className="mt-1 w-full max-w-[420px] border-2 border-border bg-black"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Confirm the wording matches what you hear before approving. Quotes are
+              verbatim, so stutters and filler are expected — edit the text above only
+              to trim, never to rephrase.
+            </p>
+          </div>
+        )}
 
         <div className="mt-3 grid gap-4 md:grid-cols-3">
           <div className="space-y-2">

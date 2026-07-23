@@ -34,11 +34,16 @@ export const generateClipUploadUrl = mutation({
 });
 
 /**
- * Attach an uploaded clip to every published quote citing the same moment.
+ * Attach an uploaded clip to every quote citing the same moment — DRAFTS first,
+ * and any already-published rows too.
  *
- * Keyed on the quote's `sourceUrl` (program permalink + ?t=<seconds>) rather
- * than a row id, so re-running the clip script is idempotent and a clip cut
- * once covers any duplicate quote published from the same timestamp.
+ * Drafts matter more than published rows here: the clip is the review tool. A
+ * reviewer should watch the candidate say it before deciding, not after, so
+ * clips are cut for pending drafts and publishQuote carries the id across.
+ *
+ * Keyed on `sourceUrl` (program permalink + ?t=<seconds>) rather than a row id,
+ * so re-running the clip script is idempotent and one clip covers every quote
+ * drawn from the same moment.
  */
 export const attachClip = mutation({
   args: { sourceUrl: v.string(), storageId: v.id("_storage") },
@@ -58,10 +63,15 @@ export const attachClip = mutation({
       );
     }
 
-    const rows = await ctx.db
+    const drafts = await ctx.db
+      .query("quote_drafts")
+      .withIndex("by_sourceUrl", (q) => q.eq("sourceUrl", sourceUrl))
+      .collect();
+    const published = await ctx.db
       .query("quote_published")
       .withIndex("by_sourceUrl", (q) => q.eq("sourceUrl", sourceUrl))
       .collect();
+    const rows = [...drafts, ...published];
     if (rows.length === 0) {
       // Nothing to attach to: delete the upload rather than orphan a file in
       // storage that nothing references and nothing will ever clean up.
@@ -80,18 +90,29 @@ export const attachClip = mutation({
   },
 });
 
-/** Published quotes that still need a clip cut, for the local script to work through. */
+/**
+ * Quotes still needing a clip, for the local script to work through.
+ *
+ * Drafts included regardless of review status — the whole point is that a clip
+ * exists before the approve/reject decision. Deduped by sourceUrl so two quotes
+ * from the same moment cut one clip, not two.
+ */
 export const quotesNeedingClips = query({
   args: {},
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    const rows = await ctx.db.query("quote_published").collect();
-    return rows
-      .filter((r) => !r.clipStorageId && r.sourceUrl.includes("wiseye.org") && r.sourceUrl.includes("?t="))
-      .map((r) => ({
-        candidateSlug: r.candidateSlug,
-        sourceUrl: r.sourceUrl,
-        text: r.text,
-      }));
+    const drafts = await ctx.db.query("quote_drafts").collect();
+    const published = await ctx.db.query("quote_published").collect();
+    const seen = new Set<string>();
+    const out: { candidateSlug: string; sourceUrl: string; text: string }[] = [];
+    for (const r of [...drafts, ...published]) {
+      const url = r.sourceUrl;
+      if (!url || r.clipStorageId) continue;
+      if (!url.includes("wiseye.org") || !url.includes("?t=")) continue;
+      if (seen.has(url)) continue;
+      seen.add(url);
+      out.push({ candidateSlug: r.candidateSlug, sourceUrl: url, text: r.text });
+    }
+    return out;
   },
 });

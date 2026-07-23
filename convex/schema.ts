@@ -373,7 +373,12 @@ export default defineSchema({
     reviewStatus: reviewStatus,
     extractedAt: v.number(),
     traceId: v.optional(v.string()),
-  }).index("by_candidate", ["raceId", "candidateSlug"]),
+    // Clip of the moment being quoted, attached BEFORE review so a reviewer can
+    // watch and hear it rather than trusting the transcript. publishQuote
+    // carries it across to the published row.
+    clipStorageId: v.optional(v.id("_storage")),
+  }).index("by_candidate", ["raceId", "candidateSlug"])
+    .index("by_sourceUrl", ["sourceUrl"]),
 
   quote_published: defineTable({
     candidateSlug: v.string(),
