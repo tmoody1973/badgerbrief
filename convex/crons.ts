@@ -19,6 +19,26 @@ crons.daily(
   {},
 );
 
+// 11:15 UTC — 15 min after the scout, so the articles it just proposed get
+// their publication date read from the article's own metadata the same morning.
+//
+// THIS IS WHAT KEPT /news LOOKING FROZEN. The hub sorts date-verified articles
+// first and only trusts a date it has confirmed against the publisher's own
+// page, so an unverified article sorts below every dated one and falls off the
+// 60-item feed. Nothing scheduled ever ran the verifier, so brand-new coverage
+// was invisible on arrival: nine articles dated the 24th sat in the database
+// while the feed's newest story was the 22nd. The verifier is not an
+// enrichment nicety — without it, ingestion does not reach the page.
+//
+// limit 120 comfortably covers a day's scouting (a full-pool run proposes
+// ~20-70) with headroom for a backlog.
+crons.daily(
+  "verify article publication dates",
+  { hourUTC: 11, minuteUTC: 15 },
+  internal.publishedDateSync.syncPublishedDates,
+  { limit: 120 },
+);
+
 // 11:30 UTC — between scout and the research sweep, so own-site policy pages
 // discovered today are extractable in the same run (MOO-326).
 crons.daily(
