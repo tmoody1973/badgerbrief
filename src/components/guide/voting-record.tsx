@@ -51,13 +51,15 @@ export function VotingRecord({
         {federal ? "" : " and the full bill"}. We don&rsquo;t rate or score votes.
       </p>
       {federal && (
-        // The source's coverage is genuinely partial, so the page says so rather
-        // than implying a complete record. Congress.gov's House vote data is
-        // still in beta and carries only votes tied to a piece of legislation.
+        // Coverage is genuinely partial, so the page says so rather than
+        // implying a complete record. Verified against the live source: votes
+        // like "Election of the Speaker" ARE published, but they record a
+        // choice between people rather than a yes/no, so there is no position
+        // to show and they are deliberately excluded.
         <p className="mt-1 max-w-[60ch] text-xs text-muted-foreground">
-          Covers recorded votes on legislation. Votes not tied to a bill or
-          resolution — such as electing a Speaker — aren&rsquo;t yet published in the
-          source data and are missing here.
+          Covers recorded votes on bills, resolutions and amendments. Votes
+          without a yes/no position — electing a Speaker, quorum calls — aren&rsquo;t
+          included.
         </p>
       )}
 

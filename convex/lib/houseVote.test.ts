@@ -209,6 +209,36 @@ describe("parseHouseVote", () => {
     });
   });
 
+  test("REJECTS a Speaker election, whose totals count people not positions", () => {
+    // Observed live at 119/1/2. votePartyTotal carries {candidate, total} rows
+    // instead of party yea/nay rows, because members vote for a PERSON. There is
+    // no aye/nay to record, so the document must be refused rather than coerced
+    // into a position — the same reason a quorum call ("Call by States", roll 1)
+    // is refused for naming no legislation.
+    const detail = {
+      houseRollCallVote: {
+        congress: 119,
+        sessionNumber: 1,
+        rollCallNumber: 2,
+        votePartyTotal: [
+          { candidate: "Jeffries", total: 215 },
+          { candidate: "Johnson (LA)", total: 218 },
+        ],
+      },
+    };
+    const members = {
+      houseRollCallVoteMemberVotes: {
+        congress: 119,
+        sessionNumber: 1,
+        rollCallNumber: 2,
+        results: [],
+      },
+    };
+    expect(parseHouseVote(detail, members, ref(2))).toEqual({
+      error: "party row missing integer yeaTotal",
+    });
+  });
+
   test("CORRUPTION SWEEP: flipping any single member's vote is rejected", () => {
     // The federal counterpart of the Wisconsin blank-mark sweep. Every row, one
     // at a time, gets its cast changed to a different real value; the tally must
