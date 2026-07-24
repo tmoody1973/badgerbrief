@@ -9,6 +9,7 @@ import { AdReviewQueue, UnattributedAds } from "./ad-review";
 import { ReviewQueue } from "./review-queue";
 import { ArticleSources } from "./article-sources";
 import { OutletEditor } from "./outlet-editor";
+import { FeedbackQueue } from "./feedback-queue";
 import { asMessage, ErrorLine } from "./draft-row";
 import { Button } from "@/components/retroui/Button";
 import type { OutletType } from "../../../convex/lib/outlets";
@@ -20,7 +21,8 @@ type TabKey =
   | "editorial"
   | "sources"
   | "narratives"
-  | "outlets";
+  | "outlets"
+  | "feedback";
 
 /**
  * Admin work is five independent queues that used to stack into one long scroll.
@@ -36,6 +38,12 @@ export function AdminTabs() {
   );
   const pendingNarratives = useQuery(
     api.sponsors.pendingNarratives,
+    isAuthenticated ? {} : "skip",
+  );
+  // Unread reader reports. A correction here is a possible published error
+  // about a named candidate, so the count belongs where a reviewer will see it.
+  const newFeedback = useQuery(
+    api.feedback.newCount,
     isAuthenticated ? {} : "skip",
   );
   const draftOutlets = useQuery(
@@ -60,6 +68,7 @@ export function AdminTabs() {
     { key: "sources", label: "Sources", count: counts?.sources },
     { key: "narratives", label: "Narratives", count: pendingNarratives?.length },
     { key: "outlets", label: "Outlets", count: draftOutlets?.length },
+    { key: "feedback", label: "Reader reports", count: newFeedback },
   ];
 
   return (
@@ -110,6 +119,7 @@ export function AdminTabs() {
         {tab === "editorial" && <ReviewQueue />}
         {tab === "sources" && <ArticleSources />}
         {tab === "narratives" && <NarrativeQueue rows={pendingNarratives} />}
+        {tab === "feedback" && <FeedbackQueue />}
         {tab === "outlets" && (
           <div className="space-y-6">
             <OutletQueue rows={draftOutlets} />

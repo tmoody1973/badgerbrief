@@ -91,8 +91,29 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
           report it here
         </a>
         . The form asks which page and a link to the record, so it can be
-        checked against the original and corrected. If you&apos;d rather file it
-        publicly, the code is open source and you can{" "}
+        checked against the original.
+        <br />
+        <br />
+        <strong>What happens next.</strong> Every report is read by a person.
+        Anything reporting a factual error — a vote, a name, a figure, a date —
+        is checked against the source it came from and, if we got it wrong,
+        corrected on the site. We aim to do that within two business days, and
+        faster for anything affecting a candidate&apos;s voting record, where a
+        mistake misstates what someone actually did. Corrections are made to the
+        page itself rather than logged elsewhere, so the record you read is
+        always the corrected one.
+        <br />
+        <br />
+        <strong>Why this matters here.</strong> Most of this site is assembled
+        automatically. Each roll call is reconciled against the totals the
+        document itself publishes, which catches a miscount — but arithmetic
+        cannot catch a document that adds up and is still wrong. No person
+        reviews every parsed record before it is published, so readers are the
+        last check, and reports are treated accordingly.
+        <br />
+        <br />
+        If you&apos;d rather file it publicly, the code is open source and you
+        can{" "}
         <a
           href="https://github.com/tmoody1973/badgerbrief/issues/new"
           target="_blank"
