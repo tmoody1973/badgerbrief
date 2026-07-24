@@ -70,6 +70,20 @@ const getMyBallot = createTool({
       const ballot = await ctx.runQuery(internal.voterHelpQueries.ballotForUser, {
         userId: ctx.userId as Id<"users">,
       });
+      // Returning the bare `{"districts":null,"races":[]}` leaves the model to
+      // remember a rule from the far end of the instructions, and it reliably
+      // did not — it handed off to MyVote and never mentioned saving an
+      // address, so the user had no way to learn why their ballot was empty.
+      // Every other tool here states what to do when it has nothing; this one
+      // did not. Say it at the point of failure instead.
+      if (ballot.districts === null) {
+        return (
+          "No saved address for this user, so their districts are unknown and no " +
+          "ballot can be built. Tell them to save their address on the Brief page " +
+          "(/brief) to see their own races, and hand off the official MyVote link " +
+          "for looking it up in the meantime."
+        );
+      }
       return JSON.stringify(ballot);
     }),
 });
