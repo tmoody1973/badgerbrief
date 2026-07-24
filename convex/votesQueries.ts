@@ -239,7 +239,7 @@ const PAGE_DEFAULT = 25;
  * bounded — ≤705 rows), joined to legislative_votes for metadata, then position
  * + search filtered and sliced to `limit`. otherVotesOnBill is computed over the
  * UNFILTERED session so a filter never changes it. billUrl is deterministic;
- * summary is null until Phase 2 joins the bills table.
+ * summary comes from the bills cache (by_session_bill), null if unenriched.
  */
 export const votingRecordPage = query({
   args: {
@@ -294,21 +294,31 @@ export const votingRecordPage = query({
     });
 
     const total = filtered.length;
-    const rows = filtered.slice(0, cap).map((r) => ({
-      billNumber: r.vote.billNumber,
-      billTitle: r.vote.billTitle,
-      voteType: r.vote.voteType,
-      votedOn: r.vote.votedOn,
-      chamber: r.vote.chamber,
-      session: r.vote.session,
-      position: r.position,
-      ayes: r.vote.ayes,
-      nays: r.vote.nays,
-      sourceUrl: r.vote.sourceUrl,
-      otherVotesOnBill: (perBill.get(r.vote.billNumber) ?? 1) - 1,
-      billUrl: billUrl(r.vote.session, r.vote.billNumber),
-      summary: null as string | null,
-    }));
+    const rows = await Promise.all(
+      filtered.slice(0, cap).map(async (r) => {
+        const bill = await ctx.db
+          .query("bills")
+          .withIndex("by_session_bill", (q) =>
+            q.eq("session", r.vote.session).eq("billNumber", r.vote.billNumber),
+          )
+          .unique();
+        return {
+          billNumber: r.vote.billNumber,
+          billTitle: r.vote.billTitle,
+          voteType: r.vote.voteType,
+          votedOn: r.vote.votedOn,
+          chamber: r.vote.chamber,
+          session: r.vote.session,
+          position: r.position,
+          ayes: r.vote.ayes,
+          nays: r.vote.nays,
+          sourceUrl: r.vote.sourceUrl,
+          otherVotesOnBill: (perBill.get(r.vote.billNumber) ?? 1) - 1,
+          billUrl: billUrl(r.vote.session, r.vote.billNumber),
+          summary: bill?.summary ?? null,
+        };
+      }),
+    );
 
     return { rows, total, hasMore: cap < total };
   },

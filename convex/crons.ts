@@ -107,4 +107,14 @@ crons.weekly(
   {},
 );
 
+// Sundays 12:30 UTC — 30 min after the roll-call ingest, so bills from today's
+// new roll calls get their LRB analysis in the same weekly pass. Already-enriched
+// bills are skipped, so a full pass is cheap once the backfill has run.
+crons.weekly(
+  "enrich bill analyses",
+  { dayOfWeek: "sunday", hourUTC: 12, minuteUTC: 30 },
+  internal.bills.enrich,
+  {},
+);
+
 export default crons;

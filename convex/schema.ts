@@ -575,4 +575,15 @@ export default defineSchema({
     .index("by_candidate", ["candidateSlug"])
     .index("by_vote", ["voteKey"])
     .index("by_candidate_session", ["candidateSlug", "session"]),
+
+  // Per-bill LRB analysis cache. summary is the first analysis sentence, or null
+  // when the bill/resolution has no LRB analysis. Keyed by session+billNumber
+  // (bill numbers reset each biennium, so session is part of the key).
+  bills: defineTable({
+    session: v.string(),
+    billNumber: v.string(),
+    billUrl: v.string(),
+    summary: v.union(v.string(), v.null()),
+    fetchedAt: v.number(),
+  }).index("by_session_bill", ["session", "billNumber"]),
 });

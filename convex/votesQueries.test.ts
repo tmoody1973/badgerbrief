@@ -403,6 +403,26 @@ describe("votingRecordPage", () => {
     await seedTwo(t);
     expect((await t.query(api.votesQueries.votingRecordPage, { candidateSlug: "francesca-hong", session: "2025" })).total).toBe(0);
   });
+
+  test("attaches the bill summary from the bills cache", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall: ROLL_CALL }); // 2023 AB 388
+    // Enrich AB 388 in the bills cache.
+    await t.mutation(internal.billsQueries.storeBill, {
+      session: "2023", billNumber: "AB 388", billUrl: "http://u", summary: "This bill creates a program.",
+    });
+    const res = await t.query(api.votesQueries.votingRecordPage, { candidateSlug: "francesca-hong", session: "2023" });
+    expect(res.rows[0].summary).toBe("This bill creates a program.");
+  });
+
+  test("summary is null when the bill is not in the cache", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall: ROLL_CALL });
+    const res = await t.query(api.votesQueries.votingRecordPage, { candidateSlug: "francesca-hong", session: "2023" });
+    expect(res.rows[0].summary).toBeNull();
+  });
 });
 
 describe("legislator_votes.session", () => {
