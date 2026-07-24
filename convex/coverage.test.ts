@@ -13,17 +13,45 @@ async function seedArticle(c: ReturnType<typeof t>, over: Record<string, unknown
   }));
 }
 
+// Filtering is asserted by WHICH articles come back, identified by headline —
+// not by reading hubStatus/status off the result. Those fields are no longer in
+// the public payload (they are internal editorial state), and a test that reads
+// them would quietly force them back into every visitor's page source.
 test("hub shows only hubStatus:auto; entity shows only approved", async () => {
   const c = t();
-  await seedArticle(c, { hubStatus: "auto", status: "proposed", raceId: "WI-GOV-2026", candidateSlug: "francesca-hong" });
-  await seedArticle(c, { hubStatus: "hidden", status: "approved", raceId: "WI-GOV-2026", candidateSlug: "francesca-hong" });
+  await seedArticle(c, { headline: "on-hub", hubStatus: "auto", status: "proposed", raceId: "WI-GOV-2026", candidateSlug: "francesca-hong" });
+  await seedArticle(c, { headline: "hidden-but-approved", hubStatus: "hidden", status: "approved", raceId: "WI-GOV-2026", candidateSlug: "francesca-hong" });
 
   const hub = await c.query(api.coverage.hubArticles, {});
-  expect(hub.map((r) => r.article.hubStatus)).toEqual(["auto"]); // hidden excluded
+  expect(hub.map((r) => r.article.headline)).toEqual(["on-hub"]); // hidden excluded
 
   const entity = await c.query(api.coverage.inTheNewsForCandidate, { candidateSlug: "francesca-hong" });
-  expect(entity.length).toBe(1); // only the approved one, though it's hub-hidden
-  expect(entity[0].article.status).toBe("approved");
+  // Only the approved one, though it is hub-hidden — the two axes are separate.
+  expect(entity.map((r) => r.article.headline)).toEqual(["hidden-but-approved"]);
+});
+
+test("the public payload carries no internal editorial fields", async () => {
+  // /news shipped 855KB of HTML with whyRelevant and relevanceReason 145 times
+  // each, plus relevance scores and review status — none of it rendered. This
+  // pins the projection so a convenient `...article` spread cannot put the
+  // editorial machinery back into every visitor's page source.
+  const c = t();
+  await seedArticle(c, {
+    hubStatus: "auto",
+    status: "proposed",
+    relevanceScore: 1,
+    relevanceReason: "names candidate",
+    raceId: "WI-GOV-2026",
+  });
+  const [row] = await c.query(api.coverage.hubArticles, {});
+  const allowed = new Set(["_id", "headline", "url", "outlet", "imageUrl", "raceId", "publishedAt"]);
+  const leaked = Object.keys(row.article).filter((k) => !allowed.has(k));
+  expect(leaked).toEqual([]); // nothing beyond the rendered fields
+  // The specific offenders that were being shipped.
+  expect(row.article).not.toHaveProperty("whyRelevant");
+  expect(row.article).not.toHaveProperty("relevanceReason");
+  expect(row.article).not.toHaveProperty("relevanceScore");
+  expect(row.article).not.toHaveProperty("status");
 });
 
 test("hubModerationList returns both auto and hidden rows; hubArticles still only auto", async () => {
@@ -32,7 +60,7 @@ test("hubModerationList returns both auto and hidden rows; hubArticles still onl
   await seedArticle(c, { hubStatus: "hidden", status: "approved", raceId: "WI-GOV-2026", candidateSlug: "francesca-hong" });
 
   const hub = await c.query(api.coverage.hubArticles, {});
-  expect(hub.map((r) => r.article.hubStatus)).toEqual(["auto"]);
+  expect(hub).toHaveLength(1); // only the "auto" row is public
 
   const asAdmin = c.withIdentity(admin as any);
   const moderation = await asAdmin.query(api.coverage.hubModerationList, {});

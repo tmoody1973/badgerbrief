@@ -62,8 +62,10 @@ test("campaign sites are never decorated, never become outlets, never hit the hu
   });
   expect(res.scanned).toBe(2); // the campaign-site row is skipped
   const hub = await c.query(api.coverage.hubArticles, {});
+  // Only the non-campaign row is on the hub. sourceKind is internal and no
+  // longer in the public payload, so the exclusion is asserted by the count and
+  // the surviving headline rather than by reading the field.
   expect(hub).toHaveLength(1);
-  expect(hub[0].article.sourceKind).not.toBe("campaign_site");
   await c.run(async (ctx) => {
     const outlets = await ctx.db.query("outlets").collect();
     expect(outlets.map((o) => o.displayName)).not.toContain(

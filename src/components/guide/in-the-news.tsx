@@ -1,8 +1,7 @@
-import type { Doc } from "../../../convex/_generated/dataModel";
 import { SourceTransparencyCard } from "./source-transparency-card";
 import { ArticleThumb } from "./article-thumb";
 
-type Row = { article: Doc<"article_sources">; outlet: Doc<"outlets"> | null };
+import type { CoverageRow as Row } from "@/lib/coverage-types";
 
 export function InTheNews({ items, heading }: { items: Row[]; heading: string }) {
   if (items.length === 0) return null;

@@ -37,7 +37,8 @@ export default async function NewsPage() {
               headline: r.article.headline,
               url: r.article.url,
               outlet: r.article.outlet,
-              publishedAt: r.article.publishedAtVerified ? r.article.publishedAt : undefined,
+              // publishedAt is only ever set when the date was verified.
+              publishedAt: r.article.publishedAt,
             })),
           ),
         ]}

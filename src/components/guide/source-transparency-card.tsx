@@ -1,4 +1,4 @@
-import type { Doc } from "../../../convex/_generated/dataModel";
+import type { PublicOutlet } from "@/lib/coverage-types";
 
 const TYPE_LABEL: Record<string, string> = {
   nonprofit: "nonprofit newsroom", public_media: "public media",
@@ -15,7 +15,7 @@ const TYPE_LABEL: Record<string, string> = {
  */
 export function SourceTransparencyStamp({
   outlet, outletName,
-}: { outlet: Doc<"outlets"> | null; outletName: string }) {
+}: { outlet: PublicOutlet | null; outletName: string }) {
   const type = outlet ? (TYPE_LABEL[outlet.type] ?? "news outlet") : "outlet profile pending";
   const hasDetail = !!(outlet?.ownership || outlet?.fundingNote);
   const stamp = (
@@ -47,7 +47,7 @@ export function SourceTransparencyStamp({
 
 export function SourceTransparencyCard({
   outlet, outletName,
-}: { outlet: Doc<"outlets"> | null; outletName: string }) {
+}: { outlet: PublicOutlet | null; outletName: string }) {
   if (!outlet) {
     return (
       <p className="font-mono text-xs text-muted-foreground">

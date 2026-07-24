@@ -4,22 +4,68 @@ import type { Doc } from "./_generated/dataModel";
 import { requireAdmin } from "./sponsors";
 import { cleanPublishedAt } from "./lib/outlets";
 
-async function withOutlet(ctx: QueryCtx, article: Doc<"article_sources">) {
+async function loadOutlet(ctx: QueryCtx, article: Doc<"article_sources">) {
   const key = article.outletKey;
   const outlet = key
     ? await ctx.db.query("outlets").withIndex("by_key", (q) => q.eq("key", key)).unique()
     : null;
+  return outlet && outlet.reviewStatus === "approved" ? outlet : null;
+}
+
+/** Only a date read from the article's OWN publication metadata is displayed.
+ * The scout's LLM guess is never shown, and cleanPublishedAt stays as a
+ * belt-and-braces sanity gate. */
+const displayDate = (article: Doc<"article_sources">) =>
+  article.publishedAtVerified ? cleanPublishedAt(article.publishedAt) : undefined;
+
+/** Admin shape: the whole row, including the triage fields a reviewer needs. */
+async function withOutlet(ctx: QueryCtx, article: Doc<"article_sources">) {
   return {
-    // Only a date we read from the article's OWN publication metadata is
-    // displayed (publishedAtVerified). The scout's LLM guess is never shown,
-    // and cleanPublishedAt is still applied as a belt-and-braces sanity gate.
+    article: { ...article, publishedAt: displayDate(article) },
+    outlet: await loadOutlet(ctx, article),
+  };
+}
+
+/**
+ * Public shape: ONLY the fields something on the page actually renders.
+ *
+ * Spreading the whole document shipped the editorial machinery to every
+ * visitor. /news was 855KB of HTML, 35% of it the RSC payload, carrying
+ * `whyRelevant` and `relevanceReason` 145 times each and outlet funding
+ * metadata 47 times — none of it rendered anywhere. That is dead weight on the
+ * largest-contentful paint of the page voters are most likely to open on a
+ * phone.
+ *
+ * It is also a disclosure question, not only a performance one: relevance
+ * scores and the scout's private reasoning about why an article was kept are
+ * internal editorial notes, and shipping them in the page source publishes
+ * them whether or not anything draws them.
+ */
+async function withOutletPublic(ctx: QueryCtx, article: Doc<"article_sources">) {
+  const outlet = await loadOutlet(ctx, article);
+  return {
     article: {
-      ...article,
-      publishedAt: article.publishedAtVerified
-        ? cleanPublishedAt(article.publishedAt)
-        : undefined,
+      _id: article._id, // React key on the feed
+      headline: article.headline,
+      url: article.url,
+      outlet: article.outlet,
+      imageUrl: article.imageUrl,
+      raceId: article.raceId,
+      publishedAt: displayDate(article),
     },
-    outlet: outlet && outlet.reviewStatus === "approved" ? outlet : null,
+    // The transparency card and stamp read exactly these.
+    outlet: outlet
+      ? {
+          key: outlet.key,
+          displayName: outlet.displayName,
+          type: outlet.type,
+          ownership: outlet.ownership,
+          fundingNote: outlet.fundingNote,
+          ownershipSourceUrl: outlet.ownershipSourceUrl,
+          // thirdPartyRatings omitted on purpose — v1 never renders it, so
+          // sending it would publish bias ratings the site chose not to show.
+        }
+      : null,
   };
 }
 
@@ -60,7 +106,7 @@ export const hubArticles = query({
     const filtered = (raceId ? rows.filter((r) => r.raceId === raceId) : rows)
       .sort(byRecency)
       .slice(0, limit ?? 60);
-    return Promise.all(filtered.map((a) => withOutlet(ctx, a)));
+    return Promise.all(filtered.map((a) => withOutletPublic(ctx, a)));
   },
 });
 
@@ -69,7 +115,7 @@ export const inTheNewsForCandidate = query({
   handler: async (ctx, { candidateSlug }) => {
     const rows = (await ctx.db.query("article_sources").withIndex("by_candidate", (q) => q.eq("candidateSlug", candidateSlug)).collect())
       .filter((r) => r.status === "approved" && r.sourceKind !== "campaign_site");
-    return Promise.all(rows.map((a) => withOutlet(ctx, a)));
+    return Promise.all(rows.map((a) => withOutletPublic(ctx, a)));
   },
 });
 
@@ -78,7 +124,7 @@ export const inTheNewsForRace = query({
   handler: async (ctx, { raceId }) => {
     const rows = (await ctx.db.query("article_sources").withIndex("by_race", (q) => q.eq("raceId", raceId)).collect())
       .filter((r) => r.status === "approved" && r.sourceKind !== "campaign_site");
-    return Promise.all(rows.map((a) => withOutlet(ctx, a)));
+    return Promise.all(rows.map((a) => withOutletPublic(ctx, a)));
   },
 });
 

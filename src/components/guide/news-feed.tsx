@@ -10,7 +10,7 @@ import type { Doc } from "../../../convex/_generated/dataModel";
 import { SourceTransparencyStamp } from "./source-transparency-card";
 import { ArticleThumb } from "./article-thumb";
 
-type Row = { article: Doc<"article_sources">; outlet: Doc<"outlets"> | null };
+import type { CoverageRow as Row } from "@/lib/coverage-types";
 
 const MONTH = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
