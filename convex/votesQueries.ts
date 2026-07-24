@@ -144,6 +144,57 @@ export const ingestedKeys = internalQuery({
   },
 });
 
+/**
+ * Delete one session+chamber's stored roll calls so an ingest can rebuild them.
+ *
+ * WHY THIS HAS TO EXIST. legislator_votes rows are written ONLY inside
+ * storeRollCall, at ingest time, and non-tracked members' positions are never
+ * persisted — so a legislatorName added after a backfill attaches nothing and
+ * that candidate silently shows an empty record. There is no reconcile-from-DB
+ * path and there cannot be one: the data needed to build it was never stored.
+ * The only way to pick up newly-mapped legislators is to drop the stored roll
+ * calls and re-fetch them from the source, which still has them.
+ *
+ * Deletes legislator_votes alongside legislative_votes. Leaving the former
+ * behind would orphan them against vote keys that no longer exist, and the
+ * re-ingest would then insert a SECOND row per candidate per vote — silently
+ * doubling every tracked legislator's record.
+ *
+ * Paginated for the same reason as backfillLegislatorSession: one mutation may
+ * not touch more than 4096 documents, and a session+chamber is well past that
+ * once legislator_votes are counted. Call until `isDone`.
+ */
+export const deleteSessionVotes = internalMutation({
+  args: {
+    session: v.string(),
+    chamber: v.union(v.literal("assembly"), v.literal("senate"), v.literal("us_house")),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { session, chamber, limit = 200 }) => {
+    const votes = await ctx.db
+      .query("legislative_votes")
+      .withIndex("by_session_chamber", (q) =>
+        q.eq("session", session).eq("chamber", chamber),
+      )
+      .take(limit);
+    let deletedVotes = 0;
+    let deletedPositions = 0;
+    for (const v of votes) {
+      const positions = await ctx.db
+        .query("legislator_votes")
+        .withIndex("by_vote", (q) => q.eq("voteKey", v.voteKey))
+        .collect();
+      for (const p of positions) {
+        await ctx.db.delete(p._id);
+        deletedPositions++;
+      }
+      await ctx.db.delete(v._id);
+      deletedVotes++;
+    }
+    return { deletedVotes, deletedPositions, isDone: votes.length < limit };
+  },
+});
+
 /** Attach a hand-verified roll-call surname to a candidate. */
 export const setLegislatorName = mutation({
   args: {

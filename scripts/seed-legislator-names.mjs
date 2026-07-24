@@ -52,6 +52,23 @@ const MAPPINGS = [
   { slug: "brett-hulsey", name: "HULSEY", chamber: "assembly", sessions: ["2011", "2013"] },
   { slug: "david-crowley", name: "CROWLEY", chamber: "assembly", sessions: ["2017", "2019"] },
   { slug: "jocasta-zamarripa", name: "ZAMARRIPA", chamber: "assembly", sessions: ["2011", "2013", "2015", "2017", "2019"] },
+
+  // Sitting state senators seeking re-election in 2026 (odd districts).
+  // Every surname below was checked against BOTH a real 2023 roll call
+  // (sv0050) and a real 2025 one (sv0100): all ten appear verbatim, and no row
+  // in either document carries a disambiguating initial, so no two senators
+  // share a surname and none of these is ambiguous. Slugs are the WEC
+  // "Name On Ballot" slugified, which is why Larson is `chris-j-larson`.
+  { slug: "tim-carpenter", name: "CARPENTER", chamber: "senate", sessions: ["2023", "2025"] }, // D3
+  { slug: "chris-j-larson", name: "LARSON", chamber: "senate", sessions: ["2023", "2025"] }, // D7
+  { slug: "john-jagler", name: "JAGLER", chamber: "senate", sessions: ["2023", "2025"] }, // D13
+  { slug: "mark-spreitzer", name: "SPREITZER", chamber: "senate", sessions: ["2023", "2025"] }, // D15
+  { slug: "howard-marklein", name: "MARKLEIN", chamber: "senate", sessions: ["2023", "2025"] }, // D17
+  { slug: "rachael-ann-cabral-guevara", name: "CABRAL-GUEVARA", chamber: "senate", sessions: ["2023", "2025"] }, // D19
+  { slug: "dianne-hesselbein", name: "HESSELBEIN", chamber: "senate", sessions: ["2023", "2025"] }, // D27
+  { slug: "cory-tomczyk", name: "TOMCZYK", chamber: "senate", sessions: ["2023", "2025"] }, // D29
+  { slug: "jeff-smith", name: "SMITH", chamber: "senate", sessions: ["2023", "2025"] }, // D31
+  { slug: "chris-kapenga", name: "KAPENGA", chamber: "senate", sessions: ["2023", "2025"] }, // D33
 ];
 
 for (const m of MAPPINGS) {
