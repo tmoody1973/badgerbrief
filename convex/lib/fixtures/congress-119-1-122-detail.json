@@ -1,0 +1,58 @@
+{
+    "houseRollCallVote": {
+        "congress": 119,
+        "identifier": 11912025122,
+        "legislationNumber": "276",
+        "legislationType": "HR",
+        "legislationUrl": "https://www.congress.gov/bill/119/house-bill/276",
+        "result": "Passed",
+        "rollCallNumber": 122,
+        "sessionNumber": 1,
+        "sourceDataURL": "https://clerk.house.gov/evs/2025/roll122.xml",
+        "startDate": "2025-05-08T10:42:00-04:00",
+        "updateDate": "2025-06-24T08:37:50-04:00",
+        "votePartyTotal": [
+            {
+                "nayTotal": 1,
+                "notVotingTotal": 8,
+                "party": {
+                    "name": "Republican",
+                    "type": "R"
+                },
+                "presentTotal": 0,
+                "voteParty": "R",
+                "yeaTotal": 211
+            },
+            {
+                "nayTotal": 205,
+                "notVotingTotal": 8,
+                "party": {
+                    "name": "Democrat",
+                    "type": "D"
+                },
+                "presentTotal": 0,
+                "voteParty": "D",
+                "yeaTotal": 0
+            },
+            {
+                "nayTotal": 0,
+                "notVotingTotal": 0,
+                "party": {
+                    "name": "Independent",
+                    "type": "I"
+                },
+                "presentTotal": 0,
+                "voteParty": "I",
+                "yeaTotal": 0
+            }
+        ],
+        "voteQuestion": "On Passage",
+        "voteType": "Recorded Vote"
+    },
+    "request": {
+        "congress": "119",
+        "contentType": "application/json",
+        "format": "json",
+        "session": "1"
+    }
+}

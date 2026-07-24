@@ -1,0 +1,61 @@
+{
+    "houseRollCallVote": {
+        "amendmentAuthor": "Biggs of Arizona Part A Amendment No. 29",
+        "amendmentNumber": "97",
+        "amendmentType": "HAMDT",
+        "congress": 119,
+        "identifier": 11912025259,
+        "legislationNumber": "3838",
+        "legislationType": "HR",
+        "legislationUrl": "https://www.congress.gov/amendment/119/house-amendment/97",
+        "result": "Failed",
+        "rollCallNumber": 259,
+        "sessionNumber": 1,
+        "sourceDataURL": "https://clerk.house.gov/evs/2025/roll259.xml",
+        "startDate": "2025-09-10T17:36:00-04:00",
+        "updateDate": "2025-09-11T17:23:44-04:00",
+        "votePartyTotal": [
+            {
+                "nayTotal": 18,
+                "notVotingTotal": 5,
+                "party": {
+                    "name": "Republican",
+                    "type": "R"
+                },
+                "presentTotal": 0,
+                "voteParty": "R",
+                "yeaTotal": 198
+            },
+            {
+                "nayTotal": 210,
+                "notVotingTotal": 4,
+                "party": {
+                    "name": "Democrat",
+                    "type": "D"
+                },
+                "presentTotal": 0,
+                "voteParty": "D",
+                "yeaTotal": 2
+            },
+            {
+                "nayTotal": 0,
+                "notVotingTotal": 0,
+                "party": {
+                    "name": "Independent",
+                    "type": "I"
+                },
+                "presentTotal": 0,
+                "voteParty": "I",
+                "yeaTotal": 0
+            }
+        ],
+        "voteQuestion": "On Agreeing to the Amendment",
+        "voteType": "Recorded Vote"
+    },
+    "request": {
+        "congress": "119",
+        "contentType": "application/json",
+        "format": "json",
+        "session": "1"
+    }
+}
