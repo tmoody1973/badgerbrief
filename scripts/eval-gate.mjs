@@ -12,7 +12,16 @@
  *   node scripts/eval-gate.mjs --name opus-check --model claude-opus-4-8
  *   node scripts/eval-gate.mjs --name degraded --instructions-file bad.txt
  *   node scripts/eval-gate.mjs --name candidate --baseline haiku-baseline
- *   Flags: --dev (run agent against dev deployment; default prod), --model, --instructions-file
+ *   node scripts/eval-gate.mjs --name candidate --judge-passes 1   # single noisy run
+ *   Flags: --dev (run agent against dev deployment; default prod), --model,
+ *          --instructions-file, --judge-passes N (default 3)
+ *
+ * The judge is NOT deterministic. Three runs over identical code and identical
+ * answers scored golden-expectations 67%, 72% and 94%, with different questions
+ * failing each time, so a single pass cannot certify anything against a 90%
+ * floor. Answers are therefore generated once and judged N times, and a
+ * question fails only on a majority verdict. Generating answers is the
+ * expensive half (one live agent call each), so the extra passes are cheap.
  *
  * Requires: `ax` CLI with a profile, `npx convex` auth for this project.
  */
@@ -46,6 +55,10 @@ const instructionsFile = arg("--instructions-file");
 const baseline = arg("--baseline");
 const useDev = process.argv.includes("--dev");
 const reportOnly = process.argv.includes("--report-only"); // reprint rates for an existing experiment
+// How many times the SAME answers are judged before taking a majority. The
+// judge is non-deterministic (67/72/94% observed on identical input), so 1 is
+// only for reproducing a single historical run.
+const judgePasses = Math.max(1, Number(arg("--judge-passes") ?? 3));
 
 function ax(args, input) {
   return execFileSync("ax", args, { input, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
@@ -95,21 +108,19 @@ for (const ex of reportOnly ? [] : examples) {
   console.log(`  ${f.category}: ${Date.now() - t0}ms — ${f.question.slice(0, 60)}`);
 }
 
-// 3. Create the experiment (skipped with --report-only: reuse the existing one)
-if (!reportOnly) axTolerant(
-  ["experiments", "create", "--name", name, "--dataset", DATASET, "--space", SPACE, "--file", "-"],
-  JSON.stringify(runs),
-);
-const experiments = axJson(["experiments", "list", "--dataset", DATASET, "--space", SPACE, "-o", "json"]);
-const expList = Array.isArray(experiments) ? experiments : experiments.experiments;
-const exp = expList.find((e) => e.name === name);
-if (!exp) {
-  console.error(`experiment "${name}" not found after create`);
-  process.exit(2);
-}
-console.log(`experiment created: ${name} (${exp.id})`);
-
-// 4. Score it with the judges (dataset-based evaluation task)
+// 3. Create the experiment(s) and score each.
+//
+// MAJORITY-OF-N, AND WHY IT IS CHEAP. The judge is not deterministic: three
+// runs over identical code and identical answers scored golden-expectations
+// 67%, 72% and 94%, with DIFFERENT questions failing each time. Against that,
+// a single run cannot certify anything — a 90% floor passes or fails largely on
+// which way the judge happened to fall.
+//
+// The expensive half is generating the answers (one live agent call per
+// question, already done above in step 2). Judging is comparatively cheap, so
+// the SAME answers are uploaded as N experiments and judged N times, and a
+// question only counts as failing when a majority of passes say so. That
+// collapses the variance without re-running the agent N times.
 const evaluatorsJson = JSON.stringify(
   EVALUATORS.map((e) => ({
     evaluator_id: e.id,
@@ -119,20 +130,41 @@ const evaluatorsJson = JSON.stringify(
         : { input: "question", output: "output" },
   })),
 );
-if (!reportOnly) axTolerant([
-  "tasks", "create-evaluation",
-  "--name", `gate-${name}`,
-  "--task-type", "TEMPLATE_EVALUATION",
-  "--dataset", DATASET,
-  "--space", SPACE,
-  "--experiment-ids", exp.id,
-  "--evaluators", evaluatorsJson,
-  "--no-continuous",
-]);
-const tasks = axJson(["tasks", "list", "--space", SPACE, "-o", "json"]);
-const task = (tasks.tasks ?? tasks).find((t) => t.name === `gate-${name}`);
-console.log(`scoring with judges (task ${task.id})…`);
-if (!reportOnly) axTolerant(["tasks", "trigger-run", task.id, "--experiment-ids", exp.id, "--wait"]);
+
+/** Upload the answers as `expName` and score them once. Returns its rows. */
+async function judgePass(expName) {
+  if (!reportOnly) {
+    axTolerant(
+      ["experiments", "create", "--name", expName, "--dataset", DATASET, "--space", SPACE, "--file", "-"],
+      JSON.stringify(runs),
+    );
+  }
+  const expId = experimentIdByName(expName);
+  console.log(`experiment: ${expName} (${expId})`);
+
+  if (!reportOnly) {
+    axTolerant([
+      "tasks", "create-evaluation",
+      "--name", `gate-${expName}`,
+      "--task-type", "TEMPLATE_EVALUATION",
+      "--dataset", DATASET,
+      "--space", SPACE,
+      "--experiment-ids", expId,
+      "--evaluators", evaluatorsJson,
+      "--no-continuous",
+    ]);
+  }
+  const tasks = axJson(["tasks", "list", "--space", SPACE, "-o", "json"]);
+  const task = (tasks.tasks ?? tasks).find((t) => t.name === `gate-${expName}`);
+  if (!task) {
+    console.error(`evaluation task "gate-${expName}" not found after create`);
+    process.exit(2);
+  }
+  console.log(`  scoring with judges (task ${task.id})…`);
+  if (!reportOnly) axTolerant(["tasks", "trigger-run", task.id, "--experiment-ids", expId, "--wait"]);
+  await awaitTaskRun(task.id);
+  return fetchRuns(expId);
+}
 
 // `ax tasks list-runs` is a landmine: the server now returns a `failure_reason`
 // field on TaskRun that ax's client-side model doesn't know, so it throws on
@@ -152,16 +184,19 @@ async function fetchTaskRuns(taskId) {
   if (!res.ok) throw new Error(`task runs fetch failed: ${res.status}`);
   return (await res.json()).task_runs;
 }
-// poll until the run reaches a terminal state (trigger --wait may have bailed early)
-for (let i = 0; i < 60; i++) {
-  const rl = await fetchTaskRuns(task.id);
-  const latest = rl[0];
-  if (latest && ["COMPLETED", "FAILED", "CANCELLED"].includes(latest.status)) {
-    console.log(`judge run ${latest.status}`);
-    if (latest.status !== "COMPLETED") process.exit(2);
-    break;
+/** Poll until the run reaches a terminal state (trigger --wait may bail early). */
+async function awaitTaskRun(taskId) {
+  for (let i = 0; i < 60; i++) {
+    const latest = (await fetchTaskRuns(taskId))[0];
+    if (latest && ["COMPLETED", "FAILED", "CANCELLED"].includes(latest.status)) {
+      console.log(`  judge run ${latest.status}`);
+      if (latest.status !== "COMPLETED") process.exit(2);
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 10_000));
   }
-  await new Promise((r) => setTimeout(r, 10_000));
+  console.error("  judge run did not reach a terminal state in time");
+  process.exit(2);
 }
 
 // 5. Pull scores and compute pass rates.
@@ -221,22 +256,77 @@ async function passRates(expId) {
   }
   return { rates, rows };
 }
-const { rates, rows } = await passRates(exp.id);
-console.log(`\n=== ${name} ===`);
+// Judge the same answers `judgePasses` times. Pass 1 keeps the bare experiment
+// name so --report-only and any existing baseline still resolve.
+const passRows = [];
+for (let p = 1; p <= judgePasses; p++) {
+  passRows.push(await judgePass(p === 1 ? name : `${name}-j${p}`));
+}
+
+const rowKey = (r) => r.example_id ?? r.dataset_example_id;
+const questionFor = (id) => {
+  const ex = examples.find((e) => e.id === id);
+  return ex?.additional_properties?.question ?? ex?.question ?? String(id);
+};
+
+/**
+ * Collapse N judge passes into one verdict per (question, evaluator).
+ *
+ * A question fails only when a MAJORITY of passes call it a failure, so a
+ * single judge misfire no longer moves the gate. NOT_PARSABLE is not a vote in
+ * either direction — it is judge noise (same treatment as eval-monitor) — so a
+ * question is skipped entirely when no pass produced a usable label.
+ */
+function majority() {
+  const rates = {};
+  const failures = [];
+  for (const { name: evalName } of EVALUATORS) {
+    let scored = 0;
+    let passed = 0;
+    for (const id of new Set(passRows.flat().map(rowKey))) {
+      const labels = passRows
+        .map((rows) => rows.find((r) => rowKey(r) === id)?.[`eval.${evalName}.label`])
+        .filter((l) => l && l !== "NOT_PARSABLE");
+      if (labels.length === 0) continue;
+      scored++;
+      const yes = labels.filter((l) => PASS_LABELS.has(l)).length;
+      if (yes * 2 > labels.length) passed++;
+      else failures.push({ evalName, id, labels });
+    }
+    rates[evalName] = { n: scored, rate: scored ? passed / scored : null };
+  }
+  return { rates, failures };
+}
+
+const { rates, failures } = majority();
+
+// Per-pass rates are printed alongside the majority so the judge's spread stays
+// visible — a wide spread here is the signal that the floor is being measured
+// with a noisy instrument, not that the agent changed.
+if (judgePasses > 1) {
+  console.log(`\n=== ${name}: golden-expectations per pass ===`);
+  passRows.forEach((rows, i) => {
+    const scored = rows.filter((r) => {
+      const l = r["eval.golden-expectations.label"];
+      return l && l !== "NOT_PARSABLE";
+    });
+    const ok = scored.filter((r) => PASS_LABELS.has(r["eval.golden-expectations.label"]));
+    const pct = scored.length ? Math.round((ok.length / scored.length) * 100) : 0;
+    console.log(`  pass ${i + 1}: ${pct}% (n=${scored.length})`);
+  });
+}
+
+console.log(`\n=== ${name} (majority of ${judgePasses}) ===`);
 for (const [evalName, { n, rate }] of Object.entries(rates)) {
   console.log(`  ${evalName.padEnd(24)} ${rate === null ? "NO SCORES" : `${Math.round(rate * 100)}%`} (n=${n})`);
 }
-for (const r of rows) {
-  for (const { name: evalName } of EVALUATORS) {
-    const label = r[`eval.${evalName}.label`];
-    if (label && !PASS_LABELS.has(label)) {
-      const ex = examples.find((e) => e.id === (r.example_id ?? r.dataset_example_id));
-      const q = ex?.additional_properties?.question ?? ex?.question ?? String(r.example_id);
-      console.log(`  ✗ ${evalName} → ${label} on "${q.slice(0, 70)}"`);
-      const expl = r[`eval.${evalName}.explanation`];
-      if (expl) console.log(`      ${String(expl).slice(0, 200).replace(/\n/g, " ")}`);
-    }
-  }
+for (const f of failures) {
+  console.log(`  ✗ ${f.evalName} → ${f.labels.join("/")} on "${questionFor(f.id).slice(0, 70)}"`);
+  const expl = passRows
+    .flat()
+    .find((r) => rowKey(r) === f.id && r[`eval.${f.evalName}.explanation`])
+    ?.[`eval.${f.evalName}.explanation`];
+  if (expl) console.log(`      ${String(expl).slice(0, 200).replace(/\n/g, " ")}`);
 }
 
 // 6. Gate verdict
