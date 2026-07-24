@@ -1,7 +1,7 @@
 // src/components/guide/voting-record-sessions.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
@@ -59,12 +59,20 @@ function SessionGroup({
 }) {
   const [position, setPosition] = useState<PageRow["position"] | null>(null);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [limit, setLimit] = useState(STEP);
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search), 250);
+    return () => clearTimeout(id);
+  }, [search]);
+  // A new search view starts from the first page.
+  useEffect(() => { setLimit(STEP); }, [debouncedSearch]);
 
   const data = useQuery(
     api.votesQueries.votingRecordPage,
     open
-      ? { candidateSlug, session, limit, position: position ?? undefined, query: search || undefined }
+      ? { candidateSlug, session, limit, position: position ?? undefined, query: debouncedSearch || undefined }
       : "skip",
   );
 
@@ -76,7 +84,7 @@ function SessionGroup({
         className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-secondary/40"
       >
         <span className="font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
-          {open ? "▾" : "▸"} {session} session
+          <span aria-hidden="true">{open ? "▾" : "▸"}</span> {session} session
         </span>
         <span className="font-mono text-[11px] text-muted-foreground">{nf.format(count)} votes</span>
       </button>
@@ -95,7 +103,7 @@ function SessionGroup({
             ))}
             <input
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setLimit(STEP); }}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Find a bill"
               aria-label={`Find a bill in the ${session} session`}
               className="ml-1 min-w-[8rem] flex-1 border-2 border-border bg-card px-2 py-1.5 text-sm"

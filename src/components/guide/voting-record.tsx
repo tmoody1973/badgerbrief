@@ -26,7 +26,7 @@ export function VotingRecord({
   candidateSlug: string;
   candidateName: string;
 }) {
-  const sessionLabels = summary.sessions.map((s) => s.session).sort();
+  const sessionLabels = summary.sessions.map((s) => s.session).sort().reverse();
   return (
     <section id="votes" className="mt-6 scroll-mt-16">
       <h2 className="font-display text-xl">Voting record</h2>
