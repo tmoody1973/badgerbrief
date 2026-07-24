@@ -78,6 +78,15 @@ if (remotePatterns.length > MAX_REMOTE_PATTERNS) {
 
 const nextConfig: NextConfig = {
   images: { remotePatterns },
+  // Tree-shake barrel imports from the two heaviest client dependencies. Clerk
+  // and Convex load on every public page (the header sign-in and the ballot
+  // finder need them), and their index re-exports otherwise pull far more into
+  // the bundle than a page actually uses — the bulk of PageSpeed's
+  // "reduce unused JavaScript" flag. This ships only the symbols each page
+  // imports. Render-safe: it changes how modules are bundled, not what runs.
+  experimental: {
+    optimizePackageImports: ["@clerk/nextjs", "convex/react", "convex/react-clerk"],
+  },
   /**
    * The Legislature used to be two chamber-wide races whose districts lived in
    * an opaque blob. They are now one race per district, and the old pair was
