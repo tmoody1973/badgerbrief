@@ -6,5 +6,6 @@ export const NAV_LINKS = [
   { href: "/vote", label: "How to vote" },
   { href: "/chat", label: "Voter Help" },
   { href: "/brief", label: "My Brief" },
+  { href: "/about", label: "About" },
   { href: "/methodology", label: "Methodology" },
 ] as const;

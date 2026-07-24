@@ -4,7 +4,10 @@ import { MobileNav } from "./mobile-nav";
 import { NAV_LINKS } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
 
-// Methodology lives in the footer + mobile menu; the desktop row stays short.
+// About earns a desktop slot: on an election site "who publishes this" is a
+// question a reader should never have to hunt for, and burying it reads as
+// evasion. Methodology stays in the footer + mobile menu — About links to it,
+// so the row keeps one entry rather than two.
 const DESKTOP_LINKS = NAV_LINKS.filter((l) => l.href !== "/methodology");
 
 export function SiteHeader() {
