@@ -18,6 +18,8 @@ export const getAdMoneyForRace = (raceId: string) =>
 export const getAdMoneyOverview = () => fetchQuery(api.adMoney.adMoneyOverview, {});
 export const getTvAdsForRace = (raceId: string) =>
   fetchQuery(api.ads.tvAdsForRace, { raceId });
+export const getPollsForRace = (raceId: string) =>
+  fetchQuery(api.pollsQueries.forRace, { raceId });
 export const getTvAdTracker = () => fetchQuery(api.ads.tvAdsForTracker, {});
 export const candidateDirectory = () =>
   fetchQuery(api.public.candidateDirectory, {});

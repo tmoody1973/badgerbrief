@@ -616,6 +616,50 @@ export default defineSchema({
     .index("by_vote", ["voteKey"])
     .index("by_candidate_session", ["candidateSlug", "session"]),
 
+  // ---------- published horse-race polls ----------
+  // Stored VERBATIM and never averaged. BadgerBrief cites what a pollster
+  // published; it does not compute a number no pollster published — the same
+  // posture as the voting record ("we don't rate or score"). It is also not
+  // computable from this data: values include ranges ("26-27%"), bare margins
+  // ("R +2.2") and prose, so any average would invent precision the pollster
+  // declined to give. Established aggregators are linked instead.
+  polls: defineTable({
+    pollKey: v.string(), // raceId + pollster + field + end date
+    raceId: v.string(),
+    pollster: v.string(),
+    pollType: v.string(), // "Democratic primary", "General election matchup", …
+    matchup: v.optional(v.string()),
+    conductedStart: v.string(), // YYYY-MM-DD
+    conductedEnd: v.string(),
+    releasedOn: v.optional(v.string()),
+    // A string, not a number: the source mixes counts with prose such as
+    // "~600 delegates/guests", and that qualifier is the point.
+    sampleSize: v.optional(v.string()),
+    sampleType: v.optional(v.string()),
+    marginOfError: v.optional(v.string()),
+    // False for straw polls. Shown WITH the flag rather than hidden — a
+    // convention straw poll is real news, but printing it beside a Marquette
+    // poll unlabelled would mislead.
+    scientific: v.boolean(),
+    groups: v.array(
+      v.object({
+        label: v.union(v.string(), v.null()), // "Democratic" when one poll covers both
+        rows: v.array(
+          v.object({
+            label: v.string(), // candidate/option as the pollster printed it
+            value: v.string(), // published figure, verbatim
+            candidateSlug: v.union(v.string(), v.null()), // only when unambiguous
+          }),
+        ),
+      }),
+    ),
+    notes: v.optional(v.string()),
+    sources: v.array(sourceLink),
+    ingestedAt: v.number(),
+  })
+    .index("by_pollKey", ["pollKey"])
+    .index("by_race", ["raceId"]),
+
   // Per-bill LRB analysis cache. summary is the first analysis sentence, or null
   // when the bill/resolution has no LRB analysis. Keyed by session+billNumber
   // (bill numbers reset each biennium, so session is part of the key).

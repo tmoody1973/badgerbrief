@@ -7,6 +7,7 @@ import { RaceFinanceTable } from "@/components/guide/finance";
 import { InTheNews } from "@/components/guide/in-the-news";
 import { LastUpdated } from "@/components/guide/labels";
 import { RaceAdMoney } from "@/components/guide/race-ad-money";
+import { RacePolls } from "@/components/guide/race-polls";
 import { RaceTvAds } from "@/components/guide/race-tv-ads";
 import {
   SectionNav,
@@ -17,6 +18,7 @@ import { isOnBallot, partySectionId } from "@/lib/ballot-status";
 import {
   getAdMoneyForRace,
   getInTheNewsForRace,
+  getPollsForRace,
   getRace,
   getTvAdsForRace,
   listRaces,
@@ -84,6 +86,7 @@ export default async function RacePage({ params }: Props) {
   const adMoney = await getAdMoneyForRace(slugToRaceId(slug));
   const tvAds = await getTvAdsForRace(slugToRaceId(slug));
   const inTheNews = await getInTheNewsForRace(race.raceId);
+  const polls = await getPollsForRace(race.raceId);
 
   const parties = [
     ...new Set(candidates.map((c) => c.primaryParty).filter(Boolean)),
@@ -117,6 +120,7 @@ export default async function RacePage({ params }: Props) {
     ...(finance.length > 0 ? [{ id: "money", label: "The money" }] : []),
     ...(adMoney.candidates.length > 0 ? [{ id: "ad-money", label: "Ad money" }] : []),
     ...(tvAds.length > 0 ? [{ id: "tv-ads", label: "TV ads" }] : []),
+    ...(polls.length > 0 ? [{ id: "polls", label: "Polls", count: polls.length }] : []),
     ...(inTheNews.length > 0
       ? [{ id: "news", label: "In the news", count: inTheNews.length }]
       : []),
@@ -197,6 +201,10 @@ export default async function RacePage({ params }: Props) {
           <CandidateGrid list={nonPartisan} />
         </section>
       )}
+
+      {/* After the candidates, before the money: polls are about the same
+          people the reader has just met. */}
+      <RacePolls polls={polls} raceName={race.office} />
 
       <RaceFinanceTable finance={finance} candidates={candidates} />
 
