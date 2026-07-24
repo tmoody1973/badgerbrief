@@ -1,19 +1,19 @@
 # Handoff — Legislative voting records
 
-**Written:** 2026-07-23 · **Branch:** `main` (feature merged, pushed, deployed) · **Convex prod:** `precious-axolotl-906`
+**Written:** 2026-07-23 · **Updated:** 2026-07-24 (pre-2019 parser closed) · **Branch:** `main` (merged, pushed, deployed)
+**Convex prod:** `precious-axolotl-906`
 **Live:** https://badgerbrief.org/candidates/francesca-hong (Voting record section) · chat `getVotingRecord`
 
 ---
 
 ## 0. One-paragraph state
 
-The legislative voting-record feature is **built, reviewed, merged, deployed, and live**. It ingests Wisconsin
-Legislature floor roll calls (bills + resolutions), matches tracked legislators by exact curated surname, and
-shows their votes in the Voter Help chat and a "Voting record" section on candidate pages. **Kelda Roys (551
-votes) and Francesca Hong (500 votes) are mapped and live.** The open work is one thing: **the pre-2019
-roll-call HTML format doesn't parse**, which blocks four historical legislators — most importantly Mandela
-Barnes, whose entire Assembly service (2013, 2015) is in that unparseable range. Tarik chose to **build the
-old-format parser properly**. That is the next task.
+The legislative voting-record feature is **built, reviewed, merged, deployed, and live — including all
+pre-2019 sessions**. It ingests Wisconsin Legislature floor roll calls (bills + resolutions), matches tracked
+legislators by exact curated surname, and shows their votes in the Voter Help chat and a "Voting record"
+section on candidate pages. **All six mapped legislators are live** (counts in §2). The pre-2019 parser
+defect that blocked Barnes/Hulsey/Crowley/Zamarripa is **fixed and their records are on prod**. There is no
+open work on this feature. Remaining project-level items are in §5 — the real launch blocker is MOO-393.
 
 ---
 
@@ -39,36 +39,44 @@ old-format parser properly**. That is the next task.
 
 ---
 
-## 2. THE NEXT TASK — old-format parser for pre-2019 roll calls
+## 2. DONE — pre-2019 roll calls (closed 2026-07-24)
 
-### Why it's needed
-The four pre-2023 legislators need earlier Assembly sessions ingested:
+Commits `5427aac` (parser + fixture + tests) and `84ff439` (mappings), both on `origin/main`.
 
-| Legislator | Slug | Chamber | Sessions to cover | Currently coverable? |
-|---|---|---|---|---|
-| Mandela Barnes | `mandela-barnes` | Assembly (Dist 11) | 2013, 2015 | **No — both pre-2019** |
-| Brett Hulsey | `brett-hulsey` | Assembly (77→78) | 2011, 2013 | **No — both pre-2019** |
-| David Crowley | `david-crowley` | Assembly (Dist 17) | 2017, 2019 | 2019 only |
-| JoCasta Zamarripa | `jocasta-zamarripa` | Assembly (Dist 8) | 2011,2013,2015,2017,2019 | 2019 only |
+### The real root cause — NOT what this doc originally said
+The original diagnosis in this handoff blamed a **3-column HTML table layout**. That was wrong, and the
+wrong lead is worth recording: the flat line stream from `htmlToLines` handles the old layout fine.
 
-(Service years verified via Perplexity + ballotpedia this session. All four are **Assembly**, none Senate.)
+The actual cause was one character. Pre-2019 documents print a disambiguating initial **dotted** —
+`OTT, A.` / `OTT, J.` — where 2023/2025 print it bare (`ANDERSON, C`). `NAME_RE` had no optional `\.`, so
+exactly those two rows failed to match and were dropped. That is the whole "short by exactly 2" signature in
+every 2011–2017 document. Both Otts sat together through 2015; by 2019 only one remained and was printed as a
+plain `OTT`, which is why 2019 already parsed. Fix: 9 lines in `convex/lib/rollCall.ts` (`NAME_RE`, ~line 135).
 
-### The exact defect (root-caused this session — start here)
-- Old-session index pages exist and use the same URL shape: `docs.legis.wisconsin.gov/{session}/related/votes/assembly`. Counts: 2011→786, 2013→441, 2015→442, 2017→362, 2019→177 ids.
-- **2019 parses fine (22/23 sampled).** The newer format works.
-- **2011–2017 are 100% rejected**, every document short by **exactly 2** in the tally reconciliation (`parsed 55/37/5 does not match printed 57/37/5`).
-- Root cause: the old documents lay members out in a **3-column HTML table** (three `A / N / NV / NAME` header groups side by side, ~33 members per column). The current `parseAssemblyVotes` reads a flat line stream from `htmlToLines`, and at the column boundaries **exactly 2 members are mis-associated / dropped** — the flattened block yields **97 names for a 99-vote tally**, with `NO VACANT DISTRICTS` declared. The 2 missing are NOT after the member block (only `NO VACANT DISTRICTS / SEQUENCE NO. / date / path` follow) and NOT paired (`PAIRED - 0`).
-- **The gate is behaving correctly** — it refuses to store a document where 97 parsed rows can't reconcile to a 99-vote tally. Do NOT loosen the gate to make old docs pass. The fix is to parse the 3-column layout correctly so all 99 rows are read, then the existing gate reconciles them.
-- NOTE: 2013 tally line uses the literal text `&nbsp` (no semicolon) between numbers, where 2023/2025 use a real U+00A0. `parseTallies` already reads it fine (belt-and-braces), but the member cells may have similar entity quirks — check when adding the fixture.
+**The gate was never loosened.** `git show 5427aac -- convex/lib/rollCall.ts` touches no `error` / `SEATS` /
+`count()` line. The reconciliation logic is byte-identical to what shipped on 2026-07-23.
 
-### How to build it (Task-3-level rigor — this is the correctness core)
-1. **Understand the 3-column layout fully.** Fetch a 2013 doc's RAW HTML (not flattened) and map how the three column-tables interleave. Determine the reading order htmlToLines produces and exactly which 2 rows get lost. A representative doc: `2013/assembly/av0100` (AB 181, 57/37/5, 99 seats, NO VACANT). It's saved this session at `/tmp/old2013.html` but re-fetch to be safe.
-2. **Add old fixtures** — at least one 2013 (or 2011) Assembly roll call, committed like the existing `convex/lib/fixtures/wi-*.html`. Pick a substantive bill vote with a known aye/nay split.
-3. **Extend the parser** to handle the multi-column layout WITHOUT breaking the current single-stream path (2023/2025 must still parse identically — 45 existing tests must stay green). Likely: detect the column structure and read each column's rows in order, or fix htmlToLines' cell association.
-4. **Re-verify the gate on the old format**: after the fix, a corrupted old doc (blank a mark) must still be REJECTED. Run the same corruption sweep discipline Task 3 used.
-5. **Ingest** the needed sessions: `npx convex run --prod votes:ingest '{"sessions":["2011","2013","2015","2017","2019"],"chambers":["assembly"]}'`. **SEED NAMES FIRST** (landmine 4).
-6. **Collision-check every surname before mapping** (landmine 2 — this is how Taylor/Rodriguez were caught). For each of the four: confirm exactly one person of that surname+party in the sessions they served, and that it's genuinely our candidate (bio matches the district/timing). In 2019, `CROWLEY` and `ZAMARRIPA` are already confirmed single, unambiguous entries. Barnes/Hulsey need checking in 2013 once it parses.
-7. Add each verified mapping to `scripts/seed-legislator-names.mjs` and run it (prod), then verify the record renders.
+### Verification on record
+- `npx vitest run convex/lib/rollCall.test.ts` → **50/50 pass**; `npx tsc --noEmit` → clean.
+- Old-format fixture committed: `convex/lib/fixtures/wi-assembly-av0100-2013.html` (2013 av0100, AB 181, 57/37/5).
+- Corruption sweep re-run on the OLD format: blanking the mark cell on each of all 99 rows is rejected every
+  time (`REJECTS a blank mark cell on ANY row of the pre-2019 format too`).
+- Surname collision check done and documented inline in `scripts/seed-legislator-names.mjs`: each of the four
+  is the single party-D entry of that surname in every session served.
+
+### Prod coverage (verified 2026-07-24 via `votesQueries:votingRecord`)
+| Legislator | Slug | Votes | By session |
+|---|---|---|---|
+| Mandela Barnes | `mandela-barnes` | 823 | 2013: 420 · 2015: 403 |
+| Brett Hulsey | `brett-hulsey` | 1,125 | 2011: 705 · 2013: 420 |
+| David Crowley | `david-crowley` | 515 | 2017: 342 · 2019: 173 |
+| JoCasta Zamarripa | `jocasta-zamarripa` | 2,043 | 2011: 705 · 2013: 420 · 2015: 403 · 2017: 342 · 2019: 173 |
+| Francesca Hong | `francesca-hong` | 500 | 2023: 222 · 2025: 278 |
+| Kelda Roys | `kelda-roys` | 551 | 2023: 292 · 2025: 259 |
+
+Accepted-vs-available roll calls per session: 2011 705/786, 2013 420/441, 2015 403/442, 2017 342/362,
+2019 173/177. The shortfall is the gate failing closed (landmine 8) — undeclared mid-session vacancies and
+motion votes with no measure number. Not data loss.
 
 ### DO NOT map (verified this session — wrong-person traps)
 - `TAYLOR` and `RODRIGUEZ` appear in current 2023/2025 roll calls but are **different sitting legislators** — Chris Taylor (our candidate) left the Assembly in 2020; Sara Rodriguez became Lt. Gov. Jan 2023. Mapping them = misattribution. They stay unmapped.
