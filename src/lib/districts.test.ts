@@ -58,6 +58,16 @@ const RACES = [
   { raceId: "WI-STATE-ASSEMBLY-2026", level: "State Legislative", districts: [{ district: 19 }, { district: 76 }] },
 ];
 
+/** The shape that replaced the chamber-wide rows: one race per district. */
+const PER_DISTRICT = [
+  { raceId: "WI-GOV-2026", level: "State Executive" },
+  { raceId: "WI-US-HOUSE-D4-2026", level: "Federal" },
+  { raceId: "WI-STATE-SENATE-D7-2026", level: "State Legislative" },
+  { raceId: "WI-STATE-SENATE-D23-2026", level: "State Legislative" },
+  { raceId: "WI-STATE-ASSEMBLY-D19-2026", level: "State Legislative" },
+  { raceId: "WI-STATE-ASSEMBLY-D76-2026", level: "State Legislative" },
+];
+
 describe("relevantRaces", () => {
   it("Milwaukee (CD 4, SD 7): statewide + D4 house + senate + assembly, NOT D2", () => {
     const ids = relevantRaces({ congressional: 4, senate: 7, assembly: 19 }, RACES).map(
@@ -77,6 +87,47 @@ describe("relevantRaces", () => {
     );
     expect(ids).toContain("WI-US-HOUSE-D2-2026");
     expect(ids).not.toContain("WI-STATE-SENATE-2026");
+    expect(ids).toContain("WI-STATE-ASSEMBLY-2026");
+  });
+});
+
+describe("relevantRaces with per-district legislative races", () => {
+  it("matches the voter's own senate and assembly district by raceId", () => {
+    const ids = relevantRaces({ congressional: 4, senate: 7, assembly: 19 }, PER_DISTRICT).map(
+      (r) => r.raceId,
+    );
+    expect(ids).toContain("WI-STATE-SENATE-D7-2026");
+    expect(ids).toContain("WI-STATE-ASSEMBLY-D19-2026");
+    expect(ids).not.toContain("WI-STATE-SENATE-D23-2026");
+    expect(ids).not.toContain("WI-STATE-ASSEMBLY-D76-2026");
+  });
+
+  it("omits a senate district that is not up this cycle", () => {
+    // Even districts do not appear at all in 2026, so there is no race to match.
+    const ids = relevantRaces({ congressional: 4, senate: 8, assembly: 19 }, PER_DISTRICT).map(
+      (r) => r.raceId,
+    );
+    expect(ids.some((i) => i.includes("SENATE"))).toBe(false);
+    expect(ids).toContain("WI-STATE-ASSEMBLY-D19-2026");
+  });
+
+  it("never shows both a chamber-wide row and its per-district replacement", () => {
+    // During a partial rollout both shapes are present. Showing the voter their
+    // assembly race twice is the visible symptom; the per-district row wins.
+    const mixed = [...PER_DISTRICT, ...RACES.filter((r) => r.level === "State Legislative")];
+    const ids = relevantRaces({ congressional: 4, senate: 7, assembly: 19 }, mixed).map(
+      (r) => r.raceId,
+    );
+    expect(ids).toContain("WI-STATE-ASSEMBLY-D19-2026");
+    expect(ids).not.toContain("WI-STATE-ASSEMBLY-2026");
+    expect(ids).not.toContain("WI-STATE-SENATE-2026");
+  });
+
+  it("still honours the chamber-wide row when no per-district race exists yet", () => {
+    const ids = relevantRaces({ congressional: 4, senate: 7, assembly: 19 }, RACES).map(
+      (r) => r.raceId,
+    );
+    expect(ids).toContain("WI-STATE-SENATE-2026");
     expect(ids).toContain("WI-STATE-ASSEMBLY-2026");
   });
 });

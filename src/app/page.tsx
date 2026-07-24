@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BallotFinder } from "@/components/guide/ballot-finder";
 import { RaceCard } from "@/components/guide/cards";
+import { DistrictRaces } from "@/components/guide/district-races";
 import { LastUpdated, Stamp } from "@/components/guide/labels";
 import { getElection, listRaces, getVotingInfo } from "@/lib/data";
 import {
@@ -26,9 +27,17 @@ export default async function Home() {
     getVotingInfo(),
   ]);
 
-  const byLevel = new Map<string, typeof races>();
+  // The two chamber-wide legislative rows predate the per-district races and
+  // are superseded by them. Listing both shows the same contest twice, so the
+  // old shape is dropped as soon as any per-district race exists.
+  const hasPerDistrict = races.some((r) => /-D\d+-\d{4}$/.test(r.raceId) && r.level === "State Legislative");
+  const listed = hasPerDistrict
+    ? races.filter((r) => r.level !== "State Legislative" || /-D\d+-\d{4}$/.test(r.raceId))
+    : races;
+
+  const byLevel = new Map<string, typeof listed>();
   for (const level of LEVEL_ORDER) {
-    const group = races.filter((r) => r.level === level);
+    const group = listed.filter((r) => r.level === level);
     if (group.length > 0) byLevel.set(level, group);
   }
 
@@ -101,7 +110,7 @@ export default async function Home() {
           What races are on the Wisconsin 2026 primary ballot?
         </h2>
         <p className="mt-2 max-w-2xl">
-          {races.length} races: statewide offices, all eight U.S. House
+          {listed.length} races: statewide offices, all eight U.S. House
           districts, the state supreme court, and the legislature.
         </p>
         {[...byLevel.entries()].map(([level, group]) => (
@@ -109,11 +118,18 @@ export default async function Home() {
             <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
               {level}
             </h3>
-            <div className="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {group.map((race) => (
-                <RaceCard key={race.raceId} race={race} />
-              ))}
-            </div>
+            {level === "State Legislative" ? (
+              // 116 near-identical district races, of which exactly two are on
+              // any voter's ballot — a card grid here would be ~39 rows and
+              // bury everything below it.
+              <DistrictRaces races={group} />
+            ) : (
+              <div className="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {group.map((race) => (
+                  <RaceCard key={race.raceId} race={race} />
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </section>
