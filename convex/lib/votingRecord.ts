@@ -15,10 +15,54 @@ export type RecordChamber = "assembly" | "senate" | "us_house";
  * CENTER RENOVATIONS LOAN PROGRAM", so every word must appear (any order),
  * each boundary-anchored so "aid" cannot match inside "paid".
  */
+/** A query that is nothing but a measure designation: "AB 388", "H CON RES 14". */
+const BILL_NUMBER_QUERY = /^[A-Za-z][A-Za-z\s.]*\d+$/;
+const squash = (s: string) => s.toLowerCase().replace(/[\s.]+/g, "");
+
+/**
+ * Measure designations spelled out, so the words people actually use are
+ * searchable.
+ *
+ * Nothing stored on a vote contains the word "resolution": the type lives only
+ * in the squashed prefix ("HCONRES") and the official title rarely repeats it.
+ * A voter asking about the "budget resolution" therefore matched nothing.
+ * Adding the expansion to the haystack only ever makes matching more permissive,
+ * never less, so no previously-matching query stops working.
+ */
+const MEASURE_WORDS: Record<string, string> = {
+  AB: "assembly bill",
+  SB: "senate bill",
+  AJR: "assembly joint resolution",
+  SJR: "senate joint resolution",
+  AR: "assembly resolution",
+  SR: "senate resolution",
+  HR: "house bill",
+  HRES: "house resolution",
+  HJRES: "house joint resolution",
+  HCONRES: "house concurrent resolution",
+  HAMDT: "house amendment",
+};
+
+const measureWords = (billNumber: string): string => {
+  const prefix = billNumber.trim().split(/[\s\d]/)[0]?.toUpperCase() ?? "";
+  return MEASURE_WORDS[prefix] ?? "";
+};
+
 export function matchesQuery(billTitle: string, billNumber: string, query: string): boolean {
-  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const trimmed = query.trim();
+  const words = trimmed.toLowerCase().split(/\s+/).filter(Boolean);
   if (words.length === 0) return true;
-  const haystack = `${billTitle} ${billNumber}`.toLowerCase();
+
+  // Federal measures are printed with spaces inside the designation — the House
+  // Clerk writes "H CON RES 14" — while we store the squashed "HCONRES 14".
+  // Word matching then fails on the form a reader is most likely to type, and
+  // the vote silently looks absent. Compared as an EQUALITY of squashed forms,
+  // not a substring, so "AB 3" still does not match AB 388.
+  if (BILL_NUMBER_QUERY.test(trimmed) && squash(trimmed) === squash(billNumber)) {
+    return true;
+  }
+
+  const haystack = `${billTitle} ${billNumber} ${measureWords(billNumber)}`.toLowerCase();
   return words.every((w) => {
     const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     return new RegExp(`\\b${escaped}\\b`).test(haystack);

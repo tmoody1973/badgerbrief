@@ -11,6 +11,35 @@ describe("matchesQuery", () => {
   test("boundary-anchored: 'aid' does not match 'paid'", () => {
     expect(matchesQuery("REQUIRING WAGES BE PAID PROMPTLY", "AB 1", "aid")).toBe(false);
   });
+
+  test("matches a federal measure typed with spaces in its designation", () => {
+    // The House Clerk prints "H CON RES 14"; we store "HCONRES 14". Without
+    // squashing, the form a reader is most likely to type finds nothing and the
+    // vote looks absent.
+    const title = "Establishing the congressional budget for fiscal year 2025";
+    expect(matchesQuery(title, "HCONRES 14", "H CON RES 14")).toBe(true);
+    expect(matchesQuery(title, "HCONRES 14", "HCONRES 14")).toBe(true);
+    expect(matchesQuery(title, "HCONRES 14", "h con res 14")).toBe(true);
+  });
+
+  test("matches the words people use for a measure type", () => {
+    // Nothing stored contains the word "resolution" — the type is only in the
+    // squashed "HCONRES" prefix — so a voter asking about the "budget
+    // resolution" previously matched nothing.
+    const title = "Establishing the congressional budget for fiscal year 2025";
+    expect(matchesQuery(title, "HCONRES 14", "budget resolution")).toBe(true);
+    expect(matchesQuery(title, "HCONRES 14", "concurrent resolution")).toBe(true);
+    expect(matchesQuery("CHILD CARE LOANS", "AB 388", "assembly bill")).toBe(true);
+    // The expansion must not invent a type that isn't there.
+    expect(matchesQuery(title, "HCONRES 14", "senate bill")).toBe(false);
+  });
+
+  test("squashing is an equality, so a shorter number is not a prefix match", () => {
+    // "AB 3" must not reach AB 388 — a substring test would wrongly match it and
+    // attribute another bill's vote to the candidate.
+    expect(matchesQuery("CHILD CARE LOANS", "AB 388", "AB 3")).toBe(false);
+    expect(matchesQuery("CHILD CARE LOANS", "AB 388", "AB 388")).toBe(true);
+  });
 });
 
 describe("summarize", () => {
