@@ -86,12 +86,12 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     body: (
       <>
         See something wrong? Every fact on the site links to its source so you
-        can check it yourself — and if we got it wrong, email{" "}
-        <a href="mailto:tarikjmoody@gmail.com" className="underline">
-          tarikjmoody@gmail.com
-        </a>{" "}
-        with a link to the page and what&apos;s incorrect. We&apos;ll review it
-        against the source and correct it. If you&apos;d rather file it
+        can check it yourself — and if we got it wrong,{" "}
+        <a href="/feedback" className="underline">
+          report it here
+        </a>
+        . The form asks which page and a link to the record, so it can be
+        checked against the original and corrected. If you&apos;d rather file it
         publicly, the code is open source and you can{" "}
         <a
           href="https://github.com/tmoody1973/badgerbrief/issues/new"

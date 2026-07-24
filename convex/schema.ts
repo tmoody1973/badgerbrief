@@ -623,6 +623,33 @@ export default defineSchema({
     .index("by_vote", ["voteKey"])
     .index("by_candidate_session", ["candidateSlug", "session"]),
 
+  // ---------- reader corrections & questions ----------
+  // THE MISSING HUMAN CHECK. parseRollCall's own comment states the limit of
+  // the reconciliation gate: a document that is internally consistent but wrong
+  // — two members' positions swapped — passes every arithmetic test, and no
+  // person reviews a parsed roll call before it reaches a real candidate's
+  // public profile. A reader is how that gets caught. This table is a safety
+  // mechanism, not a contact form.
+  feedback: defineTable({
+    kind: v.union(v.literal("correction"), v.literal("question"), v.literal("other")),
+    // Where the reader was. Captured automatically so nobody has to describe
+    // which of 600+ pages they were looking at.
+    pageUrl: v.optional(v.string()),
+    message: v.string(),
+    // Required for corrections. The whole site links every claim to a source;
+    // a correction without one is an opinion, and asking for it filters noise
+    // without turning anyone away who actually found a mistake.
+    sourceUrl: v.optional(v.string()),
+    // Optional — a correction is worth acting on whether or not the reader
+    // wants a reply, so contact is never a barrier to reporting.
+    contact: v.optional(v.string()),
+    status: v.union(v.literal("new"), v.literal("reviewed"), v.literal("resolved")),
+    reviewerNote: v.optional(v.string()),
+    submittedAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_kind", ["kind"]),
+
   // ---------- published horse-race polls ----------
   // Stored VERBATIM and never averaged. BadgerBrief cites what a pollster
   // published; it does not compute a number no pollster published — the same

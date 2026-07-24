@@ -22,6 +22,7 @@ import type * as coverage from "../coverage.js";
 import type * as coverageBackfill from "../coverageBackfill.js";
 import type * as crons from "../crons.js";
 import type * as demoWorkflow from "../demoWorkflow.js";
+import type * as feedback from "../feedback.js";
 import type * as finance from "../finance.js";
 import type * as helloAgent from "../helloAgent.js";
 import type * as houseVotes from "../houseVotes.js";
@@ -101,6 +102,7 @@ declare const fullApi: ApiFromModules<{
   coverageBackfill: typeof coverageBackfill;
   crons: typeof crons;
   demoWorkflow: typeof demoWorkflow;
+  feedback: typeof feedback;
   finance: typeof finance;
   helloAgent: typeof helloAgent;
   houseVotes: typeof houseVotes;

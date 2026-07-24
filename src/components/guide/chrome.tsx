@@ -65,7 +65,22 @@ export function SiteFooter() {
           </a>{" "}
           is the authoritative system.
         </p>
-        <p className="border-t-2 border-dashed border-border pt-4 font-mono text-xs text-muted-foreground">
+        {/* Reachable from every page: a correction is only useful if the
+            reader can report it at the moment they spot it. */}
+        <p className="border-t-2 border-dashed border-border pt-4">
+          <Link href="/about" className="underline decoration-2 underline-offset-2">
+            About BadgerBrief
+          </Link>
+          {" · "}
+          <Link href="/methodology" className="underline decoration-2 underline-offset-2">
+            Methodology
+          </Link>
+          {" · "}
+          <Link href="/feedback" className="font-bold underline decoration-2 underline-offset-2">
+            Report an error
+          </Link>
+        </p>
+        <p className="font-mono text-xs text-muted-foreground">
           Campaign finance data for Wisconsin state offices comes from the
           Wisconsin Ethics Commission&apos;s Sunshine database and is used for
           non-commercial voter education only, per Wis. Stat. § 11.1304(12).
