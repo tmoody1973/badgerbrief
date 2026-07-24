@@ -131,7 +131,9 @@ export function RacePolls({ polls, raceName }: { polls: RacePoll[]; raceName: st
       <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
         {polls.length} published poll{polls.length === 1 ? "" : "s"} of the {raceName}
         {scientific < polls.length
-          ? `, ${polls.length - scientific} of which are straw polls rather than polls of voters`
+          ? polls.length - scientific === 1
+            ? ", one of which is a straw poll rather than a poll of voters"
+            : `, ${polls.length - scientific} of which are straw polls rather than polls of voters`
           : ""}
         , newest first. Figures are shown exactly as each pollster published them.{" "}
         <strong>We don&rsquo;t average polls</strong> — an average is a number no

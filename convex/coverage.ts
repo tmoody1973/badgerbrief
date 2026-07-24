@@ -49,7 +49,14 @@ export const hubArticles = query({
       // A candidate's own campaign site is not news — the entity queries below
       // exclude it, and the hub must too, or a campaign page appears as
       // "coverage" with its campaign framed as a rated outlet.
-      .filter((r) => r.sourceKind !== "campaign_site");
+      .filter((r) => r.sourceKind !== "campaign_site")
+      // An editor's rejection has to actually remove the article. hubStatus and
+      // status are separate axes — hubStatus "auto" is the relevance gate's
+      // verdict, status is the human's — and filtering on hubStatus alone left
+      // four REJECTED articles published on /news, including coverage of a
+      // candidate who had withdrawn. A rejection that leaves the story visible
+      // is worse than no review at all, because the queue reads as handled.
+      .filter((r) => r.status !== "rejected");
     const filtered = (raceId ? rows.filter((r) => r.raceId === raceId) : rows)
       .sort(byRecency)
       .slice(0, limit ?? 60);
