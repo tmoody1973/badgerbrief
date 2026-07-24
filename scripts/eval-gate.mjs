@@ -174,10 +174,38 @@ async function fetchRuns(expId) {
   if (!res.ok) throw new Error(`runs fetch failed: ${res.status}`);
   return (await res.json()).experiment_runs;
 }
+/**
+ * `ax experiments list` pages at 15 by default, so a baseline silently falls
+ * off the end as experiments accumulate and the lookup throws "not found" for
+ * an experiment that plainly exists. Ask for a large page instead of trusting
+ * the default.
+ */
 function experimentIdByName(expName) {
-  const list = axJson(["experiments", "list", "--dataset", DATASET, "--space", SPACE, "-o", "json"]);
-  const found = (Array.isArray(list) ? list : list.experiments).find((e) => e.name === expName);
-  if (!found) throw new Error(`experiment "${expName}" not found`);
+  const all = [];
+  let cursor;
+  // 100 is the server's hard cap (a larger --limit is a 422), so follow the
+  // cursor rather than assuming one page holds everything.
+  for (let page = 0; page < 20; page++) {
+    const argv = [
+      "experiments", "list",
+      "--dataset", DATASET, "--space", SPACE,
+      "--limit", "100",
+      "-o", "json",
+    ];
+    if (cursor) argv.push("--cursor", cursor);
+    const res = axJson(argv);
+    const batch = Array.isArray(res) ? res : res.experiments;
+    all.push(...batch);
+    cursor = Array.isArray(res) ? undefined : (res.next_cursor ?? res.cursor);
+    if (!cursor || batch.length === 0) break;
+  }
+  const found = all.find((e) => e.name === expName);
+  if (!found) {
+    throw new Error(
+      `experiment "${expName}" not found among ${all.length} experiments on ` +
+        `dataset "${DATASET}" (names: ${all.map((e) => e.name).join(", ")})`,
+    );
+  }
   return found.id;
 }
 async function passRates(expId) {
