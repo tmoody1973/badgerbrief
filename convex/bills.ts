@@ -13,7 +13,6 @@ import { internal } from "./_generated/api";
 import { billUrl } from "./lib/votingRecord";
 import { parseLrbFirstSentence } from "./lib/billAnalysis";
 
-const SESSIONS = ["2025", "2023", "2019", "2017", "2015", "2013", "2011"];
 const UA = "BadgerBrief/1.0 (nonpartisan voter guide; +https://badgerbrief.org)";
 
 async function fetchText(url: string): Promise<string | null> {
@@ -32,7 +31,8 @@ export const enrich = internalAction({
     let stored = 0;
     let storedNull = 0;
     let fetchFailed = 0;
-    for (const session of SESSIONS) {
+    const sessions: string[] = await ctx.runQuery(internal.billsQueries.sessionsWithVotes, {});
+    for (const session of sessions) {
       if (stored + storedNull + fetchFailed >= limit) break;
       const billNumbers: string[] = await ctx.runQuery(
         internal.billsQueries.unenrichedBillsForSession,

@@ -17,6 +17,9 @@ export function parseLrbFirstSentence(html: string): string | null {
   const text = m[1]
     .replace(/<[^>]+>/g, "")
     .replace(/&nbsp;/g, " ")
+    .replace(/&sect;/g, "§")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCharCode(parseInt(n, 16)))
     .replace(/&amp;/g, "&");
   const boundary = text.search(/\.\s{2,}/);
   const sentence = boundary === -1 ? text : text.slice(0, boundary + 1);

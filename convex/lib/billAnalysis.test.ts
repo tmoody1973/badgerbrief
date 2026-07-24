@@ -38,4 +38,10 @@ describe("parseLrbFirstSentence", () => {
     const long = "This bill does a thing " + "and another ".repeat(60); // >320 chars, no ". "
     expect(parseLrbFirstSentence(`<div class="qs_anal_text_">${long}</div>`)!.length).toBeLessThanOrEqual(305);
   });
+
+  test("decodes named and numeric HTML entities", () => {
+    const html =
+      '<div class="qs_anal_text_">This bill amends &sect;20.005 and &#167;19.20 of the statutes.  Next.</div>';
+    expect(parseLrbFirstSentence(html)).toBe("This bill amends §20.005 and §19.20 of the statutes.");
+  });
 });

@@ -56,3 +56,20 @@ export const unenrichedBillsForSession = internalQuery({
     return out;
   },
 });
+
+/**
+ * Distinct sessions that have any roll call, so the enrich action covers every
+ * ingested session automatically — it can never fall behind a new vote backfill
+ * the way a hand-maintained session list would.
+ *
+ * ponytail: collects the whole legislative_votes table to dedup sessions — fine
+ * at a few thousand rows. If it ever nears the 4096-document query limit, switch
+ * to a distinct-session set maintained at ingest time.
+ */
+export const sessionsWithVotes = internalQuery({
+  args: {},
+  handler: async (ctx): Promise<string[]> => {
+    const rows = await ctx.db.query("legislative_votes").collect();
+    return [...new Set(rows.map((r) => r.session))].sort((a, b) => b.localeCompare(a));
+  },
+});

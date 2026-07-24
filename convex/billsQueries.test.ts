@@ -47,3 +47,13 @@ describe("unenrichedBillsForSession", () => {
     expect(out.sort()).toEqual(["AB 2"]); // AB 1 already enriched; AB 9 is 2015
   });
 });
+
+describe("sessionsWithVotes", () => {
+  test("returns distinct sessions with roll calls, newest first", async () => {
+    const t = convexTest(schema, modules);
+    await seedRoll(t, "2013", "assembly", "av1", "AB 1");
+    await seedRoll(t, "2013", "assembly", "av2", "AB 2");
+    await seedRoll(t, "2015", "assembly", "av3", "AB 3");
+    expect(await t.query(internal.billsQueries.sessionsWithVotes, {})).toEqual(["2015", "2013"]);
+  });
+});
