@@ -13,6 +13,7 @@ import type * as adminQueue from "../adminQueue.js";
 import type * as ads from "../ads.js";
 import type * as adsTv from "../adsTv.js";
 import type * as audit from "../audit.js";
+import type * as bills from "../bills.js";
 import type * as billsQueries from "../billsQueries.js";
 import type * as briefAgent from "../briefAgent.js";
 import type * as briefWorkflow from "../briefWorkflow.js";
@@ -86,6 +87,7 @@ declare const fullApi: ApiFromModules<{
   ads: typeof ads;
   adsTv: typeof adsTv;
   audit: typeof audit;
+  bills: typeof bills;
   billsQueries: typeof billsQueries;
   briefAgent: typeof briefAgent;
   briefWorkflow: typeof briefWorkflow;
