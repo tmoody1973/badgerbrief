@@ -19,24 +19,30 @@ institutions actually read.
 
 ---
 
-## 0. Facts needed before submitting (Tarik only)
+## 0. Settled facts — use these verbatim everywhere
 
-Every item below asks "who publishes this". These are real-world claims about a
-real organisation and a real person, so they are **not** inferred or filled in
-from context — answer once here and every submission can reuse them.
+Decided 2026-07-24. Consistency matters more than wording: Wikidata, Google
+News and every civic listing should describe the publication identically, and
+an answer engine cross-referencing them should find no contradiction.
 
-| Field | Needed for | Value |
-|---|---|---|
-| Legal/publishing entity name | Wikidata, Google News, LWV | ? |
-| Relationship to Radio Milwaukee / 88Nine | Google News, press | ? — affiliated, independent, or personal project? |
-| Editorial contact address | all | currently a personal Gmail on /methodology — see §4 |
-| Funding source | LWV, library listings, trust | ? |
-| Founded date | Wikidata | ? |
-| Official social profiles | `sameAs` schema, Wikidata | ? |
+| Field | Value |
+|---|---|
+| Publication | BadgerBrief |
+| Publisher | Independent. Built and maintained by Tarik Moody in his own time. |
+| Employer | **Not mentioned anywhere.** Not part of the identity. |
+| Funding | None — no advertising, sponsorship, donations or grants |
+| Affiliation | No party, campaign, PAC or advocacy group |
+| Editorial stance | Non-partisan; no endorsements, ratings or rankings |
+| Contact | https://badgerbrief.org/feedback (form only — no published email) |
+| Public pages | /about · /methodology · /feedback |
+| Still needed | Founded date (for Wikidata `inception`); official social profiles (for `sameAs`) |
 
-Until the affiliation question is answered, submit as an **independent
-publication**. Claiming an institutional affiliation that is not formal is worse
-than claiming none.
+**One-line description** (reuse exactly):
+> BadgerBrief is an independent, non-partisan guide to Wisconsin's 2026
+> elections, linking every claim to its official source.
+
+**Do not** claim to be a news organisation. `/about` says plainly it is not, and
+a submission that says otherwise contradicts the site.
 
 ---
 
@@ -56,14 +62,15 @@ one item from the SaaS playbook that transfers unchanged.
 | `language of work` (P407) | English (Q1860) |
 | `inception` (P571) | *(founded date)* |
 | `main subject` (P921) | 2026 Wisconsin elections |
-| `publisher` (P123) | *(entity — see §0)* |
+| `publisher` (P123) | *(omit — no corporate publisher; it is independently maintained)* |
 
 **Do not** create an item for the founder unless there is independent coverage to
 cite; Wikidata notability requires a serious reference, and a self-created item
 without one gets deleted and looks like self-promotion.
 
 **After it exists:** add its URL to `organizationNode()` `sameAs` in
-`src/lib/jsonld.tsx` — the field is deliberately empty today.
+`src/lib/jsonld.tsx` — the field is deliberately empty today. That closes the
+loop: the site asserts the Wikidata entity, and the entity asserts the site.
 
 ---
 
@@ -77,8 +84,9 @@ publisher-legitimacy signal. Free.
 - ✅ Dated articles with named outlets (/news)
 - ✅ Transparent methodology page
 - ✅ HTTPS, sitemap, clean heading hierarchy
-- ⚠️ **Contact information** — needs a real editorial address, not a personal
-  Gmail (§4)
+- ✅ **Contact information** — /feedback form, reachable from every page footer
+- ✅ **Corrections policy with a stated turnaround** — /methodology
+- ✅ **Ownership and funding disclosed** — /about
 
 **Steps:** publishercenter.google.com → add publication → verify domain in
 Search Console → set sections (`/news`, `/races`, `/candidates`) → submit.
@@ -108,16 +116,50 @@ playbook's Tier 1/2, with authority that actually matters to a Wisconsin voter.
 **Timing:** these are the highest-value action in the next 18 days — a link from
 a library or LWV page reaches voters directly, not just crawlers.
 
+### Outreach email — send as-is
+
+Subject: `Free non-partisan Wisconsin 2026 voter guide — for your election resources page`
+
+> Hello,
+>
+> I maintain BadgerBrief (https://badgerbrief.org), a free, independent,
+> non-partisan guide to Wisconsin's August 11 primary. I'm writing in case it's
+> useful for your election resources.
+>
+> It covers every race on the ballot — all 99 Assembly districts, the 17 Senate
+> districts up this cycle, the statewide offices and all eight congressional
+> seats — with candidates taken from the Wisconsin Elections Commission's
+> official list, so the names match the ballot exactly. Voting records are
+> parsed directly from the Legislature's own roll calls and the U.S. House
+> Clerk's records, and every claim links to the source it came from.
+>
+> There's no funding behind it, no advertising, no party or campaign
+> affiliation, and it makes no endorsements. Methodology and corrections policy
+> are at https://badgerbrief.org/methodology.
+>
+> Free to link, and there's nothing to sign up for. Happy to answer anything.
+>
+> — Tarik Moody
+
+**Why this works:** it leads with what the reader gets, names the authoritative
+sources, and states independence plainly — no ask beyond a link. Do not add a
+pitch, a logo, or a request for a reply by a date.
+
 ---
 
-## 4. Editorial contact (blocks §2)
+## 4. Editorial contact — DONE
 
-`/methodology` lists a personal Gmail as the corrections contact. For a
-publication making factual claims about named candidates, that is a weak trust
-signal and Google News will read it the same way.
+Resolved 2026-07-24. The personal Gmail is gone from `/methodology` and
+`/news/about`; both now point at `/feedback`, which is linked from the footer of
+every page. Verified zero occurrences of the address across the live site.
 
-Set up `editor@badgerbrief.org` (or `corrections@`) and update
-`/methodology`. Cheap, and it unblocks the Publisher Center application.
+Form-only was a deliberate choice: it keeps a named individual's inbox off a
+politically-targeted site, captures the page URL automatically, and requires a
+source link on factual corrections — the same standard every claim on the site
+already meets.
+
+If Google News later insists on an email, add `corrections@badgerbrief.org` as a
+secondary contact on `/about`. Do not republish a personal address.
 
 ---
 
@@ -131,7 +173,10 @@ Set up `editor@badgerbrief.org` (or `corrections@`) and update
 3. **No paid submission services.** Everything above is free.
 4. **No incentivised reviews anywhere.**
 5. **No `/alternatives/` pages against other voter guides.**
-6. **Do not claim an institutional affiliation** before §0 is answered.
+6. **Do not name an employer anywhere.** Settled in §0: the identity is
+   independent, full stop. Raising an employer invites readers to attribute
+   someone else's perceived politics to a guide whose whole value is that it
+   has none.
 
 ---
 
