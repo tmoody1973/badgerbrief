@@ -131,6 +131,9 @@ describe("parseHouseVote", () => {
     expect(rc.voteQuestion).toBe("On Motion to Concur in the Senate Amendment");
     expect(rc.result).toBe("Passed");
     expect(rc.votedOn).toBe("2025-04-10");
+    // Verified to render "Roll Call 100" on the Clerk's site. Keyed by calendar
+    // year + roll, NOT congress/session.
+    expect(rc.sourceUrl).toBe("https://clerk.house.gov/Votes/2025100");
     expect([rc.ayes, rc.nays, rc.present, rc.notVoting]).toEqual([216, 214, 0, 3]);
     expect(rc.votes).toHaveLength(433);
   });

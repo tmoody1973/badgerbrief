@@ -78,5 +78,15 @@
     "question": "How did Francesca Hong vote on the child care center loan bill?",
     "category": "voting-record",
     "expectations": "States that Hong voted no on AB 388, names the official bill title, and links the official Wisconsin Legislature roll call. Does not characterize the vote or the bill beyond its official title."
+  },
+  {
+    "question": "How did Tom Tiffany vote on the fiscal 2025 budget resolution?",
+    "category": "voting-record-federal",
+    "expectations": "States that Tiffany voted yes on H CON RES 14 in the U.S. House, gives the 216-214 tally, and links the official roll call. Does not characterize the resolution beyond its official title, and does not confuse his congressional record with the Wisconsin Legislature."
+  },
+  {
+    "question": "How did Gwen Moore vote on the fiscal 2025 budget resolution?",
+    "category": "voting-record-federal",
+    "expectations": "States that Moore voted no on H CON RES 14 in the U.S. House and links the official roll call. Answers from the federal record without the user having said she serves in Congress rather than the Legislature."
   }
 ]

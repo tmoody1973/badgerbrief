@@ -165,9 +165,19 @@ export type FederalRollCall = {
   votes: FederalMemberVote[];
 };
 
-/** Human-readable Congress.gov page for a House roll call. */
-export const houseVoteUrl = (congress: number, session: number, roll: number) =>
-  `https://www.congress.gov/roll-call-vote/${congress}/${session}/${roll}`;
+/**
+ * Human-readable official page for a House roll call, keyed by CALENDAR YEAR
+ * and roll number — not by congress/session.
+ *
+ * The House Clerk publishes it and it is verified to render the right vote
+ * (clerk.house.gov/Votes/2025100 -> "Roll Call 100"). A congress.gov
+ * /roll-call-vote/{congress}/{session}/{roll} shape looks plausible but could
+ * not be verified: congress.gov returns 403 to any automated request, so
+ * shipping it would mean putting an unchecked link on every federal vote.
+ * Prefer the link that was actually confirmed to resolve.
+ */
+export const houseVoteUrl = (year: string, roll: number) =>
+  `https://clerk.house.gov/Votes/${year}${roll}`;
 
 /** "2025-04-10T11:08:00-04:00" -> "2025-04-10". Takes the date as printed,
  * without timezone conversion: shifting to UTC moves a late-evening vote onto
@@ -299,7 +309,9 @@ export function parseHouseVote(
     legislationUrl:
       typeof mem.legislationUrl === "string" ? mem.legislationUrl : null,
     sourceDataUrl: typeof det.sourceDataURL === "string" ? det.sourceDataURL : null,
-    sourceUrl: houseVoteUrl(ref.congress, ref.session, ref.rollCallNumber),
+    // Year comes from the vote's own date — the Clerk keys its pages by calendar
+    // year, and a Congress spans two of them.
+    sourceUrl: houseVoteUrl(votedOn.slice(0, 4), ref.rollCallNumber),
     ayes: tally.aye,
     nays: tally.nay,
     present: tally.present,

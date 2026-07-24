@@ -305,6 +305,38 @@ export const federalBillsMissingTitle = internalQuery({
   },
 });
 
+/**
+ * Repoint federal sourceUrl at the House Clerk's verified vote page.
+ *
+ * Rows ingested before that change carry a congress.gov /roll-call-vote/ URL
+ * whose shape was never confirmed — congress.gov 403s every automated request,
+ * so it could not be checked. Idempotent: rows already pointing at the Clerk are
+ * left alone.
+ */
+export const repairFederalSourceUrls = internalMutation({
+  args: { session: v.string() },
+  handler: async (ctx, { session }) => {
+    const rows = await ctx.db
+      .query("legislative_votes")
+      .withIndex("by_session_chamber", (q) =>
+        q.eq("session", session).eq("chamber", "us_house"),
+      )
+      .collect();
+    let patched = 0;
+    for (const r of rows) {
+      if (r.sourceUrl.startsWith("https://clerk.house.gov/Votes/")) continue;
+      const roll = r.voteId.split("-")[1];
+      const year = r.votedOn.slice(0, 4);
+      if (!roll || year.length !== 4) continue;
+      await ctx.db.patch(r._id, {
+        sourceUrl: `https://clerk.house.gov/Votes/${year}${roll}`,
+      });
+      patched++;
+    }
+    return { patched, total: rows.length };
+  },
+});
+
 /** Fill billTitle for federal votes once the bill enrichment pass resolves it. */
 export const setFederalBillTitle = internalMutation({
   args: { session: v.string(), billNumber: v.string(), billTitle: v.string() },
