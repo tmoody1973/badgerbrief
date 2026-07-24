@@ -36,9 +36,21 @@ const chip = (active: boolean) =>
 const linkCls =
   "font-mono text-[11px] uppercase tracking-[0.1em] underline decoration-2 underline-offset-2";
 
+/** "119" -> "119th Congress"; "2023" -> "2023 session". A Congress is not a
+ * session and labelling it one misstates the record's own timeframe. */
+export function periodLabel(session: string, federal: boolean): string {
+  if (!federal) return `${session} session`;
+  const n = Number(session);
+  if (!Number.isFinite(n)) return session;
+  const tens = n % 100;
+  const suffix =
+    tens >= 11 && tens <= 13 ? "th" : (["th", "st", "nd", "rd"][n % 10] ?? "th");
+  return `${n}${suffix} Congress`;
+}
+
 export function VotingRecordSessions({
-  candidateSlug, sessions,
-}: { candidateSlug: string; sessions: SessionCount[] }) {
+  candidateSlug, sessions, federal = false,
+}: { candidateSlug: string; sessions: SessionCount[]; federal?: boolean }) {
   const [openSession, setOpenSession] = useState<string | null>(sessions[0]?.session ?? null);
   return (
     <ol className="mt-3 divide-y-2 divide-border border-2 border-border bg-card shadow-[var(--shadow-brutal)]">
@@ -50,6 +62,7 @@ export function VotingRecordSessions({
           count={s.count}
           open={openSession === s.session}
           onToggle={() => setOpenSession((cur) => (cur === s.session ? null : s.session))}
+          federal={federal}
         />
       ))}
     </ol>
@@ -57,9 +70,10 @@ export function VotingRecordSessions({
 }
 
 function SessionGroup({
-  candidateSlug, session, count, open, onToggle,
+  candidateSlug, session, count, open, onToggle, federal,
 }: {
   candidateSlug: string; session: string; count: number; open: boolean; onToggle: () => void;
+  federal: boolean;
 }) {
   const [position, setPosition] = useState<PageRow["position"] | null>(null);
   const [search, setSearch] = useState("");
@@ -88,7 +102,7 @@ function SessionGroup({
         className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-secondary/40"
       >
         <span className="font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
-          <span aria-hidden="true">{open ? "▾" : "▸"}</span> {session} session
+          <span aria-hidden="true">{open ? "▾" : "▸"}</span> {periodLabel(session, federal)}
         </span>
         <span className="font-mono text-[11px] text-muted-foreground">{nf.format(count)} votes</span>
       </button>
@@ -109,7 +123,7 @@ function SessionGroup({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Find a bill"
-              aria-label={`Find a bill in the ${session} session`}
+              aria-label={`Find a bill in the ${periodLabel(session, federal)}`}
               className="ml-1 min-w-[8rem] flex-1 border-2 border-border bg-card px-2 py-1.5 text-sm"
             />
           </div>

@@ -78,7 +78,11 @@ export function VotingRecord({
         />
       </div>
 
-      <VotingRecordSessions candidateSlug={candidateSlug} sessions={summary.sessions} />
+      <VotingRecordSessions
+        candidateSlug={candidateSlug}
+        sessions={summary.sessions}
+        federal={federal}
+      />
     </section>
   );
 }
