@@ -91,18 +91,31 @@ export const storeRollCall = internalMutation({
 /**
  * One-time (idempotent) fill of legislator_votes.session for rows written
  * before the field existed. session is the first "-"-delimited part of voteKey.
+ *
+ * Paginated: a single mutation may not read+write more than 4096 documents, and
+ * prod already holds several thousand legislator_votes rows, so an unbounded
+ * `.collect()` over the whole table overruns the limit. The caller drives the
+ * cursor — pass `continueCursor` back in until `isDone` — so each execution
+ * touches at most `numItems` rows. Patching `session` does not change document
+ * order, so pagination stays stable across the passes.
  */
 export const backfillLegislatorSession = internalMutation({
-  args: {},
-  handler: async (ctx): Promise<{ updated: number }> => {
-    const rows = await ctx.db.query("legislator_votes").collect();
+  args: {
+    cursor: v.optional(v.union(v.string(), v.null())),
+    numItems: v.optional(v.number()),
+  },
+  handler: async (
+    ctx,
+    { cursor = null, numItems = 1000 },
+  ): Promise<{ updated: number; continueCursor: string; isDone: boolean }> => {
+    const page = await ctx.db.query("legislator_votes").paginate({ cursor, numItems });
     let updated = 0;
-    for (const r of rows) {
+    for (const r of page.page) {
       if (r.session) continue;
       await ctx.db.patch(r._id, { session: r.voteKey.split("-")[0] });
       updated++;
     }
-    return { updated };
+    return { updated, continueCursor: page.continueCursor, isDone: page.isDone };
   },
 });
 

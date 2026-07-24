@@ -429,9 +429,45 @@ describe("legislator_votes.session", () => {
     });
     const res = await t.mutation(internal.votesQueries.backfillLegislatorSession, {});
     expect(res.updated).toBe(1);
+    expect(res.isDone).toBe(true);
     await t.run(async (ctx) => {
       const [p] = await ctx.db.query("legislator_votes").collect();
       expect(p.session).toBe("2013");
+    });
+  });
+
+  test("backfillLegislatorSession drives across pages via the returned cursor", async () => {
+    // The prod table exceeds the 4096-doc read+write budget of one mutation, so
+    // the backfill paginates and the caller loops the cursor until isDone. With
+    // numItems=1, three rows require three passes; every row must end filled.
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    await t.run(async (ctx) => {
+      for (const voteKey of ["2011-assembly-av1", "2013-assembly-av2", "2015-assembly-av3"]) {
+        await ctx.db.insert("legislator_votes", {
+          voteKey,
+          candidateSlug: "francesca-hong",
+          position: "aye",
+        });
+      }
+    });
+
+    let cursor: string | null = null;
+    let total = 0;
+    let passes = 0;
+    for (;;) {
+      const res: { updated: number; continueCursor: string; isDone: boolean } =
+        await t.mutation(internal.votesQueries.backfillLegislatorSession, { cursor, numItems: 1 });
+      total += res.updated;
+      passes++;
+      if (res.isDone) break;
+      cursor = res.continueCursor;
+    }
+    expect(total).toBe(3);
+    expect(passes).toBeGreaterThanOrEqual(3);
+    await t.run(async (ctx) => {
+      const rows = await ctx.db.query("legislator_votes").collect();
+      expect(rows.every((r) => r.session === r.voteKey.split("-")[0])).toBe(true);
     });
   });
 });
