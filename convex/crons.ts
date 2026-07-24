@@ -39,6 +39,16 @@ crons.daily(
   { limit: 120 },
 );
 
+// 11:20 UTC — right after the scout + date-verify, tell Bing/IndexNow the
+// news hub changed so today's coverage is picked up without waiting for a
+// crawl. No-op if INDEXNOW_KEY isn't set.
+crons.daily(
+  "indexnow ping",
+  { hourUTC: 11, minuteUTC: 20 },
+  internal.indexNow.pingDaily,
+  {},
+);
+
 // 11:30 UTC — between scout and the research sweep, so own-site policy pages
 // discovered today are extractable in the same run (MOO-326).
 crons.daily(
