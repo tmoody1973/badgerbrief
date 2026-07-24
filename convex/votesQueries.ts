@@ -5,6 +5,7 @@
  */
 import { v } from "convex/values";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { billUrl, matchesQuery, summarize, type VotingSummary } from "./lib/votingRecord";
 import { requireAdmin } from "./sponsors";
 
 const positionValidator = v.union(
@@ -79,10 +80,29 @@ export const storeRollCall = internalMutation({
         voteKey: rollCall.voteKey,
         candidateSlug: c.slug,
         position: row.position,
+        session: rollCall.session,
       });
       matched++;
     }
     return { stored: true, matched };
+  },
+});
+
+/**
+ * One-time (idempotent) fill of legislator_votes.session for rows written
+ * before the field existed. session is the first "-"-delimited part of voteKey.
+ */
+export const backfillLegislatorSession = internalMutation({
+  args: {},
+  handler: async (ctx): Promise<{ updated: number }> => {
+    const rows = await ctx.db.query("legislator_votes").collect();
+    let updated = 0;
+    for (const r of rows) {
+      if (r.session) continue;
+      await ctx.db.patch(r._id, { session: r.voteKey.split("-")[0] });
+      updated++;
+    }
+    return { updated };
   },
 });
 
@@ -124,6 +144,24 @@ const FINAL_VOTE_TYPES = ["PASSAGE", "CONCURRENCE", "ADOPTION"];
 const isFinal = (voteType: string) =>
   FINAL_VOTE_TYPES.some((t) => voteType.toUpperCase().includes(t));
 
+/**
+ * Aggregate for the summary tiles and the SectionNav count. Computed from the
+ * lightweight legislator_votes rows alone (session is the voteKey prefix), so
+ * the candidate page never ships the full vote list. Explicit return type works
+ * around the api-circularity TS quirk (same reason votingRecord annotates its).
+ */
+export const votingRecordSummary = query({
+  args: { candidateSlug: v.string() },
+  handler: async (ctx, { candidateSlug }): Promise<VotingSummary | null> => {
+    const rows = await ctx.db
+      .query("legislator_votes")
+      .withIndex("by_candidate", (q) => q.eq("candidateSlug", candidateSlug))
+      .collect();
+    if (rows.length === 0) return null;
+    return summarize(rows.map((r) => ({ voteKey: r.voteKey, position: r.position })));
+  },
+});
+
 export const votingRecord = query({
   args: { candidateSlug: v.string(), query: v.optional(v.string()) },
   handler: async (ctx, { candidateSlug, query: search }) => {
@@ -143,24 +181,8 @@ export const votingRecord = query({
       rows.push({ vote, position: p.position });
     }
 
-    // Word-set match, not one contiguous substring: an agent-phrased query like
-    // "child care center loan" is not a literal substring of the official title
-    // "CHILD CARE CENTER RENOVATIONS LOAN PROGRAM" (the word "renovations" sits
-    // between them), so requiring every word to appear (any order) instead of
-    // one exact run of characters is what lets natural-language queries match.
-    // Each word is boundary-anchored (not a raw substring test) so a query
-    // word like "aid" cannot silently match inside an unrelated word like
-    // "paid" — this doesn't cost any natural-language recall since bill
-    // titles and query words are always matched whole-word anyway.
-    const needleWords = search?.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    const matched = needleWords?.length
-      ? rows.filter((r) => {
-          const haystack = `${r.vote.billTitle} ${r.vote.billNumber}`.toLowerCase();
-          return needleWords.every((w) => {
-            const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-            return new RegExp(`\\b${escaped}\\b`).test(haystack);
-          });
-        })
+    const matched = search?.trim()
+      ? rows.filter((r) => matchesQuery(r.vote.billTitle, r.vote.billNumber, search))
       : rows;
 
     // Count every recorded vote we hold on the SAME bill, so an answer can
@@ -194,5 +216,87 @@ export const votingRecord = query({
         sourceUrl: r.vote.sourceUrl,
         otherVotesOnBill: (perBill.get(`${r.vote.session}-${r.vote.billNumber}`) ?? 1) - 1,
       }));
+  },
+});
+
+const PAGE_DEFAULT = 25;
+
+/**
+ * One session's rows for the accordion. The whole session is read (indexed and
+ * bounded — ≤705 rows), joined to legislative_votes for metadata, then position
+ * + search filtered and sliced to `limit`. otherVotesOnBill is computed over the
+ * UNFILTERED session so a filter never changes it. billUrl is deterministic;
+ * summary is null until Phase 2 joins the bills table.
+ */
+export const votingRecordPage = query({
+  args: {
+    candidateSlug: v.string(),
+    session: v.string(),
+    limit: v.optional(v.number()),
+    position: v.optional(positionValidator),
+    query: v.optional(v.string()),
+  },
+  handler: async (
+    ctx,
+    { candidateSlug, session, limit, position, query: search },
+  ): Promise<{
+    rows: Array<{
+      billNumber: string; billTitle: string; voteType: string; votedOn: string;
+      chamber: "assembly" | "senate"; session: string;
+      position: "aye" | "nay" | "not_voting"; ayes: number; nays: number;
+      sourceUrl: string; otherVotesOnBill: number; billUrl: string; summary: string | null;
+    }>;
+    total: number;
+    hasMore: boolean;
+  }> => {
+    const cap = limit ?? PAGE_DEFAULT;
+    const positions = await ctx.db
+      .query("legislator_votes")
+      .withIndex("by_candidate_session", (q) =>
+        q.eq("candidateSlug", candidateSlug).eq("session", session),
+      )
+      .collect();
+
+    const all = [];
+    for (const p of positions) {
+      const vote = await ctx.db
+        .query("legislative_votes")
+        .withIndex("by_voteKey", (q) => q.eq("voteKey", p.voteKey))
+        .unique();
+      if (vote) all.push({ vote, position: p.position });
+    }
+
+    const perBill = new Map<string, number>();
+    for (const r of all) perBill.set(r.vote.billNumber, (perBill.get(r.vote.billNumber) ?? 0) + 1);
+
+    const filtered = all.filter(
+      (r) =>
+        (!position || r.position === position) &&
+        (!search?.trim() || matchesQuery(r.vote.billTitle, r.vote.billNumber, search)),
+    );
+    filtered.sort((a, b) => {
+      const fa = isFinal(a.vote.voteType) ? 1 : 0;
+      const fb = isFinal(b.vote.voteType) ? 1 : 0;
+      return fb - fa || b.vote.votedOn.localeCompare(a.vote.votedOn);
+    });
+
+    const total = filtered.length;
+    const rows = filtered.slice(0, cap).map((r) => ({
+      billNumber: r.vote.billNumber,
+      billTitle: r.vote.billTitle,
+      voteType: r.vote.voteType,
+      votedOn: r.vote.votedOn,
+      chamber: r.vote.chamber,
+      session: r.vote.session,
+      position: r.position,
+      ayes: r.vote.ayes,
+      nays: r.vote.nays,
+      sourceUrl: r.vote.sourceUrl,
+      otherVotesOnBill: (perBill.get(r.vote.billNumber) ?? 1) - 1,
+      billUrl: billUrl(r.vote.session, r.vote.billNumber),
+      summary: null as string | null,
+    }));
+
+    return { rows, total, hasMore: cap < total };
   },
 });

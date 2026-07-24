@@ -328,3 +328,110 @@ describe("votingRecord", () => {
     expect(rows).toHaveLength(0);
   });
 });
+
+describe("votingRecordSummary", () => {
+  test("returns null for a candidate with no votes", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    expect(await t.query(api.votesQueries.votingRecordSummary, { candidateSlug: "francesca-hong" })).toBeNull();
+  });
+
+  test("totals, per-position and per-session counts reconcile", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall: ROLL_CALL }); // 2023, HONG nay
+    const summary = await t.query(api.votesQueries.votingRecordSummary, { candidateSlug: "francesca-hong" });
+    expect(summary).toMatchObject({
+      total: 1,
+      byPosition: { aye: 0, nay: 1, not_voting: 0 },
+      chamber: "assembly",
+      sessions: [{ session: "2023", count: 1 }],
+    });
+  });
+});
+
+describe("votingRecordPage", () => {
+  // Two 2023 votes for HONG: a passage (nay) and a procedural TABLE (aye) on the same bill.
+  async function seedTwo(t: ReturnType<typeof convexTest>) {
+    await seedCandidate(t);
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall: ROLL_CALL }); // PASSAGE, nay
+    await t.mutation(internal.votesQueries.storeRollCall, {
+      rollCall: { ...ROLL_CALL, voteKey: "2023-assembly-av0082", voteId: "av0082", voteType: "TABLE",
+        votes: [{ name: "HONG", party: "D", position: "aye" as const }] },
+    });
+  }
+
+  test("returns a session's rows, final votes first, with billUrl and null summary", async () => {
+    const t = convexTest(schema, modules);
+    await seedTwo(t);
+    const res = await t.query(api.votesQueries.votingRecordPage, { candidateSlug: "francesca-hong", session: "2023" });
+    expect(res.total).toBe(2);
+    expect(res.hasMore).toBe(false);
+    expect(res.rows[0].voteType).toBe("PASSAGE"); // final first
+    expect(res.rows[0].billUrl).toBe("https://docs.legis.wisconsin.gov/2023/related/proposals/ab388");
+    expect(res.rows[0].summary).toBeNull();
+    expect(res.rows[0].otherVotesOnBill).toBe(1); // the TABLE vote on the same bill
+  });
+
+  test("limit slices and reports hasMore without changing total", async () => {
+    const t = convexTest(schema, modules);
+    await seedTwo(t);
+    const res = await t.query(api.votesQueries.votingRecordPage, { candidateSlug: "francesca-hong", session: "2023", limit: 1 });
+    expect(res.rows).toHaveLength(1);
+    expect(res.total).toBe(2);
+    expect(res.hasMore).toBe(true);
+  });
+
+  test("position filter narrows the rows but leaves otherVotesOnBill intact", async () => {
+    const t = convexTest(schema, modules);
+    await seedTwo(t);
+    const res = await t.query(api.votesQueries.votingRecordPage, { candidateSlug: "francesca-hong", session: "2023", position: "aye" });
+    expect(res.total).toBe(1);
+    expect(res.rows[0].voteType).toBe("TABLE");
+    expect(res.rows[0].otherVotesOnBill).toBe(1); // still counts the passage vote
+  });
+
+  test("query search matches title/number whole-word", async () => {
+    const t = convexTest(schema, modules);
+    await seedTwo(t);
+    expect((await t.query(api.votesQueries.votingRecordPage, { candidateSlug: "francesca-hong", session: "2023", query: "child care" })).total).toBe(2);
+    expect((await t.query(api.votesQueries.votingRecordPage, { candidateSlug: "francesca-hong", session: "2023", query: "transportation" })).total).toBe(0);
+  });
+
+  test("only returns the requested session", async () => {
+    const t = convexTest(schema, modules);
+    await seedTwo(t);
+    expect((await t.query(api.votesQueries.votingRecordPage, { candidateSlug: "francesca-hong", session: "2025" })).total).toBe(0);
+  });
+});
+
+describe("legislator_votes.session", () => {
+  test("storeRollCall records the session on the legislator_votes row", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall: ROLL_CALL });
+    await t.run(async (ctx) => {
+      const [p] = await ctx.db.query("legislator_votes").collect();
+      expect(p.session).toBe("2023");
+    });
+  });
+
+  test("backfillLegislatorSession fills rows missing a session from the voteKey prefix", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    // Simulate a pre-migration row: session omitted.
+    await t.run(async (ctx) => {
+      await ctx.db.insert("legislator_votes", {
+        voteKey: "2013-assembly-av0100",
+        candidateSlug: "francesca-hong",
+        position: "aye",
+      });
+    });
+    const res = await t.mutation(internal.votesQueries.backfillLegislatorSession, {});
+    expect(res.updated).toBe(1);
+    await t.run(async (ctx) => {
+      const [p] = await ctx.db.query("legislator_votes").collect();
+      expect(p.session).toBe("2013");
+    });
+  });
+});

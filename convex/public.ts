@@ -122,25 +122,21 @@ export const getCandidateBySlug = query({
       })),
     );
 
-    // Voting record for candidates with a hand-verified roll-call mapping.
-    // Everyone else gets an empty array and renders no section. The explicit
-    // annotation works around a TS circularity: this function's own return
-    // type feeds `api`, and `api` is what resolves `api.votesQueries.*`.
-    const votingRecord: Array<{
-      billNumber: string;
-      billTitle: string;
-      voteType: string;
-      votedOn: string;
-      chamber: "assembly" | "senate";
-      session: string;
-      position: "aye" | "nay" | "not_voting";
-      ayes: number;
-      nays: number;
-      sourceUrl: string;
-      otherVotesOnBill: number;
-    }> = await ctx.runQuery(api.votesQueries.votingRecord, {
+    // Aggregate only — the full per-session rows load client-side via
+    // votingRecordPage, so a candidate with 2,000+ votes no longer ships them
+    // all in the page payload. Cast (not a `:` declaration annotation) for the
+    // api-circularity quirk: a nullable declared type here provides contextual
+    // typing into the runQuery call that trips getCandidateBySlug's own
+    // self-referential return-type inference; a post-hoc `as` doesn't.
+    const votingRecordSummary = (await ctx.runQuery(api.votesQueries.votingRecordSummary, {
       candidateSlug: slug,
-    });
+    })) as {
+      total: number;
+      byPosition: { aye: number; nay: number; not_voting: number };
+      participationRate: number;
+      sessions: { session: string; count: number }[];
+      chamber: "assembly" | "senate";
+    } | null;
 
     return {
       candidate,
@@ -151,7 +147,7 @@ export const getCandidateBySlug = query({
       contributions,
       committeeFunding,
       ads,
-      votingRecord,
+      votingRecordSummary,
     };
   },
 });

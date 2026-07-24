@@ -568,7 +568,11 @@ export default defineSchema({
     voteKey: v.string(),
     candidateSlug: v.string(),
     position: v.union(v.literal("aye"), v.literal("nay"), v.literal("not_voting")),
+    // session = voteKey prefix. Optional so the schema push accepts pre-migration
+    // rows; backfillLegislatorSession + storeRollCall make it always-present in data.
+    session: v.optional(v.string()),
   })
     .index("by_candidate", ["candidateSlug"])
-    .index("by_vote", ["voteKey"]),
+    .index("by_vote", ["voteKey"])
+    .index("by_candidate_session", ["candidateSlug", "session"]),
 });

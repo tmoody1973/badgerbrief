@@ -1,110 +1,54 @@
-type VoteRow = {
-  billNumber: string;
-  billTitle: string;
-  voteType: string;
-  votedOn: string;
-  session: string;
-  chamber: string;
-  position: "aye" | "nay" | "not_voting";
-  ayes: number;
-  nays: number;
-  sourceUrl: string;
-  otherVotesOnBill: number;
+import { StatTile } from "./stat-tile";
+import { VotingRecordSessions } from "./voting-record-sessions";
+
+type VotingSummary = {
+  total: number;
+  byPosition: { aye: number; nay: number; not_voting: number };
+  participationRate: number;
+  sessions: { session: string; count: number }[];
+  chamber: "assembly" | "senate";
 };
 
-const POSITION_LABEL: Record<VoteRow["position"], string> = {
-  aye: "Voted yes",
-  nay: "Voted no",
-  not_voting: "Did not vote",
-};
-
-const VISIBLE = 5;
+const nf = new Intl.NumberFormat("en-US");
 
 /**
- * A legislator's floor votes, newest first.
+ * A legislator's floor votes: an aggregate summary + a lazy per-session
+ * accordion (VotingRecordSessions). The candidate page ships only this summary;
+ * the rows load on demand, so a 2,000-vote record is navigable and cheap.
  *
- * SELECTION IS RECENCY, AND THE PAGE SAYS SO. Ordering by "most important
- * votes" would be an editorial judgment we'd have to defend, and picking which
- * of a legislator's votes matter is exactly the cherry-picking that ingesting
- * the complete record avoids. Recency is a neutral rule we can state.
- *
- * DESIGN.md: one card, never nested — entries are separated by dashed rules.
+ * SELECTION IS RECENCY, AND THE PAGE SAYS SO. We don't rate or score votes; the
+ * aggregates here are arithmetic only.
  */
 export function VotingRecord({
-  votes,
-  candidateName,
+  summary, candidateSlug, candidateName,
 }: {
-  votes: VoteRow[];
+  summary: VotingSummary;
+  candidateSlug: string;
   candidateName: string;
 }) {
-  if (votes.length === 0) return null;
-
-  const ordered = [...votes].sort((a, b) => b.votedOn.localeCompare(a.votedOn));
-  const shown = ordered.slice(0, VISIBLE);
-  const folded = ordered.slice(VISIBLE);
-  const sessions = [...new Set(ordered.map((v) => v.session))].sort();
-
-  const Entry = ({ v }: { v: VoteRow }) => (
-    <li className="px-4 py-3">
-      <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-        {v.billNumber} · {v.voteType} · {v.votedOn}
-      </p>
-      <p className="mt-1 max-w-[62ch] text-sm">{v.billTitle}</p>
-      <p className="mt-1 text-sm">
-        <span className="font-bold">{POSITION_LABEL[v.position]}</span>
-        <span className="text-muted-foreground">
-          {" "}
-          · {v.ayes} ayes, {v.nays} nays
-          {v.otherVotesOnBill > 0
-            ? ` · ${v.otherVotesOnBill} other recorded vote${v.otherVotesOnBill === 1 ? "" : "s"} on this bill`
-            : ""}
-        </span>
-      </p>
-      <a
-        href={v.sourceUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-1 inline-block font-mono text-[11px] uppercase tracking-[0.1em] underline decoration-2 underline-offset-2"
-      >
-        Official roll call ↗
-      </a>
-    </li>
-  );
-
+  const sessionLabels = summary.sessions.map((s) => s.session).sort().reverse();
   return (
     <section id="votes" className="mt-6 scroll-mt-16">
       <h2 className="font-display text-xl">Voting record</h2>
       <p className="mt-1 max-w-[60ch] text-sm text-muted-foreground">
-        Recorded floor votes {candidateName} cast in the Wisconsin Legislature, most
-        recent first, from the {sessions.join(" and ")} session
-        {sessions.length > 1 ? "s" : ""}. Every entry links to its official roll call.
-        We don&rsquo;t rate or score votes.
+        Recorded floor votes {candidateName} cast in the Wisconsin Legislature, newest
+        first, across the {sessionLabels.join(", ")} session
+        {sessionLabels.length > 1 ? "s" : ""}. Every entry links to its official roll call
+        and the full bill. We don&rsquo;t rate or score votes.
       </p>
 
-      <div className="mt-3 border-2 border-border bg-card shadow-[var(--shadow-brutal)]">
-        <div className="border-b-2 border-border bg-secondary/40 px-4 py-2">
-          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
-            Wisconsin Legislature · {votes.length} recorded vote{votes.length === 1 ? "" : "s"}
-          </span>
-        </div>
-        <ol className="divide-y-2 divide-dashed divide-border">
-          {shown.map((v) => (
-            <Entry key={v.sourceUrl} v={v} />
-          ))}
-        </ol>
-        {folded.length > 0 && (
-          <details className="border-t-2 border-dashed border-border">
-            <summary className="cursor-pointer px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
-              Show all {ordered.length} votes
-            </summary>
-            <ol className="divide-y-2 divide-dashed divide-border border-t-2 border-dashed border-border">
-              {folded.map((v) => (
-                <Entry key={v.sourceUrl} v={v} />
-              ))}
-            </ol>
-          </details>
-        )}
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <StatTile label="Recorded votes" value={nf.format(summary.total)} />
+        <StatTile label="Voted yes" value={nf.format(summary.byPosition.aye)} />
+        <StatTile label="Voted no" value={nf.format(summary.byPosition.nay)} />
+        <StatTile
+          label="Participation"
+          value={`${Math.round(summary.participationRate * 100)}%`}
+          note={`${nf.format(summary.byPosition.not_voting)} did not vote`}
+        />
       </div>
+
+      <VotingRecordSessions candidateSlug={candidateSlug} sessions={summary.sessions} />
     </section>
   );
 }

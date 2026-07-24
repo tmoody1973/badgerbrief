@@ -80,7 +80,7 @@ export default async function CandidatePage({ params }: Props) {
     getInTheNewsForCandidate(slug),
   ]);
   if (!data) notFound();
-  const { candidate, race, positions, quotes, finance, contributions, committeeFunding, ads, votingRecord } = data;
+  const { candidate, race, positions, quotes, finance, contributions, committeeFunding, ads, votingRecordSummary } = data;
 
   // WisconsinEye interview answers get their own section: every candidate in
   // the race sat for the same interview, so the answers are comparable across
@@ -111,8 +111,8 @@ export default async function CandidatePage({ params }: Props) {
     ...(otherQuotes.length > 0
       ? [{ id: "quotes", label: "Quotes", count: otherQuotes.length }]
       : []),
-    ...(votingRecord.length > 0
-      ? [{ id: "votes", label: "Voting record", count: votingRecord.length }]
+    ...(votingRecordSummary
+      ? [{ id: "votes", label: "Voting record", count: votingRecordSummary.total }]
       : []),
     ...(inTheNews.length > 0
       ? [{ id: "news", label: "In the news", count: inTheNews.length }]
@@ -223,7 +223,13 @@ export default async function CandidatePage({ params }: Props) {
 
         <InterviewQuotes quotes={interviewQuotes} candidateName={candidate.name} />
 
-        <VotingRecord votes={votingRecord} candidateName={candidate.name} />
+        {votingRecordSummary && (
+          <VotingRecord
+            summary={votingRecordSummary}
+            candidateSlug={candidate.slug}
+            candidateName={candidate.name}
+          />
+        )}
 
         {otherQuotes.length > 0 && (
           <section id="quotes" className="mt-6 scroll-mt-16">
