@@ -8,14 +8,42 @@ import { SITE_NAME, SITE_URL } from "./site";
 
 type JsonLdNode = Record<string, unknown>;
 
+/**
+ * Who publishes this.
+ *
+ * For a voter guide this is the load-bearing trust signal, not decoration.
+ * A reader deciding whether to believe a roll-call claim — and an answer
+ * engine deciding whether to cite one — both ask the same question first:
+ * who is behind it and how do they work? The bare Organization node answered
+ * neither.
+ *
+ * Every field below is verifiable from the site itself. Deliberately ABSENT:
+ * `sameAs` (social/Wikidata profiles) and `founder`, because asserting an
+ * affiliation or a named person on a nonpartisan civic publication is a
+ * real-world claim about real people and must come from the publisher, not be
+ * inferred here.
+ */
 export function organizationNode(): JsonLdNode {
   return {
-    "@type": "Organization",
+    "@type": "NewsMediaOrganization",
     "@id": `${SITE_URL}/#org`,
     name: SITE_NAME,
     url: SITE_URL,
     description:
       "Non-partisan, source-linked Wisconsin voter guide and election intelligence platform.",
+    // The pages that state how the work is done. schema.org defines these
+    // specifically for news organisations, and they are exactly what a reader
+    // checking for bias should be pointed at.
+    publishingPrinciples: `${SITE_URL}/methodology`,
+    correctionsPolicy: `${SITE_URL}/methodology`,
+    diversityPolicy: `${SITE_URL}/methodology`,
+    areaServed: { "@type": "State", name: "Wisconsin" },
+    knowsAbout: [
+      "Wisconsin 2026 elections",
+      "Wisconsin Legislature voting records",
+      "campaign finance",
+      "candidate positions",
+    ],
   };
 }
 

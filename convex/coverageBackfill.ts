@@ -112,3 +112,56 @@ export const cleanupCampaignSiteOutlets = internalMutation({
     };
   },
 });
+
+/**
+ * Re-score every decorated article against the CURRENT relevance gate.
+ *
+ * backfillCoverage deliberately only touches never-decorated rows, so a change
+ * to the gate itself leaves the existing corpus frozen at whatever it scored
+ * the day it arrived. When the gate learned to read the url slug, 111 of 325
+ * tracked articles were still sitting at 0.3 and invisible on /news — real
+ * coverage the new rule would admit.
+ *
+ * Two things are never overridden:
+ *  - hubStatus "hidden", which is a human saying no. A rescore that
+ *    un-hides an article an editor removed would silently republish it.
+ *  - status "rejected" rows are left alone for the same reason; the hub query
+ *    already excludes them, and rewriting their score only muddies the audit.
+ */
+export const rescoreCoverage = internalMutation({
+  args: { dryRun: v.optional(v.boolean()), limit: v.optional(v.number()) },
+  handler: async (ctx, { dryRun = true, limit }) => {
+    const candidates = await ctx.db.query("candidates").collect();
+    const races = await ctx.db.query("races").collect();
+    const decorateCtx = {
+      candidateNames: candidates.map((c) => c.name),
+      raceKeywords: [...new Set(races.map((r) => r.office.toLowerCase()))],
+    };
+
+    const rows = (await ctx.db.query("article_sources").collect())
+      .filter((r) => r.sourceKind !== "campaign_site")
+      .filter((r) => r.hubStatus !== "hidden")
+      .filter((r) => r.status !== "rejected")
+      .slice(0, limit ?? 5000);
+
+    let promoted = 0;
+    let changed = 0;
+    for (const row of rows) {
+      const d = decorateCoverageRow(
+        { outlet: row.outlet, headline: row.headline, url: row.url },
+        decorateCtx,
+      );
+      if (d.relevanceScore === row.relevanceScore) continue;
+      changed++;
+      if (d.hubStatus === "auto" && row.hubStatus !== "auto") promoted++;
+      if (!dryRun) {
+        await ctx.db.patch(row._id, {
+          relevanceScore: d.relevanceScore,
+          relevanceReason: d.relevanceReason,
+          ...(d.hubStatus ? { hubStatus: d.hubStatus } : {}),
+        });
+      }
+    }
+    return { scanned: rows.length, changed, promoted, dryRun };
+  },
+});

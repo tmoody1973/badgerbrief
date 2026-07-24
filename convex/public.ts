@@ -138,9 +138,30 @@ export const getCandidateBySlug = query({
       chamber: "assembly" | "senate" | "us_house";
     } | null;
 
+    // Everyone else on this ballot. A candidate page's most reliable value —
+    // and for the ~220 imported candidates who carry no positions, quotes or
+    // finance, the ONLY value — is telling a voter who they are choosing
+    // between. `hasRecord` marks whoever has a parsed voting record so a
+    // challenger's page can link straight to the incumbent's votes.
+    const fieldRows = await ctx.db
+      .query("candidates")
+      .withIndex("by_race", (q) => q.eq("raceId", candidate.raceId))
+      .collect();
+    const field = await Promise.all(
+      fieldRows.map(async (c) => ({
+        slug: c.slug,
+        name: c.name,
+        party: c.party,
+        incumbent: c.incumbent,
+        status: c.status,
+        hasRecord: Boolean(c.legislatorName || c.bioguideId),
+      })),
+    );
+
     return {
       candidate,
       race,
+      field,
       positions,
       quotes: quotesWithClips,
       finance,

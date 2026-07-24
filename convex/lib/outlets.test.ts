@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { normalizeOutletKey, OUTLET_TYPES, scoreRelevance, HUB_RELEVANCE_MIN, parseOutletTransparency, cleanPublishedAt } from "./outlets";
+import { normalizeOutletKey, OUTLET_TYPES, scoreRelevance, HUB_RELEVANCE_MIN, parseOutletTransparency, cleanPublishedAt, decorateCoverageRow } from "./outlets";
 import outletRaw from "./fixtures/outlet-firecrawl.json";
 
 describe("normalizeOutletKey", () => {
@@ -61,5 +61,53 @@ describe("cleanPublishedAt", () => {
   test("tolerates one day of clock/timezone skew", () => {
     expect(cleanPublishedAt("2026-07-23", NOW)).toBe("2026-07-23");
     expect(cleanPublishedAt("2026-07-25", NOW)).toBeUndefined();
+  });
+});
+
+describe("decorateCoverageRow reads the url slug, not just the headline", () => {
+  const ctx = {
+    candidateNames: ["Sara Rodriguez", "Francesca Hong"],
+    raceKeywords: ["governor", "treasurer"],
+  };
+
+  test("recovers an article whose candidate is only in the slug", () => {
+    // Real row that sat below the gate: the headline never names her, the
+    // publisher's slug does.
+    const r = decorateCoverageRow(
+      {
+        outlet: "WisPolitics",
+        headline: "Straw poll results announced at state convention",
+        url: "https://www.wispolitics.com/2026/rodriguez-wins-wispolitics-straw-poll-for-governor/",
+      },
+      ctx,
+    );
+    // 0.7, not 1: the slug carries the surname but not the full name, and a
+    // bare surname must not assert the story is about THAT person — the same
+    // collision risk the roll-call matching refuses to take. Clearing the gate
+    // is the requirement; claiming certainty is not.
+    expect(r.relevanceScore).toBeGreaterThanOrEqual(HUB_RELEVANCE_MIN);
+    expect(r.hubStatus).toBe("auto");
+  });
+
+  test("recovers a race-keyword article from the slug", () => {
+    const r = decorateCoverageRow(
+      {
+        outlet: "WPR",
+        headline: "A closer look at an office few voters think about",
+        url: "https://www.wpr.org/economy/wisconsin-treasurer-race-focuses-whether-expand-office",
+      },
+      ctx,
+    );
+    expect(r.relevanceScore).toBeGreaterThanOrEqual(HUB_RELEVANCE_MIN);
+  });
+
+  test("does not let the DOMAIN alone qualify an unrelated story", () => {
+    // The domain is stripped before scoring: an outlet called "governor
+    // something" must not make every one of its pages relevant.
+    const r = decorateCoverageRow(
+      { outlet: "Example", headline: "Packers sign new quarterback", url: "https://governor.example.com/sports/packers-qb" },
+      ctx,
+    );
+    expect(r.relevanceScore).toBeLessThan(HUB_RELEVANCE_MIN);
   });
 });

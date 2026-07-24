@@ -82,7 +82,25 @@ export function decorateCoverageRow(
   row: { outlet: string; headline: string; url?: string },
   ctx: { candidateNames: string[]; raceKeywords: string[] },
 ): { outletKey: string; relevanceScore: number; relevanceReason: string; hubStatus?: "auto" } {
-  const { score, reason } = scoreRelevance(row.headline, ctx);
+  // Score the headline AND the url slug.
+  //
+  // Scoring the headline alone left 111 of 325 tracked articles at 0.3 —
+  // below HUB_RELEVANCE_MIN, so invisible on /news — including plainly
+  // relevant coverage: wispolitics "rodriguez-wins-wispolitics-straw-poll-for-
+  // governor", wpr "republican-primary-governor-candidates-trump-fundraising",
+  // wpr "wisconsin-treasurer-race-focuses-whether-expand-office". Newsrooms
+  // routinely keep the name out of the headline and put it in the slug, so the
+  // gate was rejecting on an absence that carries no meaning.
+  //
+  // The slug is publisher-written, not LLM-written — which is why it is used
+  // and `whyRelevant` is not. whyRelevant always names the candidate the scout
+  // was searching for, so scoring it would hand every row a 1 and delete the
+  // gate entirely.
+  const slugText = (row.url ?? "")
+    .replace(/^https?:\/\/[^/]+/, "") // drop the domain: outlet names are not topics
+    .replace(/[/_-]+/g, " ")
+    .replace(/\.(html?|php|aspx?)$/i, "");
+  const { score, reason } = scoreRelevance(`${row.headline} ${slugText}`, ctx);
   return {
     // Key off the URL's domain when we recognise it, falling back to the name.
     // `row.outlet` is a string the LLM wrote, so the same newsroom arrives as

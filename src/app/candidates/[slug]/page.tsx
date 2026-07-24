@@ -13,6 +13,7 @@ import {
 } from "@/components/guide/labels";
 import { InTheNews } from "@/components/guide/in-the-news";
 import { InterviewQuotes } from "@/components/guide/interview-quotes";
+import { BallotContext } from "@/components/guide/ballot-context";
 import { VotingRecord } from "@/components/guide/voting-record";
 import { isInterviewQuote } from "@/lib/interview-quote";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
@@ -105,7 +106,7 @@ export default async function CandidatePage({ params }: Props) {
     getInTheNewsForCandidate(slug),
   ]);
   if (!data) notFound();
-  const { candidate, race, positions, quotes, finance, contributions, committeeFunding, ads, votingRecordSummary } = data;
+  const { candidate, race, field, positions, quotes, finance, contributions, committeeFunding, ads, votingRecordSummary } = data;
 
   // WisconsinEye interview answers get their own section: every candidate in
   // the race sat for the same interview, so the answers are comparable across
@@ -121,6 +122,7 @@ export default async function CandidatePage({ params }: Props) {
   const foldedQuotes = otherQuotes.slice(VISIBLE_QUOTES);
 
   const navSections: NavSection[] = [
+    ...(race ? [{ id: "ballot", label: "The ballot" }] : []),
     ...(candidate.background ? [{ id: "bio", label: "Background" }] : []),
     ...(candidate.keyPriorities?.length
       ? [{ id: "priorities", label: "Priorities" }]
@@ -205,6 +207,17 @@ export default async function CandidatePage({ params }: Props) {
 
       <div className="lg:grid lg:grid-cols-12 lg:gap-8">
         <div className="min-w-0 lg:col-span-8">
+        {race && (
+          <BallotContext
+            candidateSlug={candidate.slug}
+            candidateName={candidate.name}
+            raceId={race.raceId}
+            raceOffice={race.office}
+            primaryDate={race.primaryDate}
+            opponents={field}
+          />
+        )}
+
         {candidate.background && (
           <section id="bio" className="mt-6 scroll-mt-16 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
             <h2 className="font-display text-xl">

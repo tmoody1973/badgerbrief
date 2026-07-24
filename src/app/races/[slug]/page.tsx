@@ -25,6 +25,7 @@ import {
 } from "@/lib/data";
 import {
   JsonLd,
+  faqNode,
   breadcrumbNode,
   organizationNode,
   personNode,
@@ -118,6 +119,7 @@ export default async function RacePage({ params }: Props) {
     ...new Set(candidates.map((c) => c.primaryParty).filter(Boolean)),
   ] as string[];
   const nonPartisan = candidates.filter((c) => !c.primaryParty);
+  const onBallotCandidates = candidates.filter((c) => isOnBallot(c.status));
 
   const byParty = (party: string) =>
     candidates.filter((c) => c.primaryParty === party);
@@ -163,6 +165,37 @@ export default async function RacePage({ params }: Props) {
             { name: "Home", path: "/" },
             { name: race.office, path: `/races/${slug}` },
           ]),
+          // The page's own H1 is already the question a voter types, and the
+          // answer is on the page. Stating that as FAQPage makes it extractable
+          // by an answer engine instead of leaving it to be inferred from
+          // prose — the single highest-leverage markup for "who is running
+          // for X" queries, which is most of the traffic this guide exists to
+          // serve. Answers are built from the same data the page renders, so
+          // the markup can never drift from what a reader sees.
+          faqNode(
+            [
+              {
+                q: `Who is running for ${race.office} in 2026?`,
+                a: onBallotCandidates.length
+                  ? `${onBallotCandidates
+                      .map((c) => (c.party ? `${c.name} (${c.party})` : c.name))
+                      .join(", ")} ${onBallotCandidates.length === 1 ? "is" : "are"} on the ballot for ${race.office} in Wisconsin's partisan primary on ${race.primaryDate ?? "August 11, 2026"}.`
+                  : "",
+              },
+              {
+                q: `When is the primary for ${race.office}?`,
+                a: `Wisconsin's partisan primary is ${race.primaryDate ?? "August 11, 2026"}. The general election is ${race.generalDate ?? "November 3, 2026"}.`,
+              },
+              ...(race.incumbent
+                ? [
+                    {
+                      q: `Who currently holds ${race.office}?`,
+                      a: `${race.incumbent} is the incumbent.`,
+                    },
+                  ]
+                : []),
+            ].filter((f) => f.a),
+          ),
           ...candidates.map(personNode),
         ]}
       />

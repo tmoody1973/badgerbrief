@@ -22,7 +22,24 @@ import { ALLOWED_DOMAINS, WI_OUTLETS, isAllowedUrl, parseScoutResponse, sortByRo
 import { decorateCoverageRow } from "./lib/outlets";
 
 const AGENT_NAME = "article-scout";
-const DEFAULT_LIMIT = 3;
+/**
+ * Candidates scouted per run.
+ *
+ * This was 3, against a contested pool of 30 — a TEN DAY rotation. The daily
+ * cron therefore looked for coverage of any given candidate about once every
+ * ten days, which is why /news could sit at a story three days old while the
+ * biggest event of the cycle went unfound: the July 22 Marquette poll wave was
+ * about Hong, Barnes and Tiffany, and none of them were in the slice that ran.
+ * A feed that reports on a tenth of the field each day does not look stale
+ * because ingestion is broken; it looks stale because nobody searched.
+ *
+ * 30 covers the whole contested pool every run, so every candidate is checked
+ * daily. Rotation still orders the pool (least-recently-touched first), so this
+ * degrades sensibly if the pool grows past the limit rather than starving the
+ * tail. One LLM call per candidate per day is not a meaningful cost against an
+ * August 11 primary.
+ */
+const DEFAULT_LIMIT = 30;
 
 // Lazy singleton so deploys succeed with Arize keys absent (env read at call
 // time, never at import time). Returns null when telemetry is unconfigured.
@@ -177,10 +194,24 @@ export const run = internalAction({
             { role: "system", content: SCOUT_SYSTEM },
             {
               role: "user",
-              content: `Find recent news coverage (last 90 days preferred) of ${target.name}, candidate for ${target.raceId} in Wisconsin's August 2026 primary. Return article URLs from the allowed outlets only.`,
+              // "Last 90 days preferred" was the reason /news read as stale.
+              // A three-month window with no ordering returns whatever is best
+              // indexed, which skews old; and because already-known urls are
+              // dropped as duplicates, each run surfaced yet another OLDER
+              // unseen article instead of today's. The feed filled with June
+              // while the July 22 Marquette poll wave went unfound.
+              //
+              // The window is now days, ordered newest-first, with today's date
+              // stated so the model has an anchor rather than inferring "recent"
+              // from its own training cutoff.
+              content: `Today is ${new Date().toISOString().slice(0, 10)}. Find the MOST RECENT news coverage of ${target.name}, candidate for ${target.raceId} in Wisconsin's August 11, 2026 primary. Prioritise the last 7 days; do not return anything older than 30 days. List newest first and include each article's publication date. Return article URLs from the allowed outlets only.`,
             },
           ],
           search_domain_filter: ALLOWED_DOMAINS,
+          // The provider-side recency filter, which the prompt alone cannot
+          // enforce — without it the search itself still ranks by relevance
+          // over freshness and the model can only pick from what it is given.
+          search_recency_filter: "week",
           response_format: { type: "json_schema", json_schema: { schema: SCOUT_JSON_SCHEMA } },
         };
 
