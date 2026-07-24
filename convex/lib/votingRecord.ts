@@ -3,7 +3,10 @@
  * split as lib/rollCall.ts, so the queries in votesQueries.ts and the vitest
  * suite can both use them.
  */
-export type Position = "aye" | "nay" | "not_voting";
+export type Position = "aye" | "nay" | "present" | "not_voting";
+
+/** Wisconsin's two chambers plus the U.S. House. */
+export type RecordChamber = "assembly" | "senate" | "us_house";
 
 /**
  * Whole-word, order-independent match of every query word against the title
@@ -24,33 +27,41 @@ export function matchesQuery(billTitle: string, billNumber: string, query: strin
 
 export type VotingSummary = {
   total: number;
-  byPosition: { aye: number; nay: number; not_voting: number };
+  byPosition: { aye: number; nay: number; present: number; not_voting: number };
   participationRate: number;
   sessions: { session: string; count: number }[];
-  chamber: "assembly" | "senate";
+  chamber: RecordChamber;
 };
 
 /**
  * Per-candidate aggregate, computed from the lightweight legislator_votes rows
  * alone. voteKey is "{session}-{chamber}-{voteId}", so both session and chamber
  * come from the key with no join to legislative_votes. participationRate is
- * mechanical — (aye + nay) / total — never framed as good or bad.
+ * mechanical — never framed as good or bad.
+ *
+ * "Present" counts as participation. A member who votes Present showed up and
+ * declined to take a side, which is a deliberate act on the record; folding it
+ * into non-participation would understate their attendance. It stays a separate
+ * bucket rather than being merged into either aye/nay or not_voting.
  */
 export function summarize(rows: { voteKey: string; position: Position }[]): VotingSummary {
-  const byPosition = { aye: 0, nay: 0, not_voting: 0 };
+  const byPosition = { aye: 0, nay: 0, present: 0, not_voting: 0 };
   const sessionCounts = new Map<string, number>();
-  let chamber: "assembly" | "senate" = "assembly";
+  let chamber: RecordChamber = "assembly";
   for (const r of rows) {
     byPosition[r.position]++;
     const [session, ch] = r.voteKey.split("-");
-    if (ch === "assembly" || ch === "senate") chamber = ch;
+    if (ch === "assembly" || ch === "senate" || ch === "us_house") chamber = ch;
     sessionCounts.set(session, (sessionCounts.get(session) ?? 0) + 1);
   }
   const total = rows.length;
   const sessions = [...sessionCounts.entries()]
     .map(([session, count]) => ({ session, count }))
     .sort((a, b) => b.session.localeCompare(a.session)); // newest first
-  const participationRate = total === 0 ? 0 : (byPosition.aye + byPosition.nay) / total;
+  const participationRate =
+    total === 0
+      ? 0
+      : (byPosition.aye + byPosition.nay + byPosition.present) / total;
   return { total, byPosition, participationRate, sessions, chamber };
 }
 

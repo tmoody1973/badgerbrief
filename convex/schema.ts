@@ -128,6 +128,11 @@ export default defineSchema({
         sessions: v.array(v.string()),
       }),
     ),
+    // Federal counterpart of legislatorName, for members of the U.S. House.
+    // Deliberately NOT the same design: Bioguide IDs are unique by construction,
+    // so there is no same-surname collision to curate around and no chamber or
+    // session list to hand-verify. One stable id does the whole job.
+    bioguideId: v.optional(v.string()),
     photoUrl: v.optional(v.string()),
     photoSource: v.optional(v.string()),
     socialMedia: v.optional(v.record(v.string(), v.string())),
@@ -541,22 +546,52 @@ export default defineSchema({
   }).index("by_ref", ["refTable", "refId"]),
 
   // ---------- legislative voting records ----------
+  // Holds BOTH Wisconsin roll calls and U.S. House roll calls. One table, so the
+  // chat tool and candidate page have a single query path and callers never need
+  // to know whether a member served in Madison or Washington.
   legislative_votes: defineTable({
-    voteKey: v.string(), // "2023-assembly-av0083" — natural key
+    // "2023-assembly-av0083" (state) or "119-1-us_house-100" (federal)
+    voteKey: v.string(),
+    // Biennium for state ("2023"); Congress number for federal ("119"). Both
+    // reset bill numbers, so this is always part of a per-bill grouping key.
     session: v.string(),
-    chamber: v.union(v.literal("assembly"), v.literal("senate")),
-    voteId: v.string(),
+    chamber: v.union(
+      v.literal("assembly"),
+      v.literal("senate"),
+      v.literal("us_house"),
+    ),
+    voteId: v.string(), // "av0083" (state) or "1-100" = session-roll (federal)
     billNumber: v.string(),
     // Verbatim from THIS roll call. The same bill carries different titles in
-    // each chamber, so there is no canonical per-bill title.
+    // each chamber, so there is no canonical per-bill title. Federal votes carry
+    // no title at all in the source, so this is filled by the bill enrichment
+    // pass and is "" until then — render the measure as a fallback.
     billTitle: v.string(),
-    voteType: v.string(), // PASSAGE, CONCURRENCE, ADOPTION — verbatim, never paraphrased
+    // PASSAGE / CONCURRENCE / ADOPTION for state; the federal equivalent is the
+    // voteQuestion ("On Passage"). Verbatim either way, never paraphrased.
+    voteType: v.string(),
     votedOn: v.string(), // YYYY-MM-DD
     ayes: v.number(),
     nays: v.number(),
     notVoting: v.number(),
     sourceUrl: v.string(),
     ingestedAt: v.number(),
+
+    // ---- federal only ----
+    // Voting "Present" exists in the House and not in these Wisconsin documents.
+    // It is NOT the same as not voting: the member was there and declined to
+    // take a side, so the two are never merged.
+    present: v.optional(v.number()),
+    // "Passed" / "Failed" / "Agreed to" — the House publishes an explicit
+    // outcome; Wisconsin does not.
+    result: v.optional(v.string()),
+    // What was actually voted on, which for an amendment vote is the amendment
+    // ("HAMDT 97") while billNumber stays the underlying bill ("HR 3838").
+    measure: v.optional(v.string()),
+    legislationUrl: v.optional(v.string()),
+    // The House Clerk's XML for this same vote — an independent rendering, used
+    // by the cross-source verifier.
+    sourceDataUrl: v.optional(v.string()),
   })
     .index("by_voteKey", ["voteKey"])
     .index("by_session_chamber", ["session", "chamber"])
@@ -567,7 +602,12 @@ export default defineSchema({
   legislator_votes: defineTable({
     voteKey: v.string(),
     candidateSlug: v.string(),
-    position: v.union(v.literal("aye"), v.literal("nay"), v.literal("not_voting")),
+    position: v.union(
+      v.literal("aye"),
+      v.literal("nay"),
+      v.literal("present"),
+      v.literal("not_voting"),
+    ),
     // session = voteKey prefix. Optional so the schema push accepts pre-migration
     // rows; backfillLegislatorSession + storeRollCall make it always-present in data.
     session: v.optional(v.string()),

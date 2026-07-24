@@ -3,13 +3,22 @@ import { VotingRecordSessions } from "./voting-record-sessions";
 
 type VotingSummary = {
   total: number;
-  byPosition: { aye: number; nay: number; not_voting: number };
+  byPosition: { aye: number; nay: number; present: number; not_voting: number };
   participationRate: number;
   sessions: { session: string; count: number }[];
-  chamber: "assembly" | "senate";
+  chamber: "assembly" | "senate" | "us_house";
 };
 
 const nf = new Intl.NumberFormat("en-US");
+
+/** "119" -> "119th". Handles the 11x exceptions (11th/12th/13th, not 11st). */
+function ordinal(n: string): string {
+  const num = Number(n);
+  if (!Number.isFinite(num)) return n;
+  const tens = num % 100;
+  if (tens >= 11 && tens <= 13) return `${num}th`;
+  return `${num}${["th", "st", "nd", "rd"][num % 10] ?? "th"}`;
+}
 
 /**
  * A legislator's floor votes: an aggregate summary + a lazy per-session
@@ -26,16 +35,31 @@ export function VotingRecord({
   candidateSlug: string;
   candidateName: string;
 }) {
+  const federal = summary.chamber === "us_house";
   const sessionLabels = summary.sessions.map((s) => s.session).sort().reverse();
+  const periods = federal
+    ? sessionLabels.map((s) => `${ordinal(s)} Congress`)
+    : sessionLabels.map((s) => `${s} session`);
+  const body = federal ? "the U.S. House of Representatives" : "the Wisconsin Legislature";
+
   return (
     <section id="votes" className="mt-6 scroll-mt-16">
       <h2 className="font-display text-xl">Voting record</h2>
       <p className="mt-1 max-w-[60ch] text-sm text-muted-foreground">
-        Recorded floor votes {candidateName} cast in the Wisconsin Legislature, newest
-        first, across the {sessionLabels.join(", ")} session
-        {sessionLabels.length > 1 ? "s" : ""}. Every entry links to its official roll call
-        and the full bill. We don&rsquo;t rate or score votes.
+        Recorded floor votes {candidateName} cast in {body}, newest first, across the{" "}
+        {periods.join(", ")}. Every entry links to its official roll call
+        {federal ? "" : " and the full bill"}. We don&rsquo;t rate or score votes.
       </p>
+      {federal && (
+        // The source's coverage is genuinely partial, so the page says so rather
+        // than implying a complete record. Congress.gov's House vote data is
+        // still in beta and carries only votes tied to a piece of legislation.
+        <p className="mt-1 max-w-[60ch] text-xs text-muted-foreground">
+          Covers recorded votes on legislation. Votes not tied to a bill or
+          resolution — such as electing a Speaker — aren&rsquo;t yet published in the
+          source data and are missing here.
+        </p>
+      )}
 
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <StatTile label="Recorded votes" value={nf.format(summary.total)} />
@@ -44,7 +68,11 @@ export function VotingRecord({
         <StatTile
           label="Participation"
           value={`${Math.round(summary.participationRate * 100)}%`}
-          note={`${nf.format(summary.byPosition.not_voting)} did not vote`}
+          note={
+            summary.byPosition.present > 0
+              ? `${nf.format(summary.byPosition.not_voting)} did not vote · ${nf.format(summary.byPosition.present)} present`
+              : `${nf.format(summary.byPosition.not_voting)} did not vote`
+          }
         />
       </div>
 

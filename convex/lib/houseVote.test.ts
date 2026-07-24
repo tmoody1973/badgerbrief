@@ -123,7 +123,9 @@ describe("dates", () => {
 describe("parseHouseVote", () => {
   test("parses a Yea-and-Nay vote on a concurrent resolution", () => {
     const rc = ok(parseHouseVote(d100(), m100(), ref(100)));
-    expect(rc.voteKey).toBe("119-1-us_house-100");
+    // "{session}-{chamber}-{voteId}" — summarize() reads chamber from index 1.
+    expect(rc.voteKey.split("-")[1]).toBe("us_house");
+    expect(rc.voteKey).toBe("119-us_house-1-100");
     expect(rc.measure).toBe("HCONRES 14");
     expect(rc.billNumber).toBe("HCONRES 14");
     expect(rc.voteQuestion).toBe("On Motion to Concur in the Senate Amendment");

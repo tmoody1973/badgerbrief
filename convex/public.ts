@@ -132,10 +132,10 @@ export const getCandidateBySlug = query({
       candidateSlug: slug,
     })) as {
       total: number;
-      byPosition: { aye: number; nay: number; not_voting: number };
+      byPosition: { aye: number; nay: number; present: number; not_voting: number };
       participationRate: number;
       sessions: { session: string; count: number }[];
-      chamber: "assembly" | "senate";
+      chamber: "assembly" | "senate" | "us_house";
     } | null;
 
     return {

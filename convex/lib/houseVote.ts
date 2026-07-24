@@ -283,7 +283,10 @@ export function parseHouseVote(
   if (duplicate) return { error: `duplicate bioguideID: ${duplicate}` };
 
   return {
-    voteKey: `${ref.congress}-${ref.session}-us_house-${ref.rollCallNumber}`,
+    // MUST stay "{session}-{chamber}-{voteId}": summarize() in lib/votingRecord
+    // reads the chamber out of split("-")[1] with no join, so putting the
+    // session number second would make every federal row read as chamber "1".
+    voteKey: `${ref.congress}-us_house-${ref.session}-${ref.rollCallNumber}`,
     congress: ref.congress,
     session: ref.session,
     rollCallNumber: ref.rollCallNumber,

@@ -9,17 +9,21 @@ type SessionCount = { session: string; count: number };
 type PageRow = {
   billNumber: string; billTitle: string; voteType: string; votedOn: string;
   chamber: string; session: string;
-  position: "aye" | "nay" | "not_voting";
+  position: "aye" | "nay" | "present" | "not_voting";
   ayes: number; nays: number; sourceUrl: string; otherVotesOnBill: number;
   billUrl: string; summary: string | null;
 };
 
+// "Present" only occurs in the U.S. House and is NOT the same as not voting:
+// the member was there and declined to take a side.
 const POSITION_LABEL: Record<PageRow["position"], string> = {
-  aye: "Voted yes", nay: "Voted no", not_voting: "Did not vote",
+  aye: "Voted yes", nay: "Voted no",
+  present: "Voted present", not_voting: "Did not vote",
 };
 const FILTERS: { key: PageRow["position"] | null; label: string }[] = [
   { key: null, label: "All" }, { key: "aye", label: "Yes" },
-  { key: "nay", label: "No" }, { key: "not_voting", label: "Didn't vote" },
+  { key: "nay", label: "No" }, { key: "present", label: "Present" },
+  { key: "not_voting", label: "Didn't vote" },
 ];
 const STEP = 25;
 const nf = new Intl.NumberFormat("en-US");

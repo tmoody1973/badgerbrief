@@ -117,4 +117,25 @@ crons.weekly(
   {},
 );
 
+// Sundays 13:00 UTC — after the state roll-call pass. Already-stored roll calls
+// are skipped, so a weekly run costs one list call per session when the House
+// hasn't voted. Every stored vote is cross-checked against the House Clerk's XML
+// before it lands (MOO-396).
+crons.weekly(
+  "ingest House roll calls",
+  { dayOfWeek: "sunday", hourUTC: 13, minuteUTC: 0 },
+  internal.houseVotes.ingest,
+  {},
+);
+
+// Sundays 13:30 UTC — the vote endpoints carry no bill title at all, so titles
+// come from a second pass over the bill endpoint. Cached per bill, so this is
+// cheap once the backfill has run.
+crons.weekly(
+  "enrich House bill titles",
+  { dayOfWeek: "sunday", hourUTC: 13, minuteUTC: 30 },
+  internal.houseVotes.enrichBillTitles,
+  {},
+);
+
 export default crons;

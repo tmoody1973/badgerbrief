@@ -135,7 +135,7 @@ const getCoverage = createTool({
 
 const getVotingRecord = createTool({
   description:
-    'How a candidate who serves or served in the Wisconsin Legislature voted. Pass candidateSlug (e.g. "francesca-hong") and an optional query matching a bill number ("AB 388") or words from its official title ("child care"). Returns the deciding vote first, the candidate\'s position, the tally, and the official roll-call link. Wisconsin Legislature only — not Congress. Read-only.',
+    'How a candidate who serves or served in the Wisconsin Legislature OR the U.S. House voted. Pass candidateSlug (e.g. "francesca-hong", "tom-tiffany") and an optional query matching a bill number ("AB 388", "HR 276") or words from its official title ("child care"). Returns the deciding vote first, the candidate\'s position, the tally, and the official roll-call link; the chamber field says which body. Works the same either way — you do not need to know whether they served in Madison or Washington. Read-only.',
   inputSchema: z.object({
     candidateSlug: z.string().describe('Candidate slug such as "francesca-hong"'),
     query: z.string().optional().describe('Bill number or words from its official title'),
@@ -147,7 +147,7 @@ const getVotingRecord = createTool({
         ...(query ? { query } : {}),
       });
       if (rows.length === 0) {
-        return `No voting record for "${candidateSlug}" matching that. BadgerBrief covers Wisconsin Legislature floor votes from the 2023 and 2025 sessions only — say so plainly rather than guessing, and note we don't cover Congress.`;
+        return `No voting record for "${candidateSlug}" matching that. BadgerBrief covers Wisconsin Legislature floor votes (2011-2019, 2023, 2025 sessions) and U.S. House roll calls for the 119th Congress; federal coverage includes only votes tied to a bill or resolution. Say so plainly rather than guessing.`;
       }
       return JSON.stringify(rows.slice(0, 8));
     }),
