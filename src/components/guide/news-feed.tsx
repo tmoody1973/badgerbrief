@@ -161,7 +161,7 @@ export function NewsFeed({
           <article className="press mt-6 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
             <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-primary">Most recent</p>
             <div className="mt-3">
-              <ArticleThumb src={lead.article.imageUrl} size="lead" />
+              <ArticleThumb src={lead.article.imageUrl} size="lead" outlet={lead.article.outlet} />
             </div>
             <h2 className="font-display mt-3 text-[clamp(1.5rem,5.5vw,2.25rem)] leading-[1.1]">
               <Headline row={lead} className="min-w-0" />
@@ -179,8 +179,8 @@ export function NewsFeed({
                   key={row.article._id}
                   className="press border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]"
                 >
-                  <ArticleThumb src={row.article.imageUrl} size="secondary" />
-                  <h3 className={`${row.article.imageUrl ? "mt-3" : ""} text-lg font-bold leading-snug`}>
+                  <ArticleThumb src={row.article.imageUrl} size="secondary" outlet={row.article.outlet} />
+                  <h3 className="mt-3 text-lg font-bold leading-snug">
                     <Headline row={row} className="min-w-0" />
                   </h3>
                   <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -205,7 +205,7 @@ export function NewsFeed({
                     key={row.article._id}
                     className={`flex gap-3 px-4 py-3 ${i > 0 ? "border-t-2 border-dashed border-border" : ""}`}
                   >
-                    <ArticleThumb src={row.article.imageUrl} size="river" />
+                    <ArticleThumb src={row.article.imageUrl} size="river" outlet={row.article.outlet} />
                     <div className="min-w-0 flex-1">
                       <h3 className="font-bold leading-snug">
                         <Headline row={row} className="min-w-0" />

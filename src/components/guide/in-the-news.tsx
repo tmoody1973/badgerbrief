@@ -18,7 +18,7 @@ export function InTheNews({ items, heading }: { items: Row[]; heading: string })
       <ul className="mt-3 space-y-3">
         {items.map(({ article, outlet }) => (
           <li key={article._id} className="flex gap-3 border-2 border-border bg-card p-3">
-            <ArticleThumb src={article.imageUrl} />
+            <ArticleThumb src={article.imageUrl} outlet={article.outlet} />
             <div className="min-w-0 flex-1">
               <a href={article.url} target="_blank" rel="noopener noreferrer" className="font-bold underline">
                 {article.headline}&nbsp;↗

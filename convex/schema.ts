@@ -424,6 +424,12 @@ export default defineSchema({
     candidateSlug: v.optional(v.string()), // optional: race-level / statewide coverage
     raceId: v.optional(v.string()),
     url: v.string(),
+    // canonicalArticleKey(url) — the article's identity across URL rewrites.
+    // Gannett properties (jsonline.com et al) keep a stable numeric asset id and
+    // rewrite the slug and section path around it, so exact-url dedup let the
+    // same story onto /news twice. Optional so the schema push accepts
+    // pre-migration rows; backfillArticleUrlKeys makes it always-present.
+    urlKey: v.optional(v.string()),
     outlet: v.string(),
     outletKey: v.optional(v.string()),     // normalizeOutletKey(outlet) → outlets.key
     sourceKind: v.optional(
@@ -449,6 +455,7 @@ export default defineSchema({
     traceId: v.optional(v.string()),
   })
     .index("by_url", ["url"])
+    .index("by_urlKey", ["urlKey"])
     .index("by_status", ["status"])
     .index("by_candidate", ["candidateSlug"])
     .index("by_race", ["raceId"])

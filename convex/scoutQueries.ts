@@ -6,6 +6,7 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
 import { canonicalOutletName } from "./lib/outlets";
+import { canonicalArticleKey } from "./lib/articleUrl";
 
 /** Bare hostname for the outlet's `domain` field; undefined if unparseable. */
 const hostOf = (url: string): string | undefined => {
@@ -88,12 +89,25 @@ export const knownSourceUrls = internalQuery({
   handler: async (ctx, { urls }) => {
     const known = new Set<string>();
 
+    // Matched on the canonical key, not the raw url: jsonline.com serves the
+    // same story under several slugs and section paths, and exact-string
+    // matching let both onto /news as separate articles.
     for (const url of urls) {
+      const key = canonicalArticleKey(url);
       const existing = await ctx.db
+        .query("article_sources")
+        .withIndex("by_urlKey", (q) => q.eq("urlKey", key))
+        .first();
+      if (existing) {
+        known.add(url);
+        continue;
+      }
+      // Rows written before urlKey existed still only match on the raw url.
+      const legacy = await ctx.db
         .query("article_sources")
         .withIndex("by_url", (q) => q.eq("url", url))
         .first();
-      if (existing) known.add(url);
+      if (legacy) known.add(url);
     }
 
     const candidates = await ctx.db.query("candidates").collect();
@@ -141,6 +155,9 @@ export const insertProposed = internalMutation({
     for (const row of rows) {
       await ctx.db.insert("article_sources", {
         ...row,
+        // Identity that survives a publisher rewriting the slug around a stable
+        // asset id — see lib/articleUrl.ts for the two real /news duplicates.
+        urlKey: canonicalArticleKey(row.url),
         status: "proposed",
         proposedAt,
         traceId,
@@ -172,5 +189,52 @@ export const insertProposed = internalMutation({
     }
 
     return rows.length;
+  },
+});
+
+/**
+ * Backfill `urlKey` and remove articles that are the same story twice.
+ *
+ * Two jsonline.com stories reached /news as duplicate rows because the
+ * publisher rewrote the slug and section path around a stable asset id, and
+ * dedup keyed on the raw url. This fills the canonical key for existing rows
+ * and drops the later copy of any collision.
+ *
+ * Keeps the EARLIEST row: it is the one whose id may already be referenced by
+ * a candidate or race page, and its outlet enrichment has had longer to land.
+ * Paginated — a single mutation may not read+write more than 4096 documents.
+ *
+ * RUN IT TWICE. The twin lookup goes through the by_urlKey index, so it can
+ * only see rows that already carry a key. On a first run over unkeyed data most
+ * rows are keyed only after their twin has been examined, and the pass reports
+ * `deleted: 0` — which reads like "no duplicates" rather than "not yet
+ * comparable". The second pass, with every key present, is the one that
+ * collapses them (observed: 291 keyed / 0 deleted, then 0 keyed / 7 deleted).
+ */
+export const backfillArticleUrlKeys = internalMutation({
+  args: { cursor: v.optional(v.union(v.string(), v.null())), numItems: v.optional(v.number()) },
+  handler: async (ctx, { cursor = null, numItems = 500 }) => {
+    const page = await ctx.db.query("article_sources").paginate({ cursor, numItems });
+    let keyed = 0;
+    let deleted = 0;
+    for (const row of page.page) {
+      const key = canonicalArticleKey(row.url);
+      if (row.urlKey !== key) {
+        await ctx.db.patch(row._id, { urlKey: key });
+        keyed++;
+      }
+      const twins = await ctx.db
+        .query("article_sources")
+        .withIndex("by_urlKey", (q) => q.eq("urlKey", key))
+        .collect();
+      for (const t of twins) {
+        // Strictly later rows only, so the comparison can never delete both.
+        if (t._id !== row._id && t._creationTime > row._creationTime) {
+          await ctx.db.delete(t._id);
+          deleted++;
+        }
+      }
+    }
+    return { keyed, deleted, continueCursor: page.continueCursor, isDone: page.isDone };
   },
 });
