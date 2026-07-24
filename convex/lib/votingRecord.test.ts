@@ -40,6 +40,21 @@ describe("matchesQuery", () => {
     expect(matchesQuery("CHILD CARE LOANS", "AB 388", "AB 3")).toBe(false);
     expect(matchesQuery("CHILD CARE LOANS", "AB 388", "AB 388")).toBe(true);
   });
+
+  test("a measure designation does NOT fall through to word matching", () => {
+    // The words of "H CON RES 14" are h/con/res/14, and those fragments match
+    // unrelated bills — "h" alone hits the "H.R." in another bill's title. On
+    // prod this turned a precise lookup into 17 hits led by the wrong measure.
+    const other = "Providing for consideration of the Senate amendment to the bill (H.R. 1)";
+    expect(matchesQuery(other, "HRES 566", "H CON RES 14")).toBe(false);
+    expect(matchesQuery("Establishing the budget", "HCONRES 14", "H CON RES 14")).toBe(true);
+  });
+
+  test("an ordinary phrase ending in a number is still matched by words", () => {
+    // "child care 388" looks like letters-then-digits but CHILDCARE is not a
+    // measure type, so it must be judged by words, not by an exact-number rule.
+    expect(matchesQuery("CHILD CARE CENTER LOANS", "AB 388", "child care 388")).toBe(true);
+  });
 });
 
 describe("summarize", () => {

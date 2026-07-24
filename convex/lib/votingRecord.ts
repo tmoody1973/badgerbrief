@@ -15,8 +15,6 @@ export type RecordChamber = "assembly" | "senate" | "us_house";
  * CENTER RENOVATIONS LOAN PROGRAM", so every word must appear (any order),
  * each boundary-anchored so "aid" cannot match inside "paid".
  */
-/** A query that is nothing but a measure designation: "AB 388", "H CON RES 14". */
-const BILL_NUMBER_QUERY = /^[A-Za-z][A-Za-z\s.]*\d+$/;
 const squash = (s: string) => s.toLowerCase().replace(/[\s.]+/g, "");
 
 /**
@@ -48,19 +46,38 @@ const measureWords = (billNumber: string): string => {
   return MEASURE_WORDS[prefix] ?? "";
 };
 
+/**
+ * A query that is ONLY a measure designation, e.g. "AB 388" or "H CON RES 14".
+ *
+ * The letters must squash to a designation we actually know. A looser shape
+ * test ("letters then digits") also swallows ordinary phrases like "child care
+ * 388", which would then be judged by an exact-number rule instead of by words.
+ */
+function measureDesignation(query: string): string | null {
+  const m = query.trim().match(/^([A-Za-z][A-Za-z\s.]*?)\s*(\d+)$/);
+  if (!m) return null;
+  const type = squash(m[1]).toUpperCase();
+  return type in MEASURE_WORDS ? `${type}${m[2]}` : null;
+}
+
 export function matchesQuery(billTitle: string, billNumber: string, query: string): boolean {
   const trimmed = query.trim();
   const words = trimmed.toLowerCase().split(/\s+/).filter(Boolean);
   if (words.length === 0) return true;
 
-  // Federal measures are printed with spaces inside the designation — the House
-  // Clerk writes "H CON RES 14" — while we store the squashed "HCONRES 14".
-  // Word matching then fails on the form a reader is most likely to type, and
-  // the vote silently looks absent. Compared as an EQUALITY of squashed forms,
-  // not a substring, so "AB 3" still does not match AB 388.
-  if (BILL_NUMBER_QUERY.test(trimmed) && squash(trimmed) === squash(billNumber)) {
-    return true;
-  }
+  // Asking for a specific measure means that measure ONLY.
+  //
+  // Federal designations are printed with spaces — the House Clerk writes
+  // "H CON RES 14" — while we store the squashed "HCONRES 14", so word matching
+  // missed the form a reader is most likely to type and the vote looked absent.
+  //
+  // This returns decisively either way rather than falling through: the words of
+  // "H CON RES 14" are h/con/res/14, which word-match unrelated bills through
+  // fragments like the "h" in "H.R. 1" and turn a precise lookup into 17 hits
+  // led by the wrong measure. Equality, not substring, so "AB 3" never reaches
+  // AB 388.
+  const designation = measureDesignation(trimmed);
+  if (designation) return designation === squash(billNumber).toUpperCase();
 
   const haystack = `${billTitle} ${billNumber} ${measureWords(billNumber)}`.toLowerCase();
   return words.every((w) => {
