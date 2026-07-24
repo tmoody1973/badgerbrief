@@ -57,3 +57,19 @@ describe("sessionsWithVotes", () => {
     expect(await t.query(internal.billsQueries.sessionsWithVotes, {})).toEqual(["2015", "2013"]);
   });
 });
+
+describe("clearNullSummaryBills", () => {
+  test("deletes only the null-summary rows, leaving enriched ones", async () => {
+    const t = convexTest(schema, modules);
+    await t.mutation(internal.billsQueries.storeBill, { session: "2025", billNumber: "AB 1", billUrl: "http://u", summary: null });
+    await t.mutation(internal.billsQueries.storeBill, { session: "2013", billNumber: "AB 2", billUrl: "http://u", summary: "This bill…" });
+    const res = await t.mutation(internal.billsQueries.clearNullSummaryBills, {});
+    expect(res.deleted).toBe(1);
+    expect(res.isDone).toBe(true);
+    await t.run(async (ctx) => {
+      const rows = await ctx.db.query("bills").collect();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].summary).toBe("This bill…");
+    });
+  });
+});

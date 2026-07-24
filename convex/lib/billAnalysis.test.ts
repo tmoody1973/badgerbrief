@@ -44,4 +44,18 @@ describe("parseLrbFirstSentence", () => {
       '<div class="qs_anal_text_">This bill amends &sect;20.005 and &#167;19.20 of the statutes.  Next.</div>';
     expect(parseLrbFirstSentence(html)).toBe("This bill amends §20.005 and §19.20 of the statutes.");
   });
+
+  test("reads the 2025+ format: class 'qsanal_text', span-wrapped, first div is the first sentence", () => {
+    // 2025 pages drop the underscores, wrap text in <span class="qstr">, and put
+    // each paragraph in its own div — so the FIRST qsanal_text div is the first
+    // sentence. (Real markup from 2025 AB 996.)
+    const html =
+      '<div class="qsanal_text" style="font-size:11pt" data-path="/2025/related/proposals/ab996/_12">' +
+      '<span class="qstr" style="line-height: 1.20">This bill requires the Department of Financial Institutions to make contributions to certain Trump accounts.</span>' +
+      "</div>" +
+      '<div class="qsanal_text"><span class="qstr">A second paragraph that must not be included.</span></div>';
+    expect(parseLrbFirstSentence(html)).toBe(
+      "This bill requires the Department of Financial Institutions to make contributions to certain Trump accounts.",
+    );
+  });
 });

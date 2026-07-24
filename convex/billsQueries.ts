@@ -7,6 +7,36 @@ import { internalMutation, internalQuery } from "./_generated/server";
 
 const CHAMBERS = ["assembly", "senate"] as const;
 
+/**
+ * Delete every bills row whose summary is null so the enrich action re-fetches
+ * it. A null can mean "the bill genuinely has no analysis" OR "we failed to
+ * parse the analysis" (e.g. a page-format the parser didn't yet handle), and
+ * the two are indistinguishable without re-fetching — so after a parser fix,
+ * clear the nulls and re-run enrich: genuinely-empty bills re-store null,
+ * newly-parseable ones get their sentence. Paginated for the 4096-doc limit;
+ * the caller drives the cursor until isDone.
+ */
+export const clearNullSummaryBills = internalMutation({
+  args: {
+    cursor: v.optional(v.union(v.string(), v.null())),
+    numItems: v.optional(v.number()),
+  },
+  handler: async (
+    ctx,
+    { cursor = null, numItems = 1000 },
+  ): Promise<{ deleted: number; continueCursor: string; isDone: boolean }> => {
+    const page = await ctx.db.query("bills").paginate({ cursor, numItems });
+    let deleted = 0;
+    for (const b of page.page) {
+      if (b.summary === null) {
+        await ctx.db.delete(b._id);
+        deleted++;
+      }
+    }
+    return { deleted, continueCursor: page.continueCursor, isDone: page.isDone };
+  },
+});
+
 /** Upsert one bill's analysis by (session, billNumber). */
 export const storeBill = internalMutation({
   args: {
