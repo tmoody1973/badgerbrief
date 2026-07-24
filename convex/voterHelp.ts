@@ -84,7 +84,7 @@ const getMyBallot = createTool({
       if (ballot.districts === null) {
         return JSON.stringify({
           districts: null,
-          saidPlainly:
+          mustTellUser:
             "No saved address for this user, so no personalized ballot exists yet. " +
             "Say plainly that they need to save their address on the Brief page " +
             "(/brief) to see their own races, THEN offer the official link below. " +
@@ -107,7 +107,25 @@ const getRaceInfo = createTool({
     withToolSpan("getRaceInfo", ctx.threadId, { raceId }, async () => {
       const data = await ctx.runQuery(api.public.getRace, { raceId });
       if (!data) return `No race found with id "${raceId}" — disclose this and hand off the official link.`;
-      return JSON.stringify({ race: data.race, candidates: data.candidates, positions: data.positions, finance: data.finance });
+      // The governor field is 18 people, most of whom withdrew or never filed.
+      // Handed a flat list, the model summarised "who's running" down to the
+      // active ones and silently dropped the rest — accurate-sounding but
+      // incomplete, and the reader cannot tell anyone is missing. Splitting the
+      // list makes both groups reportable, and makes ballot status the thing
+      // that distinguishes them rather than a status string buried per-row.
+      const onBallot = data.candidates.filter((c) => (c.status ?? "Active") === "Active");
+      const notOnBallot = data.candidates.filter((c) => (c.status ?? "Active") !== "Active");
+      return JSON.stringify({
+        race: data.race,
+        onBallot,
+        notOnBallot,
+        ballotNote:
+          notOnBallot.length > 0
+            ? `${onBallot.length} candidates are on the primary ballot; ${notOnBallot.length} withdrew or did not file. Name the on-ballot candidates, and say that the others are not on the ballot rather than omitting them.`
+            : undefined,
+        positions: data.positions,
+        finance: data.finance,
+      });
     }),
 });
 
@@ -178,13 +196,39 @@ const getVotingRecord = createTool({
 
 const handoffOfficialLink = createTool({
   description:
-    "The canonical official link for a voting action (register, absentee, pollingPlace, myBallot, voterId, electionsCommission, general). Use for every procedural handoff and whenever you lack data — never invent a URL.",
+    'The canonical official link for a voting action (register, absentee, pollingPlace, myBallot, voterId, electionsCommission, general). Use for every procedural handoff and whenever you lack data — never invent a URL. Pass reason: "no_data" when handing off BECAUSE BadgerBrief does not cover something, so the answer says so.',
   inputSchema: z.object({
     topic: z.enum(OFFICIAL_LINK_TOPICS as [OfficialLinkTopic, ...OfficialLinkTopic[]]),
+    // A handoff means one of two different things and the answer must read
+    // differently for each. Handing off a link ALONE reads as "here is where to
+    // do this" — which is right for a procedural step and wrong for an
+    // out-of-scope question, where the user is left thinking BadgerBrief simply
+    // did not bother. Observed on "who's running for mayor of Green Bay?": the
+    // model returned the WEC link and never said the guide does not cover
+    // municipal races.
+    reason: z
+      .enum(["procedural", "no_data"])
+      .optional()
+      .describe('"no_data" when BadgerBrief does not cover what was asked'),
   }),
-  execute: async (ctx, { topic }): Promise<string> =>
-    withToolSpan("handoffOfficialLink", ctx.threadId, { topic }, async () => {
-      return JSON.stringify(OFFICIAL_LINKS[topic]);
+  execute: async (ctx, { topic, reason }): Promise<string> =>
+    withToolSpan("handoffOfficialLink", ctx.threadId, { topic, reason }, async () => {
+      // The reminder is UNCONDITIONAL, and conditionally worded, because gating
+      // it on `reason` made the fix depend on the model choosing to set an
+      // optional parameter — which it did roughly a third of the time, so the
+      // disclosure came and went exactly as before. Returning it every time and
+      // letting the wording decide when it applies removes that coin flip.
+      // Harmless on a procedural handoff, where the "if" simply is not met.
+      return JSON.stringify({
+        ...OFFICIAL_LINKS[topic],
+        ifYouLackTheData:
+          "IF you are handing this off because BadgerBrief does not have or does " +
+          "not cover what was asked (county or municipal races, or any race " +
+          "outside the 2026 statewide, congressional and legislative primary), " +
+          "say that plainly BEFORE the link. A bare link reads as an answer and " +
+          "leaves the user thinking the guide simply did not look. If instead " +
+          "this is a normal procedural handoff, ignore this note.",
+      });
     }),
 });
 
