@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { NewsFeed } from "@/components/guide/news-feed";
 import { getHubArticles, listRaces } from "@/lib/data";
+import { JsonLd, newsCollectionNode, organizationNode } from "@/lib/jsonld";
 
 export const revalidate = 300;
 export const metadata: Metadata = {
@@ -28,6 +29,19 @@ export default async function NewsPage() {
     : "";
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10 lg:max-w-5xl">
+      <JsonLd
+        nodes={[
+          organizationNode(),
+          newsCollectionNode(
+            items.map((r) => ({
+              headline: r.article.headline,
+              url: r.article.url,
+              outlet: r.article.outlet,
+              publishedAt: r.article.publishedAtVerified ? r.article.publishedAt : undefined,
+            })),
+          ),
+        ]}
+      />
       {/* Masthead + dateline. Counts are real — never a rounded-up claim. */}
       <header className="border-b-2 border-border pb-3">
         <h1 className="font-display text-[clamp(1.75rem,7vw,3rem)] leading-none">Election news</h1>

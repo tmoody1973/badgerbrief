@@ -92,3 +92,44 @@ export function JsonLd({ nodes }: { nodes: JsonLdNode[] }) {
     />
   );
 }
+
+/**
+ * The /news hub as a CollectionPage wrapping an ItemList of the coverage we
+ * track. Every other template already carried structured data while the
+ * freshest, most-crawled page on the site carried none.
+ *
+ * Each item points at the PUBLISHER's url, not ours: BadgerBrief indexes other
+ * outlets' reporting and does not host it, so claiming these as our own
+ * articles would misattribute someone else's work. `isBasedOn` + a named
+ * publisher keeps the attribution explicit, which is also what an answer engine
+ * needs to cite the right outlet rather than us.
+ */
+export function newsCollectionNode(
+  items: { headline: string; url: string; outlet: string; publishedAt?: string }[],
+): JsonLdNode {
+  return {
+    "@type": "CollectionPage",
+    "@id": `${SITE_URL}/news#collection`,
+    name: "Wisconsin 2026 election news",
+    url: `${SITE_URL}/news`,
+    isPartOf: { "@id": `${SITE_URL}/#org` },
+    description:
+      "Tracked coverage of Wisconsin's 2026 races from named outlets, with source transparency on every publisher.",
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: items.length,
+      itemListElement: items.map((a, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: a.url,
+        item: {
+          "@type": "NewsArticle",
+          headline: a.headline,
+          url: a.url,
+          ...(a.publishedAt ? { datePublished: a.publishedAt } : {}),
+          publisher: { "@type": "Organization", name: a.outlet },
+        },
+      })),
+    },
+  };
+}

@@ -44,10 +44,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await getCandidateBySlug(slug);
   if (!data) return {};
+  const { candidate, race } = data;
+  const office = race?.office ?? "Wisconsin 2026";
+  const title = `${candidate.name} — ${office}`;
+
+  // Describe what this page ACTUALLY holds. The old text promised
+  // "background, priorities, and sourced positions" on every candidate,
+  // including the ~220 newly imported ones that have none of those — a
+  // description that oversells is both a duplicate-content signal and a
+  // promise the click does not keep.
+  const has = [
+    data.positions?.length ? "published positions" : null,
+    data.votingRecordSummary?.total ? "voting record" : null,
+    data.finance?.length ? "campaign finance" : null,
+    data.quotes?.length ? "quotes" : null,
+  ].filter(Boolean) as string[];
+
+  const who = `${candidate.name}${candidate.party ? ` (${candidate.party})` : ""}`;
+  const ballot = candidate.incumbent ? ", the incumbent," : "";
+  const description = has.length
+    ? `${who}${ballot} is running for ${office} in Wisconsin's August 11, 2026 primary. ${
+        has.slice(0, 3).join(", ").replace(/, ([^,]*)$/, " and $1")
+      }, every claim linked to its source.`
+    : `${who}${ballot} is on the ballot for ${office} in Wisconsin's August 11, 2026 primary. Candidate details from the Wisconsin Elections Commission.`;
+
   return {
-    title: `${data.candidate.name} — ${data.race?.office ?? "Wisconsin 2026"}`,
-    description: `${data.candidate.name}${data.candidate.party ? ` (${data.candidate.party})` : ""}: background, priorities, and sourced positions in the 2026 ${data.race?.office ?? "Wisconsin"} race.`,
+    title,
+    description,
     alternates: { canonical: `/candidates/${slug}` },
+    openGraph: { title, description, url: `/candidates/${slug}`, type: "profile" },
   };
 }
 

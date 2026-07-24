@@ -5,10 +5,17 @@ import { SITE_URL, raceIdToSlug } from "@/lib/site";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [races, candidateSlugs] = await Promise.all([
+  const [allRaces, candidateSlugs] = await Promise.all([
     listRaces(),
     listCandidateSlugs(),
   ]);
+
+  // The chamber-wide legislative races were superseded by one race per
+  // district and now 301 to the homepage (see next.config.ts). A sitemap must
+  // list canonical, indexable URLs only — advertising a redirect wastes crawl
+  // budget and re-asserts a page we deliberately retired.
+  const SUPERSEDED = new Set(["WI-STATE-SENATE-2026", "WI-STATE-ASSEMBLY-2026"]);
+  const races = allRaces.filter((r) => !SUPERSEDED.has(r.raceId));
   return [
     { url: SITE_URL, changeFrequency: "daily", priority: 1 },
     { url: `${SITE_URL}/vote`, changeFrequency: "weekly", priority: 0.9 },

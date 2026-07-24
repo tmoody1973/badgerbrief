@@ -78,6 +78,23 @@ if (remotePatterns.length > MAX_REMOTE_PATTERNS) {
 
 const nextConfig: NextConfig = {
   images: { remotePatterns },
+  /**
+   * The Legislature used to be two chamber-wide races whose districts lived in
+   * an opaque blob. They are now one race per district, and the old pair was
+   * dropped from the homepage — which left two indexed URLs with no inbound
+   * links, competing with the 116 real district pages for the same query.
+   *
+   * Permanent, not temporary: the split is not being reverted, and a 301 hands
+   * the accumulated signal to the pages that replaced them instead of stranding
+   * it. Redirecting home rather than 404ing keeps anything already indexed or
+   * linked working, and the homepage carries the district browser.
+   */
+  async redirects() {
+    return [
+      { source: "/races/wi-state-senate-2026", destination: "/", permanent: true },
+      { source: "/races/wi-state-assembly-2026", destination: "/", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -44,10 +44,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await getRace(slugToRaceId(slug));
   if (!data) return {};
+  // "Wisconsin State Assembly — District 1" already says Wisconsin; appending
+  // "Wisconsin 2026" made a 68-character title that said it three times and
+  // truncated in results. The layout appends the brand, so the page supplies
+  // only what distinguishes it.
+  const office = data.race.office;
+  const title = /wisconsin/i.test(office) ? `${office} — 2026` : `${office} — Wisconsin 2026`;
+
+  // A description differentiated by the thing a voter is actually searching
+  // for: who is on THIS ballot. 116 district pages sharing one template
+  // sentence read as duplicates and tell the reader nothing. "Race ratings"
+  // was also simply untrue for district races, which carry none.
+  const onBallot = data.candidates.filter((c) => isOnBallot(c.status));
+  const incumbent = onBallot.find((c) => c.incumbent);
+  const named = onBallot
+    .slice(0, 3)
+    .map((c) => (c.party ? `${c.name} (${c.party[0]})` : c.name))
+    .join(", ");
+  const description = onBallot.length
+    ? `${named}${onBallot.length > 3 ? ` and ${onBallot.length - 3} more` : ""} ${
+        onBallot.length === 1 ? "is" : "are"
+      } on the August 11, 2026 primary ballot for ${office}.${
+        incumbent ? ` ${incumbent.name} is the incumbent.` : " Open seat."
+      }`
+    : `Candidates, campaign finance and sourced coverage for ${office} in the August 11, 2026 Wisconsin primary.`;
+
   return {
-    title: `${data.race.office} — Wisconsin 2026`,
-    description: `Who is running for ${data.race.office} in 2026: ${data.candidates.length} candidates, race ratings, and sourced backgrounds.`,
+    title,
+    description,
     alternates: { canonical: `/races/${slug}` },
+    openGraph: { title, description, url: `/races/${slug}`, type: "profile" },
   };
 }
 
