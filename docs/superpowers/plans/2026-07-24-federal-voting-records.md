@@ -44,8 +44,21 @@ Verified on 119/1/100 (H CON RES 14): 433 rows, 433 unique Bioguide IDs, summed 
 6. **No seat-count check is possible.** The state gate asserts `rows + vacantSeats == SEATS[chamber]`. The
    House has 435 seats but the API declares no vacancies, and mid-term vacancies are routine. That check has
    no federal equivalent and must not be faked with a hardcoded 435.
-7. **Rate limit.** api.data.gov default is 1,000 requests/hour. A full 119th backfill is ~630 votes × 2 calls
-   ≈ 1,260 requests, so the backfill spans two rate-limit windows and the ingest must handle 429 with backoff.
+7. ~~**Rate limit.**~~ **Resolved.** The issued key allows 20,000 requests/hour, far above a full backfill.
+   No backoff or windowing needed.
+8. **Amendment votes carry no `legislationType`/`legislationNumber` at list level** — only `amendmentType`,
+   `amendmentNumber`, `amendmentAuthor`. The detail/members levels DO name the underlying bill, so the
+   parser records both: `measure` is what was voted on ("HAMDT 97"), `billNumber` is what a reader
+   recognises ("HR 3838"). Collapsing them either loses the amendment or mislabels the vote.
+9. **Two non-legislative vote shapes exist and must be refused** (found by running the live ingest, not by
+   reading docs — the documentation claims such votes are simply absent):
+   - *"Call by States"* (119/1/1) — an opening quorum call naming no legislation.
+   - *"Election of the Speaker"* (119/1/2) — `votePartyTotal` carries `{candidate, total}` rows instead of
+     party yea/nay rows, because members vote for a **person**. There is no yes/no position to record.
+     Coercing it into aye/nay would be fabrication; the gate refuses it.
+10. **~9 seconds per vote** (detail + members + Clerk XML, sequential; the XML alone is 83KB). A 357-vote
+    session exceeds the Convex action time limit, so the backfill must be driven in batches from the client
+    with `limit`. The weekly cron is fine — it only ever sees a handful of new votes.
 
 ### The free upgrade over the state feature
 
@@ -108,13 +121,18 @@ mapping is deliberately **not** carried over (per the ticket).
 
 ---
 
-## 4. Open item for Tarik
+## 4. Operations
 
-`CONGRESS_GOV_API_KEY` must be obtained at <https://api.congress.gov/sign-up/> (instant) and set:
+The key is `CONGRESS_API_KEY` (Tarik's naming), in `.env.local` and set on prod Convex.
 
 ```bash
-npx convex env set --prod CONGRESS_GOV_API_KEY <key>
+# Backfill must be batched — a full session exceeds the action time limit.
+npx convex run --prod houseVotes:ingest '{"congress":119,"sessions":[1],"limit":40}'   # repeat until deferred=0
+npx convex run --prod houseVotes:enrichBillTitles '{"congress":119}'
+
+# Seed IDs BEFORE ingesting — a late id attaches nothing (see script header).
+node scripts/seed-bioguide-ids.mjs --prod
 ```
 
-`DEMO_KEY` unblocks fixture capture and all of tasks 1–5, but its rate limit is far too low for the ~1,260
-request backfill. Tasks 1–5 proceed now; task 6's live backfill waits on the real key.
+`skipCrossCheck: true` exists for diagnosis only. Never use it for a real backfill: it disables the one
+check arithmetic cannot make.
