@@ -329,6 +329,27 @@ describe("votingRecord", () => {
   });
 });
 
+describe("votingRecordSummary", () => {
+  test("returns null for a candidate with no votes", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    expect(await t.query(api.votesQueries.votingRecordSummary, { candidateSlug: "francesca-hong" })).toBeNull();
+  });
+
+  test("totals, per-position and per-session counts reconcile", async () => {
+    const t = convexTest(schema, modules);
+    await seedCandidate(t);
+    await t.mutation(internal.votesQueries.storeRollCall, { rollCall: ROLL_CALL }); // 2023, HONG nay
+    const summary = await t.query(api.votesQueries.votingRecordSummary, { candidateSlug: "francesca-hong" });
+    expect(summary).toMatchObject({
+      total: 1,
+      byPosition: { aye: 0, nay: 1, not_voting: 0 },
+      chamber: "assembly",
+      sessions: [{ session: "2023", count: 1 }],
+    });
+  });
+});
+
 describe("legislator_votes.session", () => {
   test("storeRollCall records the session on the legislator_votes row", async () => {
     const t = convexTest(schema, modules);

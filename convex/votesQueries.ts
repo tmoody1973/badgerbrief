@@ -5,7 +5,7 @@
  */
 import { v } from "convex/values";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
-import { matchesQuery } from "./lib/votingRecord";
+import { matchesQuery, summarize, type VotingSummary } from "./lib/votingRecord";
 import { requireAdmin } from "./sponsors";
 
 const positionValidator = v.union(
@@ -143,6 +143,24 @@ export const setLegislatorName = mutation({
 const FINAL_VOTE_TYPES = ["PASSAGE", "CONCURRENCE", "ADOPTION"];
 const isFinal = (voteType: string) =>
   FINAL_VOTE_TYPES.some((t) => voteType.toUpperCase().includes(t));
+
+/**
+ * Aggregate for the summary tiles and the SectionNav count. Computed from the
+ * lightweight legislator_votes rows alone (session is the voteKey prefix), so
+ * the candidate page never ships the full vote list. Explicit return type works
+ * around the api-circularity TS quirk (same reason votingRecord annotates its).
+ */
+export const votingRecordSummary = query({
+  args: { candidateSlug: v.string() },
+  handler: async (ctx, { candidateSlug }): Promise<VotingSummary | null> => {
+    const rows = await ctx.db
+      .query("legislator_votes")
+      .withIndex("by_candidate", (q) => q.eq("candidateSlug", candidateSlug))
+      .collect();
+    if (rows.length === 0) return null;
+    return summarize(rows.map((r) => ({ voteKey: r.voteKey, position: r.position })));
+  },
+});
 
 export const votingRecord = query({
   args: { candidateSlug: v.string(), query: v.optional(v.string()) },
