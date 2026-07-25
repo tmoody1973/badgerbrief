@@ -1,6 +1,6 @@
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import schema from "./schema";
 
 const modules = import.meta.glob([
@@ -59,5 +59,15 @@ describe("upsertVoterAccess publish gate", () => {
     const rows = await t.run(async (ctx) => ctx.db.query("voter_access").collect());
     expect(rows).toHaveLength(1);
     expect(rows[0].summary).toBe("Updated.");
+  });
+});
+
+describe("getVoterAccess query", () => {
+  test("returns rows sorted by order", async () => {
+    const t = setup();
+    await t.mutation(internal.seed.upsertVoterAccess, { ...officialRow, key: "b", order: 2 });
+    await t.mutation(internal.seed.upsertVoterAccess, { ...officialRow, key: "a", order: 1 });
+    const rows = await t.query(api.public.getVoterAccess, {});
+    expect(rows.map((r) => r.key)).toEqual(["a", "b"]);
   });
 });

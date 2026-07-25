@@ -191,6 +191,14 @@ export const getVotingInfo = query({
   },
 });
 
+export const getVoterAccess = query({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("voter_access").collect();
+    return rows.sort((a, b) => a.order - b.order);
+  },
+});
+
 /** slug → name/race for all candidates — the /ads analytics turns attributed
  * ad candidateSlugs into readable names. */
 export const candidateDirectory = query({

@@ -52,6 +52,7 @@ export const getCandidateBySlug = cached("getCandidateBySlug", (slug: string) =>
 export const listCandidateSlugs = cached("listCandidateSlugs", () =>
   fetchQuery(api.public.listCandidateSlugs, {}));
 export const getVotingInfo = cached("getVotingInfo", () => fetchQuery(api.public.getVotingInfo, {}));
+export const getVoterAccess = cached("getVoterAccess", () => fetchQuery(api.public.getVoterAccess, {}));
 export const listAds = cached("listAds", () => fetchQuery(api.ads.listAds, {}));
 export const getAdMoneyForRace = cached("getAdMoneyForRace", (raceId: string) =>
   fetchQuery(api.adMoney.adMoneyForRace, { raceId }));
