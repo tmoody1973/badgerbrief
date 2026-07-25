@@ -6,11 +6,11 @@ export const homeEs: HomeDict = {
   meta: {
     title: "BadgerBrief — Guía Electoral de Wisconsin 2026",
     description:
-      "Guía electoral de Wisconsin no partidista y con fuentes verificables: tu papeleta, los candidatos, el dinero y cómo votar exactamente.",
+      "Guía electoral de Wisconsin no partidista y con fuentes verificables: su papeleta, los candidatos, el dinero y cómo votar exactamente.",
   },
   crumbs: { home: "Inicio" },
   stamp: "Wisconsin 2026",
-  h1: "Conoce tu papeleta antes de rellenarla.",
+  h1: "Conozca su papeleta antes de rellenarla.",
   introBeforeDate: "La primaria partidista de Wisconsin es el",
   introAfterDate:
     ". Esta es una guía no partidista y con fuentes verificables para cada contienda estatal y del Congreso en ella — quién se postula, qué dicen y exactamente cómo votar.",
@@ -27,6 +27,6 @@ export const homeEs: HomeDict = {
   races: {
     heading: "¿Qué contiendas hay en la papeleta de la primaria de Wisconsin de 2026?",
     countSuffix: " contiendas: cargos estatales, los ocho distritos de la Cámara de EE. UU., la corte suprema estatal y la legislatura.",
-    districtRacesSummary: (count) => `Encuentra las contiendas de tu distrito (${count})`,
+    districtRacesSummary: (count) => `Encuentre las contiendas de su distrito (${count})`,
   },
 };

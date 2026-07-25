@@ -13,7 +13,7 @@ export const aboutEs: AboutDict = {
   crumbs: { home: "Inicio", about: "Acerca de" },
   h1: "Acerca de BadgerBrief",
   intro:
-    "BadgerBrief es una guía independiente y no partidista de las elecciones de Wisconsin de 2026. Existe para responder una pregunta lo más claramente posible: quién está en tu papeleta y qué ha hecho realmente.",
+    "BadgerBrief es una guía independiente y no partidista de las elecciones de Wisconsin de 2026. Existe para responder una pregunta lo más claramente posible: quién está en su papeleta y qué ha hecho realmente.",
   reportMistake: "¿Ves un error? Repórtalo →",
   independent: {
     heading: "Independiente, y sin financiamiento",

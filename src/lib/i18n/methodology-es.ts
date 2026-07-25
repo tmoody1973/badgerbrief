@@ -54,7 +54,7 @@ export const methodologyEs: MethodologyDict = {
     corrections: {
       heading: "Correcciones",
       p1Before:
-        "¿Ves algo incorrecto? Cada dato del sitio enlaza a su fuente para que puedas verificarlo tú mismo — y si nos equivocamos, ",
+        "¿Ve algo incorrecto? Cada dato del sitio enlaza a su fuente para que pueda verificarlo usted mismo — y si nos equivocamos, ",
       reportLinkText: "repórtalo aquí",
       p1After: ". El formulario pregunta qué página y un enlace al registro, para poder verificarlo contra el original.",
       whatHappensLabel: "Qué pasa después.",
@@ -63,7 +63,7 @@ export const methodologyEs: MethodologyDict = {
       whyMattersLabel: "Por qué esto importa aquí.",
       whyMattersBody:
         " La mayor parte de este sitio se ensambla automáticamente. Cada votación nominal se concilia con los totales que el propio documento publica, lo cual detecta un error de conteo — pero la aritmética no puede detectar un documento que cuadra y aun así está equivocado. Ninguna persona revisa cada registro procesado antes de publicarse, así que los lectores son la última verificación, y los reportes se tratan en consecuencia.",
-      p2Before: "Si prefieres reportarlo públicamente, el código es de fuente abierta y puedes ",
+      p2Before: "Si prefiere reportarlo públicamente, el código es de fuente abierta y puede ",
       issueLinkText: "abrir un issue",
       p2After: ".",
     },
