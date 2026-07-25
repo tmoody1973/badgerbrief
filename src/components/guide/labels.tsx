@@ -63,14 +63,20 @@ export function StatusBadge({ status }: { status?: string }) {
   );
 }
 
-export function LastUpdated({ date }: { date: string }) {
+export function LastUpdated({
+  date,
+  prefix = "Last updated:",
+}: {
+  date: string;
+  prefix?: string;
+}) {
   const parsed = new Date(date);
   const iso = isNaN(parsed.getTime())
     ? undefined
     : parsed.toISOString().slice(0, 10);
   return (
     <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
-      Last updated: <time dateTime={iso}>{date}</time>
+      {prefix} <time dateTime={iso}>{date}</time>
     </p>
   );
 }

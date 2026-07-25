@@ -127,6 +127,7 @@ export function VoteGuide({
             month: "long",
             day: "numeric",
           })}
+          prefix={dict.lastUpdatedPrefix}
         />
       </div>
 
