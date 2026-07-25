@@ -61,11 +61,11 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col pb-16 sm:pb-0">
         <Providers>
           <StoreUser />
           <SiteHeader />
-          <div className="flex-1 pb-16 sm:pb-0">{children}</div>
+          <div className="flex-1">{children}</div>
           <SiteFooter />
           <BottomTabs />
         </Providers>

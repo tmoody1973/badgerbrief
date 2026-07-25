@@ -33,7 +33,7 @@ self.addEventListener("fetch", (event) => {
           }
           return res;
         })
-        .catch(() => caches.match(request).then((r) => r || caches.match("/vote").then((v) => v || caches.match("/offline")))),
+        .catch(() => caches.match(request).then((r) => r || caches.match("/offline"))),
     );
     return;
   }
