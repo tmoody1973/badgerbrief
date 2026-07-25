@@ -51,7 +51,7 @@ export const aboutEn: AboutDict = {
   crumbs: { home: "Home", about: "About" },
   h1: "About BadgerBrief",
   intro:
-    "BadgerBrief is an independent, non-partisan guide to Wisconsin's 2026 elections. It exists to answer one question as plainly as possible: who is on your ballot, and what have they actually done?",
+    "BadgerBrief is an independent, non-partisan guide to Wisconsin’s 2026 elections. It exists to answer one question as plainly as possible: who is on your ballot, and what have they actually done?",
   reportMistake: "See a mistake? Report an error →",
   independent: {
     heading: "Independent, and unfunded",
@@ -67,7 +67,7 @@ export const aboutEn: AboutDict = {
   facts: {
     heading: "How the facts get here",
     p1:
-      "Almost nothing here is typed in by hand. Ballots come from the Wisconsin Elections Commission's official candidate list — the names are printed exactly as a voter sees them in the booth. Voting records are parsed directly from the Legislature's own roll-call documents and the U.S. House Clerk's records, and every one is reconciled against the totals the document itself publishes before it is stored. Campaign finance comes from the Wisconsin Ethics Commission and the FEC.",
+      "Almost nothing here is typed in by hand. Ballots come from the Wisconsin Elections Commission’s official candidate list — the names are printed exactly as a voter sees them in the booth. Voting records are parsed directly from the Legislature’s own roll-call documents and the U.S. House Clerk’s records, and every one is reconciled against the totals the document itself publishes before it is stored. Campaign finance comes from the Wisconsin Ethics Commission and the FEC.",
     p2Before:
       "When a document cannot be reconciled, it is discarded rather than published — an incomplete record is worse than a missing one.",
     p2LinkText: "The full methodology",
@@ -82,7 +82,7 @@ export const aboutEn: AboutDict = {
     disclosureBody:
       " Tarik is Director of Strategy and Innovation at Radio Milwaukee, and an appointed commissioner of the Milwaukee City Plan Commission. Both are stated here on purpose. The Plan Commission is a city land-use body — it has no role in the state legislative, congressional, or statewide races this guide covers — and he has no involvement in any race on BadgerBrief. Every candidate is treated identically, by the same sourced method, with no endorsements. Neither role funds or directs this site.",
     p3:
-      "This is not a news organisation and does not claim to be one. It is one person's attempt to make public records legible, held to a simple rule: if a claim is on this site, its source is one click away, and if it turns out to be wrong, it gets corrected in public.",
+      "This is not a news organisation and does not claim to be one. It is one person’s attempt to make public records legible, held to a simple rule: if a claim is on this site, its source is one click away, and if it turns out to be wrong, it gets corrected in public.",
   },
   wrong: {
     heading: "If something is wrong",
