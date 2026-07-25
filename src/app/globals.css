@@ -3,6 +3,13 @@
 /* Class-based dark mode: next-themes toggles `.dark` on <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Native cross-document view transitions (MOO-399). Progressive: unsupported
+   browsers get instant navigation. Off when the user asks for reduced motion. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
 /* BadgerBrief Wisconsin civic palette — spec: docs/superpowers/specs/2026-07-17-badgerbrief-m1-design.md */
 :root {
   color-scheme: light;
