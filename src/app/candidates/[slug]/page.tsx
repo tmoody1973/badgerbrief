@@ -206,7 +206,7 @@ export default async function CandidatePage({ params }: Props) {
       </div>
 
       <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-        <div className="min-w-0 lg:col-span-8">
+        <div className="flex flex-col min-w-0 lg:col-span-8">
         {race && (
           <BallotContext
             candidateSlug={candidate.slug}
@@ -233,7 +233,7 @@ export default async function CandidatePage({ params }: Props) {
         )}
 
         {positions.length > 0 && (
-          <section id="positions" className="mt-6 scroll-mt-16">
+          <section id="positions" className="order-first mt-6 scroll-mt-16 sm:order-none">
             <h2 className="font-display text-xl">
               Where does {candidate.name} stand on the issues?
             </h2>
