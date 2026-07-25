@@ -26,6 +26,7 @@ import type * as feedback from "../feedback.js";
 import type * as finance from "../finance.js";
 import type * as helloAgent from "../helloAgent.js";
 import type * as houseVotes from "../houseVotes.js";
+import type * as indexNow from "../indexNow.js";
 import type * as interviewClips from "../interviewClips.js";
 import type * as lib_adMoney from "../lib/adMoney.js";
 import type * as lib_adsMatch from "../lib/adsMatch.js";
@@ -106,6 +107,7 @@ declare const fullApi: ApiFromModules<{
   finance: typeof finance;
   helloAgent: typeof helloAgent;
   houseVotes: typeof houseVotes;
+  indexNow: typeof indexNow;
   interviewClips: typeof interviewClips;
   "lib/adMoney": typeof lib_adMoney;
   "lib/adsMatch": typeof lib_adsMatch;
