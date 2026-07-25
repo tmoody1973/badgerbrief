@@ -14,7 +14,7 @@ export const aboutEs: AboutDict = {
   h1: "Acerca de BadgerBrief",
   intro:
     "BadgerBrief es una guía independiente y no partidista de las elecciones de Wisconsin de 2026. Existe para responder una pregunta lo más claramente posible: quién está en su papeleta y qué ha hecho realmente.",
-  reportMistake: "¿Ves un error? Repórtalo →",
+  reportMistake: "¿Ve un error? Repórtelo →",
   independent: {
     heading: "Independiente, y sin financiamiento",
     fundingLabel: "Financiamiento",
