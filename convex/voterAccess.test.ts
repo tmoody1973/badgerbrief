@@ -1,0 +1,53 @@
+import { convexTest } from "convex-test";
+import { describe, expect, test } from "vitest";
+import { internal } from "./_generated/api";
+import schema from "./schema";
+
+const modules = import.meta.glob([
+  "./**/*.ts",
+  "./**/*.js",
+  "!./**/*.test.ts",
+  "!./**/*.d.ts",
+]);
+
+function setup() {
+  return convexTest(schema, modules);
+}
+
+const officialRow = {
+  key: "voter-id",
+  title: "What photo ID can I use to vote?",
+  summary: "Wisconsin requires an acceptable photo ID to vote.",
+  details: "A Wisconsin driver license, state ID, US passport, and several others qualify.",
+  order: 1,
+  sources: [{ name: "Wisconsin Elections Commission — bringit.wi.gov", url: "https://bringit.wi.gov/" }],
+};
+
+describe("upsertVoterAccess publish gate", () => {
+  test("accepts a row with an official-domain source", async () => {
+    const t = setup();
+    await t.mutation(internal.seed.upsertVoterAccess, officialRow);
+    const rows = await t.run(async (ctx) => ctx.db.query("voter_access").collect());
+    expect(rows).toHaveLength(1);
+    expect(rows[0].lastCheckedAt).toBeGreaterThan(0);
+  });
+
+  test("rejects an advocacy-only row (no official-domain source)", async () => {
+    const t = setup();
+    await expect(
+      t.mutation(internal.seed.upsertVoterAccess, {
+        ...officialRow,
+        sources: [{ name: "VoteRiders", url: "https://www.voteriders.org/wisconsin/" }],
+      }),
+    ).rejects.toThrow("official-domain source");
+  });
+
+  test("upserts by key (second call updates, not duplicates)", async () => {
+    const t = setup();
+    await t.mutation(internal.seed.upsertVoterAccess, officialRow);
+    await t.mutation(internal.seed.upsertVoterAccess, { ...officialRow, summary: "Updated." });
+    const rows = await t.run(async (ctx) => ctx.db.query("voter_access").collect());
+    expect(rows).toHaveLength(1);
+    expect(rows[0].summary).toBe("Updated.");
+  });
+});

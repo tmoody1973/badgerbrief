@@ -177,6 +177,16 @@ export default defineSchema({
     lastCheckedAt: v.number(), // publish gate: freshness required
   }).index("by_election", ["electionSlug"]),
 
+  voter_access: defineTable({
+    key: v.string(),
+    title: v.string(),
+    summary: v.string(),
+    details: v.string(),
+    sources: v.array(sourceLink), // publish gate: >=1 required
+    order: v.number(),
+    lastCheckedAt: v.number(), // publish gate: freshness required
+  }).index("by_key", ["key"]),
+
   // ---------- finance ----------
   finance_totals: defineTable({
     candidateSlug: v.string(),

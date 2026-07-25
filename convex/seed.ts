@@ -28,7 +28,7 @@ const candidateInput = v.object({
   sources: v.array(sourceLink),
 });
 
-async function upsertByIndex<T extends "elections" | "races" | "voting_info">(
+async function upsertByIndex<T extends "elections" | "races" | "voting_info" | "voter_access">(
   ctx: MutationCtx,
   table: T,
   existing: { _id: string } | null,
@@ -91,6 +91,37 @@ export const upsertVotingInfo = internalMutation({
       .withIndex("by_election", (q) => q.eq("electionSlug", args.electionSlug))
       .unique();
     return await upsertByIndex(ctx, "voting_info", existing, {
+      ...args,
+      lastCheckedAt: Date.now(),
+    });
+  },
+});
+
+export const OFFICIAL_DOMAINS = ["elections.wi.gov", "myvote.wi.gov", "bringit.wi.gov"];
+
+export const upsertVoterAccess = internalMutation({
+  args: {
+    key: v.string(),
+    title: v.string(),
+    summary: v.string(),
+    details: v.string(),
+    order: v.number(),
+    sources: v.array(sourceLink),
+  },
+  handler: async (ctx, args) => {
+    const hasOfficial = args.sources.some((s) =>
+      OFFICIAL_DOMAINS.some((d) => s.url.includes(d)),
+    );
+    if (!hasOfficial) {
+      throw new Error(
+        "voter_access row requires an official-domain source (publish gate)",
+      );
+    }
+    const existing = await ctx.db
+      .query("voter_access")
+      .withIndex("by_key", (q) => q.eq("key", args.key))
+      .unique();
+    return await upsertByIndex(ctx, "voter_access", existing, {
       ...args,
       lastCheckedAt: Date.now(),
     });
