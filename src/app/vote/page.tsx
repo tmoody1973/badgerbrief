@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LastUpdated } from "@/components/guide/labels";
 import { SourceList } from "@/components/guide/sources";
-import { getVotingInfo } from "@/lib/data";
+import { getVoterAccess, getVotingInfo } from "@/lib/data";
 import {
   JsonLd,
   breadcrumbNode,
   faqNode,
   organizationNode,
 } from "@/lib/jsonld";
+import { voterAccessToFaqs } from "@/lib/voter-access-faqs";
 
 export const revalidate = 300;
 
@@ -32,6 +33,7 @@ function deadlineRows(map: DeadlineMap): [string, string][] {
 export default async function VotePage() {
   const info = await getVotingInfo();
   if (!info) notFound();
+  const access = (await getVoterAccess()) ?? [];
 
   const registration = deadlineRows(info.voterRegistration as DeadlineMap);
   const absenteeRequest = deadlineRows(
@@ -94,7 +96,7 @@ export default async function VotePage() {
             { name: "Home", path: "/" },
             { name: "How to vote", path: "/vote" },
           ]),
-          faqNode(faqs),
+          faqNode([...faqs, ...voterAccessToFaqs(access)]),
         ]}
       />
 
@@ -154,6 +156,29 @@ export default async function VotePage() {
           })}
         />
       </div>
+
+      {access.length > 0 && (
+        <section className="mt-10">
+          <h2 className="font-display text-xl">Your situation</h2>
+          <p className="mt-2 max-w-[60ch] text-sm text-muted-foreground">
+            Answers to common eligibility questions. Every rule links to its
+            official source. These are general rules, not legal advice — for a
+            specific situation, use the official link.
+          </p>
+          <div className="mt-4 space-y-2">
+            {access.map((row) => (
+              <details key={row.key} className="border-2 border-border bg-card p-3">
+                <summary className="cursor-pointer font-bold">{row.title}</summary>
+                <p className="mt-2 max-w-[60ch] text-sm">{row.summary}</p>
+                <p className="mt-2 max-w-[60ch] text-sm whitespace-pre-line">{row.details}</p>
+                <div className="mt-3">
+                  <SourceList sources={row.sources} />
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
