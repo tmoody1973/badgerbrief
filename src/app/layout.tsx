@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { StoreUser } from "./store-user";
 import { Analytics } from "@/components/guide/analytics";
+import { BottomTabs } from "@/components/guide/bottom-tabs";
 import { PostHogProvider } from "@/components/posthog-provider";
 import { AnalyticsEvents } from "@/components/guide/analytics-events";
 import { SwRegister } from "@/components/guide/sw-register";
@@ -64,8 +65,9 @@ export default function RootLayout({
         <Providers>
           <StoreUser />
           <SiteHeader />
-          <div className="flex-1">{children}</div>
+          <div className="flex-1 pb-16 sm:pb-0">{children}</div>
           <SiteFooter />
+          <BottomTabs />
         </Providers>
         <Analytics />
         <PostHogProvider />

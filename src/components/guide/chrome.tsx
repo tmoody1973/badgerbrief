@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { AuthNav } from "./auth-nav";
-import { MobileNav } from "./mobile-nav";
 import { NAV_LINKS } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -32,7 +31,6 @@ export function SiteHeader() {
           <AuthNav />
           <ThemeToggle />
         </nav>
-        <MobileNav />
       </div>
     </header>
   );
