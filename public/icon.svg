@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="BadgerBrief">
+  <rect width="512" height="512" fill="#c5050c"/>
+  <rect x="24" y="24" width="464" height="464" fill="none" stroke="#1c1b1a" stroke-width="24"/>
+  <text x="256" y="256" fill="#fff7ed" font-family="Arial Black, Arial, sans-serif" font-weight="900"
+        font-size="240" text-anchor="middle" dominant-baseline="central" letter-spacing="-8">BB</text>
+</svg>

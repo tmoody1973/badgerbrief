@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo_Black, Public_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -36,6 +36,16 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     type: "website",
   },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "BadgerBrief" },
+  icons: { icon: "/icon.svg" },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fff7ed" },
+    { media: "(prefers-color-scheme: dark)", color: "#1c1b1a" },
+  ],
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
