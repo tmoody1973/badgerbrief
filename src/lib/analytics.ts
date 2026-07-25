@@ -1,6 +1,7 @@
 "use client";
 
 import { track as vercelTrack } from "@vercel/analytics";
+import { posthog, posthogReady } from "@/lib/posthog";
 
 /**
  * Product analytics for BadgerBrief (MOO-336).
@@ -50,9 +51,21 @@ export function track<K extends keyof Events>(
   name: K,
   ...args: Events[K] extends Record<string, never> ? [] : [Events[K]]
 ): void {
+  const props = (args[0] ?? undefined) as
+    | Record<string, string | number | boolean>
+    | undefined;
   try {
-    vercelTrack(name, (args[0] ?? undefined) as Record<string, string | number | boolean> | undefined);
+    vercelTrack(name, props);
   } catch {
     // swallow — a voter guide must render even if analytics is blocked
+  }
+  // Second sink. Same vetted, PII-free event and props — this wrapper stays the
+  // ONE place the privacy rule is enforced, so both sinks are safe by
+  // construction. Guarded on posthogReady so a call before init (or with no
+  // key) is a silent no-op, never a thrown error into a render.
+  try {
+    if (posthogReady()) posthog.capture(name, props);
+  } catch {
+    // swallow — analytics must never break a page
   }
 }

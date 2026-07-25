@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { StoreUser } from "./store-user";
 import { Analytics } from "@/components/guide/analytics";
+import { PostHogProvider } from "@/components/posthog-provider";
 import { AnalyticsEvents } from "@/components/guide/analytics-events";
 import { SiteFooter, SiteHeader } from "@/components/guide/chrome";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
@@ -56,6 +57,7 @@ export default function RootLayout({
           <SiteFooter />
         </Providers>
         <Analytics />
+        <PostHogProvider />
         <AnalyticsEvents />
       </body>
     </html>
