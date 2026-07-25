@@ -1,0 +1,92 @@
+[
+  {
+    "key": "voter-id",
+    "title": "What photo ID can I use to vote?",
+    "summary": "Wisconsin requires an acceptable photo ID to vote. A Wisconsin driver license or state ID card, a U.S. passport, a military ID, a tribal ID issued by a Wisconsin tribe, and certain student and other IDs all qualify. The name on the ID does not have to match your registration exactly, and some IDs can be expired.",
+    "details": "The name on your ID only needs to conform to the name on the poll list — it does not have to match exactly. 'Bob' conforms to 'Robert', and 'Smith-Jones' conforms to 'Smith' after a recent marriage. A Wisconsin driver license or state ID, a military ID, or a U.S. passport may be used even if it is expired, as long as it expired after the most recent general election. The address on your ID does not have to be current. See the Wisconsin Elections Commission's acceptable photo ID list for the full set of IDs and the details.",
+    "order": 1,
+    "sources": [
+      { "name": "Wisconsin Elections Commission — Acceptable Photo IDs", "url": "https://elections.wi.gov/acceptable-photo-ids" },
+      { "name": "VoteRiders — Wisconsin voter ID help", "url": "https://www.voteriders.org/pride/wisconsin/" }
+    ]
+  },
+  {
+    "key": "absentee",
+    "title": "How do I vote absentee — by mail or early in person?",
+    "summary": "You can vote absentee by mail or in person before Election Day. For a mail ballot you request it from your municipal clerk, and most voters must include a copy of their photo ID. In-person early voting is run by your municipality in the two weeks before the election.",
+    "details": "A mail-ballot request must reach your municipal clerk by 5 p.m. on the fifth day before the election — but request it much earlier, because the ballot still has to reach you and be returned in time. Your completed absentee ballot must be back with the clerk by 8 p.m. on Election Day to be counted. In-person absentee (early) voting cannot begin more than two weeks before the election and ends the Sunday before; you show your photo ID when you vote early, and each city, village, and town sets its own early-voting dates and hours. Check your dates, clerk, and ballot status at myvote.wi.gov.",
+    "order": 2,
+    "sources": [
+      { "name": "Wisconsin Elections Commission — Voting Absentee", "url": "https://elections.wi.gov/voters/voting-mail" },
+      { "name": "Wisconsin Elections Commission — How to Request an Absentee Ballot", "url": "https://elections.wi.gov/how-request-absentee-ballot" }
+    ]
+  },
+  {
+    "key": "election-day",
+    "title": "Can I register and vote on Election Day?",
+    "summary": "Yes. Wisconsin lets you register at your polling place on Election Day. You'll need a proof-of-residence document showing your current address. If you register before Election Day, the online and by-mail deadline is 20 days before, and in person at the clerk's office runs until the Friday before.",
+    "details": "You can register and vote the same day at your polling place with a proof-of-residence document showing your current address — for example a driver license, bank statement, utility bill, or a letter from a unit of government. To register earlier, do it online or by mail up to 20 days before the election, or in person at your municipal clerk's office until 5 p.m. the Friday before (you cannot register the Saturday, Sunday, or Monday before). You must have lived at your address for at least 28 days by Election Day. Find your polling place and register online at myvote.wi.gov.",
+    "order": 3,
+    "sources": [
+      { "name": "Wisconsin Elections Commission — Voter Registration and Proof of Residence", "url": "https://elections.wi.gov/Register" },
+      { "name": "Wisconsin Elections Commission — Election Day Voting", "url": "https://elections.wi.gov/election-day-voting" }
+    ]
+  },
+  {
+    "key": "disability",
+    "title": "I have a disability — how do I vote (curbside, assistance, accessible machines)?",
+    "summary": "Every polling place must offer accessible voting equipment and curbside voting, and you may bring a person of your choice to help you mark your ballot. You can also ask your clerk ahead of time for a specific accommodation.",
+    "details": "If you cannot enter the polling place, Wisconsin law requires curbside voting — you can vote from your vehicle. Every polling place must have accessible voting equipment (such as the ExpressVote) and an ADA-compliant booth or table for a paper ballot. If you need help marking your ballot, you may bring any person of your choosing except your employer or a representative of your union. You can also notify your municipal clerk before Election Day to request a specific accommodation, and the clerk must make reasonable efforts to provide it. Disability Rights Wisconsin runs a voter hotline (844-347-8683) for disability-related voting questions.",
+    "order": 4,
+    "sources": [
+      { "name": "Wisconsin Elections Commission — Accessible Voting", "url": "https://elections.wi.gov/voters/accessible-voting" },
+      { "name": "Wisconsin Elections Commission — Assisting Voters with Disabilities", "url": "https://elections.wi.gov/assisting-voters-disabilities" },
+      { "name": "Disability Rights Wisconsin — Voting", "url": "https://disabilityrightswi.org/resource-center/voting/" }
+    ]
+  },
+  {
+    "key": "felony-conviction",
+    "title": "I have a felony conviction — can I vote?",
+    "summary": "You cannot vote in Wisconsin while serving any part of a felony sentence — including probation, parole, or extended supervision. Once you finish your sentence and are 'off paper,' your right to vote is restored automatically and you must re-register. A misdemeanor never takes away your right to vote.",
+    "details": "Under Wisconsin law (Wis. Stat. § 6.03(1)(b)), a person convicted of a felony cannot vote while still serving any portion of the sentence, including probation, parole, or extended supervision. When you complete the sentence and are no longer under Department of Corrections supervision, your voting rights are restored automatically — you do not need a pardon or any document proving it, but you do have to re-register even if you were registered before. If you were charged with a felony but not convicted, you can still vote; if you were convicted but not yet sentenced, you cannot. A misdemeanor conviction never removes your right to vote. Register at myvote.wi.gov.",
+    "order": 5,
+    "sources": [
+      { "name": "Wisconsin Elections Commission — Voter Eligibility Guide", "url": "https://elections.wi.gov/resources/brochures/voter-eligibility-guide" },
+      { "name": "Wisconsin Elections Commission — Ex-Felons and Incarcerated Voters and the Photo ID Law", "url": "https://elections.wi.gov/resources/brochures/ex-felons-and-incarcerated-voters-and-photo-id-law" },
+      { "name": "ACLU of Wisconsin — Voting Rights for Persons with Criminal Convictions", "url": "https://www.aclu-wi.org/votingrightscriminalconvictions/" }
+    ]
+  },
+  {
+    "key": "name-change",
+    "title": "My name changed — what do I update?",
+    "summary": "If your name changed, re-register to vote under your new name. Update your name with the Wisconsin DMV and Social Security first, then update your registration — online at MyVote, by mail, at your clerk's office, or at the polls on Election Day.",
+    "details": "A name change (for example after marriage) means you re-register under the new name. Update your name with the Wisconsin DMV and Social Security first, since that is what makes the change official. Then update your voter registration online at myvote.wi.gov (if you have a Wisconsin DMV license or ID card), by mail or in person at your municipal clerk until 5 p.m. the Friday before the election, or at your polling place on Election Day. Note that at the ballot your photo ID name only needs to conform to your registration — so an ID that has not been updated yet is often still usable.",
+    "order": 6,
+    "sources": [
+      { "name": "Wisconsin Elections Commission — Name Changes and Voting in Wisconsin", "url": "https://elections.wi.gov/resources/brochures/name-changes-and-voting-wisconsin" },
+      { "name": "Wisconsin Elections Commission — Voter Registration and Proof of Residence", "url": "https://elections.wi.gov/Register" }
+    ]
+  },
+  {
+    "key": "id-name-mismatch",
+    "title": "My ID doesn't match my name or gender — can I still vote?",
+    "summary": "You can vote as long as your photo ID reasonably resembles you and the name on it conforms to your registration. The gender marker on your ID is not checked and does not have to match — what matters is the name.",
+    "details": "Wisconsin poll workers check that your photo ID reasonably resembles you and that the name on it conforms to the name on the poll list — an exact match is not required (for example, 'Sue' conforms to 'Susan'). The gender marker on your ID is not required information and is not used to decide whether you receive a ballot, so you do not need to update the gender on your ID to vote. If your ID name and your registration name differ significantly, you can re-register under the name on your ID, or update your ID, before Election Day. VoteRiders offers free help with Wisconsin voter ID for transgender and nonbinary voters.",
+    "order": 7,
+    "sources": [
+      { "name": "Wisconsin Elections Commission — Acceptable Photo IDs", "url": "https://elections.wi.gov/acceptable-photo-ids" },
+      { "name": "VoteRiders — Voter ID info for trans and nonbinary voters in Wisconsin", "url": "https://www.voteriders.org/pride/wisconsin/" }
+    ]
+  },
+  {
+    "key": "homelessness",
+    "title": "I don't have a fixed address — can I vote?",
+    "summary": "Yes. If you are unhoused you can register and vote in Wisconsin. You may use a letter from a shelter or a social-service organization as your proof of residence, and you will still show a photo ID.",
+    "details": "You must have an identifiable location that you consider your residence for voting — a place you intend to return to. For proof of residence you may use a letter, on letterhead and signed, from a homeless shelter or a public or private social-service organization that serves the unhoused; the letter identifies you and describes the location that serves as your voting residence. You still need to show an acceptable photo ID. The Wisconsin Elections Commission Help Desk (608-261-2028, elections@wi.gov) can help election officials assist unhoused voters.",
+    "order": 8,
+    "sources": [
+      { "name": "Wisconsin Elections Commission — I'm currently unhoused", "url": "https://elections.wi.gov/im-currently-unhoused" },
+      { "name": "Wisconsin Elections Commission — Homeless Voters and the Photo ID Law", "url": "https://elections.wi.gov/resources/brochures/homeless-voters-and-photo-id-law" }
+    ]
+  }
+]
