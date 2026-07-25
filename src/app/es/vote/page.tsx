@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { VoteGuide } from "@/components/guide/vote-guide";
 import { voteEs } from "@/lib/i18n/vote-es";
-import { VOTE_HREFLANG } from "@/lib/i18n/vote-dict";
+import { hreflangFor } from "@/lib/i18n/locale";
 import { getVoterAccess, getVotingInfo } from "@/lib/data";
 
 export const revalidate = 300;
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: voteEs.meta.description,
   alternates: {
     canonical: "/es/vote",
-    languages: VOTE_HREFLANG,
+    languages: hreflangFor("/vote"),
   },
 };
 

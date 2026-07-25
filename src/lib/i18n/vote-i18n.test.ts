@@ -1,13 +1,13 @@
 // @vitest-environment node
 import { describe, expect, test } from "vitest";
-import { VOTE_HREFLANG } from "@/lib/i18n/vote-dict";
+import { hreflangFor } from "@/lib/i18n/locale";
 import { voteEs } from "@/lib/i18n/vote-es";
 
 const KEYS = ["voter-id","absentee","election-day","disability","felony-conviction","name-change","id-name-mismatch","homelessness"];
 
 describe("hreflang reciprocity (shared source of truth)", () => {
-  test("VOTE_HREFLANG has reciprocal en/es + x-default", () => {
-    expect(VOTE_HREFLANG).toMatchObject({ en: "/vote", es: "/es/vote", "x-default": "/vote" });
+  test("hreflangFor('/vote') has reciprocal en/es + x-default", () => {
+    expect(hreflangFor("/vote")).toMatchObject({ en: "/vote", es: "/es/vote", "x-default": "/vote" });
   });
 });
 

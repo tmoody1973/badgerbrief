@@ -6,16 +6,6 @@ export type VoterAccessRow = Doc<"voter_access">;
 
 export type Faq = { q: string; a: string };
 
-// Single source of truth for the EN/ES hreflang pair — imported by BOTH page
-// metadata objects AND the reciprocity test, so the test never has to import a
-// page module (which would pull in @/lib/data / unstable_cache and fail in the
-// vitest node env). Self-canonical is set per-page; this is the shared `languages`.
-export const VOTE_HREFLANG = {
-  en: "/vote",
-  es: "/es/vote",
-  "x-default": "/vote",
-} as const;
-
 export type VoteDict = {
   lang: "en" | "es";
   meta: { title: string; description: string };
