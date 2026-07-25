@@ -4,6 +4,7 @@ import { RaceCard } from "@/components/guide/cards";
 import { DistrictRaces } from "@/components/guide/district-races";
 import { LastUpdated, Stamp } from "@/components/guide/labels";
 import { getElection, listRaces, getVotingInfo } from "@/lib/data";
+import { splitHomeRaces } from "@/lib/home-races";
 import {
   JsonLd,
   breadcrumbNode,
@@ -13,13 +14,6 @@ import {
 
 export const revalidate = 300;
 
-const LEVEL_ORDER = [
-  "State Executive",
-  "Federal",
-  "State Judicial",
-  "State Legislative",
-];
-
 export default async function Home() {
   const [election, races, votingInfo] = await Promise.all([
     getElection(),
@@ -27,19 +21,7 @@ export default async function Home() {
     getVotingInfo(),
   ]);
 
-  // The two chamber-wide legislative rows predate the per-district races and
-  // are superseded by them. Listing both shows the same contest twice, so the
-  // old shape is dropped as soon as any per-district race exists.
-  const hasPerDistrict = races.some((r) => /-D\d+-\d{4}$/.test(r.raceId) && r.level === "State Legislative");
-  const listed = hasPerDistrict
-    ? races.filter((r) => r.level !== "State Legislative" || /-D\d+-\d{4}$/.test(r.raceId))
-    : races;
-
-  const byLevel = new Map<string, typeof listed>();
-  for (const level of LEVEL_ORDER) {
-    const group = listed.filter((r) => r.level === level);
-    if (group.length > 0) byLevel.set(level, group);
-  }
+  const { listed, byLevel } = splitHomeRaces(races);
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
@@ -121,8 +103,21 @@ export default async function Home() {
             {level === "State Legislative" ? (
               // 116 near-identical district races, of which exactly two are on
               // any voter's ballot — a card grid here would be ~39 rows and
-              // bury everything below it.
-              <DistrictRaces races={group} />
+              // bury everything below it. Collapsed behind <details> on
+              // mobile; the links stay in the DOM either way (SEO).
+              <>
+                <details className="mt-2 border-2 border-border bg-card p-3 sm:hidden">
+                  <summary className="cursor-pointer font-bold">
+                    Find your district races ({group.length})
+                  </summary>
+                  <div className="mt-3">
+                    <DistrictRaces races={group} />
+                  </div>
+                </details>
+                <div className="hidden sm:block">
+                  <DistrictRaces races={group} />
+                </div>
+              </>
             ) : (
               <div className="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {group.map((race) => (
