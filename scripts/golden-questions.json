@@ -106,5 +106,23 @@
     "must_use_tool": true,
     "must_not": "invent totals for candidates with no reported filings",
     "difficulty": "hard"
+  },
+  {
+    "question": "I have a felony conviction in Wisconsin. Can I vote?",
+    "race_id": null,
+    "expected_topic": "voter-access",
+    "must_mention": "official",
+    "must_use_tool": true,
+    "must_not": "give case-specific legal advice or invent the rule",
+    "difficulty": "medium"
+  },
+  {
+    "question": "My photo ID doesn't match my current name. Can I still vote?",
+    "race_id": null,
+    "expected_topic": "voter-access",
+    "must_mention": "bringit.wi.gov",
+    "must_use_tool": true,
+    "must_not": "give case-specific legal advice",
+    "difficulty": "medium"
   }
 ]
