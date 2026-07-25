@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { track } from "@/lib/analytics";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { relevantRaces, type Districts } from "@/lib/districts";
+import { localeFromPath } from "@/lib/i18n/chrome-dict";
+import { ballotFinderDict, type BallotFinderDict } from "@/lib/i18n/ballot-finder-dict";
 import { RaceCard } from "./cards";
 
 /** Home-page "find your ballot" section: address → districts → your races (MOO-307). */
@@ -18,12 +21,12 @@ type Status =
 
 const range = (n: number) => Array.from({ length: n }, (_, i) => i + 1);
 
-function MyVoteCtas() {
+function MyVoteCtas({ dict }: { dict: BallotFinderDict }) {
   return (
     <div className="mt-4 flex flex-wrap gap-3">
       {[
-        ["Find your polling place", "https://myvote.wi.gov/en-us/Find-My-Polling-Place"],
-        ["Request an absentee ballot", "https://myvote.wi.gov/en-us/Vote-Absentee-By-Mail"],
+        [dict.myVotePolling, "https://myvote.wi.gov/en-us/Find-My-Polling-Place"],
+        [dict.myVoteAbsentee, "https://myvote.wi.gov/en-us/Vote-Absentee-By-Mail"],
       ].map(([label, href]) => (
         <a
           key={href}
@@ -34,7 +37,7 @@ function MyVoteCtas() {
         >
           {label} →{" "}
           <span className="font-mono text-[10px] uppercase tracking-wide">
-            official · MyVote WI
+            {dict.officialTag}
           </span>
         </a>
       ))}
@@ -43,6 +46,7 @@ function MyVoteCtas() {
 }
 
 export function BallotFinder({ races }: { races: Doc<"races">[] }) {
+  const dict = ballotFinderDict(localeFromPath(usePathname()));
   const [address, setAddress] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [manual, setManual] = useState(false);
@@ -92,26 +96,15 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
         );
       } else if (data.error === "not_wisconsin") {
         track("ballot_lookup", { status: "no_match" });
-        setStatus({
-          kind: "error",
-          message:
-            "That address doesn't look like it's in Wisconsin — this guide covers Wisconsin ballots only.",
-        });
+        setStatus({ kind: "error", message: dict.errNotWisconsin });
       } else {
         track("ballot_lookup", { status: "no_match" });
-        setStatus({
-          kind: "error",
-          message:
-            "We couldn't match that address. Check the street, city, and ZIP — or pick your districts below.",
-        });
+        setStatus({ kind: "error", message: dict.errNoMatch });
         setManual(true);
       }
     } catch {
       track("ballot_lookup", { status: "error" });
-      setStatus({
-        kind: "error",
-        message: "The address lookup is unavailable right now. You can pick your districts below.",
-      });
+      setStatus({ kind: "error", message: dict.errUnavailable });
       setManual(true);
     }
   };
@@ -124,18 +117,14 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
 
   return (
     <section className="mt-8 border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
-      <h2 className="font-display text-2xl">What&apos;s on your ballot?</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Enter your Wisconsin address — we match it to your congressional and
-        state legislative districts via the U.S. Census Bureau. We don&apos;t
-        store it unless you&apos;re signed in.
-      </p>
+      <h2 className="font-display text-2xl">{dict.heading}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{dict.instructions}</p>
       <form onSubmit={lookup} className="mt-4 flex flex-wrap gap-3">
         <input
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          placeholder="200 E Wells St, Milwaukee, WI 53202"
-          aria-label="Wisconsin street address"
+          placeholder={dict.placeholder}
+          aria-label={dict.addressAria}
           required
           minLength={5}
           className="min-w-0 flex-1 border-2 border-border bg-background px-3 py-2"
@@ -145,7 +134,7 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
           disabled={status.kind === "loading"}
           className="border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)] press disabled:opacity-60"
         >
-          {status.kind === "loading" ? "Looking up…" : "Find my races"}
+          {status.kind === "loading" ? dict.looking : dict.findRaces}
         </button>
       </form>
 
@@ -159,20 +148,20 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
         <div className="mt-3 flex flex-wrap items-end gap-3">
           {(
             [
-              ["Congressional", "congressional", 8],
-              ["State Senate", "senate", 33],
-              ["Assembly", "assembly", 99],
+              [dict.manualCongressional, "congressional", 8],
+              [dict.manualSenate, "senate", 33],
+              [dict.manualAssembly, "assembly", 99],
             ] as const
           ).map(([label, key, max]) => (
             <label key={key} className="text-sm font-bold">
-              {label} district
+              {label}
               <select
                 value={picked[key] || ""}
                 onChange={(e) => setPicked({ ...picked, [key]: Number(e.target.value) })}
                 className="mt-1 block border-2 border-border bg-background px-2 py-1.5"
               >
                 <option value="" disabled>
-                  Pick…
+                  {dict.pick}
                 </option>
                 {range(max).map((n) => (
                   <option key={n} value={n}>
@@ -188,7 +177,7 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
             onClick={() => applyDistricts(picked)}
             className="border-2 border-border bg-secondary px-3 py-1.5 font-bold shadow-[var(--shadow-brutal)] press disabled:opacity-60"
           >
-            Show my races
+            {dict.showRaces}
           </button>
         </div>
       )}
@@ -197,13 +186,11 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
         <div className="mt-5">
           <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
             {status.matchedAddress ? `${status.matchedAddress} · ` : ""}
-            CD {status.districts.congressional} · Senate {status.districts.senate} ·
-            Assembly {status.districts.assembly}
+            {dict.foundLine(status.districts)}
           </p>
           {!senateOnBallot && (
             <p className="mt-2 text-sm text-muted-foreground">
-              Your state senate seat (District {status.districts.senate}) isn&apos;t up
-              for election in 2026 — even-numbered senate districts vote in 2028.
+              {dict.senateNotUp(status.districts.senate)}
             </p>
           )}
           <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -211,7 +198,7 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
               <RaceCard key={race.raceId} race={race} />
             ))}
           </div>
-          <MyVoteCtas />
+          <MyVoteCtas dict={dict} />
         </div>
       )}
     </section>
