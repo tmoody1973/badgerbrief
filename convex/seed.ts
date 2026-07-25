@@ -109,9 +109,14 @@ export const upsertVoterAccess = internalMutation({
     sources: v.array(sourceLink),
   },
   handler: async (ctx, args) => {
-    const hasOfficial = args.sources.some((s) =>
-      OFFICIAL_DOMAINS.some((d) => s.url.includes(d)),
-    );
+    const hasOfficial = args.sources.some((s) => {
+      try {
+        const host = new URL(s.url).hostname.replace(/^www\./, "");
+        return OFFICIAL_DOMAINS.some((d) => host === d || host.endsWith("." + d));
+      } catch {
+        return false;
+      }
+    });
     if (!hasOfficial) {
       throw new Error(
         "voter_access row requires an official-domain source (publish gate)",

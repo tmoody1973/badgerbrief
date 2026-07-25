@@ -42,6 +42,16 @@ describe("upsertVoterAccess publish gate", () => {
     ).rejects.toThrow("official-domain source");
   });
 
+  test("rejects a look-alike host that only contains an official domain as a substring", async () => {
+    const t = setup();
+    await expect(
+      t.mutation(internal.seed.upsertVoterAccess, {
+        ...officialRow,
+        sources: [{ name: "spoof", url: "https://not-elections.wi.gov.attacker.net/" }],
+      }),
+    ).rejects.toThrow("official-domain source");
+  });
+
   test("upserts by key (second call updates, not duplicates)", async () => {
     const t = setup();
     await t.mutation(internal.seed.upsertVoterAccess, officialRow);
