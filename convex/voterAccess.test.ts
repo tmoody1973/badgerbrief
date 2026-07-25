@@ -2,6 +2,7 @@ import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { api, internal } from "./_generated/api";
 import schema from "./schema";
+import { voterAccessPayload } from "./voterHelp";
 
 const modules = import.meta.glob([
   "./**/*.ts",
@@ -69,5 +70,21 @@ describe("getVoterAccess query", () => {
     await t.mutation(internal.seed.upsertVoterAccess, { ...officialRow, key: "a", order: 1 });
     const rows = await t.query(api.public.getVoterAccess, {});
     expect(rows.map((r) => r.key)).toEqual(["a", "b"]);
+  });
+});
+
+describe("voterAccessPayload", () => {
+  test("includes the no-legal-advice directive and the rows", () => {
+    const payload = JSON.parse(
+      voterAccessPayload([{ key: "voter-id", title: "ID?", summary: "s", details: "d", sources: [], order: 1, lastCheckedAt: 1 }]),
+    );
+    expect(payload.directive).toMatch(/legal advice/i);
+    expect(payload.rows).toHaveLength(1);
+  });
+
+  test("empty rows still carries the directive", () => {
+    const payload = JSON.parse(voterAccessPayload([]));
+    expect(payload.directive).toMatch(/official source/i);
+    expect(payload.rows).toEqual([]);
   });
 });

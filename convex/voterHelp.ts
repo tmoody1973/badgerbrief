@@ -60,6 +60,25 @@ const getVotingInfo = createTool({
     }),
 });
 
+export function voterAccessPayload(rows: unknown[]): string {
+  return JSON.stringify({
+    directive:
+      "State the general rule and link the official source. Do NOT give case-specific legal advice; if the voter's situation is specific, hand off to the official source.",
+    rows,
+  });
+}
+
+const getVoterAccess = createTool({
+  description:
+    "Wisconsin voter eligibility & access situations (voter ID, absentee, election-day registration, disability, felony conviction, name change, ID/name mismatch, homelessness). Returns general rules with official sources. Read-only.",
+  inputSchema: z.object({}),
+  execute: async (ctx): Promise<string> =>
+    withToolSpan("getVoterAccess", ctx.threadId, {}, async () => {
+      const rows = await ctx.runQuery(api.public.getVoterAccess, {});
+      return voterAccessPayload(rows);
+    }),
+});
+
 const getMyBallot = createTool({
   description:
     "The signed-in user's district-relevant races and candidate names, based on their saved address. Returns districts: null when the user hasn't saved an address yet. Read-only.",
@@ -253,7 +272,7 @@ function makeVoterHelpAgent(model: string, instructions: string = INSTRUCTIONS) 
     name: AGENT_NAME,
     languageModel: anthropic(model),
     instructions,
-    tools: { getVotingInfo, getMyBallot, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, handoffOfficialLink },
+    tools: { getVotingInfo, getVoterAccess, getMyBallot, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, handoffOfficialLink },
     stopWhen: stepCountIs(8),
   });
 }
