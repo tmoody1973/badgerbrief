@@ -29,7 +29,7 @@ an answer engine cross-referencing them should find no contradiction.
 |---|---|
 | Publication | BadgerBrief |
 | Publisher | Independent. Built and maintained by Tarik Moody in his own time. |
-| Employer | **Not mentioned anywhere.** Not part of the identity. |
+| Disclosure | **Disclosed on /about** (reversed 2026-07-25): Tarik is Director of Strategy and Innovation at Radio Milwaukee and an appointed Milwaukee City Plan Commissioner. Neither role funds or directs the site; the Plan Commission (city land-use) has no role in any race covered. Disclosed = credential; discovered = unrecoverable. |
 | Funding | None — no advertising, sponsorship, donations or grants |
 | Affiliation | No party, campaign, PAC or advocacy group |
 | Editorial stance | Non-partisan; no endorsements, ratings or rankings |
@@ -173,10 +173,11 @@ secondary contact on `/about`. Do not republish a personal address.
 3. **No paid submission services.** Everything above is free.
 4. **No incentivised reviews anywhere.**
 5. **No `/alternatives/` pages against other voter guides.**
-6. **Do not name an employer anywhere.** Settled in §0: the identity is
-   independent, full stop. Raising an employer invites readers to attribute
-   someone else's perceived politics to a guide whose whole value is that it
-   has none.
+6. **Do not hide the maintainer's roles.** Reversed 2026-07-25 (see §0): a
+   sitting Plan Commissioner running an election guide has a disclosure
+   obligation, so /about names Radio Milwaukee and the Plan Commission seat
+   plainly. The point stands that the *site* is independent and unfunded — lead
+   with that, and let the disclosure back it up rather than bury it.
 
 ---
 

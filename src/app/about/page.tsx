@@ -54,11 +54,21 @@ export default function AboutPage() {
         who is on your ballot, and what have they actually done?
       </p>
 
+      <p className="mt-4">
+        <Link
+          href="/feedback"
+          className="text-sm underline decoration-2 underline-offset-2"
+        >
+          See a mistake? Report an error →
+        </Link>
+      </p>
+
       <section className="mt-8">
         <h2 className="font-display text-xl">Independent, and unfunded</h2>
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
           <Fact label="Funding">
-            None. No advertising, no sponsorships, no donations, no grants.
+            Self-funded &mdash; no advertising, sponsorships, donations, grants,
+            or party/PAC money.
           </Fact>
           <Fact label="Affiliation">
             No party, campaign, PAC or advocacy group. Nobody has editorial
@@ -100,12 +110,21 @@ export default function AboutPage() {
       <section className="mt-8">
         <h2 className="font-display text-xl">Who makes it</h2>
         <p className="mt-2 max-w-[60ch]">
-          BadgerBrief is built and maintained by Tarik Moody, independently and
-          in his own time. It started from a simple frustration: the information
-          needed to vote in a state race is all public, and almost none of it is
-          in one place. Roll calls sit in one system, finance filings in
-          another, ballot certifications in a third — technically open, and
-          practically out of reach on a weeknight before an election.
+          BadgerBrief is built and maintained by{" "}
+          <strong>Tarik Moody</strong> in Milwaukee, independently and in his
+          own time.
+          {/* photo: add later — shipping text-only now */}
+        </p>
+        <p className="mt-3 max-w-[60ch]">
+          <strong>In the interest of full disclosure:</strong> Tarik is Director
+          of Strategy and Innovation at Radio Milwaukee, and an appointed
+          commissioner of the Milwaukee City Plan Commission. Both are stated
+          here on purpose. The Plan Commission is a city land-use body — it has
+          no role in the state legislative, congressional, or statewide races
+          this guide covers — and he has no involvement in any race on
+          BadgerBrief. Every candidate is treated identically, by the same
+          sourced method, with no endorsements. Neither role funds or directs
+          this site.
         </p>
         <p className="mt-3 max-w-[60ch]">
           This is not a news organisation and does not claim to be one. It is
