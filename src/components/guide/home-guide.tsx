@@ -3,6 +3,7 @@ import type { Doc } from "../../../convex/_generated/dataModel";
 import { BallotFinder } from "@/components/guide/ballot-finder";
 import { RaceCard } from "@/components/guide/cards";
 import { DistrictRaces } from "@/components/guide/district-races";
+import { raceLevelLabel } from "@/lib/i18n/race-card-dict";
 import { LastUpdated, Stamp } from "@/components/guide/labels";
 import { splitHomeRaces } from "@/lib/home-races";
 import type { HomeDict } from "@/lib/i18n/home-en";
@@ -97,7 +98,7 @@ export function HomeGuide({
         {[...byLevel.entries()].map(([level, group]) => (
           <div key={level} className="mt-6">
             <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              {level}
+              {raceLevelLabel(level, lang)}
             </h3>
             {level === "State Legislative" ? (
               // 116 near-identical district races, of which exactly two are on
@@ -120,7 +121,7 @@ export function HomeGuide({
             ) : (
               <div className="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {group.map((race) => (
-                  <RaceCard key={race.raceId} race={race} />
+                  <RaceCard key={race.raceId} race={race} locale={lang} />
                 ))}
               </div>
             )}

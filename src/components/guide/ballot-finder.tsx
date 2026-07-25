@@ -46,7 +46,8 @@ function MyVoteCtas({ dict }: { dict: BallotFinderDict }) {
 }
 
 export function BallotFinder({ races }: { races: Doc<"races">[] }) {
-  const dict = ballotFinderDict(localeFromPath(usePathname()));
+  const locale = localeFromPath(usePathname());
+  const dict = ballotFinderDict(locale);
   const [address, setAddress] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [manual, setManual] = useState(false);
@@ -195,7 +196,7 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
           )}
           <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {matches.map((race) => (
-              <RaceCard key={race.raceId} race={race} />
+              <RaceCard key={race.raceId} race={race} locale={locale} />
             ))}
           </div>
           <MyVoteCtas dict={dict} />

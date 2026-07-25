@@ -1,14 +1,23 @@
 import Link from "next/link";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { raceIdToSlug } from "@/lib/site";
+import type { Locale } from "@/lib/i18n/locale";
+import {
+  candidateCountLabel,
+  incumbentPrefix,
+  raceLevelLabel,
+  raceRatingLabel,
+} from "@/lib/i18n/race-card-dict";
 import { PartyBadge, StatusBadge } from "./labels";
 
 export function RaceCard({
   race,
   candidateCount,
+  locale = "en",
 }: {
   race: Doc<"races">;
   candidateCount?: number;
+  locale?: Locale;
 }) {
   const rating = race.raceRating?.["Cook_Political_Report"];
   return (
@@ -17,23 +26,23 @@ export function RaceCard({
       className="press block border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]"
     >
       <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-        {race.level}
+        {raceLevelLabel(race.level, locale)}
       </p>
       <h3 className="font-display mt-1 text-lg leading-tight">{race.office}</h3>
       {race.incumbent && (
         <p className="mt-1 text-sm text-muted-foreground">
-          Incumbent: {race.incumbent}
+          {incumbentPrefix(locale)}: {race.incumbent}
         </p>
       )}
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {rating && (
           <span className="border-2 border-border bg-warning px-2 py-0.5 text-xs font-bold">
-            {rating}
+            {raceRatingLabel(rating, locale)}
           </span>
         )}
         {candidateCount !== undefined && candidateCount > 0 && (
           <span className="font-mono text-xs">
-            {candidateCount} candidate{candidateCount === 1 ? "" : "s"}
+            {candidateCountLabel(candidateCount, locale)}
           </span>
         )}
       </div>
