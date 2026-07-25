@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthNav } from "./auth-nav";
+import { LangToggle } from "./lang-toggle";
 import { NAV_LINKS } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -16,21 +17,26 @@ export function SiteHeader() {
         <Link href="/" className="font-display text-2xl tracking-tight">
           Badger<span className="text-primary">Brief</span>
         </Link>
-        <nav className="hidden items-center gap-3 font-mono text-sm font-bold uppercase tracking-wider sm:flex">
-          {DESKTOP_LINKS.map(({ href, label }) => (
-            <Link key={href} href={href} className="whitespace-nowrap px-2 py-1 hover:bg-secondary">
-              {label}
+        <div className="flex items-center gap-3">
+          <nav className="hidden items-center gap-3 font-mono text-sm font-bold uppercase tracking-wider sm:flex">
+            {DESKTOP_LINKS.map(({ href, label }) => (
+              <Link key={href} href={href} className="whitespace-nowrap px-2 py-1 hover:bg-secondary">
+                {label}
+              </Link>
+            ))}
+            <Link
+              href="/vote"
+              className="whitespace-nowrap border-2 border-border bg-primary px-2 py-1 text-primary-foreground shadow-[var(--shadow-brutal)]"
+            >
+              Aug 11
             </Link>
-          ))}
-          <Link
-            href="/vote"
-            className="whitespace-nowrap border-2 border-border bg-primary px-2 py-1 text-primary-foreground shadow-[var(--shadow-brutal)]"
-          >
-            Aug 11
-          </Link>
-          <AuthNav />
-          <ThemeToggle />
-        </nav>
+            <AuthNav />
+            <ThemeToggle />
+          </nav>
+          {/* Always visible (mobile + desktop) so the language switch lives in
+              the menu bar, not just inside the /vote page content. */}
+          <LangToggle />
+        </div>
       </div>
     </header>
   );
