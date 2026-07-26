@@ -17,6 +17,7 @@ export const homeEs: HomeDict = {
   primaryDateFallback: "11 de agosto de 2026",
   howToVoteCta: "Cómo votar →",
   governorsRaceCta: "Contienda por gobernador",
+  matchCta: "¿Qué te importa? →",
   deadlines: {
     heading: "¿Cuáles son los plazos de la primaria de Wisconsin de 2026?",
     pollsOpenPrefix: "Las urnas abren",

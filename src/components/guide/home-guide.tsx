@@ -67,9 +67,9 @@ export function HomeGuide({
           </Link>
           <Link
             href="/match"
-            className="press border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)]"
+            className="border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)] press"
           >
-            What matters to you? →
+            {dict.matchCta}
           </Link>
         </div>
         {election && (

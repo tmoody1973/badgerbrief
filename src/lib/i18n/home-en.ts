@@ -9,6 +9,7 @@ export type HomeDict = {
   primaryDateFallback: string;
   howToVoteCta: string;
   governorsRaceCta: string;
+  matchCta: string;
   deadlines: {
     heading: string;
     pollsOpenPrefix: string;
@@ -41,6 +42,7 @@ export const homeEn: HomeDict = {
   primaryDateFallback: "August 11, 2026",
   howToVoteCta: "How to vote →",
   governorsRaceCta: "Governor's race",
+  matchCta: "What matters to you? →",
   deadlines: {
     heading: "When are the 2026 Wisconsin primary deadlines?",
     pollsOpenPrefix: "Polls are open",
