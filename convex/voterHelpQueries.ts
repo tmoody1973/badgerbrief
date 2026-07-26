@@ -118,21 +118,6 @@ export const listThreadMessages = query({
  * The getMyBallot tool's substrate: the user's district-relevant races with
  * candidate names. `districts: null` means the user hasn't saved an address.
  */
-/**
- * Statewide races (State Executive / State Judicial) — on every WI ballot.
- * The issue-matching tool's fallback when the user has no saved address,
- * mirroring /match's statewide-first behavior.
- */
-export const statewideRaceIds = internalQuery({
-  args: {},
-  handler: async (ctx) => {
-    const races = await ctx.db.query("races").collect();
-    return races
-      .filter((r) => r.level === "State Executive" || r.level === "State Judicial")
-      .map((r) => r.raceId);
-  },
-});
-
 export const ballotForUser = internalQuery({
   // v.string() + normalizeId, not v.id: the MOO-313 eval harness runs the agent
   // under a synthetic userId, and that must read as "no saved address", not crash.

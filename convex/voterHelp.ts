@@ -15,8 +15,6 @@ import { anthropic } from "@ai-sdk/anthropic";
 import type { Id } from "./_generated/dataModel";
 import { ensureTelemetry, tracer } from "./lib/agentTelemetry";
 import { OFFICIAL_LINKS, OFFICIAL_LINK_TOPICS, type OfficialLinkTopic } from "../src/lib/official-links";
-import { buildIssueMatch } from "../src/lib/issue-match";
-import { ISSUE_SLUGS } from "./lib/extraction";
 
 const AGENT_NAME = "voter-help-agent";
 // MOO-313 golden-gate history (2026-07-19, dataset voter-help-golden):
@@ -115,69 +113,6 @@ const getMyBallot = createTool({
         });
       }
       return JSON.stringify(ballot);
-    }),
-});
-
-const matchBallotByIssues = createTool({
-  description:
-    `Given the issues a voter cares about, return which candidates ON THEIR BALLOT have a sourced published position on each — grouped by issue then race — plus who has "no position on record". Use for "I care about X and Y, who should I look at?", "which candidates align with my priorities?", "who has a position on healthcare?". ALIGNMENT ONLY — never a ranking, score, or recommendation. issueSlugs must come from this list (map the voter's own words to the closest ones, skip anything that doesn't fit): ${ISSUE_SLUGS.join(", ")}. Uses the signed-in user's saved ballot; falls back to the statewide races on every ballot when no address is saved. Read-only.`,
-  inputSchema: z.object({
-    issueSlugs: z
-      .array(z.enum(ISSUE_SLUGS))
-      .min(1)
-      .describe('Issue slugs the voter cares about, e.g. ["healthcare","agriculture"]'),
-  }),
-  execute: async (ctx, { issueSlugs }): Promise<string> =>
-    withToolSpan("matchBallotByIssues", ctx.threadId, { issueSlugs }, async () => {
-      // The user's own ballot when they've saved an address; otherwise the
-      // statewide races on every WI ballot (mirrors /match's statewide-first
-      // fallback so the tool is useful before an address is saved).
-      let raceIds: string[] = [];
-      let scope: "ballot" | "statewide" = "statewide";
-      if (ctx.userId) {
-        const ballot = await ctx.runQuery(internal.voterHelpQueries.ballotForUser, {
-          userId: ctx.userId as string,
-        });
-        if (ballot.races.length > 0) {
-          raceIds = ballot.races.map((r: { raceId: string }) => r.raceId);
-          scope = "ballot";
-        }
-      }
-      if (raceIds.length === 0) {
-        raceIds = await ctx.runQuery(internal.voterHelpQueries.statewideRaceIds, {});
-      }
-      const data = await ctx.runQuery(api.public.positionsForRaces, { raceIds });
-      const { groups } = buildIssueMatch(data, issueSlugs);
-      // Compact shape — the model narrates. Keep summary + one source per
-      // candidate; drop finance/confidence. Every requested issue is present
-      // (coverage:"none" => no sourced position on the ballot), never omitted.
-      const issues = issueSlugs.map((slug) => {
-        const g = groups.find((x) => x.issueSlug === slug);
-        return {
-          issue: slug,
-          coverage: g ? "some" : "none",
-          races: (g?.races ?? []).map((r) => ({
-            office: r.office,
-            onRecord: r.onRecord.map((o) => ({
-              name: o.candidate.name,
-              party: o.candidate.party,
-              stance: o.position.stance,
-              summary: o.position.summary,
-              source: o.position.sources[0]?.url,
-            })),
-            noPosition: r.noRecord.map((c) => c.name),
-          })),
-        };
-      });
-      return JSON.stringify({
-        scope,
-        scopeNote:
-          scope === "statewide"
-            ? "No saved address for this user — these are the statewide races on every ballot. Tell them they can save their address on the Brief page (/brief) to also match their U.S. House and legislative races."
-            : "The user's own ballot races (from their saved address).",
-        issues,
-        rule: "Present each issue's candidates neutrally, each with its source link; for anyone under noPosition say 'no position on record'. Never rank, score, or recommend a candidate (rule 6).",
-      });
     }),
 });
 
@@ -330,8 +265,6 @@ Rules, in priority order:
 8. If a quote has a clipUrl, follow it with a link whose text is exactly "Watch the clip".
 9. Voting records: state the passage/concurrence/adoption vote's position and tally, name the official bill title, and flag otherVotesOnBill>0.
 
-10. ISSUE MATCHING. When the voter names issues they care about, or asks who to look at / who aligns with their priorities, call matchBallotByIssues with the closest issue slugs. Present each issue's candidates neutrally, each with its source link, and say "no position on record" for anyone under noPosition. This is alignment, never a ranking or recommendation (rule 6). If scope is "statewide", tell them they can save their address on /brief to also match their U.S. House and legislative races.
-
 Keep answers short — a few sentences plus links. Use getMyBallot for "my ballot" / "who's on my ballot" questions; if it reports districts: null, tell the user to save their address on the Brief page first.`;
 
 function makeVoterHelpAgent(model: string, instructions: string = INSTRUCTIONS) {
@@ -339,7 +272,7 @@ function makeVoterHelpAgent(model: string, instructions: string = INSTRUCTIONS) 
     name: AGENT_NAME,
     languageModel: anthropic(model),
     instructions,
-    tools: { getVotingInfo, getVoterAccess, getMyBallot, matchBallotByIssues, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, handoffOfficialLink },
+    tools: { getVotingInfo, getVoterAccess, getMyBallot, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, handoffOfficialLink },
     stopWhen: stepCountIs(8),
   });
 }
