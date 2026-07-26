@@ -8,6 +8,7 @@ import { BottomTabs } from "@/components/guide/bottom-tabs";
 import { PostHogProvider } from "@/components/posthog-provider";
 import { AnalyticsEvents } from "@/components/guide/analytics-events";
 import { SwRegister } from "@/components/guide/sw-register";
+import { KofiWidget } from "@/components/kofi-widget";
 import { SiteFooter, SiteHeader } from "@/components/guide/chrome";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -73,6 +74,7 @@ export default function RootLayout({
         <PostHogProvider />
         <AnalyticsEvents />
         <SwRegister />
+        <KofiWidget />
       </body>
     </html>
   );

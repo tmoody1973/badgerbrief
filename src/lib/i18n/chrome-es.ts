@@ -31,6 +31,7 @@ export const chromeEs: ChromeDict = {
     about: "Acerca de BadgerBrief",
     methodology: "Metodología",
     reportError: "Reportar un error",
+    support: "Apoya este proyecto",
     financeDisclaimer:
       "Los datos de financiamiento de campañas para cargos estatales de Wisconsin provienen " +
       "de la base de datos Sunshine de la Comisión de Ética de Wisconsin y se usan solo para " +

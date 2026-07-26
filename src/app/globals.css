@@ -141,3 +141,13 @@ body {
     content-visibility: visible;
   }
 }
+
+/* Ko-fi floating "Support me" button (injected client-side) sits bottom-left at
+   16px, which collides with the mobile bottom tab bar (h-16, mobile-only). Lift
+   it above the bar on small screens; desktop (no tab bar) keeps the default. */
+@media (max-width: 639px) {
+  .floatingchat-container-wrap-mobi,
+  .floatingchat-container-wrap {
+    bottom: 5rem !important;
+  }
+}
