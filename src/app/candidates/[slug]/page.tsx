@@ -15,6 +15,7 @@ import { InTheNews } from "@/components/guide/in-the-news";
 import { InterviewQuotes } from "@/components/guide/interview-quotes";
 import { BallotContext } from "@/components/guide/ballot-context";
 import { VotingRecord } from "@/components/guide/voting-record";
+import { WhatThisMeans } from "@/components/guide/what-this-means";
 import { isInterviewQuote } from "@/lib/interview-quote";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
@@ -237,6 +238,8 @@ export default async function CandidatePage({ params }: Props) {
             <h2 className="font-display text-xl">
               Where does {candidate.name} stand on the issues?
             </h2>
+            <WhatThisMeans topic="stance-labels" />
+            <WhatThisMeans topic="sourced-position-vs-claim" />
             <div className="mt-3 grid gap-3 xl:grid-cols-2">
               {positions.map((p) => (
                 <div
@@ -262,11 +265,14 @@ export default async function CandidatePage({ params }: Props) {
         <InterviewQuotes quotes={interviewQuotes} candidateName={candidate.name} />
 
         {votingRecordSummary && (
-          <VotingRecord
-            summary={votingRecordSummary}
-            candidateSlug={candidate.slug}
-            candidateName={candidate.name}
-          />
+          <>
+            <WhatThisMeans topic="voting-record" className="mt-6" />
+            <VotingRecord
+              summary={votingRecordSummary}
+              candidateSlug={candidate.slug}
+              candidateName={candidate.name}
+            />
+          </>
         )}
 
         {otherQuotes.length > 0 && (
@@ -294,6 +300,7 @@ export default async function CandidatePage({ params }: Props) {
 
           {/* Contributor + PAC tables stay in the main column — too tall
               for a sticky rail (MOO-331). */}
+          {finance.length > 0 && <WhatThisMeans topic="campaign-finance" />}
           <FinanceDetail
             totals={finance}
             contributions={contributions}
