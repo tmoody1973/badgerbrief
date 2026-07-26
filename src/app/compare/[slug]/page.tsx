@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { LastUpdated, PartyBadge } from "@/components/guide/labels";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
+import { WhatThisMeans } from "@/components/guide/what-this-means";
 import { buildIssueComparison } from "@/lib/compare";
 import { getRace, listRaces } from "@/lib/data";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
@@ -99,6 +100,8 @@ export default async function ComparePage({ params }: Props) {
         </div>
       ) : (
         <div className="mt-6 space-y-10">
+          <WhatThisMeans topic="stance-labels" />
+          <WhatThisMeans topic="sourced-position-vs-claim" />
           {issues.map((issue) => (
             <section key={issue.issueSlug} id={issue.issueSlug} className="scroll-mt-16">
               <h2 className="font-display text-2xl">{issue.label}</h2>

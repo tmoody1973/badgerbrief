@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { PartyBadge } from "@/components/guide/labels";
 import { SourceList } from "@/components/guide/sources";
+import { WhatThisMeans } from "@/components/guide/what-this-means";
 import type { IssueMatchGroup } from "@/lib/issue-match";
 
 export function MatchResults({ groups }: { groups: IssueMatchGroup[] }) {
   return (
     <div className="mt-8 space-y-10">
+      <WhatThisMeans topic="stance-labels" />
       {groups.map((group) => (
         <section key={group.issueSlug} className="scroll-mt-16">
           <h2 className="font-display text-2xl">{group.label}</h2>
