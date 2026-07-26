@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { buildIssueMatch, type RaceInput } from "@/lib/issue-match";
+import { relevantRaces, type Districts } from "@/lib/districts";
+import { BallotControl } from "./ballot-control";
 import { IssuePicker } from "./issue-picker";
 import { MatchResults } from "./match-results";
 
@@ -35,12 +37,17 @@ export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
     [selected, setSelected],
   );
 
-  // Statewide races are on every ballot; ordered statewide-first (they're the only
-  // ones here until Task 5 adds district races).
-  const activeRaceIds = useMemo(
-    () => raceMeta.filter((r) => STATEWIDE.has(r.level)).map((r) => r.raceId),
-    [raceMeta],
-  );
+  const [districts, setDistricts] = useState<Districts | null>(null);
+
+  // Statewide always; when the voter adds an address, relevantRaces returns their
+  // full personalized set (statewide + U.S. House + legislative), statewide-first
+  // in raceMeta order.
+  const activeRaceIds = useMemo(() => {
+    const chosen = districts
+      ? relevantRaces(districts, raceMeta as { raceId: string; level: string; districts?: { district?: number }[] | null }[])
+      : raceMeta.filter((r) => STATEWIDE.has(r.level));
+    return chosen.map((r) => r.raceId);
+  }, [districts, raceMeta]);
 
   const data = useQuery(
     api.public.positionsForRaces,
@@ -55,6 +62,7 @@ export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
   return (
     <>
       <IssuePicker selected={selected} onToggle={toggle} />
+      <BallotControl onFound={(d) => setDistricts(d)} />
 
       {selected.length === 0 ? (
         <p className="mt-8 border-2 border-dashed border-border bg-card p-6 text-sm text-muted-foreground">
