@@ -10,6 +10,7 @@ export type HomeDict = {
   howToVoteCta: string;
   governorsRaceCta: string;
   matchCta: string;
+  startHereCta?: string;
   deadlines: {
     heading: string;
     pollsOpenPrefix: string;
@@ -43,6 +44,7 @@ export const homeEn: HomeDict = {
   howToVoteCta: "How to vote →",
   governorsRaceCta: "Governor's race",
   matchCta: "What matters to you? →",
+  startHereCta: "New here? Start here →",
   deadlines: {
     heading: "When are the 2026 Wisconsin primary deadlines?",
     pollsOpenPrefix: "Polls are open",

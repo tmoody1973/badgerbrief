@@ -18,6 +18,9 @@ export const homeEs: HomeDict = {
   howToVoteCta: "Cómo votar →",
   governorsRaceCta: "Contienda por gobernador",
   matchCta: "¿Qué te importa? →",
+  // ponytail: guided path is EN-only v1 (home-guide.tsx gates lang !== "es"),
+  // so this never renders — kept only to satisfy the ES-key-parity test.
+  startHereCta: "New here? Start here →",
   deadlines: {
     heading: "¿Cuáles son los plazos de la primaria de Wisconsin de 2026?",
     pollsOpenPrefix: "Las urnas abren",
