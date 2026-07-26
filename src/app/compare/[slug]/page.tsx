@@ -125,7 +125,7 @@ export default async function ComparePage({ params }: Props) {
                 ))}
               </div>
               {issue.noRecord.length > 0 && (
-                <NoRecordLine names={issue.noRecord.map((c) => c.name)} />
+                <NoRecordLine candidates={issue.noRecord} />
               )}
             </section>
           ))}
@@ -139,21 +139,43 @@ export default async function ComparePage({ params }: Props) {
   );
 }
 
-function NoRecordLine({ names }: { names: string[] }) {
+function NoRecordLine({
+  candidates,
+}: {
+  candidates: { slug: string; name: string }[];
+}) {
   const HEAD = 3;
-  const head = names.slice(0, HEAD);
-  const rest = names.slice(HEAD);
+  const rest = candidates.slice(HEAD);
+  const links = candidates.map((c, i) => (
+    <span key={c.slug}>
+      {i > 0 ? ", " : ""}
+      <Link
+        href={`/candidates/${c.slug}`}
+        className="underline underline-offset-2 hover:decoration-2"
+      >
+        {c.name}
+      </Link>
+    </span>
+  ));
+
+  // ≤3 names: no fold needed — show them inline, all linked.
+  if (rest.length === 0) {
+    return (
+      <p className="mt-3 font-mono text-xs text-muted-foreground">
+        No position on record: {links}
+      </p>
+    );
+  }
+
+  // >3: summary shows the first 3 names as plain text plus a "+N more" toggle
+  // (plain text so the summary click toggles rather than following a link);
+  // the expanded body lists every name as a link.
   return (
-    <p className="mt-3 font-mono text-xs text-muted-foreground">
-      No position on record: {head.join(", ")}
-      {rest.length > 0 && (
-        <>
-          {", "}
-          <span className="whitespace-nowrap">+{rest.length} more</span>
-          {/* full list stays in the DOM for scanners/screen readers */}
-          <span className="sr-only"> — {rest.join(", ")}</span>
-        </>
-      )}
-    </p>
+    <details className="mt-3">
+      <summary className="cursor-pointer font-mono text-xs text-muted-foreground">
+        No position on record: {candidates.slice(0, HEAD).map((c) => c.name).join(", ")}, +{rest.length} more
+      </summary>
+      <p className="mt-2 font-mono text-xs text-muted-foreground">{links}</p>
+    </details>
   );
 }
