@@ -105,6 +105,15 @@ export function SiteFooter() {
           <Link href={localizeHref("/feedback", locale)} className="font-bold underline decoration-2 underline-offset-2">
             {footer.reportError}
           </Link>
+          {" · "}
+          <a
+            href="https://github.com/sponsors/tmoody1973"
+            className="font-bold underline decoration-2 underline-offset-2"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            ♥ {footer.support}
+          </a>
         </p>
         <p className="font-mono text-xs text-muted-foreground">{footer.financeDisclaimer}</p>
       </div>
