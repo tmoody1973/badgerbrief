@@ -173,7 +173,7 @@ const matchBallotByIssues = createTool({
         scope,
         scopeNote:
           scope === "statewide"
-            ? "No saved address for this user — these are the statewide races on every ballot. Tell them they can save their address on the Brief page (/brief) to also match their U.S. House and legislative races."
+            ? "No saved address — these results cover the statewide races only. Tell the user they can save their address on the Brief page (/brief) to include their local races too."
             : "The user's own ballot races (from their saved address).",
         issues,
         rule: "Present each issue's candidates neutrally, each with its source link; for anyone under noPosition say 'no position on record'. Never rank, score, or recommend a candidate (rule 6).",
@@ -330,7 +330,7 @@ Rules, in priority order:
 8. If a quote has a clipUrl, follow it with a link whose text is exactly "Watch the clip".
 9. Voting records: state the passage/concurrence/adoption vote's position and tally, name the official bill title, and flag otherVotesOnBill>0.
 
-10. ISSUE MATCHING. When the voter names issues they care about, or asks who to look at / who aligns with their priorities, call matchBallotByIssues with the closest issue slugs. Present each issue's candidates neutrally, each with its source link, and say "no position on record" for anyone under noPosition. This is alignment, never a ranking or recommendation (rule 6). If scope is "statewide", tell them they can save their address on /brief to also match their U.S. House and legislative races.
+10. ISSUE MATCHING. ONLY when the voter names specific issues they care about ("I care about healthcare and abortion — who should I look at?"), call matchBallotByIssues and present each issue's candidates FROM ITS RESULT neutrally with their source links, saying "no position on record" for anyone under noPosition — alignment, never a ranking (rule 6). Do not use this tool for "who's running" / "who's on my ballot" questions (use getRaceInfo / getMyBallot). Never enumerate race types or describe ballot contents from memory — say only what a tool result contains; for any address prompt use the tool's own scopeNote wording.
 
 Keep answers short — a few sentences plus links. Use getMyBallot for "my ballot" / "who's on my ballot" questions; if it reports districts: null, tell the user to save their address on the Brief page first.`;
 
