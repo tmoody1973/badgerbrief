@@ -8,6 +8,7 @@ import type { ChromeDict } from "./chrome-dict";
 export const chromeEs: ChromeDict = {
   navLabels: {
     "/races/wi-gov-2026": "Contiendas",
+    "/match": "Qué te importa",
     "/ads": "Rastreador de anuncios",
     "/news": "Noticias",
     "/vote": "Cómo votar",

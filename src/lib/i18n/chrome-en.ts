@@ -5,6 +5,7 @@ import type { ChromeDict } from "./chrome-dict";
 export const chromeEn: ChromeDict = {
   navLabels: {
     "/races/wi-gov-2026": "Races",
+    "/match": "What Matters",
     "/ads": "Ad Tracker",
     "/news": "News",
     "/vote": "How to vote",
