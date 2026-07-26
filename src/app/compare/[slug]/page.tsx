@@ -71,6 +71,14 @@ export default async function ComparePage({ params }: Props) {
         stance is a sourced summary — follow the source links to read it in
         context. This is not a ranking or endorsement.
       </p>
+      <p className="mt-3">
+        <Link
+          href="/match"
+          className="font-mono text-xs font-bold uppercase tracking-widest underline underline-offset-2"
+        >
+          Or start from the issues you care about →
+        </Link>
+      </p>
 
       {totalOnRecord === 0 ? (
         <div className="mt-6 border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
