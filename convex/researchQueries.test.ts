@@ -82,6 +82,31 @@ describe("listResearchTargets", () => {
     });
   });
 
+  test("excludes withdrawn/suspended candidates from both campaign-site and article targets", async () => {
+    const t = setup();
+    await t.run((ctx) =>
+      ctx.db.insert("candidates", {
+        ...baseCandidate,
+        slug: "sara-rodriguez",
+        name: "Sara Rodriguez",
+        status: "Withdrawn (July 17, 2026)",
+        socialMedia: { campaign_website: "https://www.sararodriguez.com" },
+      }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("article_sources", {
+        ...baseArticleSource,
+        candidateSlug: "sara-rodriguez",
+        url: "https://jsonline.com/rodriguez-ag",
+        status: "approved",
+        decidedAt: 1500,
+      }),
+    );
+
+    const targets = await t.query(internal.researchQueries.listResearchTargets, {});
+    expect(targets).toHaveLength(0);
+  });
+
   test("emits campaign_site semantics for auto-registered own-site subpages", async () => {
     const t = setup();
     await t.run((ctx) => ctx.db.insert("candidates", baseCandidate));

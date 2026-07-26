@@ -3,6 +3,7 @@ import { z } from "zod";
 /** MOO-312 canonical M1 issue vocabulary — keep in sync with spec §2. */
 export const ISSUE_SLUGS = [
   "abortion",
+  "agriculture",
   "economy-jobs",
   "education",
   "elections-democracy",
