@@ -6,7 +6,13 @@ import { SourceList } from "@/components/guide/sources";
 import { WhatThisMeans } from "@/components/guide/what-this-means";
 import type { IssueMatchGroup } from "@/lib/issue-match";
 
-export function MatchResults({ groups }: { groups: IssueMatchGroup[] }) {
+export function MatchResults({
+  groups,
+  guide,
+}: {
+  groups: IssueMatchGroup[];
+  guide?: string | null;
+}) {
   return (
     <div className="mt-8 space-y-10">
       <WhatThisMeans topic="stance-labels" />
@@ -32,7 +38,7 @@ export function MatchResults({ groups }: { groups: IssueMatchGroup[] }) {
                     >
                       <div className="flex flex-wrap items-center gap-2">
                         <Link
-                          href={`/candidates/${candidate.slug}`}
+                          href={`/candidates/${candidate.slug}${guide ? `?guide=${encodeURIComponent(guide)}` : ""}`}
                           className="font-bold underline decoration-2 underline-offset-2"
                         >
                           {candidate.name}

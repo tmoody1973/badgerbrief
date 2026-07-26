@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   parseGuideStep,
   nextHref,
@@ -15,9 +15,11 @@ function stepNumber(step: GuideStep): string {
 }
 
 export function GuidedRail() {
+  const pathname = usePathname();
   const params = useSearchParams();
   const step = parseGuideStep(params.get("guide"));
   if (step === null) return null;
+  if (pathname === "/es" || pathname.startsWith("/es/")) return null;
 
   const label = GUIDE_STEPS.find((s) => s.step === step)?.label ?? "";
   const prev = prevHref(step);
