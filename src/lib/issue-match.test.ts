@@ -40,4 +40,11 @@ describe("buildIssueMatch", () => {
     const { groups } = buildIssueMatch(races, ["abortion", "abortion"]);
     expect(groups).toHaveLength(1);
   });
+
+  it("preserves selection order regardless of relative coverage size", () => {
+    // abortion has less coverage (1 race) than healthcare (2 races) in the
+    // fixture, so this proves order comes from selection, not coverage.
+    const { groups } = buildIssueMatch(races, ["abortion", "healthcare"]);
+    expect(groups.map((g) => g.issueSlug)).toEqual(["abortion", "healthcare"]);
+  });
 });

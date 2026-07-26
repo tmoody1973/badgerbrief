@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Districts } from "@/lib/districts";
+import type { Districts, GeocodeResult } from "@/lib/districts";
 
 const range = (n: number) => Array.from({ length: n }, (_, i) => i + 1);
 
@@ -22,7 +22,7 @@ export function BallotControl({
     setError(null);
     try {
       const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`);
-      const data = await res.json();
+      const data: GeocodeResult = await res.json();
       if (data.ok) {
         onFound(
           { congressional: data.congressional, senate: data.senate, assembly: data.assembly },

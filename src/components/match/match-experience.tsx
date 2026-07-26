@@ -6,12 +6,16 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { buildIssueMatch, type RaceInput } from "@/lib/issue-match";
 import { relevantRaces, type Districts } from "@/lib/districts";
+import { labelForSlug } from "@/lib/candidate-order";
 import { BallotControl } from "./ballot-control";
 import { IssuePicker } from "./issue-picker";
 import { MatchResults } from "./match-results";
 
 type RaceMeta = { raceId: string; office: string; level: string };
 const STATEWIDE = new Set(["State Executive", "State Judicial"]);
+// ponytail: local rank, not home-races LEVEL_ORDER — that order interleaves
+// Federal between the two statewide levels, which isn't "statewide-first".
+const levelRank = (level: string) => (STATEWIDE.has(level) ? 0 : 1);
 
 export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
   const router = useRouter();
@@ -39,14 +43,14 @@ export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
 
   const [districts, setDistricts] = useState<Districts | null>(null);
 
-  // Statewide always; when the voter adds an address, relevantRaces returns their
-  // full personalized set (statewide + U.S. House + legislative), statewide-first
-  // in raceMeta order.
+  // Statewide always; when the voter adds an address, relevantRaces returns
+  // their full personalized set (statewide + U.S. House + legislative).
+  // Sorted statewide-first below since relevantRaces doesn't guarantee order.
   const activeRaceIds = useMemo(() => {
     const chosen = districts
       ? relevantRaces(districts, raceMeta as { raceId: string; level: string; districts?: { district?: number }[] | null }[])
       : raceMeta.filter((r) => STATEWIDE.has(r.level));
-    return chosen.map((r) => r.raceId);
+    return [...chosen].sort((a, b) => levelRank(a.level) - levelRank(b.level)).map((r) => r.raceId);
   }, [districts, raceMeta]);
 
   const data = useQuery(
@@ -59,6 +63,17 @@ export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
     return buildIssueMatch(data as RaceInput[], selected);
   }, [data, selected]);
 
+  // Every selected issue gets a line, even with zero coverage — never implied
+  // by omission. buildIssueMatch only returns groups with coverage, so refill
+  // the gaps here in selection order rather than changing its contract.
+  const ordered = useMemo(() => {
+    if (!result) return [];
+    const bySlug = new Map(result.groups.map((g) => [g.issueSlug, g]));
+    return selected.map(
+      (slug) => bySlug.get(slug) ?? { issueSlug: slug, label: labelForSlug(slug), races: [] },
+    );
+  }, [result, selected]);
+
   return (
     <>
       <IssuePicker selected={selected} onToggle={toggle} />
@@ -70,14 +85,8 @@ export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
         </p>
       ) : result === null ? (
         <p className="mt-8 font-mono text-xs text-muted-foreground">Finding positions…</p>
-      ) : result.totalOnRecord === 0 ? (
-        <p className="mt-8 border-2 border-border bg-warning p-4 text-sm font-bold">
-          None of the statewide candidates have a sourced position on{" "}
-          {selected.length > 1 ? "these issues" : "this issue"} on record yet. We only show
-          positions we can link to a source.
-        </p>
       ) : (
-        <MatchResults groups={result.groups} />
+        <MatchResults groups={ordered} />
       )}
     </>
   );

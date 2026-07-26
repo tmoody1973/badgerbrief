@@ -11,6 +11,11 @@ export function MatchResults({ groups }: { groups: IssueMatchGroup[] }) {
       {groups.map((group) => (
         <section key={group.issueSlug} className="scroll-mt-16">
           <h2 className="font-display text-2xl">{group.label}</h2>
+          {group.races.length === 0 ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              No candidate on your ballot has a sourced position on this yet.
+            </p>
+          ) : (
           <div className="mt-3 space-y-5">
             {group.races.map((race) => (
               <div key={race.raceId}>
@@ -50,6 +55,7 @@ export function MatchResults({ groups }: { groups: IssueMatchGroup[] }) {
               </div>
             ))}
           </div>
+          )}
         </section>
       ))}
     </div>
