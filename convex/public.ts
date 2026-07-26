@@ -47,6 +47,41 @@ export const getRace = query({
   },
 });
 
+export const positionsForRaces = query({
+  args: { raceIds: v.array(v.string()) },
+  handler: async (ctx, { raceIds }) => {
+    const out: {
+      raceId: string; office: string; level: string;
+      candidates: { slug: string; name: string; party?: string; incumbent?: boolean }[];
+      positions: { candidateSlug: string; issueSlug: string; stance: string; summary: string; sources: { name: string; url: string }[] }[];
+    }[] = [];
+    for (const raceId of raceIds) {
+      const race = await ctx.db
+        .query("races")
+        .withIndex("by_race_id", (q) => q.eq("raceId", raceId))
+        .unique();
+      if (!race) continue;
+      const [candidates, positions] = await Promise.all([
+        ctx.db.query("candidates").withIndex("by_race", (q) => q.eq("raceId", raceId)).collect(),
+        ctx.db
+          .query("candidate_positions_published")
+          .withIndex("by_candidate_issue", (q) => q.eq("raceId", raceId))
+          .collect(),
+      ]);
+      out.push({
+        raceId: race.raceId,
+        office: race.office,
+        level: race.level,
+        candidates: candidates.map((c) => ({ slug: c.slug, name: c.name, party: c.party, incumbent: c.incumbent })),
+        positions: positions.map((p) => ({
+          candidateSlug: p.candidateSlug, issueSlug: p.issueSlug, stance: p.stance, summary: p.summary, sources: p.sources,
+        })),
+      });
+    }
+    return out;
+  },
+});
+
 export const getCandidateBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, { slug }) => {
