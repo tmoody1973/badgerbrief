@@ -175,6 +175,105 @@ describe("position publish gate", () => {
   });
 });
 
+describe("publish.bulkRejectPositions (MOO-412 follow-up)", () => {
+  const pendingDraft = {
+    candidateSlug: "joel-brennan",
+    raceId: "WI-GOV-2026",
+    issueSlug: "education",
+    stance: "support" as const,
+    summary: "Supports increased K-12 funding.",
+    confidence: 0.6,
+    sources: [{ name: "Campaign site", url: "https://example.com/issues" }],
+    reviewStatus: "pending" as const,
+    extractedAt: 0,
+  };
+
+  async function seedPendingWithTask(t: ReturnType<typeof setup>) {
+    const draftId = await t.run((ctx) =>
+      ctx.db.insert("candidate_positions_drafts", pendingDraft),
+    );
+    const taskId = await t.run((ctx) =>
+      ctx.db.insert("review_tasks", {
+        kind: "position",
+        refTable: "candidate_positions_drafts",
+        refId: draftId,
+        status: "open",
+        createdAt: Date.now(),
+      }),
+    );
+    return { draftId, taskId };
+  }
+
+  test("rejects drafts, resolves their tasks, returns the count, and leaves the keep untouched", async () => {
+    const t = setup();
+    const reject1 = await seedPendingWithTask(t);
+    const reject2 = await seedPendingWithTask(t);
+    const keep = await seedPendingWithTask(t);
+
+    const result = await t.withIdentity(ADMIN).mutation(api.publish.bulkRejectPositions, {
+      items: [
+        { draftId: reject1.draftId, taskId: reject1.taskId },
+        { draftId: reject2.draftId, taskId: reject2.taskId },
+      ],
+    });
+    expect(result).toEqual({ rejected: 2 });
+
+    const [draft1, draft2, keptDraft] = await t.run((ctx) =>
+      Promise.all([
+        ctx.db.get(reject1.draftId),
+        ctx.db.get(reject2.draftId),
+        ctx.db.get(keep.draftId),
+      ]),
+    );
+    expect(draft1?.reviewStatus).toBe("rejected");
+    expect(draft2?.reviewStatus).toBe("rejected");
+    expect(keptDraft?.reviewStatus).toBe("pending");
+
+    const [task1, task2, keptTask] = await t.run((ctx) =>
+      Promise.all([
+        ctx.db.get(reject1.taskId),
+        ctx.db.get(reject2.taskId),
+        ctx.db.get(keep.taskId),
+      ]),
+    );
+    expect(task1?.status).toBe("dismissed");
+    expect(task2?.status).toBe("dismissed");
+    expect(keptTask?.status).toBe("open");
+
+    const entries = await t.withIdentity(ADMIN).query(api.audit.forRecord, {
+      refTable: "candidate_positions_drafts",
+      refId: reject1.draftId,
+    });
+    expect(entries.map((e) => e.action)).toEqual(["reject"]);
+  });
+
+  test("a null taskId rejects the draft without touching any task", async () => {
+    const t = setup();
+    const draftId = await t.run((ctx) =>
+      ctx.db.insert("candidate_positions_drafts", pendingDraft),
+    );
+    const result = await t.withIdentity(ADMIN).mutation(api.publish.bulkRejectPositions, {
+      items: [{ draftId, taskId: null }],
+    });
+    expect(result).toEqual({ rejected: 1 });
+    const draft = await t.run((ctx) => ctx.db.get(draftId));
+    expect(draft?.reviewStatus).toBe("rejected");
+  });
+
+  test("rejects non-admin and anonymous callers", async () => {
+    const t = setup();
+    const { draftId } = await seedPendingWithTask(t);
+    await expect(
+      t.withIdentity(READER).mutation(api.publish.bulkRejectPositions, {
+        items: [{ draftId, taskId: null }],
+      }),
+    ).rejects.toThrow(/admin role/);
+    await expect(
+      t.mutation(api.publish.bulkRejectPositions, { items: [{ draftId, taskId: null }] }),
+    ).rejects.toThrow(/authentication/);
+  });
+});
+
 describe("seed idempotency", () => {
   const race = {
     raceId: "WI-GOV-2026",

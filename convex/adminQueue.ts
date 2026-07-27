@@ -6,7 +6,7 @@ import {
   MutationCtx,
   QueryCtx,
 } from "./_generated/server";
-import { Doc } from "./_generated/dataModel";
+import { Doc, Id } from "./_generated/dataModel";
 import { logAudit } from "./audit";
 
 /** MOO-312 Task 4: admin review dashboard queries/mutations. */
@@ -152,6 +152,114 @@ export const list = query({
       // ad_match / other: no draft table to join yet — surfaced elsewhere.
     }
     return rows.sort((a, b) => b.task.createdAt - a.task.createdAt);
+  },
+});
+
+type PositionCluster = {
+  raceId: string;
+  candidateSlug: string;
+  candidateName: string;
+  office: string;
+  issueSlug: string;
+  isNew: boolean;
+  keepDraftId: Id<"candidate_positions_drafts">;
+  drafts: Array<{
+    draftId: Id<"candidate_positions_drafts">;
+    taskId: Id<"review_tasks"> | null;
+    stance: string;
+    confidence: number;
+    summary: string;
+    sourceName: string;
+    sourceUrl: string;
+    isKeep: boolean;
+  }>;
+};
+
+/**
+ * Pending position drafts grouped by candidate+issue, for the admin cluster
+ * reviewer (MOO-412 follow-up). Multiple drafts for the same
+ * raceId|candidateSlug|issueSlug are duplicate extraction attempts — the
+ * reviewer keeps one (highest confidence, then longest summary as tiebreak)
+ * and bulk-rejects the rest. `isNew` flags a cluster with no published row
+ * yet, so the reviewer can prioritize genuinely new positions over re-reviews.
+ */
+export const positionClusters = query({
+  args: {},
+  handler: async (ctx): Promise<{ clusters: PositionCluster[] }> => {
+    await requireAdmin(ctx);
+
+    // Bounded admin-only scan — same pattern as unattributedAds/adQueue above.
+    const pending = (await ctx.db.query("candidate_positions_drafts").collect()).filter(
+      (d) => d.reviewStatus === "pending",
+    );
+
+    const publishedKeys = new Set(
+      (await ctx.db.query("candidate_positions_published").collect()).map(
+        (p) => `${p.raceId}|${p.candidateSlug}|${p.issueSlug}`,
+      ),
+    );
+
+    const openPositionTasks = (
+      await ctx.db
+        .query("review_tasks")
+        .withIndex("by_status", (q) => q.eq("status", "open"))
+        .collect()
+    ).filter((t) => t.kind === "position");
+    const taskIdByDraftId = new Map(openPositionTasks.map((t) => [t.refId, t._id]));
+
+    const candidates = await ctx.db.query("candidates").collect();
+    const officeByRaceId = new Map(
+      (await ctx.db.query("races").collect()).map((r) => [r.raceId, r.office]),
+    );
+    const candidateByKey = new Map(
+      candidates.map((c) => [`${c.raceId}|${c.slug}`, c]),
+    );
+
+    const groups = new Map<string, Doc<"candidate_positions_drafts">[]>();
+    for (const draft of pending) {
+      const key = `${draft.raceId}|${draft.candidateSlug}|${draft.issueSlug}`;
+      const group = groups.get(key) ?? [];
+      group.push(draft);
+      groups.set(key, group);
+    }
+
+    const clusters: PositionCluster[] = [];
+    for (const [key, drafts] of groups) {
+      const [raceId, candidateSlug, issueSlug] = key.split("|");
+      const sorted = [...drafts].sort((a, b) => {
+        if (b.confidence !== a.confidence) return b.confidence - a.confidence;
+        return b.summary.length - a.summary.length;
+      });
+      const candidate = candidateByKey.get(`${raceId}|${candidateSlug}`);
+      clusters.push({
+        raceId,
+        candidateSlug,
+        candidateName: candidate?.name ?? candidateSlug,
+        office: candidate ? officeByRaceId.get(candidate.raceId) ?? "" : "",
+        issueSlug,
+        isNew: !publishedKeys.has(key),
+        keepDraftId: sorted[0]._id,
+        drafts: sorted.map((d, i) => ({
+          draftId: d._id,
+          taskId: taskIdByDraftId.get(d._id) ?? null,
+          stance: d.stance,
+          confidence: d.confidence,
+          summary: d.summary,
+          sourceName: d.sources[0]?.name ?? "",
+          sourceUrl: d.sources[0]?.url ?? "",
+          isKeep: i === 0,
+        })),
+      });
+    }
+
+    clusters.sort((a, b) => {
+      if (a.isNew !== b.isNew) return a.isNew ? -1 : 1;
+      const byName = a.candidateName.localeCompare(b.candidateName);
+      if (byName !== 0) return byName;
+      return a.issueSlug.localeCompare(b.issueSlug);
+    });
+
+    return { clusters };
   },
 });
 

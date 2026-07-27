@@ -142,6 +142,119 @@ describe("adminQueue.resolveAlert", () => {
   });
 });
 
+describe("adminQueue.positionClusters (MOO-412 follow-up)", () => {
+  async function seedPendingDraft(
+    t: ReturnType<typeof setup>,
+    overrides: Partial<typeof positionDraft> = {},
+  ) {
+    const draftId = await t.run((ctx) =>
+      ctx.db.insert("candidate_positions_drafts", {
+        ...positionDraft,
+        reviewStatus: "pending" as const,
+        ...overrides,
+      }),
+    );
+    const taskId = await t.run((ctx) =>
+      ctx.db.insert("review_tasks", {
+        kind: "position",
+        refTable: "candidate_positions_drafts",
+        refId: draftId,
+        status: "open",
+        createdAt: Date.now(),
+      }),
+    );
+    return { draftId, taskId };
+  }
+
+  test("groups duplicate drafts into one cluster, keeps the higher-confidence one", async () => {
+    const t = setup();
+    await t.run((ctx) =>
+      ctx.db.insert("candidates", {
+        slug: "joel-brennan",
+        raceId: "WI-GOV-2026",
+        name: "Joel Brennan",
+        sources: [],
+        dataAsOf: "2026-07-20",
+      }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("races", {
+        raceId: "WI-GOV-2026",
+        electionSlug: "wi-2026",
+        office: "Governor of Wisconsin",
+        level: "State Executive",
+        sources: [],
+        dataAsOf: "2026-07-20",
+      }),
+    );
+    const low = await seedPendingDraft(t, { confidence: 0.6, summary: "Short." });
+    const high = await seedPendingDraft(t, {
+      confidence: 0.9,
+      summary: "A much longer, more detailed summary of the position.",
+    });
+
+    const { clusters } = await t
+      .withIdentity(ADMIN)
+      .query(api.adminQueue.positionClusters, {});
+    expect(clusters).toHaveLength(1);
+    const cluster = clusters[0];
+    expect(cluster.candidateName).toBe("Joel Brennan");
+    expect(cluster.office).toBe("Governor of Wisconsin");
+    expect(cluster.keepDraftId).toBe(high.draftId);
+    expect(cluster.drafts).toHaveLength(2);
+    expect(cluster.drafts[0].isKeep).toBe(true);
+    expect(cluster.drafts[0].draftId).toBe(high.draftId);
+    expect(cluster.drafts[0].taskId).toBe(high.taskId);
+    expect(cluster.drafts[1].isKeep).toBe(false);
+    expect(cluster.drafts[1].taskId).toBe(low.taskId);
+  });
+
+  test("isNew is false when a published row exists for the key, true otherwise", async () => {
+    const t = setup();
+    await seedPendingDraft(t, { issueSlug: "education" });
+    await seedPendingDraft(t, { issueSlug: "healthcare" });
+    const publishedDraftId = await t.run((ctx) =>
+      ctx.db.insert("candidate_positions_drafts", {
+        ...positionDraft,
+        issueSlug: "education",
+        reviewStatus: "approved" as const,
+      }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("candidate_positions_published", {
+        candidateSlug: positionDraft.candidateSlug,
+        raceId: positionDraft.raceId,
+        issueSlug: "education",
+        stance: "support",
+        summary: "Already published.",
+        confidence: 0.9,
+        sources: [],
+        draftId: publishedDraftId,
+        publishedAt: 0,
+        lastReviewedAt: 0,
+      }),
+    );
+
+    const { clusters } = await t
+      .withIdentity(ADMIN)
+      .query(api.adminQueue.positionClusters, {});
+    expect(clusters).toHaveLength(2);
+    const byIssue = new Map(clusters.map((c) => [c.issueSlug, c]));
+    expect(byIssue.get("education")?.isNew).toBe(false);
+    expect(byIssue.get("healthcare")?.isNew).toBe(true);
+  });
+
+  test("rejects non-admin and anonymous callers", async () => {
+    const t = setup();
+    await expect(
+      t.withIdentity(READER).query(api.adminQueue.positionClusters, {}),
+    ).rejects.toThrow(/admin/);
+    await expect(t.query(api.adminQueue.positionClusters, {})).rejects.toThrow(
+      /admin/,
+    );
+  });
+});
+
 describe("adQueue + confirmAdMatch (MOO-309)", () => {
   async function seedAdTask(t: ReturnType<typeof setup>) {
     return await t.run(async (ctx) => {

@@ -6,6 +6,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Button } from "@/components/retroui/Button";
 import { asMessage, DraftRow, ErrorLine, type QueueRow } from "./draft-row";
+import { PositionClusters } from "./position-clusters";
 
 /**
  * MOO-312 Task 4 / MOO-327: admin review dashboard — triage queue, alerts.
@@ -83,6 +84,7 @@ function AlertsSection() {
 }
 
 type Filter = "all" | "position" | "quote";
+type View = "queue" | "cluster";
 
 function FilterTab({
   active,
@@ -118,6 +120,7 @@ function countByKind(rows: QueueRow[] | undefined, kind: QueueRow["kind"]) {
 export function ReviewQueue() {
   const rows = useQueue();
   const [filter, setFilter] = useState<Filter>("all");
+  const [view, setView] = useState<View>("queue");
 
   const positionCount = countByKind(rows, "position");
   const quoteCount = countByKind(rows, "quote");
@@ -128,28 +131,56 @@ export function ReviewQueue() {
     <div>
       <div className="border-2 border-border bg-card shadow-[var(--shadow-brutal)]">
         <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b-2 border-border bg-card p-3">
-          <div className="flex flex-wrap gap-2">
-            <FilterTab active={filter === "all"} count={totalCount} onClick={() => setFilter("all")}>
-              All
-            </FilterTab>
-            <FilterTab
-              active={filter === "position"}
-              count={positionCount}
-              onClick={() => setFilter("position")}
-            >
-              Positions
-            </FilterTab>
-            <FilterTab active={filter === "quote"} count={quoteCount} onClick={() => setFilter("quote")}>
-              Quotes
-            </FilterTab>
+          {view === "queue" && (
+            <div className="flex flex-wrap gap-2">
+              <FilterTab active={filter === "all"} count={totalCount} onClick={() => setFilter("all")}>
+                All
+              </FilterTab>
+              <FilterTab
+                active={filter === "position"}
+                count={positionCount}
+                onClick={() => setFilter("position")}
+              >
+                Positions
+              </FilterTab>
+              <FilterTab active={filter === "quote"} count={quoteCount} onClick={() => setFilter("quote")}>
+                Quotes
+              </FilterTab>
+            </div>
+          )}
+          <div className="flex items-center gap-3">
+            {view === "queue" && (
+              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                {filtered.length} remaining
+              </p>
+            )}
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => setView("queue")}
+                className={`press border-2 border-border px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest ${
+                  view === "queue" ? "bg-primary text-primary-foreground" : "bg-background"
+                }`}
+              >
+                Queue
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("cluster")}
+                className={`press border-2 border-border px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest ${
+                  view === "cluster" ? "bg-primary text-primary-foreground" : "bg-background"
+                }`}
+              >
+                By cluster
+              </button>
+            </div>
           </div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            {filtered.length} remaining
-          </p>
         </div>
 
         <div className="p-3">
-          {rows === undefined ? (
+          {view === "cluster" ? (
+            <PositionClusters />
+          ) : rows === undefined ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : filtered.length === 0 ? (
             <p className="text-sm text-muted-foreground">Queue is empty.</p>
