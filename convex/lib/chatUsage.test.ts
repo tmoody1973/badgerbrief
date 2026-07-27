@@ -37,6 +37,8 @@ describe("isKillSwitchOn", () => {
     expect(isKillSwitchOn("0")).toBe(false);
     expect(isKillSwitchOn("false")).toBe(false);
     expect(isKillSwitchOn("off")).toBe(false);
+    expect(isKillSwitchOn("no")).toBe(false);
+    expect(isKillSwitchOn("  FALSE ")).toBe(false); // trim + case-insensitive
   });
   it("is ON for an explicit truthy value", () => {
     expect(isKillSwitchOn("1")).toBe(true);
