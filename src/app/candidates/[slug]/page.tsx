@@ -204,6 +204,7 @@ export default async function CandidatePage({ params }: Props) {
                 {candidate.currentOccupation}
               </p>
             )}
+          {candidate.party && <WhatThisMeans topic="party-labels" />}
         </div>
       </div>
 

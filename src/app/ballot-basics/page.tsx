@@ -111,9 +111,9 @@ export default function BallotBasicsPage() {
             away from the far ends of either party.
           </li>
           <li>
-            <strong>Conservative</strong> — emphasizes limited government, lower taxes, free
-            markets, and traditional values; right-of-center. Most conservatives here run as
-            Republicans.
+            <strong>Conservative</strong> — favors limited government, lower taxes, free
+            markets, and traditional values, aiming to expand individual freedom and economic
+            growth; right-of-center. Most conservatives here run as Republicans.
           </li>
           <li>
             <strong>Libertarian</strong> — wants the smallest possible government in both
@@ -148,9 +148,9 @@ export default function BallotBasicsPage() {
         <ul className="space-y-2">
           <li>
             <strong>Socialism</strong> — a broad umbrella for the idea that the public, rather
-            than private owners, should control or heavily regulate major parts of the economy.
-            It spans a wide range: some versions work through democracy and elections, others
-            through one-party control. On its own, &ldquo;socialist&rdquo; is a broad word that
+            than private owners, should own or control major parts of the economy. It spans a
+            wide range: some versions work through democracy and elections, others through
+            one-party control. On its own, &ldquo;socialist&rdquo; is a broad word that
             doesn&apos;t tell you which.
           </li>
           <li>
@@ -163,9 +163,10 @@ export default function BallotBasicsPage() {
             <strong>Democratic socialism</strong> — the &ldquo;democratic&rdquo; part is the
             point: it commits to democracy — free, competitive elections, civil liberties, and
             more than one party — while pushing for a larger public and worker role in the
-            economy, such as stronger public programs and labor rights. It rejects the one-party
-            model, and because it works through elections, its candidates in the U.S. usually
-            run inside the Democratic Party. The label is tied to the{" "}
+            economy. It rejects the one-party model. Its aims can include public programs, labor
+            rights, and forms of public or worker ownership. Because it works through elections,
+            its candidates in the U.S.
+            usually run inside the Democratic Party, and the label is tied to the{" "}
             <a
               href="https://www.dsausa.org/about-us/what-is-democratic-socialism/"
               target="_blank"
@@ -183,18 +184,16 @@ export default function BallotBasicsPage() {
           </li>
         </ul>
         <p>
-          <strong>The dividing line is democracy.</strong> The clearest difference between
-          communism as it has actually been practiced and democratic socialism is who holds
-          power: communist states have been one-party systems without competitive elections,
-          while democratic socialists run in elections and support multiparty democracy. The two
-          terms are not interchangeable.
+          One clear difference between communism as it has actually been practiced and
+          democratic socialism is who holds power: communist states have been one-party systems
+          without competitive elections, while democratic socialists run in elections and
+          support multiparty democracy. So the two terms are not interchangeable.
         </p>
         <p>
-          Heated labels get aimed at every side — &ldquo;socialist&rdquo; and
-          &ldquo;communist&rdquo; at the left, &ldquo;fascist&rdquo; and
-          &ldquo;authoritarian&rdquo; at the right — and they&apos;re often used loosely. Our
-          answer is the same either way: don&apos;t vote a label. Read what a candidate actually
-          supports, linked to the source, on their page.
+          Heated labels get thrown in every direction, and they&apos;re often used loosely as
+          attacks rather than descriptions. Our answer doesn&apos;t change no matter which way
+          they fly: don&apos;t vote a label. Read what a candidate actually supports, linked to
+          the source, on their page.
         </p>
       </Section>
 
