@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ContributeForm } from "@/components/contribute/contribute-form";
+import { ShareButton } from "@/components/contribute/share-button";
+import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 300;
 
@@ -32,7 +34,20 @@ export default function ContributePage() {
         </Suspense>
       </div>
 
-      {/* Share section — ShareButton wired in Feature B Task 4 */}
+      <div className="mt-8 border-2 border-border bg-card p-4">
+        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
+          Spread the word
+        </p>
+        <p className="mt-2 max-w-[60ch] text-sm">
+          Know someone who&rsquo;s still deciding? Share the guide.
+        </p>
+        <div className="mt-3">
+          <ShareButton
+            url={SITE_URL}
+            title="BadgerBrief — Wisconsin 2026 voter guide"
+          />
+        </div>
+      </div>
 
       <div className="mt-8 border-2 border-border bg-secondary p-4 text-sm">
         <p className="font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
