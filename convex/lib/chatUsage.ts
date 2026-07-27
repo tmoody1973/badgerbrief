@@ -15,3 +15,11 @@ export function capFromEnv(name: string, fallback: number): number {
 export function isOverCap(count: number, cap: number): boolean {
   return count > cap;
 }
+
+/** Kill switch is ON only for an explicit truthy value; unset/""/"0"/"false"/"off" = OFF. */
+export function isKillSwitchOn(raw: string | undefined): boolean {
+  if (raw == null) return false;
+  const v = raw.trim().toLowerCase();
+  if (v === "" || v === "0" || v === "false" || v === "off" || v === "no") return false;
+  return true;
+}

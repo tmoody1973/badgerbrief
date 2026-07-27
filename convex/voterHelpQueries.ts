@@ -22,7 +22,7 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import { relevantRaces, type Districts } from "../src/lib/districts";
-import { capFromEnv, dayKey, isOverCap } from "./lib/chatUsage";
+import { capFromEnv, dayKey, isKillSwitchOn, isOverCap } from "./lib/chatUsage";
 
 const MAX_PROMPT_CHARS = 2000;
 
@@ -86,7 +86,7 @@ export const getMyThread = query({
 export const sendMessage = mutation({
   args: { prompt: v.string(), guestId: v.optional(v.string()) },
   handler: async (ctx, { prompt, guestId }) => {
-    if (process.env.VOTER_HELP_DISABLED) {
+    if (isKillSwitchOn(process.env.VOTER_HELP_DISABLED)) {
       throw new ConvexError("Voter Help is paused right now — try the guide.");
     }
     const trimmed = prompt.trim();

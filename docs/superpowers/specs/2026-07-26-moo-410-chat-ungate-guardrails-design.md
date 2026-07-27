@@ -49,9 +49,12 @@ without any rate-limiter dependency. **The global daily cap is the true backstop
 
 ## Guardrails — all in `sendMessage`, in this order (fail fast)
 
-1. **Kill switch (everyone).** If `process.env.VOTER_HELP_DISABLED` is truthy, throw a
-   friendly `ConvexError` ("Voter Help is paused right now — try the guide.") before any
-   work. Instant off-switch, no deploy.
+1. **Kill switch (everyone).** If `process.env.VOTER_HELP_DISABLED` is an explicit "on"
+   value (parsed by `isKillSwitchOn` — unset/`""`/`"0"`/`"false"`/`"off"`/`"no"` are OFF,
+   anything else is ON), throw a friendly `ConvexError` ("Voter Help is paused right now —
+   try the guide.") before any work. Instant off-switch, no deploy. Raw truthiness on the
+   string would leave `VOTER_HELP_DISABLED="false"` stuck paused, so the value is parsed,
+   not just checked for presence.
 2. **Global daily cap (guests only).** A new `chat_usage` day-counter table. Increment the
    `GLOBAL` row for today; if it exceeds `GUEST_DAILY_CAP` (default **500**, env-tunable),
    throw a friendly "Voter Help is busy today — signed-in users still have access; the
@@ -114,7 +117,8 @@ The `/chat` page + its chat components (`src/components/chat/*`) must:
   checks), `convex/voterHelp.ts` (maxOutputTokens + prompt caching + getRaceInfo trim),
   `src/middleware.ts` (un-gate), `src/components/chat/*` + `src/app/chat/*` (guest id +
   args + notices).
-- Env (Convex prod + dev): `VOTER_HELP_DISABLED` (unset/false), `GUEST_DAILY_CAP=500`,
+- Env (Convex prod + dev): `VOTER_HELP_DISABLED` (unset — `"0"`/`"false"`/`"off"` also read
+  as OFF, only unset while `"1"`/`"true"` etc. turn it ON), `GUEST_DAILY_CAP=500`,
   `GUEST_MSG_CAP=30`.
 
 ## Error handling / edge cases

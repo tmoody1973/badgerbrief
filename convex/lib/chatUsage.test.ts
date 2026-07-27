@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { dayKey, capFromEnv, isOverCap } from "./chatUsage";
+import { dayKey, capFromEnv, isOverCap, isKillSwitchOn } from "./chatUsage";
 
 describe("dayKey", () => {
   it("returns the UTC YYYY-MM-DD for a timestamp", () => {
@@ -27,5 +27,20 @@ describe("isOverCap", () => {
   it("is true only strictly above the cap", () => {
     expect(isOverCap(30, 30)).toBe(false); // the 30th is allowed
     expect(isOverCap(31, 30)).toBe(true);  // the 31st is not
+  });
+});
+
+describe("isKillSwitchOn", () => {
+  it("is OFF for unset or falsy-looking values", () => {
+    expect(isKillSwitchOn(undefined)).toBe(false);
+    expect(isKillSwitchOn("")).toBe(false);
+    expect(isKillSwitchOn("0")).toBe(false);
+    expect(isKillSwitchOn("false")).toBe(false);
+    expect(isKillSwitchOn("off")).toBe(false);
+  });
+  it("is ON for an explicit truthy value", () => {
+    expect(isKillSwitchOn("1")).toBe(true);
+    expect(isKillSwitchOn("true")).toBe(true);
+    expect(isKillSwitchOn("yes")).toBe(true);
   });
 });

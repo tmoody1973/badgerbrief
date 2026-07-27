@@ -337,7 +337,7 @@ git commit -m "feat(chat): guest-session client (bb_guest_id + args + inline cap
 
 **Not a code task — the release procedure. The prod deploy + gate is Tarik-gated; do not deploy without explicit go-ahead.**
 
-- [ ] **Step 1:** Set Convex env (prod + dev): `GUEST_DAILY_CAP=500`, `GUEST_MSG_CAP=30`, and ensure `VOTER_HELP_DISABLED` is unset/false. (`npx convex env set ...`.)
+- [ ] **Step 1:** Set Convex env (prod + dev): `GUEST_DAILY_CAP=500`, `GUEST_MSG_CAP=30`, and ensure `VOTER_HELP_DISABLED` is **unset** (chat runs). To PAUSE chat for everyone, set `VOTER_HELP_DISABLED=1` — `isKillSwitchOn` treats unset/`""`/`"0"`/`"false"`/`"off"`/`"no"` as OFF, so don't rely on setting it to a falsy string to turn it back on. (`npx convex env set ...`.)
 - [ ] **Step 2:** Deploy Convex: `npx convex deploy --yes` (table + fns + env).
 - [ ] **Step 3:** **Golden gate on PROD:** `npm run eval:gate -- --name moo410 --baseline sonnet-5-tuned`. Gate = golden-expectations ≥90% floor + ≤5pt drop. **If it fails, revert the Task-3 agent-bounds commit and redeploy Convex** (the guest/kill/cap/un-gate parts are behavior-neutral and can stay); re-tune bounds and re-gate. Do not proceed to the frontend deploy on a failed gate.
 - [ ] **Step 4:** Deploy frontend: `npx vercel --prod`.
