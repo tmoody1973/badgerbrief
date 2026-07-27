@@ -47,6 +47,40 @@ describe("feedback.submit", () => {
     const rows = await t.run((ctx) => ctx.db.query("feedback").collect());
     expect(rows).toHaveLength(0);
   });
+
+  test("suggest_source with a javascript: sourceUrl throws (bad scheme)", async () => {
+    const t = setup();
+    await expect(
+      t.mutation(api.feedback.submit, {
+        kind: "suggest_source",
+        message: "check this out please",
+        sourceUrl: "javascript:alert(1)",
+      }),
+    ).rejects.toThrow(/http/i);
+  });
+
+  test("suggest_source with a valid https sourceUrl inserts it as-is", async () => {
+    const t = setup();
+    await t.mutation(api.feedback.submit, {
+      kind: "suggest_source",
+      message: "check this out please",
+      sourceUrl: "https://example.com/article",
+    });
+    const rows = await t.run((ctx) => ctx.db.query("feedback").collect());
+    expect(rows[0]).toMatchObject({ sourceUrl: "https://example.com/article" });
+  });
+
+  test("data_gap with a javascript: pageUrl inserts but drops the bad-scheme pageUrl", async () => {
+    const t = setup();
+    await t.mutation(api.feedback.submit, {
+      kind: "data_gap",
+      message: "This race is missing a candidate entirely.",
+      pageUrl: "javascript:alert(1)",
+    });
+    const rows = await t.run((ctx) => ctx.db.query("feedback").collect());
+    expect(rows).toHaveLength(1);
+    expect(rows[0].pageUrl).toBeUndefined();
+  });
 });
 
 describe("feedback.list ordering", () => {
