@@ -114,6 +114,12 @@ export function SiteFooter() {
           >
             ♥ {footer.support}
           </a>
+          {" · "}
+          {/* /contribute is EN-only (no /es route yet); link stays unlocalized
+              so the ES footer doesn't 404 while still surfacing a translated label. */}
+          <Link href="/contribute" className="underline decoration-2 underline-offset-2">
+            {footer.contribute}
+          </Link>
         </p>
         <p className="font-mono text-xs text-muted-foreground">{footer.financeDisclaimer}</p>
       </div>

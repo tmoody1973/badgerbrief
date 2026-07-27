@@ -19,9 +19,34 @@ import { requireAdmin } from "./sponsors";
 const MAX_MESSAGE = 4000;
 const MAX_FIELD = 500;
 
+const clip = (s?: string) => {
+  const t = s?.trim();
+  return t ? t.slice(0, MAX_FIELD) : undefined;
+};
+
+/** Keep only http(s) URLs; anything else (javascript:, data:, mailto:, garbage) → undefined. */
+function safeUrl(u: string | undefined): string | undefined {
+  const clipped = clip(u);
+  if (!clipped) return undefined;
+  try {
+    const proto = new URL(clipped).protocol;
+    return proto === "http:" || proto === "https:" ? clipped : undefined;
+  } catch {
+    return undefined; // not a parseable absolute URL
+  }
+}
+
 export const submit = mutation({
   args: {
-    kind: v.union(v.literal("correction"), v.literal("question"), v.literal("other")),
+    kind: v.union(
+      v.literal("correction"),
+      v.literal("question"),
+      v.literal("other"),
+      v.literal("suggest_candidate"),
+      v.literal("suggest_source"),
+      v.literal("data_gap"),
+      v.literal("volunteer"),
+    ),
     message: v.string(),
     pageUrl: v.optional(v.string()),
     sourceUrl: v.optional(v.string()),
@@ -43,22 +68,27 @@ export const submit = mutation({
       throw new Error("That's longer than this form accepts — please trim it.");
     }
     // A correction has to be checkable. This is the same rule the rest of the
-    // site follows, applied to the people correcting it.
-    if (args.kind === "correction" && !args.sourceUrl?.trim()) {
+    // site follows, applied to the people correcting it. A suggested source
+    // is, definitionally, the same claim: no link, nothing to check.
+    const needsSource = args.kind === "correction" || args.kind === "suggest_source";
+    if (needsSource && !args.sourceUrl?.trim()) {
       throw new Error(
-        "A correction needs a source we can check — please add a link to the official record.",
+        "A source suggestion needs a link to the source.",
       );
     }
-    const clip = (s?: string) => {
-      const t = s?.trim();
-      return t ? t.slice(0, MAX_FIELD) : undefined;
-    };
+    const sourceUrl = safeUrl(args.sourceUrl);
+    if (needsSource && args.sourceUrl?.trim() && !sourceUrl) {
+      throw new Error("The source link must be a web address starting with http:// or https://.");
+    }
+    if (args.kind === "volunteer" && !args.contact?.trim()) {
+      throw new Error("Add a way to reach you so we can follow up.");
+    }
 
     await ctx.db.insert("feedback", {
       kind: args.kind,
       message,
-      pageUrl: clip(args.pageUrl),
-      sourceUrl: clip(args.sourceUrl),
+      pageUrl: safeUrl(args.pageUrl),
+      sourceUrl,
       contact: clip(args.contact),
       status: "new",
       submittedAt: Date.now(),
@@ -76,8 +106,11 @@ export const list = query({
       ? await ctx.db.query("feedback").withIndex("by_status", (q) => q.eq("status", status)).collect()
       : await ctx.db.query("feedback").collect();
     // A factual correction outranks a question regardless of age: one is a
-    // possible published error, the other can wait.
-    const rank = (k: string) => (k === "correction" ? 0 : k === "question" ? 1 : 2);
+    // possible published error, the other can wait. Contribution kinds
+    // (suggest_candidate/suggest_source/data_gap/volunteer) sort after those
+    // two but ahead of "other" so they don't collapse into a single catch-all
+    // bucket in the queue.
+    const rank = (k: string) => (k === "correction" ? 0 : k === "question" ? 1 : k === "other" ? 3 : 2);
     return rows.sort((a, b) => rank(a.kind) - rank(b.kind) || b.submittedAt - a.submittedAt);
   },
 });

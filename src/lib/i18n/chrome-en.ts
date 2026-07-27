@@ -31,6 +31,7 @@ export const chromeEn: ChromeDict = {
     methodology: "Methodology",
     reportError: "Report an error",
     support: "Support this project",
+    contribute: "Help improve this guide",
     financeDisclaimer:
       "Campaign finance data for Wisconsin state offices comes from the " +
       "Wisconsin Ethics Commission's Sunshine database and is used for " +
