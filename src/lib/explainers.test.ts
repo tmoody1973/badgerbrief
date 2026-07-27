@@ -6,6 +6,7 @@ const TOPICS: ExplainerTopic[] = [
   "campaign-finance",
   "voting-record",
   "sourced-position-vs-claim",
+  "party-labels",
 ];
 
 describe("EXPLAINERS", () => {
