@@ -21,7 +21,15 @@ const MAX_FIELD = 500;
 
 export const submit = mutation({
   args: {
-    kind: v.union(v.literal("correction"), v.literal("question"), v.literal("other")),
+    kind: v.union(
+      v.literal("correction"),
+      v.literal("question"),
+      v.literal("other"),
+      v.literal("suggest_candidate"),
+      v.literal("suggest_source"),
+      v.literal("data_gap"),
+      v.literal("volunteer"),
+    ),
     message: v.string(),
     pageUrl: v.optional(v.string()),
     sourceUrl: v.optional(v.string()),
@@ -43,11 +51,15 @@ export const submit = mutation({
       throw new Error("That's longer than this form accepts — please trim it.");
     }
     // A correction has to be checkable. This is the same rule the rest of the
-    // site follows, applied to the people correcting it.
-    if (args.kind === "correction" && !args.sourceUrl?.trim()) {
+    // site follows, applied to the people correcting it. A suggested source
+    // is, definitionally, the same claim: no link, nothing to check.
+    if ((args.kind === "correction" || args.kind === "suggest_source") && !args.sourceUrl?.trim()) {
       throw new Error(
-        "A correction needs a source we can check — please add a link to the official record.",
+        "A source suggestion needs a link to the source.",
       );
+    }
+    if (args.kind === "volunteer" && !args.contact?.trim()) {
+      throw new Error("Add a way to reach you so we can follow up.");
     }
     const clip = (s?: string) => {
       const t = s?.trim();

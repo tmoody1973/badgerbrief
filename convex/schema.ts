@@ -641,7 +641,15 @@ export default defineSchema({
   // public profile. A reader is how that gets caught. This table is a safety
   // mechanism, not a contact form.
   feedback: defineTable({
-    kind: v.union(v.literal("correction"), v.literal("question"), v.literal("other")),
+    kind: v.union(
+      v.literal("correction"),
+      v.literal("question"),
+      v.literal("other"),
+      v.literal("suggest_candidate"),
+      v.literal("suggest_source"),
+      v.literal("data_gap"),
+      v.literal("volunteer"),
+    ),
     // Where the reader was. Captured automatically so nobody has to describe
     // which of 600+ pages they were looking at.
     pageUrl: v.optional(v.string()),
