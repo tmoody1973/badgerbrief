@@ -98,23 +98,107 @@ export default function BallotBasicsPage() {
         <p>
           Words like <em>progressive</em>, <em>moderate</em>, <em>conservative</em>,{" "}
           <em>libertarian</em>, or <em>democratic socialist</em> are{" "}
-          <strong>labels people use to describe themselves</strong> — a candidate&apos;s own
-          words, or a group they belong to. They are <strong>not separate parties</strong> on
-          the ballot.
+          <strong>labels people use to describe themselves</strong> — not separate parties on
+          the ballot. Here&apos;s roughly what each means to the people who use it:
         </p>
+        <ul className="space-y-2">
+          <li>
+            <strong>Progressive</strong> — favors active government to reduce economic and
+            social inequality; left-of-center. Most progressives in Wisconsin run as Democrats.
+          </li>
+          <li>
+            <strong>Moderate / centrist</strong> — mixes positions from each side and steers
+            away from the far ends of either party.
+          </li>
+          <li>
+            <strong>Conservative</strong> — emphasizes limited government, lower taxes, free
+            markets, and traditional values; right-of-center. Most conservatives here run as
+            Republicans.
+          </li>
+          <li>
+            <strong>Libertarian</strong> — wants the smallest possible government in both
+            economic and personal life. There is also a{" "}
+            <a
+              href="https://www.lp.org/platform/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold underline decoration-2"
+            >
+              Libertarian Party
+            </a>{" "}
+            some candidates run under.
+          </li>
+        </ul>
         <p>
-          For example: a candidate who calls themselves a <em>democratic socialist</em> — say,
-          a member of the Democratic Socialists of America — still appears on the ballot on the{" "}
-          <strong>Democratic</strong> line, not a &ldquo;Socialist&rdquo; line. The label
-          describes their politics; the party is the line they run on.
-        </p>
-        <p>
-          So a label tells you how someone describes themselves. It doesn&apos;t tell you their
-          specific positions. For that, keep going.
+          A label is a self-description on the ballot — it never changes which party line a
+          candidate runs on, and it doesn&apos;t pin down their specific positions.
         </p>
       </Section>
 
-      <Section eyebrow="Step 3" heading="What does each party stand for? Read it in their words">
+      <Section
+        eyebrow="Step 3"
+        heading="Socialist, democratic socialist, communist — what's the difference?"
+      >
+        <p>
+          These words get used a lot right now — sometimes as real description, sometimes as an
+          insult — and they don&apos;t all mean the same thing. Here&apos;s what each actually
+          refers to, so you can judge a candidate on what they support rather than on a label
+          aimed at them.
+        </p>
+        <ul className="space-y-2">
+          <li>
+            <strong>Socialism</strong> — a broad umbrella for the idea that the public, rather
+            than private owners, should control or heavily regulate major parts of the economy.
+            It spans a wide range: some versions work through democracy and elections, others
+            through one-party control. On its own, &ldquo;socialist&rdquo; is a broad word that
+            doesn&apos;t tell you which.
+          </li>
+          <li>
+            <strong>Communism</strong> — in practice, the 20th-century communist states (such
+            as the Soviet Union, China, Cuba, or North Korea) were run by a single ruling party
+            that controlled both the government and the economy, without competitive, multiparty
+            elections. Ownership was concentrated in the state.
+          </li>
+          <li>
+            <strong>Democratic socialism</strong> — the &ldquo;democratic&rdquo; part is the
+            point: it commits to democracy — free, competitive elections, civil liberties, and
+            more than one party — while pushing for a larger public and worker role in the
+            economy, such as stronger public programs and labor rights. It rejects the one-party
+            model, and because it works through elections, its candidates in the U.S. usually
+            run inside the Democratic Party. The label is tied to the{" "}
+            <a
+              href="https://www.dsausa.org/about-us/what-is-democratic-socialism/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold underline decoration-2"
+            >
+              Democratic Socialists of America (DSA)
+            </a>
+            .
+          </li>
+          <li>
+            <strong>Social democracy</strong> (easy to mix up with the last one) — keeps a
+            private, market economy but pairs it with a strong safety net and public services —
+            the model often associated with countries like Denmark, Sweden, or Norway.
+          </li>
+        </ul>
+        <p>
+          <strong>The dividing line is democracy.</strong> The clearest difference between
+          communism as it has actually been practiced and democratic socialism is who holds
+          power: communist states have been one-party systems without competitive elections,
+          while democratic socialists run in elections and support multiparty democracy. The two
+          terms are not interchangeable.
+        </p>
+        <p>
+          Heated labels get aimed at every side — &ldquo;socialist&rdquo; and
+          &ldquo;communist&rdquo; at the left, &ldquo;fascist&rdquo; and
+          &ldquo;authoritarian&rdquo; at the right — and they&apos;re often used loosely. Our
+          answer is the same either way: don&apos;t vote a label. Read what a candidate actually
+          supports, linked to the source, on their page.
+        </p>
+      </Section>
+
+      <Section eyebrow="Step 4" heading="What does each party stand for? Read it in their words">
         <p>
           We don&apos;t summarize the parties for you — that&apos;s not our job, and any short
           version would flatten a lot of disagreement. Here&apos;s where to read it straight
@@ -157,7 +241,7 @@ export default function BallotBasicsPage() {
         </ul>
       </Section>
 
-      <Section eyebrow="Step 4" heading="A label is a starting point, not the whole story">
+      <Section eyebrow="Step 5" heading="A label is a starting point, not the whole story">
         <p>
           Two candidates in the same party can disagree on plenty. A party label is a
           shortcut — useful, but it doesn&apos;t tell you where a specific candidate stands on
