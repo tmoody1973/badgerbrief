@@ -19,6 +19,7 @@ import { WhatThisMeans } from "@/components/guide/what-this-means";
 import { isInterviewQuote } from "@/lib/interview-quote";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
+import { ShareButton } from "@/components/contribute/share-button";
 import {
   getCandidateBySlug,
   getEnrichedSponsorKeys,
@@ -31,7 +32,7 @@ import {
   organizationNode,
   personNode,
 } from "@/lib/jsonld";
-import { raceIdToSlug } from "@/lib/site";
+import { raceIdToSlug, SITE_URL } from "@/lib/site";
 
 export const revalidate = 300;
 
@@ -315,6 +316,28 @@ export default async function CandidatePage({ params }: Props) {
             <SourceList sources={candidate.sources} />
             <LastUpdated date={candidate.dataAsOf} />
           </section>
+
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t-2 border-border pt-4">
+            <p className="font-mono text-xs text-muted-foreground">
+              <Link
+                href={`/contribute?kind=suggest_source&ref=${candidate.slug}`}
+                className="underline-offset-2 hover:underline"
+              >
+                Suggest a source
+              </Link>
+              {" · "}
+              <Link
+                href={`/contribute?kind=data_gap&ref=${candidate.slug}`}
+                className="underline-offset-2 hover:underline"
+              >
+                Flag a gap
+              </Link>
+            </p>
+            <ShareButton
+              url={`${SITE_URL}/candidates/${candidate.slug}`}
+              title={`${candidate.name} — BadgerBrief`}
+            />
+          </div>
         </div>
 
         {/* Reference rail (MOO-331): at-a-glance facts that otherwise
