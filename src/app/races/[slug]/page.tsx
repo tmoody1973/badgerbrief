@@ -14,6 +14,7 @@ import {
   type NavSection,
 } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
+import { WhatThisMeans } from "@/components/guide/what-this-means";
 import { ShareButton } from "@/components/contribute/share-button";
 import { isOnBallot, partySectionId } from "@/lib/ballot-status";
 import {
@@ -239,6 +240,8 @@ export default async function RacePage({ params }: Props) {
           {race.notes && <p className="mt-2">{race.notes}</p>}
         </div>
       )}
+
+      {parties.length > 0 && <WhatThisMeans topic="party-labels" />}
 
       {parties.map((party) => (
         <section
