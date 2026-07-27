@@ -87,6 +87,26 @@ export function HomeGuide({
         )}
       </section>
 
+      <section className="mt-8 border-2 border-border bg-secondary p-5 shadow-[var(--shadow-brutal)]">
+        <h2 className="font-display text-xl">{dict.support.heading}</h2>
+        <p className="mt-2 max-w-2xl text-sm">{dict.support.body}</p>
+        <p className="mt-2 max-w-2xl text-sm">
+          {dict.support.wipPrefix}
+          <Link href="/feedback" className="font-bold underline decoration-2">
+            {dict.support.wipLinkText}
+          </Link>
+          {dict.support.wipSuffix}
+        </p>
+        <a
+          href="https://ko-fi.com/tarikmoody"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="press mt-4 inline-block border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)]"
+        >
+          {dict.support.cta}
+        </a>
+      </section>
+
       <BallotFinder races={races} />
 
       {votingInfo && (

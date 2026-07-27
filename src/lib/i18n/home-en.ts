@@ -23,6 +23,14 @@ export type HomeDict = {
     countSuffix: string;
     districtRacesSummary: (count: number) => string;
   };
+  support: {
+    heading: string;
+    body: string;
+    wipPrefix: string;
+    wipLinkText: string;
+    wipSuffix: string;
+    cta: string;
+  };
 };
 
 /** Verbatim current English homepage strings — lifting these unchanged is
@@ -56,5 +64,14 @@ export const homeEn: HomeDict = {
     heading: "What races are on the Wisconsin 2026 primary ballot?",
     countSuffix: " races: statewide offices, all eight U.S. House districts, the state supreme court, and the legislature.",
     districtRacesSummary: (count) => `Find your district races (${count})`,
+  },
+  support: {
+    heading: "One person builds this guide",
+    body:
+      "I build and host BadgerBrief myself — no ads, no paywall, no campaign or party money. Keeping it online and updated through the election comes out of my own pocket. If it helped you make sense of your ballot, tap the ☕ Support me button in the corner — any amount keeps it going.",
+    wipPrefix: "This is a work in progress. Spot an error? ",
+    wipLinkText: "Tell me on the feedback form",
+    wipSuffix: ".",
+    cta: "Support the work →",
   },
 };
