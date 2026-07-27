@@ -59,9 +59,9 @@ export function ContributeForm() {
             message,
             sourceUrl: sourceUrl || undefined,
             contact: contact || undefined,
-            // ponytail: ref is a slug, not the real referring URL — Task 4
-            // owns wiring contextual links, this is a best-effort relative path.
-            pageUrl: ref ? `/${ref}` : typeof window !== "undefined" ? window.location.href : undefined,
+            // window.location.href already carries ?kind/?ref, so admin
+            // context is preserved without fabricating a route from `ref`.
+            pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
             website: website || undefined,
           });
           setState({ kind: "sent" });
