@@ -150,6 +150,42 @@ export const publishPosition = mutation({
   },
 });
 
+/**
+ * Bulk-reject position drafts from the cluster reviewer (MOO-412 follow-up):
+ * each rejected draft's OPEN position review_task (if any) is resolved in the
+ * same pass so it doesn't linger in the Editorial queue after its draft is
+ * gone from the pending pool. One transaction — a bad id throws and rolls the
+ * whole batch back, which is fine since the client passes ids straight from
+ * positionClusters.
+ */
+export const bulkRejectPositions = mutation({
+  args: {
+    items: v.array(
+      v.object({
+        draftId: v.id("candidate_positions_drafts"),
+        taskId: v.union(v.id("review_tasks"), v.null()),
+      }),
+    ),
+  },
+  handler: async (ctx, { items }) => {
+    await requireAdmin(ctx);
+    let rejected = 0;
+    for (const { draftId, taskId } of items) {
+      await ctx.db.patch(draftId, { reviewStatus: "rejected" });
+      if (taskId) {
+        await ctx.db.patch(taskId, { status: "resolved", resolvedAt: Date.now() });
+      }
+      await logAudit(ctx, {
+        action: "reject",
+        refTable: "candidate_positions_drafts",
+        refId: draftId,
+      });
+      rejected++;
+    }
+    return { rejected };
+  },
+});
+
 export const setDraftReviewStatus = mutation({
   args: {
     kind: v.union(v.literal("quote"), v.literal("position")),
