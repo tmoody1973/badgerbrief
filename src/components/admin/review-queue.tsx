@@ -131,25 +131,29 @@ export function ReviewQueue() {
     <div>
       <div className="border-2 border-border bg-card shadow-[var(--shadow-brutal)]">
         <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b-2 border-border bg-card p-3">
-          <div className="flex flex-wrap gap-2">
-            <FilterTab active={filter === "all"} count={totalCount} onClick={() => setFilter("all")}>
-              All
-            </FilterTab>
-            <FilterTab
-              active={filter === "position"}
-              count={positionCount}
-              onClick={() => setFilter("position")}
-            >
-              Positions
-            </FilterTab>
-            <FilterTab active={filter === "quote"} count={quoteCount} onClick={() => setFilter("quote")}>
-              Quotes
-            </FilterTab>
-          </div>
+          {view === "queue" && (
+            <div className="flex flex-wrap gap-2">
+              <FilterTab active={filter === "all"} count={totalCount} onClick={() => setFilter("all")}>
+                All
+              </FilterTab>
+              <FilterTab
+                active={filter === "position"}
+                count={positionCount}
+                onClick={() => setFilter("position")}
+              >
+                Positions
+              </FilterTab>
+              <FilterTab active={filter === "quote"} count={quoteCount} onClick={() => setFilter("quote")}>
+                Quotes
+              </FilterTab>
+            </div>
+          )}
           <div className="flex items-center gap-3">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              {filtered.length} remaining
-            </p>
+            {view === "queue" && (
+              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                {filtered.length} remaining
+              </p>
+            )}
             <div className="flex gap-1">
               <button
                 type="button"

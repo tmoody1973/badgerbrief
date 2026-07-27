@@ -84,7 +84,7 @@ function ClusterCard({ cluster }: { cluster: Cluster }) {
           await resolveTask({ taskId: keep.taskId, outcome: "resolved" });
         } catch (err) {
           throw new Error(
-            `Published, but the review task could not be marked resolved — retry Publish. (${asMessage(err)})`,
+            `Published, but the review task could not be marked resolved — finish it from the Queue view. (${asMessage(err)})`,
           );
         }
       }
