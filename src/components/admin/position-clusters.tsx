@@ -57,6 +57,7 @@ function ClusterCard({ cluster }: { cluster: Cluster }) {
   const setReviewStatus = useMutation(api.publish.setDraftReviewStatus);
   const publishPosition = useMutation(api.publish.publishPosition);
   const bulkRejectPositions = useMutation(api.publish.bulkRejectPositions);
+  const resolveTask = useMutation(api.adminQueue.resolveTask);
 
   const keep = cluster.drafts.find((d) => d.isKeep) ?? cluster.drafts[0];
   const dups = cluster.drafts.filter((d) => d.draftId !== keep.draftId);
@@ -78,6 +79,15 @@ function ClusterCard({ cluster }: { cluster: Cluster }) {
     run("approve-publish", async () => {
       await setReviewStatus({ kind: "position", draftId: keep.draftId, status: "approved" });
       await publishPosition({ draftId: keep.draftId });
+      if (keep.taskId) {
+        try {
+          await resolveTask({ taskId: keep.taskId, outcome: "resolved" });
+        } catch (err) {
+          throw new Error(
+            `Published, but the review task could not be marked resolved — retry Publish. (${asMessage(err)})`,
+          );
+        }
+      }
     });
 
   const handleRejectDuplicates = () =>

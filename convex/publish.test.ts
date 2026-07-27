@@ -236,8 +236,8 @@ describe("publish.bulkRejectPositions (MOO-412 follow-up)", () => {
         ctx.db.get(keep.taskId),
       ]),
     );
-    expect(task1?.status).toBe("resolved");
-    expect(task2?.status).toBe("resolved");
+    expect(task1?.status).toBe("dismissed");
+    expect(task2?.status).toBe("dismissed");
     expect(keptTask?.status).toBe("open");
 
     const entries = await t.withIdentity(ADMIN).query(api.audit.forRecord, {
