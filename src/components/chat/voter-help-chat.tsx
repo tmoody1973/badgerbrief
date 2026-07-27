@@ -29,6 +29,33 @@ function asMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
+const GUEST_ID_KEY = "bb_guest_id";
+
+/** Read the guest id from localStorage, creating one if absent. Client-only —
+ * call from an effect, never during render/SSR. */
+export function getOrCreateGuestId(): string {
+  const existing = localStorage.getItem(GUEST_ID_KEY);
+  if (existing) return existing;
+  const created = crypto.randomUUID();
+  localStorage.setItem(GUEST_ID_KEY, created);
+  return created;
+}
+
+/**
+ * Args for a query that behaves differently signed-in vs guest: `extra` alone
+ * once authenticated, `extra` + guestId once we have one, else "skip" until
+ * the guest id exists (never fire a guest call with an undefined guestId).
+ */
+export function guestArgs<T extends Record<string, unknown>>(
+  isAuthenticated: boolean,
+  guestId: string | null,
+  extra: T = {} as T,
+): T | (T & { guestId: string }) | "skip" {
+  if (isAuthenticated) return extra;
+  if (!guestId) return "skip";
+  return { ...extra, guestId };
+}
+
 /**
  * Is this a link to an interview clip in OUR OWN Convex storage?
  *
@@ -138,13 +165,25 @@ function UserBubble({ text }: { text: string }) {
 
 export function VoterHelpChat() {
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const serverThreadId = useQuery(api.voterHelpQueries.getMyThread, isAuthenticated ? {} : "skip");
+
+  // Guest id: created client-side only, once we know the visitor isn't
+  // signing in. Never read/written during render — SSR has no localStorage.
+  const [guestId, setGuestId] = useState<string | null>(null);
+  useEffect(() => {
+    if (isLoading || isAuthenticated) return;
+    setGuestId(getOrCreateGuestId());
+  }, [isLoading, isAuthenticated]);
+
+  const serverThreadId = useQuery(
+    api.voterHelpQueries.getMyThread,
+    guestArgs(isAuthenticated, guestId),
+  );
   const [localThreadId, setLocalThreadId] = useState<string | null>(null);
   const threadId = localThreadId ?? serverThreadId ?? null;
 
   const messages = useThreadMessages(
     api.voterHelpQueries.listThreadMessages,
-    threadId ? { threadId } : "skip",
+    threadId ? guestArgs(isAuthenticated, guestId, { threadId }) : "skip",
     { initialNumItems: 50, stream: true },
   );
   const sendMessage = useMutation(api.voterHelpQueries.sendMessage);
@@ -172,12 +211,18 @@ export function VoterHelpChat() {
   const send = async (prompt: string) => {
     const trimmed = prompt.trim();
     if (!trimmed) return;
+    if (!isAuthenticated && !guestId) {
+      setError("Reload and try again.");
+      return;
+    }
     setError(null);
     setPendingEcho(trimmed);
     setDraft("");
     try {
       track("voter_help_ask"); // deliberately no properties — the prompt may contain PII
-      const { threadId: tid } = await sendMessage({ prompt: trimmed });
+      const { threadId: tid } = await sendMessage(
+        isAuthenticated ? { prompt: trimmed } : { prompt: trimmed, guestId: guestId! },
+      );
       setLocalThreadId(tid);
       track("voter_help_answered", { ok: true });
     } catch (err) {
@@ -194,14 +239,7 @@ export function VoterHelpChat() {
   };
 
   if (isLoading) return null;
-  if (!isAuthenticated) {
-    return (
-      <p className="border-2 border-border bg-card p-4">
-        Sign in to use Voter Help — a cited, non-partisan assistant for practical
-        voting questions.
-      </p>
-    );
-  }
+  const canSend = isAuthenticated || guestId !== null;
 
   return (
     <div className="flex min-h-[60vh] flex-col">
@@ -256,13 +294,14 @@ export function VoterHelpChat() {
           className="min-w-0 flex-1 border-2 border-border bg-background p-2"
           maxLength={2000}
         />
-        <Button type="submit" variant="primary" disabled={!draft.trim()}>
+        <Button type="submit" variant="primary" disabled={!draft.trim() || !canSend}>
           Send
         </Button>
       </form>
       <p className="mt-2 text-xs text-muted-foreground">
         For official actions (registering, absentee, polling place), MyVote
         Wisconsin is always the authoritative source.
+        {!isAuthenticated && " Sign in to save this conversation across devices."}
       </p>
     </div>
   );
