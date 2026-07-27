@@ -33,6 +33,7 @@ export const chromeEs: ChromeDict = {
     methodology: "Metodología",
     reportError: "Reportar un error",
     support: "Apoya este proyecto",
+    contribute: "Ayuda a mejorar esta guía",
     financeDisclaimer:
       "Los datos de financiamiento de campañas para cargos estatales de Wisconsin provienen " +
       "de la base de datos Sunshine de la Comisión de Ética de Wisconsin y se usan solo para " +

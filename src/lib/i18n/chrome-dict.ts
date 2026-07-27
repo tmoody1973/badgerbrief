@@ -13,6 +13,7 @@ export type ChromeDict = {
     methodology: string;
     reportError: string;
     support: string;
+    contribute: string;
     financeDisclaimer: string;
   };
 };
