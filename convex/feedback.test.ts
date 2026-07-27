@@ -48,3 +48,26 @@ describe("feedback.submit", () => {
     expect(rows).toHaveLength(0);
   });
 });
+
+describe("feedback.list ordering", () => {
+  const ADMIN = { subject: "user_admin", metadata: { role: "admin" } };
+
+  test("corrections and questions outrank contribution kinds, which outrank other", async () => {
+    const t = setup();
+    for (const kind of ["other", "volunteer", "data_gap", "question", "correction"] as const) {
+      await t.mutation(api.feedback.submit, {
+        kind,
+        message: `a ${kind} report from a reader`,
+        ...(kind === "correction" ? { sourceUrl: "https://example.com" } : {}),
+        ...(kind === "volunteer" ? { contact: "reader@example.com" } : {}),
+      });
+    }
+    const rows = await t.withIdentity(ADMIN).query(api.feedback.list, {});
+    const index = (kind: string) => rows.findIndex((r) => r.kind === kind);
+    expect(index("correction")).toBeLessThan(index("question"));
+    expect(index("question")).toBeLessThan(index("data_gap"));
+    expect(index("question")).toBeLessThan(index("volunteer"));
+    expect(index("data_gap")).toBeLessThan(index("other"));
+    expect(index("volunteer")).toBeLessThan(index("other"));
+  });
+});

@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Button } from "@/components/retroui/Button";
+import { CONTRIBUTE_KINDS, type ContributeKind } from "@/lib/contribute-kind";
 
 /**
  * Reader corrections and questions.
@@ -19,7 +20,7 @@ import { Button } from "@/components/retroui/Button";
  */
 type Row = {
   _id: Id<"feedback">;
-  kind: "correction" | "question" | "other";
+  kind: "correction" | "question" | "other" | ContributeKind;
   message: string;
   pageUrl?: string;
   sourceUrl?: string;
@@ -32,7 +33,16 @@ const KIND_LABEL: Record<Row["kind"], string> = {
   correction: "Correction",
   question: "Question",
   other: "Other",
-};
+  ...Object.fromEntries(CONTRIBUTE_KINDS.map(({ kind, label }) => [kind, label])),
+} as Record<Row["kind"], string>;
+
+const KIND_FILTER_OPTIONS: { value: Row["kind"] | "all"; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "correction", label: "Correction" },
+  { value: "question", label: "Question" },
+  ...CONTRIBUTE_KINDS.map(({ kind, label }) => ({ value: kind as Row["kind"], label })),
+  { value: "other", label: "Other" },
+];
 
 const meta = "font-mono text-[11px] uppercase tracking-[0.1em]";
 
@@ -119,13 +129,15 @@ function FeedbackRow({ row }: { row: Row }) {
 export function FeedbackQueue() {
   const rows = useQuery(api.feedback.list, {}) as Row[] | undefined;
   const [showResolved, setShowResolved] = useState(false);
+  const [kindFilter, setKindFilter] = useState<Row["kind"] | "all">("all");
 
   if (rows === undefined) {
     return <p className={`${meta} text-muted-foreground`}>Loading…</p>;
   }
 
-  const open = rows.filter((r) => r.status !== "resolved");
-  const resolved = rows.filter((r) => r.status === "resolved");
+  const byKind = kindFilter === "all" ? rows : rows.filter((r) => r.kind === kindFilter);
+  const open = byKind.filter((r) => r.status !== "resolved");
+  const resolved = byKind.filter((r) => r.status === "resolved");
   const shown = showResolved ? resolved : open;
 
   return (
@@ -138,13 +150,27 @@ export function FeedbackQueue() {
         </p>
       </div>
 
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button variant={showResolved ? "outline" : "primary"} onClick={() => setShowResolved(false)}>
           Open ({open.length})
         </Button>
         <Button variant={showResolved ? "primary" : "outline"} onClick={() => setShowResolved(true)}>
           Resolved ({resolved.length})
         </Button>
+        <label className={`${meta} ml-2 flex items-center gap-2 text-muted-foreground`}>
+          Kind
+          <select
+            className="border-2 border-border bg-card px-2 py-1 text-sm text-foreground"
+            value={kindFilter}
+            onChange={(e) => setKindFilter(e.target.value as Row["kind"] | "all")}
+          >
+            {KIND_FILTER_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {shown.length === 0 ? (

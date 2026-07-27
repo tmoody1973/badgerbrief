@@ -88,8 +88,11 @@ export const list = query({
       ? await ctx.db.query("feedback").withIndex("by_status", (q) => q.eq("status", status)).collect()
       : await ctx.db.query("feedback").collect();
     // A factual correction outranks a question regardless of age: one is a
-    // possible published error, the other can wait.
-    const rank = (k: string) => (k === "correction" ? 0 : k === "question" ? 1 : 2);
+    // possible published error, the other can wait. Contribution kinds
+    // (suggest_candidate/suggest_source/data_gap/volunteer) sort after those
+    // two but ahead of "other" so they don't collapse into a single catch-all
+    // bucket in the queue.
+    const rank = (k: string) => (k === "correction" ? 0 : k === "question" ? 1 : k === "other" ? 3 : 2);
     return rows.sort((a, b) => rank(a.kind) - rank(b.kind) || b.submittedAt - a.submittedAt);
   },
 });
