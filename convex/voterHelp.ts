@@ -199,16 +199,60 @@ const getRaceInfo = createTool({
       // that distinguishes them rather than a status string buried per-row.
       const onBallot = data.candidates.filter((c) => (c.status ?? "Active") === "Active");
       const notOnBallot = data.candidates.filter((c) => (c.status ?? "Active") !== "Active");
+      // Compact shape (MOO-410): the raw docs run ~62KB pretty-printed for a
+      // race like WI-GOV-2026 (18 candidates) — mostly Convex system fields
+      // (_id/_creationTime) repeated per row plus display-only v.any() blobs
+      // (race.raceRating/currentComposition/districts/campaignFinanceInfo,
+      // candidate.campaignFinanceInfo — schema comment: "rendered, never
+      // computed on"). Keep identity/bio + one source per candidate and
+      // position, matching the compact shape matchBallotByIssues already
+      // uses; `finance` carries the numbers the raw campaignFinanceInfo blob
+      // duplicates.
+      const compactCandidate = (c: (typeof onBallot)[number]) => ({
+        slug: c.slug,
+        name: c.name,
+        party: c.party,
+        primaryParty: c.primaryParty,
+        status: c.status,
+        incumbent: c.incumbent,
+        background: c.background,
+        currentOccupation: c.currentOccupation,
+        keyPriorities: c.keyPriorities,
+        source: c.sources[0],
+      });
       return JSON.stringify({
-        race: data.race,
-        onBallot,
-        notOnBallot,
+        race: {
+          raceId: data.race.raceId,
+          office: data.race.office,
+          level: data.race.level,
+          primaryDate: data.race.primaryDate,
+          generalDate: data.race.generalDate,
+          incumbent: data.race.incumbent,
+          officeDescription: data.race.officeDescription,
+          districtDescription: data.race.districtDescription,
+          source: data.race.sources[0],
+        },
+        onBallot: onBallot.map(compactCandidate),
+        notOnBallot: notOnBallot.map(compactCandidate),
         ballotNote:
           notOnBallot.length > 0
             ? `${onBallot.length} candidates are on the primary ballot; ${notOnBallot.length} withdrew or did not file. Name the on-ballot candidates, and say that the others are not on the ballot rather than omitting them.`
             : undefined,
-        positions: data.positions,
-        finance: data.finance,
+        positions: data.positions.map((p) => ({
+          candidateSlug: p.candidateSlug,
+          issueSlug: p.issueSlug,
+          stance: p.stance,
+          summary: p.summary,
+          source: p.sources[0],
+        })),
+        finance: data.finance.map((f) => ({
+          candidateSlug: f.candidateSlug,
+          receipts: f.receipts,
+          disbursements: f.disbursements,
+          cashOnHand: f.cashOnHand,
+          debts: f.debts,
+          coverageEndDate: f.coverageEndDate,
+        })),
       });
     }),
 });
@@ -341,6 +385,27 @@ function makeVoterHelpAgent(model: string, instructions: string = INSTRUCTIONS) 
     instructions,
     tools: { getVotingInfo, getVoterAccess, getMyBallot, matchBallotByIssues, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, handoffOfficialLink },
     stopWhen: stepCountIs(8),
+    // MOO-410 Task 3: bounds set here (rather than per-callsite) so BOTH the
+    // prod streamText path and the evalAnswer generateText path inherit them
+    // — the gate stays representative of prod.
+    // `callSettings` is `CallSettings` from "ai" (confirmed via
+    // node_modules/@convex-dev/agent/dist/client/types.d.ts Config type +
+    // node_modules/ai/dist/index.d.ts CallSettings — flows into every
+    // generateText/streamText call via start.js's `aiArgs = {
+    // ...opts.callSettings, ... }`).
+    callSettings: { maxOutputTokens: 1024 },
+    // Anthropic "automatic caching" (confirmed against installed
+    // @ai-sdk/anthropic 3.0.98 source + platform.claude.com/docs docs, since
+    // Context7 wasn't available in this session): a single top-level
+    // `cache_control` lets Anthropic cache the system prompt + tool schemas
+    // (identical every call) and slide the breakpoint forward as the
+    // conversation grows — no per-message/per-tool breakpoints needed, no
+    // beta header, all active models. `Config.providerOptions` is marked
+    // deprecated in the client types ("reach out if you use this") but is
+    // still live in 0.6.4: start.js passes it straight through as the
+    // top-level `providerOptions` arg to the real ai-sdk generateText/
+    // streamText call for both paths.
+    providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
   });
 }
 
