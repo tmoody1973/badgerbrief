@@ -33,4 +33,15 @@ export const homeEs: HomeDict = {
     countSuffix: " contiendas: cargos estatales, los ocho distritos de la Cámara de EE. UU., la corte suprema estatal y la legislatura.",
     districtRacesSummary: (count) => `Encuentre las contiendas de su distrito (${count})`,
   },
+  // First-pass Spanish — Tarik verifies. Ko-fi button label "Support me" is the
+  // widget's own text, left in English on purpose so it matches the visible button.
+  support: {
+    heading: "Una sola persona hace esta guía",
+    body:
+      "Yo mismo construyo y pago el alojamiento de BadgerBrief — sin anuncios, sin muro de pago, sin dinero de campañas ni de partidos. Mantenerla en línea y actualizada durante las elecciones sale de mi propio bolsillo. Si le ayudó a entender su papeleta, toque el botón ☕ Support me en la esquina — cualquier cantidad ayuda.",
+    wipPrefix: "Esto es un trabajo en progreso. ¿Ve un error? ",
+    wipLinkText: "Avíseme en el formulario de comentarios",
+    wipSuffix: ".",
+    cta: "Apoye el trabajo →",
+  },
 };
