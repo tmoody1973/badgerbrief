@@ -80,6 +80,17 @@ export function VoteGuide({
       </h1>
       <p className="mt-3 text-lg">{dict.intro(info, dict.myVoteLabel)}</p>
 
+      {dict.ballotBasics && (
+        <p className="mt-3 font-mono text-xs text-muted-foreground">
+          <Link
+            href={dict.ballotBasics.href}
+            className="underline-offset-2 hover:underline"
+          >
+            {dict.ballotBasics.text} → Ballot basics
+          </Link>
+        </p>
+      )}
+
       <div className="mt-8 space-y-6">
         {faqs.map((f) => (
           <section

@@ -2,7 +2,8 @@ export type ExplainerTopic =
   | "stance-labels"
   | "campaign-finance"
   | "voting-record"
-  | "sourced-position-vs-claim";
+  | "sourced-position-vs-claim"
+  | "party-labels";
 
 export const EXPLAINERS: Record<
   ExplainerTopic,
@@ -31,5 +32,11 @@ export const EXPLAINERS: Record<
     body:
       "A sourced position is something we tied to a specific public statement, with a link. A campaign claim is what a candidate's own site says about their priorities. We keep them separate so you can see the difference between a documented stance and a self-description.",
     learnMore: "/methodology",
+  },
+  "party-labels": {
+    summary: "What do the party and ideology labels mean?",
+    body:
+      "On the ballot, partisan candidates run under a party — in Wisconsin almost always Democratic or Republican, with the occasional third-party or independent candidate. Words like progressive, conservative, libertarian, or democratic socialist are labels people use to describe themselves, not separate parties on the ballot. A label is a starting point; each candidate's sourced positions show where they actually stand.",
+    learnMore: "/ballot-basics",
   },
 };

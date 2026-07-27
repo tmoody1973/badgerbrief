@@ -102,4 +102,8 @@ export const voteEn: VoteDict = {
   crumbs: { home: "Home", vote: "How to vote" },
   toggle: { label: "Español", href: "/es/vote" },
   myVoteLabel: "MyVote Wisconsin",
+  ballotBasics: {
+    text: "New to voting? See how the partisan primary works and what the party labels mean",
+    href: "/ballot-basics",
+  },
 };

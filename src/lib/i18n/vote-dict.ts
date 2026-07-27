@@ -26,4 +26,7 @@ export type VoteDict = {
   crumbs: { home: string; vote: string };
   toggle: { label: string; href: string };
   myVoteLabel: string;
+  // Optional: /ballot-basics is EN-only, so this callout is omitted from
+  // vote-es (gates it out for ES) rather than translated.
+  ballotBasics?: { text: string; href: string };
 };

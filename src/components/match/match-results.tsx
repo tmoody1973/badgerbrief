@@ -16,6 +16,7 @@ export function MatchResults({
   return (
     <div className="mt-8 space-y-10">
       <WhatThisMeans topic="stance-labels" />
+      <WhatThisMeans topic="party-labels" />
       {groups.map((group) => (
         <section key={group.issueSlug} className="scroll-mt-16">
           <h2 className="font-display text-2xl">{group.label}</h2>
