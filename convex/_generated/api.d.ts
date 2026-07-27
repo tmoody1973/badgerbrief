@@ -37,6 +37,7 @@ import type * as lib_briefContext from "../lib/briefContext.js";
 import type * as lib_briefEntities from "../lib/briefEntities.js";
 import type * as lib_briefValidate from "../lib/briefValidate.js";
 import type * as lib_campaignMap from "../lib/campaignMap.js";
+import type * as lib_chatUsage from "../lib/chatUsage.js";
 import type * as lib_extraction from "../lib/extraction.js";
 import type * as lib_firecrawlOutlet from "../lib/firecrawlOutlet.js";
 import type * as lib_firecrawlSponsor from "../lib/firecrawlSponsor.js";
@@ -118,6 +119,7 @@ declare const fullApi: ApiFromModules<{
   "lib/briefEntities": typeof lib_briefEntities;
   "lib/briefValidate": typeof lib_briefValidate;
   "lib/campaignMap": typeof lib_campaignMap;
+  "lib/chatUsage": typeof lib_chatUsage;
   "lib/extraction": typeof lib_extraction;
   "lib/firecrawlOutlet": typeof lib_firecrawlOutlet;
   "lib/firecrawlSponsor": typeof lib_firecrawlSponsor;
