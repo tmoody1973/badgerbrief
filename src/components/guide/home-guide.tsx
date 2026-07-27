@@ -71,6 +71,14 @@ export function HomeGuide({
           >
             {dict.matchCta}
           </Link>
+          {lang !== "es" && dict.startHereCta && (
+            <Link
+              href="/start"
+              className="border-2 border-border bg-secondary px-4 py-2 font-bold shadow-[var(--shadow-brutal)] press"
+            >
+              {dict.startHereCta}
+            </Link>
+          )}
         </div>
         {election && (
           <div className="mt-6">

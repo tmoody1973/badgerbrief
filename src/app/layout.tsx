@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { Archivo_Black, Public_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -5,6 +6,7 @@ import { Providers } from "./providers";
 import { StoreUser } from "./store-user";
 import { Analytics } from "@/components/guide/analytics";
 import { BottomTabs } from "@/components/guide/bottom-tabs";
+import { GuidedRail } from "@/components/guide/guided-rail";
 import { PostHogProvider } from "@/components/posthog-provider";
 import { AnalyticsEvents } from "@/components/guide/analytics-events";
 import { SwRegister } from "@/components/guide/sw-register";
@@ -66,6 +68,9 @@ export default function RootLayout({
         <Providers>
           <StoreUser />
           <SiteHeader />
+          <Suspense fallback={null}>
+            <GuidedRail />
+          </Suspense>
           <div className="flex-1">{children}</div>
           <SiteFooter />
           <BottomTabs />

@@ -30,9 +30,13 @@ export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
   const setSelected = useCallback(
     (next: string[]) => {
       const q = next.join(",");
-      router.replace(q ? `${pathname}?issues=${encodeURIComponent(q)}` : pathname, { scroll: false });
+      const sp = new URLSearchParams(params.toString());
+      if (q) sp.set("issues", q);
+      else sp.delete("issues");
+      const qs = sp.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
-    [router, pathname],
+    [router, pathname, params],
   );
 
   const toggle = useCallback(
@@ -86,7 +90,7 @@ export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
       ) : result === null ? (
         <p className="mt-8 font-mono text-xs text-muted-foreground">Finding positions…</p>
       ) : (
-        <MatchResults groups={ordered} />
+        <MatchResults groups={ordered} guide={params.get("guide")} />
       )}
     </>
   );
