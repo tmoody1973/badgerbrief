@@ -1,5 +1,6 @@
+import { register as registerAgentComponent } from "@convex-dev/agent/test";
 import { convexTest } from "convex-test";
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
@@ -11,7 +12,11 @@ const modules = import.meta.glob([
   "!./**/*.d.ts",
 ]);
 const USER = { subject: "clerk_chat_user" };
-const setup = () => convexTest(schema, modules);
+const setup = () => {
+  const t = convexTest(schema, modules);
+  registerAgentComponent(t);
+  return t;
+};
 
 async function seedUser(t: ReturnType<typeof setup>) {
   return await t.run((ctx) =>
@@ -19,13 +24,19 @@ async function seedUser(t: ReturnType<typeof setup>) {
   );
 }
 
+afterEach(() => {
+  delete process.env.VOTER_HELP_DISABLED;
+  delete process.env.GUEST_MSG_CAP;
+  delete process.env.GUEST_DAILY_CAP;
+});
+
 // Convention (briefs.test.ts): cover the paths that stop before the agent
 // component — thread creation/streaming is live-verified.
 describe("voterHelp guards", () => {
-  test("sendMessage rejects when signed out", async () => {
+  test("sendMessage rejects a signed-out send with no guestId", async () => {
     const t = setup();
     await expect(t.mutation(api.voterHelpQueries.sendMessage, { prompt: "hi" })).rejects.toThrow(
-      /sign in/i,
+      /reload/i,
     );
   });
 
@@ -41,7 +52,7 @@ describe("voterHelp guards", () => {
     ).rejects.toThrow(/2000/);
   });
 
-  test("listThreadMessages rejects when signed out", async () => {
+  test("listThreadMessages rejects when signed out with no guestId", async () => {
     const t = setup();
     await expect(
       t.query(api.voterHelpQueries.listThreadMessages, {
@@ -49,7 +60,28 @@ describe("voterHelp guards", () => {
         paginationOpts: { numItems: 10, cursor: null },
         streamArgs: undefined,
       }),
-    ).rejects.toThrow(/sign in/i);
+    ).rejects.toThrow(/reload/i);
+  });
+});
+
+describe("sendMessage guardrails", () => {
+  test("kill switch throws for everyone, guest or signed in", async () => {
+    process.env.VOTER_HELP_DISABLED = "1";
+    const t = setup();
+    await expect(
+      t.mutation(api.voterHelpQueries.sendMessage, { prompt: "hi", guestId: "g1" }),
+    ).rejects.toThrow(/paused/i);
+  });
+
+  test("caps a guest at GUEST_MSG_CAP sends/day", async () => {
+    process.env.GUEST_MSG_CAP = "2";
+    process.env.GUEST_DAILY_CAP = "1000";
+    const t = setup();
+    await t.mutation(api.voterHelpQueries.sendMessage, { prompt: "q1", guestId: "g1" });
+    await t.mutation(api.voterHelpQueries.sendMessage, { prompt: "q2", guestId: "g1" });
+    await expect(
+      t.mutation(api.voterHelpQueries.sendMessage, { prompt: "q3", guestId: "g1" }),
+    ).rejects.toThrow(/limit/i);
   });
 });
 
