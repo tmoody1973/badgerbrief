@@ -3,7 +3,7 @@ import { VoterHelpChat } from "@/components/chat/voter-help-chat";
 
 export const metadata: Metadata = {
   title: "Voter Help",
-  robots: { index: false }, // personal, Clerk-gated
+  robots: { index: false }, // per-visitor conversation, not shareable/indexable content
 };
 
 export default function ChatPage() {

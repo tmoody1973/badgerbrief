@@ -714,4 +714,11 @@ export default defineSchema({
     summary: v.union(v.string(), v.null()),
     fetchedAt: v.number(),
   }).index("by_session_bill", ["session", "billNumber"]),
+
+  // ---------- chat usage tracking (MOO-410) ----------
+  chat_usage: defineTable({
+    subject: v.string(), // "GLOBAL" or "guest:<uuid>"
+    day: v.string(),     // "YYYY-MM-DD" (UTC)
+    count: v.number(),
+  }).index("by_subject_day", ["subject", "day"]),
 });
