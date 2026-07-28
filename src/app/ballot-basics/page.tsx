@@ -103,8 +103,9 @@ export default function BallotBasicsPage() {
         </p>
         <ul className="space-y-2">
           <li>
-            <strong>Progressive</strong> — favors active government to reduce economic and
-            social inequality; left-of-center. Most progressives in Wisconsin run as Democrats.
+            <strong>Progressive</strong> — favors active government, stronger public programs,
+            and civil-rights protections to reduce economic and social inequality;
+            left-of-center. Most progressives in Wisconsin run as Democrats.
           </li>
           <li>
             <strong>Moderate / centrist</strong> — mixes positions from each side and steers
@@ -112,8 +113,8 @@ export default function BallotBasicsPage() {
           </li>
           <li>
             <strong>Conservative</strong> — favors limited government, lower taxes, free
-            markets, and traditional values, aiming to expand individual freedom and economic
-            growth; right-of-center. Most conservatives here run as Republicans.
+            markets, and traditional values to expand individual freedom and economic growth;
+            right-of-center. Most conservatives here run as Republicans.
           </li>
           <li>
             <strong>Libertarian</strong> — wants the smallest possible government in both
