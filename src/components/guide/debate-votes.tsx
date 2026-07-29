@@ -2,6 +2,8 @@ import type { DebateCandidate } from "./debate-topics";
 
 export type DebateHandVote = {
   id: string;
+  /** The topic block this vote was taken in, so a topic panel can find it. */
+  topicId: string;
   question: string;
   /** The moderator's own readout of the result, verbatim. */
   spoken: string;

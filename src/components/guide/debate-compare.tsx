@@ -70,6 +70,8 @@ export function DebateCompare({ raceId }: { raceId: string }) {
           candidates={debate.candidates}
           quotes={debate.quotes}
           youtubeId={debate.youtubeId}
+          participation={debate.participation}
+          handVotes={debate.handVotes}
         />
       </div>
     </section>

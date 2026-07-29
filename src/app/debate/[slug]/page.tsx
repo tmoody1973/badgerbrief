@@ -148,6 +148,8 @@ export default async function DebatePage({ params }: Props) {
           candidates={debate.candidates}
           quotes={debate.quotes}
           youtubeId={debate.youtubeId}
+          participation={debate.participation}
+          handVotes={debate.handVotes}
         />
       </section>
 

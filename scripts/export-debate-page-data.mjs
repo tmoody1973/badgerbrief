@@ -109,6 +109,9 @@ const payload = {
     clipVerified: byClip.get(q.clip)?.ok ?? null,
     voicesInClip: byClip.get(q.clip)?.voicesInClip ?? null,
   })),
+  // Why a candidate is missing from a topic, so the page can say "not asked"
+  // rather than the unfair "did not answer".
+  participation: structured.participation,
   tone: structured.tone,
   method: {
     engine: labeled.engine,

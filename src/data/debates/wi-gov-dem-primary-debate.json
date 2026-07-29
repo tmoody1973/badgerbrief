@@ -916,6 +916,58 @@
       "voicesInClip": 1
     }
   ],
+  "participation": {
+    "the-race": {
+      "notAsked": [],
+      "namedButSilent": []
+    },
+    "public-safety": {
+      "notAsked": [],
+      "namedButSilent": []
+    },
+    "affordability": {
+      "notAsked": [
+        "mandela-barnes",
+        "joel-brennan",
+        "francesca-hong"
+      ],
+      "namedButSilent": []
+    },
+    "surplus": {
+      "notAsked": [
+        "david-crowley",
+        "kelda-roys"
+      ],
+      "namedButSilent": []
+    },
+    "income-taxes": {
+      "notAsked": [],
+      "namedButSilent": []
+    },
+    "property-taxes": {
+      "notAsked": [],
+      "namedButSilent": []
+    },
+    "vouchers": {
+      "notAsked": [],
+      "namedButSilent": []
+    },
+    "data-centers": {
+      "notAsked": [],
+      "namedButSilent": []
+    },
+    "divided-government": {
+      "notAsked": [
+        "joel-brennan",
+        "kelda-roys"
+      ],
+      "namedButSilent": []
+    },
+    "closing": {
+      "notAsked": [],
+      "namedButSilent": []
+    }
+  },
   "tone": {
     "the-race": {
       "mandela-barnes": {

@@ -22,6 +22,11 @@ import { DebateClip } from "./debate-clip";
 
 export type DebateCandidate = { slug: string; name: string; title: string; short: string };
 export type DebateTopic = { id: string; label: string; blurb: string; start: number };
+/** Why a candidate has no quote on a topic. Derived, never assumed. */
+export type DebateParticipation = Record<
+  string,
+  { notAsked: string[]; namedButSilent: string[] }
+>;
 export type DebateQuote = {
   topicId: string;
   personSlug: string;
@@ -56,12 +61,22 @@ export function DebateTopics({
   candidates,
   quotes,
   youtubeId,
+  participation,
+  handVotes,
 }: {
   topics: DebateTopic[];
   candidates: DebateCandidate[];
   quotes: DebateQuote[];
   /** When present, each quote also links into the broadcaster's video. */
   youtubeId?: string | null;
+  participation?: DebateParticipation;
+  /**
+   * Hand votes, so a candidate the moderators never questioned on a topic can
+   * still show the position they registered by raising (or not raising) a hand.
+   * Without this, "not asked" reads as "we have nothing from them", when on the
+   * tax deal we have an explicit yes or no from all five.
+   */
+  handVotes?: { id: string; topicId: string; yes: string[]; no: string[] }[];
 }) {
   const [activeId, setActiveId] = useState(topics[0]?.id ?? "");
   const active = topics.find((t) => t.id === activeId) ?? topics[0];
@@ -133,12 +148,27 @@ export function DebateTopics({
             {candidates.map((c) => {
               const q = onTopic.find((x) => x.personSlug === c.slug);
               if (!q) {
+                // "Did not answer" reads as evasion. Every gap on this page is
+                // a candidate the moderators never called on, so say that
+                // instead — and only claim silence when they were addressed.
+                const notAsked = participation?.[active.id]?.notAsked.includes(c.slug);
+                const vote = handVotes?.find((v) => v.topicId === active.id);
+                const handed = vote?.yes.includes(c.slug)
+                  ? "Yes"
+                  : vote?.no.includes(c.slug)
+                    ? "No"
+                    : null;
                 return (
                   <li key={c.slug} className="min-w-0">
                     <p className="font-bold">{c.short}</p>
                     <p className="mt-1 font-mono text-[11px] font-bold tracking-[0.1em] text-muted-foreground uppercase">
-                      Did not answer
+                      {notAsked ? "Not asked on this topic" : "Addressed but did not answer"}
                     </p>
+                    {handed && (
+                      <p className="mt-1 font-mono text-[11px] font-bold tracking-[0.1em] text-muted-foreground uppercase">
+                        Hand vote: {handed}
+                      </p>
+                    )}
                   </li>
                 );
               }

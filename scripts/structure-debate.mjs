@@ -262,6 +262,42 @@ if (strays.length) {
   process.exit(1);
 }
 
+/**
+ * Why a candidate is absent from a topic — because absence is not neutral.
+ *
+ * Every gap on this page turned out to be a candidate the moderators never
+ * called on: on the failed tax deal only Roys and Crowley were asked to
+ * explain their hand, on the surplus only Hong, Brennan and Barnes, and on
+ * governing a divided legislature time ran out ("I apologize if I cut you off
+ * here. We are kind of running up against time"). Labelling that "did not
+ * answer" implies the candidate dodged, which would be our error, not theirs.
+ *
+ * So the distinction is derived rather than assumed:
+ *   notAsked      — never spoke AND no moderator said their name in the block
+ *   namedButSilent — a moderator addressed them and they still said nothing
+ */
+const SURNAME = {
+  "mandela-barnes": /\bBarnes\b/i,
+  "joel-brennan": /\bBrennan\b/i,
+  "david-crowley": /\bCrowley\b/i,
+  "francesca-hong": /\bHong\b/i,
+  "kelda-roys": /\b(Roys|Royce|Royse)\b/i,
+};
+
+const participation = {};
+for (const b of anchored) {
+  const inBlock = turns.filter((t) => t.start >= b.start && t.start < b.end);
+  const mods = inBlock.filter((t) => t.role === "moderator");
+  const notAsked = [];
+  const namedButSilent = [];
+  for (const slugId of CANDIDATES) {
+    if (inBlock.some((t) => t.personSlug === slugId)) continue; // they spoke
+    const named = mods.some((t) => SURNAME[slugId]?.test(t.text));
+    (named ? namedButSilent : notAsked).push(slugId);
+  }
+  participation[b.id] = { notAsked, namedButSilent };
+}
+
 // ── PER-CANDIDATE, PER-TOPIC TONE ───────────────────────────────────────────
 // Presented as tone on an issue, never aggregated into a per-candidate score:
 // "who sounded most negative overall" is a verdict, and this project does not
@@ -302,6 +338,7 @@ const out = {
   topics: anchored,
   handVotes: HAND_VOTES,
   exchanges,
+  participation,
   tone,
 };
 writeFileSync(join(DIR, `${slug}.structured.json`), JSON.stringify(out, null, 2) + "\n");

@@ -35,6 +35,7 @@ export type Debate = {
   topics: DebateTopic[];
   handVotes: DebateHandVote[];
   quotes: DebateQuote[];
+  participation: Record<string, { notAsked: string[]; namedButSilent: string[] }>;
   tone: Record<string, Record<string, { score: number; words: number; turns: number }>>;
   method: {
     engine: string;
