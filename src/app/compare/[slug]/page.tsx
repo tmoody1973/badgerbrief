@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LastUpdated, PartyBadge } from "@/components/guide/labels";
+import { DebateCompare } from "@/components/guide/debate-compare";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
 import { WhatThisMeans } from "@/components/guide/what-this-means";
 import { buildIssueComparison } from "@/lib/compare";
 import { getRace, listRaces } from "@/lib/data";
+import { getDebateForRace } from "@/lib/debates";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
 import { raceIdToSlug, slugToRaceId } from "@/lib/site";
 
@@ -36,12 +38,17 @@ export default async function ComparePage({ params }: Props) {
   if (!data || data.candidates.length === 0) notFound();
   const { race, candidates, positions } = data;
   const { issues, totalOnRecord } = buildIssueComparison(candidates, positions);
+  const debate = getDebateForRace(race.raceId);
 
-  const navSections: NavSection[] = issues.map((i) => ({
-    id: i.issueSlug,
-    label: i.label,
-    count: i.onRecord.length,
-  }));
+  const navSections: NavSection[] = [
+    // The debate is the densest comparison on the page, so it leads the nav.
+    ...(debate ? [{ id: "debate", label: "The debate" }] : []),
+    ...issues.map((i) => ({
+      id: i.issueSlug,
+      label: i.label,
+      count: i.onRecord.length,
+    })),
+  ];
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
@@ -56,7 +63,7 @@ export default async function ComparePage({ params }: Props) {
         ]}
       />
 
-      {totalOnRecord > 0 && <SectionNav sections={navSections} />}
+      {navSections.length > 0 && <SectionNav sections={navSections} />}
 
       <Link
         href={`/races/${slug}`}
@@ -81,15 +88,24 @@ export default async function ComparePage({ params }: Props) {
         </Link>
       </p>
 
+      {/* The densest comparison in the race leads the page. */}
+      {debate && (
+        <div className="mt-6">
+          <DebateCompare raceId={race.raceId} />
+        </div>
+      )}
+
       {totalOnRecord === 0 ? (
         <div className="mt-6 border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
           <p className="font-display text-lg">
-            No sourced positions on record yet for these candidates.
+            {debate
+              ? "Beyond the debate, no sourced positions are on record yet."
+              : "No sourced positions on record yet for these candidates."}
           </p>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            When candidates publish positions we can source, they&apos;ll appear
-            here issue by issue. In the meantime, see each candidate&apos;s page
-            for background, finance, and coverage.
+            {debate
+              ? "Debate answers are what the candidates said out loud, not stances we have classified. As candidates publish positions we can source and summarise, they will appear here issue by issue alongside them."
+              : "When candidates publish positions we can source, they’ll appear here issue by issue. In the meantime, see each candidate’s page for background, finance, and coverage."}
           </p>
           <Link
             href={`/races/${slug}`}

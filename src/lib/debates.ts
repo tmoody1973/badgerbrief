@@ -61,6 +61,15 @@ export function getDebate(slug: string): Debate | null {
   return DEBATES[slug] ?? null;
 }
 
+/**
+ * The debate held in a given race, if there is one. Returns null for every race
+ * without one — which is most of them — so callers can render nothing rather
+ * than an empty shell.
+ */
+export function getDebateForRace(raceId: string): Debate | null {
+  return Object.values(DEBATES).find((d) => d.raceId === raceId) ?? null;
+}
+
 export function getDebateTranscript(slug: string): TranscriptTurn[] {
   return TRANSCRIPTS[slug] ?? [];
 }
