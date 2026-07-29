@@ -112,7 +112,10 @@ export default async function DebatePage({ params }: Props) {
         </ul>
 
         {debate.youtubeId && (
-          <div className="mt-4 aspect-video w-full border-2 border-border">
+          /* Capped rather than full-bleed: at 1440px an unconstrained 16:9
+             frame is ~810px tall and costs a whole screen of scrolling before
+             the reader reaches a single position. */
+          <div className="mt-4 aspect-video w-full max-w-3xl border-2 border-border">
             <iframe
               className="h-full w-full"
               src={`https://www.youtube-nocookie.com/embed/${debate.youtubeId}`}
@@ -144,11 +147,16 @@ export default async function DebatePage({ params }: Props) {
           topics={debate.topics}
           candidates={debate.candidates}
           quotes={debate.quotes}
+          youtubeId={debate.youtubeId}
         />
       </section>
 
       <section id="transcript" className="mt-6 scroll-mt-16">
-        <DebateTranscript topics={debate.topics} transcript={transcript} />
+        <DebateTranscript
+          topics={debate.topics}
+          transcript={transcript}
+          youtubeId={debate.youtubeId}
+        />
       </section>
 
       <section

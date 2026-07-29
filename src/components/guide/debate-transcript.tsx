@@ -1,3 +1,4 @@
+import { youtubeAt } from "@/lib/youtube";
 import type { DebateTopic } from "./debate-topics";
 
 export type TranscriptTurn = {
@@ -25,9 +26,11 @@ export type TranscriptTurn = {
 export function DebateTranscript({
   topics,
   transcript,
+  youtubeId,
 }: {
   topics: DebateTopic[];
   transcript: TranscriptTurn[];
+  youtubeId?: string | null;
 }) {
   const mmss = (s: number) =>
     `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
@@ -51,10 +54,16 @@ export function DebateTranscript({
 
       <div className="mt-4 space-y-2 border-t-2 border-dashed border-border pt-4">
         {preamble.length > 0 && (
-          <TranscriptBlock label="Opening" turns={preamble} mmss={mmss} />
+          <TranscriptBlock label="Opening" turns={preamble} mmss={mmss} youtubeId={youtubeId} />
         )}
         {blocks.map((b) => (
-          <TranscriptBlock key={b.id} label={b.label} turns={b.turns} mmss={mmss} />
+          <TranscriptBlock
+            key={b.id}
+            label={b.label}
+            turns={b.turns}
+            mmss={mmss}
+            youtubeId={youtubeId}
+          />
         ))}
       </div>
     </div>
@@ -65,10 +74,12 @@ function TranscriptBlock({
   label,
   turns,
   mmss,
+  youtubeId,
 }: {
   label: string;
   turns: TranscriptTurn[];
   mmss: (s: number) => string;
+  youtubeId?: string | null;
 }) {
   if (turns.length === 0) return null;
   return (
@@ -86,7 +97,18 @@ function TranscriptBlock({
               <span className={t.role === "candidate" ? "" : "text-muted-foreground"}>
                 {t.name}
               </span>{" "}
-              <span className="text-muted-foreground">{mmss(t.start)}</span>
+              {youtubeId ? (
+                <a
+                  href={youtubeAt(youtubeId, t.start)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground underline decoration-2 underline-offset-2"
+                >
+                  {mmss(t.start)} ↗
+                </a>
+              ) : (
+                <span className="text-muted-foreground">{mmss(t.start)}</span>
+              )}
             </p>
             <p className="max-w-[75ch] text-sm leading-relaxed">{t.text}</p>
           </li>

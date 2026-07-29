@@ -65,10 +65,13 @@ const payload = {
   primaryDate: structured.primaryDate,
   generalDate: structured.generalDate,
   durationSec: structured.durationSec,
-  // Filled in once the broadcaster's own posting is confirmed; the page hides
-  // the embed until then rather than shipping a dead frame.
-  youtubeId: null,
-  sourceUrl: null,
+  // WISN 12's own posting. Verified to share this recording's timeline before
+  // any timestamp was linked to it: the upload runs 3459s against our 3458.98s,
+  // and its audio at 300-325s carries "Mister Barnes, you were once seen as the
+  // clear front runner", which sits at 305.1s here. So a &t= deep link lands on
+  // the words it promises rather than somewhere plausible-looking.
+  youtubeId: "RHGvHPb46Q0",
+  sourceUrl: "https://www.youtube.com/watch?v=RHGvHPb46Q0",
   candidates: CANDIDATES,
   topics: structured.topics.map((t) => ({
     id: t.id,

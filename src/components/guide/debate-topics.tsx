@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { youtubeAt } from "@/lib/youtube";
 import { DebateClip } from "./debate-clip";
 
 /**
@@ -54,10 +55,13 @@ export function DebateTopics({
   topics,
   candidates,
   quotes,
+  youtubeId,
 }: {
   topics: DebateTopic[];
   candidates: DebateCandidate[];
   quotes: DebateQuote[];
+  /** When present, each quote also links into the broadcaster's video. */
+  youtubeId?: string | null;
 }) {
   const [activeId, setActiveId] = useState(topics[0]?.id ?? "");
   const active = topics.find((t) => t.id === activeId) ?? topics[0];
@@ -167,11 +171,23 @@ export function DebateTopics({
                     />
                   </div>
 
-                  {tone && (
-                    <p className="mt-2 font-mono text-[11px] font-bold tracking-[0.1em] text-muted-foreground uppercase">
-                      Tone: {tone.word} {tone.value}
-                    </p>
-                  )}
+                  <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] font-bold tracking-[0.1em] text-muted-foreground uppercase">
+                    {tone && (
+                      <span>
+                        Tone: {tone.word} {tone.value}
+                      </span>
+                    )}
+                    {youtubeId && (
+                      <a
+                        href={youtubeAt(youtubeId, q.startSec)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline decoration-2 underline-offset-2"
+                      >
+                        Watch ↗
+                      </a>
+                    )}
+                  </p>
 
                   <details className="mt-2">
                     <summary className="press inline-block cursor-pointer border-2 border-border bg-background px-2 py-1 font-mono text-[11px] font-bold tracking-[0.1em] uppercase">
