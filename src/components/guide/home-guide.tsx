@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { BallotFinder } from "@/components/guide/ballot-finder";
 import { RaceCard } from "@/components/guide/cards";
+import { DebateBanner } from "@/components/guide/debate-banner";
 import { DistrictRaces } from "@/components/guide/district-races";
 import { raceLevelLabel } from "@/lib/i18n/race-card-dict";
 import { LastUpdated, Stamp } from "@/components/guide/labels";
@@ -41,6 +42,12 @@ export function HomeGuide({
           ]}
         />
       )}
+
+      {/* Above the hero: the debate happened days before the primary, and it is
+          the most time-sensitive thing on the site. English only for now — the
+          debate page itself has no Spanish translation yet, so linking Spanish
+          readers to an English page would be worse than not linking them. */}
+      {lang === "en" && <DebateBanner slug="wi-gov-dem-primary-debate" />}
 
       <section className="border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)] sm:p-10">
         <Stamp>{dict.stamp}</Stamp>
