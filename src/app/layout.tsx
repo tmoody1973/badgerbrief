@@ -11,6 +11,7 @@ import { PostHogProvider } from "@/components/posthog-provider";
 import { AnalyticsEvents } from "@/components/guide/analytics-events";
 import { SwRegister } from "@/components/guide/sw-register";
 import { KofiWidget } from "@/components/kofi-widget";
+import { AnnouncementBar } from "@/components/guide/announcement-bar";
 import { SiteFooter, SiteHeader } from "@/components/guide/chrome";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -67,6 +68,15 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col pb-16 sm:pb-0">
         <Providers>
           <StoreUser />
+          {/* Above the masthead so it is the first thing on every page, not
+              just the home page. Retire this after the August 11 primary. */}
+          <AnnouncementBar
+            id="wi-gov-debate-2026-07-28"
+            href="/debate/wi-gov-dem-primary-debate"
+          >
+            New: the governor&apos;s debate, issue by issue — hear all five
+            candidates in their own voice →
+          </AnnouncementBar>
           <SiteHeader />
           <Suspense fallback={null}>
             <GuidedRail />
