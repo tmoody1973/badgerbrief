@@ -54,11 +54,36 @@ mkdirSync(OUT_AUDIO, { recursive: true });
 
 const doc = JSON.parse(readFileSync(join(DIR, `${slug}.structured.json`), "utf8"));
 
-/** Every answer a candidate gave inside a topic block, flattened. */
+/**
+ * Every answer a candidate gave inside a topic block — with consecutive
+ * paragraphs by the same person merged back into one continuous answer.
+ *
+ * Deepgram splits a long turn into several paragraphs, and a candidate speaking
+ * for thirty seconds uninterrupted is one answer, not three. Treating them
+ * separately and then taking the longest makes the clip start wherever the
+ * middle paragraph happens to begin: Joel Brennan's closing statement opened
+ * "Thank you very much. While you've seen differences amongst us today…" but
+ * the longest single paragraph started at "We can expand BadgerCare", so the
+ * published quote began mid-thought.
+ */
 function answersFor(topicId, personSlug) {
-  return doc.exchanges
+  const flat = doc.exchanges
     .filter((e) => e.topicId === topicId)
     .flatMap((e) => e.answers.filter((a) => a.personSlug === personSlug).map((a) => ({ ...e, ...a })));
+
+  const merged = [];
+  for (const a of flat) {
+    const prev = merged.at(-1);
+    // Contiguous when the next paragraph picks up within a breath of the last.
+    if (prev && a.start - prev.end <= 2) {
+      prev.end = a.end;
+      prev.text = `${prev.text} ${a.text}`.trim();
+      prev.sentences = [...(prev.sentences ?? []), ...(a.sentences ?? [])];
+    } else {
+      merged.push({ ...a, sentences: [...(a.sentences ?? [])] });
+    }
+  }
+  return merged;
 }
 
 /** Whole sentences from the start of an answer, up to MAX_CLIP_SEC. */

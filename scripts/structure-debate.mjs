@@ -191,7 +191,20 @@ for (const turn of turns) {
   if (turn.role === "moderator") {
     // A follow-up inside the same answer ("Do you have a percentage in mind?")
     // extends the open exchange rather than starting a new one.
-    if (current && current.answers.length && turn.wordCount <= 25) {
+    //
+    // It must also still be the SAME topic. Length alone is not enough: the
+    // moderator's move into closing statements — "Believe it or not, it is now
+    // time for closing statements. We did choose randomly with the campaigns
+    // present to determine the order." — is 25 words, so a word-count test
+    // swallowed it and filed all five closing statements as answers to the
+    // previous question about governing a divided legislature. Four candidates'
+    // closing pitches were published as their position on that question.
+    if (
+      current &&
+      current.answers.length &&
+      turn.wordCount <= 25 &&
+      topicAt(turn.start) === current.topicId
+    ) {
       current.followUps.push({ start: turn.start, text: turn.text, by: turn.name });
       continue;
     }
@@ -221,6 +234,33 @@ for (const turn of turns) {
   });
 }
 if (current) exchanges.push(current);
+
+/**
+ * Every answer must sit inside the topic block its exchange claims.
+ *
+ * This is the check that was missing. An exchange carries one topicId, taken
+ * from where the question was asked, and each answer inherits it implicitly —
+ * so a boundary the builder fails to notice silently RELABELS answers rather
+ * than dropping them. That is the dangerous shape: the page still looks
+ * complete, while a candidate's closing statement appears as their answer to
+ * whatever was asked before it.
+ */
+const strays = [];
+for (const e of exchanges) {
+  for (const a of e.answers) {
+    const actual = topicAt(a.start);
+    if (actual !== e.topicId) {
+      const m = Math.floor(a.start / 60);
+      const s = String(Math.floor(a.start % 60)).padStart(2, "0");
+      strays.push(`${a.name} at ${m}:${s} is in "${actual}" but filed under "${e.topicId}"`);
+    }
+  }
+}
+if (strays.length) {
+  console.error(`STRUCTURE FAILED — ${strays.length} answer(s) filed under the wrong topic:\n`);
+  for (const x of strays.slice(0, 12)) console.error("  ✗ " + x);
+  process.exit(1);
+}
 
 // ── PER-CANDIDATE, PER-TOPIC TONE ───────────────────────────────────────────
 // Presented as tone on an issue, never aggregated into a per-candidate score:
