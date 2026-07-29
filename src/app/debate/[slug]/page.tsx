@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { DebateTopics } from "@/components/guide/debate-topics";
 import { DebateTranscript } from "@/components/guide/debate-transcript";
 import { DebateVotes } from "@/components/guide/debate-votes";
+import { DebateWhoWasThere } from "@/components/guide/debate-who";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { getDebate, getDebateTranscript, listDebateSlugs } from "@/lib/debates";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
@@ -48,6 +49,7 @@ export default async function DebatePage({ params }: Props) {
   const transcript = getDebateTranscript(slug);
 
   const sections: NavSection[] = [
+    { id: "who", label: "Who was there" },
     { id: "votes", label: "Hand votes", count: debate.handVotes.length },
     { id: "issues", label: "Issues", count: debate.topics.length },
     { id: "transcript", label: "Transcript", count: transcript.length },
@@ -124,6 +126,13 @@ export default async function DebatePage({ params }: Props) {
       </header>
 
       <SectionNav sections={sections} />
+
+      <section id="who" className="mt-6 scroll-mt-16">
+        <DebateWhoWasThere
+          raceId={debate.raceId}
+          onStage={debate.candidates.map((c) => c.slug)}
+        />
+      </section>
 
       <section id="votes" className="mt-6 scroll-mt-16">
         <DebateVotes votes={debate.handVotes} candidates={debate.candidates} />
