@@ -1,0 +1,1157 @@
+{
+  "slug": "wi-gov-dem-primary-debate",
+  "title": "Wisconsin Democratic Primary Debate for Governor",
+  "date": "2026-07-28",
+  "venue": "Marquette University, Milwaukee",
+  "broadcaster": "WISN 12",
+  "moderators": [
+    "Matt Smith",
+    "Gerron Jordan"
+  ],
+  "raceId": "WI-GOV-2026",
+  "primaryDate": "2026-08-11",
+  "generalDate": "2026-11-03",
+  "durationSec": 3459.0303,
+  "youtubeId": null,
+  "sourceUrl": null,
+  "candidates": [
+    {
+      "slug": "mandela-barnes",
+      "name": "Mandela Barnes",
+      "title": "Former Lieutenant Governor",
+      "short": "Barnes"
+    },
+    {
+      "slug": "joel-brennan",
+      "name": "Joel Brennan",
+      "title": "Former Evers cabinet secretary",
+      "short": "Brennan"
+    },
+    {
+      "slug": "david-crowley",
+      "name": "David Crowley",
+      "title": "Milwaukee County Executive",
+      "short": "Crowley"
+    },
+    {
+      "slug": "francesca-hong",
+      "name": "Francesca Hong",
+      "title": "State Representative",
+      "short": "Hong"
+    },
+    {
+      "slug": "kelda-roys",
+      "name": "Kelda Roys",
+      "title": "State Senator",
+      "short": "Roys"
+    }
+  ],
+  "topics": [
+    {
+      "id": "the-race",
+      "label": "The state of the race",
+      "blurb": "Crowley's re-entry, Hong's DSA membership, Barnes' 2022 loss, and whether single-digit polling ends a candidacy.",
+      "start": 137.28,
+      "end": 564,
+      "openedBy": "Matt Smith",
+      "anchor": "It is fair to say that this race has been chaotic"
+    },
+    {
+      "id": "public-safety",
+      "label": "Policing and public safety",
+      "blurb": "The Madison police shooting of Corey Ruys, body cameras, and whether any of them would cut police budgets.",
+      "start": 564,
+      "end": 948.46,
+      "openedBy": "Gerron Jordan",
+      "anchor": "Last week, a Madison police officer shot and killed a man"
+    },
+    {
+      "id": "affordability",
+      "label": "Affordability and the failed tax deal",
+      "blurb": "The Evers–Republican rebate deal that died in the state Senate, and who would have signed it.",
+      "start": 948.46,
+      "end": 1103.58,
+      "openedBy": "Gerron Jordan",
+      "anchor": "Let's move on to the economy tonight"
+    },
+    {
+      "id": "surplus",
+      "label": "The budget surplus",
+      "blurb": "Return the projected $2.5 billion to taxpayers, or spend it — and on what.",
+      "start": 1103.58,
+      "end": 1354.35,
+      "openedBy": "Gerron Jordan",
+      "anchor": "Congressman Tom Tiffany is campaigning on the fact that he would return the entire surplus"
+    },
+    {
+      "id": "income-taxes",
+      "label": "Taxing the wealthy",
+      "blurb": "Each candidate's specific income threshold and rate, pressed for numbers.",
+      "start": 1354.35,
+      "end": 1768.91,
+      "openedBy": "Gerron Jordan",
+      "anchor": "We did bring up taxes, so let's move on to taxes"
+    },
+    {
+      "id": "property-taxes",
+      "label": "Property taxes",
+      "blurb": "School referenda, the two-thirds funding commitment, and shared revenue.",
+      "start": 1768.91,
+      "end": 2115.16,
+      "openedBy": "Gerron Jordan",
+      "anchor": "Let's talk about property taxes"
+    },
+    {
+      "id": "vouchers",
+      "label": "School vouchers",
+      "blurb": "Whether to end, cap or keep the nation's oldest school choice program — the sharpest split of the night.",
+      "start": 2115.16,
+      "end": 2671.44,
+      "openedBy": "Gerron Jordan",
+      "anchor": "We brought up vouchers, so let's talk about vouchers right now"
+    },
+    {
+      "id": "data-centers",
+      "label": "AI data centers",
+      "blurb": "Moratorium, pause, or guardrails, with 76% of Wisconsinites telling Marquette the costs outweigh the benefits.",
+      "start": 2671.44,
+      "end": 3119.76,
+      "openedBy": "Matt Smith",
+      "anchor": "Let's talk about data centers"
+    },
+    {
+      "id": "divided-government",
+      "label": "Governing a divided legislature",
+      "blurb": "What survives if Republicans keep the legislature.",
+      "start": 3119.76,
+      "end": 3243.66,
+      "openedBy": "Gerron Jordan",
+      "anchor": "Everything you've talked about tonight relies on a democratically controlled legislature"
+    },
+    {
+      "id": "closing",
+      "label": "Closing statements",
+      "blurb": "Thirty seconds each, in an order drawn at random.",
+      "start": 3243.66,
+      "end": 3450.47,
+      "openedBy": "Gerron Jordan",
+      "anchor": "it is now time for closing statements"
+    }
+  ],
+  "handVotes": [
+    {
+      "id": "body-cameras",
+      "topicId": "public-safety",
+      "question": "Would you sign legislation requiring all police and sheriff's departments in Wisconsin to have body cameras?",
+      "spoken": "All of you — all candidates.",
+      "yes": [
+        "mandela-barnes",
+        "joel-brennan",
+        "david-crowley",
+        "francesca-hong",
+        "kelda-roys"
+      ],
+      "no": []
+    },
+    {
+      "id": "tax-deal",
+      "topicId": "affordability",
+      "question": "Would you have signed the Evers–Republican tax relief deal into law if it had passed?",
+      "spoken": "One, Mr. Crowley.",
+      "yes": [
+        "david-crowley"
+      ],
+      "no": [
+        "mandela-barnes",
+        "joel-brennan",
+        "francesca-hong",
+        "kelda-roys"
+      ]
+    },
+    {
+      "id": "property-tax-cut",
+      "topicId": "property-taxes",
+      "question": "Would you commit to an across-the-board property tax decrease?",
+      "spoken": "All candidates agreeing to across the board property tax decrease.",
+      "yes": [
+        "mandela-barnes",
+        "joel-brennan",
+        "david-crowley",
+        "francesca-hong",
+        "kelda-roys"
+      ],
+      "no": []
+    }
+  ],
+  "quotes": [
+    {
+      "topicId": "the-race",
+      "personSlug": "mandela-barnes",
+      "quote": "But when you come up that short, you have a whole lot of time to think about the things that went wrong. You learn about the devastating impact of big money in politics. You also learn about how low Republicans can get, and I can tell you right now we have the resources and we have the support to get it done and on the terms of governor Evers, I have zero interest in upholding the status quo. I have zero interest in being the establishment candidate.",
+      "fullAnswer": "But when you come up that short, you have a whole lot of time to think about the things that went wrong. You learn about the devastating impact of big money in politics. You also learn about how low Republicans can get, and I can tell you right now we have the resources and we have the support to get it done and on the terms of governor Evers, I have zero interest in upholding the status quo. I have zero interest in being the establishment candidate. That is the difference right here on the stage because I am pushing the envelope to make sure that we are as bold as we can possibly be in the Donald Trump era because that's what people have been calling for Democrats to be all along.",
+      "question": "Mr Barnes, you were once seen as the clear front runner in this race. You previously lost a statewide election for US Senate when the field cleared for you. In fact, last year, the Milwaukee Courier said we need a candidate who can unite this state and win. Mandela Barnes already showed us he can't, and Governor Tony Evers recently endorsed David Crowley over you. So why should primary voters now trust you that you can win statewide this time?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 374.59,
+      "endSec": 395.65,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/the-race--mandela-barnes.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.08287957153822247,
+      "diarizationConfidence": 0.8335796914285712,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "the-race",
+      "personSlug": "joel-brennan",
+      "quote": "Well, here's what I would tell you is I don't think primary voters have been paying much attention until the last two weeks and all the upheaval that you have seen. This is what I find when I am going out around the state is that, and this has been verified by polls that was done here by my alma mater at Marquette, because about half the people at this point haven't made a decision. And so that is a lane that's opening up. The challenge that I have had from day one is not that anybody thinks I'm unqualified for the office. I am I served as the top appointee to Governor Evers.",
+      "fullAnswer": "Well, here's what I would tell you is I don't think primary voters have been paying much attention until the last two weeks and all the upheaval that you have seen. This is what I find when I am going out around the state is that, and this has been verified by polls that was done here by my alma mater at Marquette, because about half the people at this point haven't made a decision. And so that is a lane that's opening up. The challenge that I have had from day one is not that anybody thinks I'm unqualified for the office. I am I served as the top appointee to Governor Evers.",
+      "question": "Mister Brennan and miss Roys, you are both polling in the single digits and have been since the start of this race. At this point, are primary voters wasting their vote on a vote for you, mister Brennan?",
+      "askedBy": "Matt Smith",
+      "startSec": 420.11,
+      "endSec": 449.65,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/the-race--joel-brennan.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.17765296804473588,
+      "diarizationConfidence": 0.770084141403508,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "the-race",
+      "personSlug": "david-crowley",
+      "quote": "Well, first and foremost, thank you for having us, but I was never born into the establishment. I was actually born into struggle. I grew up in the 53206 zip code where I had to work extremely hard for everything that I have, and so I'm not here to protect the establishment. I'm here to deliver real results for Wisconsinites all over our states. And, you know, I like to make decisions based off of the data, based off of facts.",
+      "fullAnswer": "Well, first and foremost, thank you for having us, but I was never born into the establishment. I was actually born into struggle. I grew up in the 53206 zip code where I had to work extremely hard for everything that I have, and so I'm not here to protect the establishment. I'm here to deliver real results for Wisconsinites all over our states. And, you know, I like to make decisions based off of the data, based off of facts.",
+      "question": "Mr Crowley, three weeks ago you dropped out of this race saying you couldn't see a path to victory. Eleven days ago, the primary upended when Sara Rodriguez dropped out and you made the unprecedented move of reentering the race with an immediate endorsement from Governor Tony Evers. Since then, you have been linked to a social media account that includes offensive posts. You've said you didn't write any of those, and some have accused you of being the latest prop for the Democratic establishment. So are you and why should voters now trust your judgment and ability to win?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 176.29,
+      "endSec": 198.04,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/the-race--david-crowley.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.11178641844494844,
+      "diarizationConfidence": 0.432913669506173,
+      "flaggedInFirstPass": true,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "the-race",
+      "personSlug": "francesca-hong",
+      "quote": "Well, first, thank you so much to the team at WISN, the Marquette University for hosting this important debate. I do not support the full platform of the National DSA, and I'm not endorsed by DSA National. What democratic socialism is is a form of government that puts working class people first, that puts work first. The policies that we have been working on, permanent affordability, has broad bipartisan support in every corner of the state.",
+      "fullAnswer": "Well, first, thank you so much to the team at WISN, the Marquette University for hosting this important debate. I do not support the full platform of the National DSA, and I'm not endorsed by DSA National. What democratic socialism is is a form of government that puts working class people first, that puts work first. The policies that we have been working on, permanent affordability, has broad bipartisan support in every corner of the state. Well, things like fully funding our public schools, ensuring that we are doing right by our kids and cutting property taxes.",
+      "question": "Miss Hong, you are the Democratic Socialist who is leading in all the polls, yet some Democrats are attempting to stop you from winning, fearful that you cannot beat Republican Tom Tiffany. Just this weekend, the co chair of the Democratic Socialists of America, which you are a member, reaffirmed the DSA's position of abolishing the senate, prisons, and replacing the presidency and the supreme court as we know it. Do you fully back the DSA platform, and why should primary voters trust your judgment and your ability to win statewide?",
+      "askedBy": "Matt Smith",
+      "startSec": 246.32,
+      "endSec": 274.75,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/the-race--francesca-hong.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.270594409138886,
+      "diarizationConfidence": 0.6225184981443307,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "the-race",
+      "personSlug": "kelda-roys",
+      "quote": "If you want the best public schools in the nation for your children, if you want to open up the state's health care plan so that everyone can buy in and we can lower costs for all Wisconsinites, if you want a candidate who is gonna stand up and fight Donald Trump and bring an end to this authoritarian regime, then you should vote for me. I am the candidate in this race that brings the most experience in and around state government with ten years of service in the legislature and the only one who served on the state budget committee.",
+      "fullAnswer": "If you want the best public schools in the nation for your children, if you want to open up the state's health care plan so that everyone can buy in and we can lower costs for all Wisconsinites, if you want a candidate who is gonna stand up and fight Donald Trump and bring an end to this authoritarian regime, then you should vote for me. I am the candidate in this race that brings the most experience in and around state government with ten years of service in the legislature and the only one who served on the state budget committee. I've also been an executive in the private and nonprofit sectors, and for over twenty years, I've been the candidate that has turned progressive ideas, like the kind that all of us have on this stage, into law. That kind of experience is absolutely essential, and voters need to think about not just who can beat Tom Tiffany, although that is important, Not just who can deliver a democratic legislature, although that is vitally important, but who can actually do the job on day one. And I am proud to have earned by far the most endorsements of any candidate in this race, including the most endorsements in Milwaukee County, the most, largest labor union endorsement with WEAC, the state teachers union, and, the endorsement of former lieutenant governor Barbara Lawton.",
+      "question": "Mister Brennan, thank you. Miss Roys, you are continuing to poll in the single digits as well. At this point, are primary voters wasting their vote on a vote for you?",
+      "askedBy": "Matt Smith",
+      "startSec": 499.13,
+      "endSec": 524.07,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/the-race--kelda-roys.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.2395084142493076,
+      "diarizationConfidence": 0.7438879527897009,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "public-safety",
+      "personSlug": "mandela-barnes",
+      "quote": "First of all, we should all be very disturbed by what we saw in those images, what we saw in the video. And we should fight as hard as we possibly can as a state, as a people, as a society, to make sure that never happens again. And body cameras, of course, are the norm. It should be the norm. And I wish that the Madison Police Department did have those body cameras.",
+      "fullAnswer": "First of all, we should all be very disturbed by what we saw in those images, what we saw in the video. And we should fight as hard as we possibly can as a state, as a people, as a society, to make sure that never happens again. And body cameras, of course, are the norm. It should be the norm. And I wish that the Madison Police Department did have those body cameras.",
+      "question": "Mister Barnes, you have previously shown support for reducing police funding and abolishing ICE. Following the Madison shooting, you said you were deeply disturbed and pained. Would you sign a bill or budget that cuts funding for police departments?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 699.04,
+      "endSec": 719.09,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/public-safety--mandela-barnes.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.005724183006866558,
+      "diarizationConfidence": 0.8265334459459449,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "public-safety",
+      "personSlug": "joel-brennan",
+      "quote": "They have about the same crime rate. We have about three times as many people incarcerated. In Wisconsin, we spend about $315 per capita on that. As a long term target, spending that $600,000,000 difference that they spend on other things in Minnesota, spending those on early childhood, on K-twelve education, on other programs in Wisconsin, that would be the kind of investment over the long term that would put us in better stead and keep us from having fewer of these incidents.",
+      "fullAnswer": "They have about the same crime rate. We have about three times as many people incarcerated. In Wisconsin, we spend about $315 per capita on that. As a long term target, spending that $600,000,000 difference that they spend on other things in Minnesota, spending those on early childhood, on K-twelve education, on other programs in Wisconsin, that would be the kind of investment over the long term that would put us in better stead and keep us from having fewer of these incidents. Because they should outrage all of us, but there are ways that we can make a difference on those by spending our money differently.",
+      "question": "Mr. Brennan, after the shooting in Madison, you are also calling for investigation. Would you sign a bill or a budget that cuts funding for police departments?",
+      "askedBy": "Matt Smith",
+      "startSec": 837.94,
+      "endSec": 864.77,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/public-safety--joel-brennan.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.2556466574075623,
+      "diarizationConfidence": 0.778369284018691,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "public-safety",
+      "personSlug": "david-crowley",
+      "quote": "We cannot defund the police. We should be investing in public safety, and that doesn't mean more money to police officers. That's like investing in in in in in systems like the community violence interruption. Milwaukee County, we have been a leader in actually helping to reduce violent crime here in Milwaukee County, working directly hand in hand with not just police departments, but also community organizations. And so we have to focus on not just investing upstream, but making sure we wrap around services around families so that they don't have to go down the road of criminality in the first place.",
+      "fullAnswer": "We cannot defund the police. We should be investing in public safety, and that doesn't mean more money to police officers. That's like investing in in in in in systems like the community violence interruption. Milwaukee County, we have been a leader in actually helping to reduce violent crime here in Milwaukee County, working directly hand in hand with not just police departments, but also community organizations. And so we have to focus on not just investing upstream, but making sure we wrap around services around families so that they don't have to go down the road of criminality in the first place.",
+      "question": "Brennan, thank you. Mr. Crowley, without first seeing any video, you said that you were horrified by the reports of the shooting and immediately pointed to other police shootings in Kenosha and Minneapolis. Did you rush to judgment with your comments, and would you sign a bill or budget that cuts funding for police departments?",
+      "askedBy": "Matt Smith",
+      "startSec": 904.43,
+      "endSec": 933.32,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/public-safety--david-crowley.mp3",
+      "sentiment": "positive",
+      "sentimentScore": 0.3833319285830248,
+      "diarizationConfidence": 0.5811120684466022,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "public-safety",
+      "personSlug": "francesca-hong",
+      "quote": "The governor cannot defund police, and I'm not here to govern by slogan. I'm here to make sure that I am the governor that is most serious about public safety, That means investing in the things that we know prevent crime and getting resources to victims and ensuring that the people who are incarcerated and the folks who are working in our prisons are able to live a life of dignity and work with dignity.",
+      "fullAnswer": "The governor cannot defund police, and I'm not here to govern by slogan. I'm here to make sure that I am the governor that is most serious about public safety, That means investing in the things that we know prevent crime and getting resources to victims and ensuring that the people who are incarcerated and the folks who are working in our prisons are able to live a life of dignity and work with dignity. I think it's important that we invest in communities, including our public schools, out of of school programs, and mental health resources, and attacking the opioid, epidemic. These these are things that are proven to prevent crime, and this is what will help to make sure that we have a government that is serious about public safety.",
+      "question": "You have also called to defund and abolish police before while saying your ideal world is one without prisons. Would you sign a bill or budget that cuts funding for police departments? No. No, why not?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 645.23,
+      "endSec": 668.22,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/public-safety--francesca-hong.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.32643443814507034,
+      "diarizationConfidence": 0.6002483340909082,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "public-safety",
+      "personSlug": "kelda-roys",
+      "quote": "No, but I think we need to actually fund local communities so that we can do evidence based programs that actually reduce and prevent crime. At the end of the day, I'm a mom and stepmom of five. I want my kids and every kid to be safe in our communities, and I want law enforcement officers to be safe in our communities.",
+      "fullAnswer": "No, but I think we need to actually fund local communities so that we can do evidence based programs that actually reduce and prevent crime. At the end of the day, I'm a mom and stepmom of five. I want my kids and every kid to be safe in our communities, and I want law enforcement officers to be safe in our communities. That means that we have to invest in proven strategies that actually do that, unlike what Republicans like Tom Tiffany have done, which is cut funding to local governments, and take away local control so that communities don't have the resources to be able to actually solve these problems effectively. I am really proud, as the only attorney on this stage, to be someone that has fought for and passed criminal justice reforms to make us more safe and more just.",
+      "question": "Miss Roys, after the Madison shooting, you said we do not have to accept this as inevitable. We can create a more fair, safe world. Would you sign a bill or budget that cuts funding for police departments?",
+      "askedBy": "Matt Smith",
+      "startSec": 736.86,
+      "endSec": 753.89,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/public-safety--kelda-roys.mp3",
+      "sentiment": "positive",
+      "sentimentScore": 0.3356851765161587,
+      "diarizationConfidence": 0.8144957736805561,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "affordability",
+      "personSlug": "david-crowley",
+      "quote": "Well, would have signed it into law because we would have gotten a bipartisan deal actually done. I think folks understand here in the state of Wisconsin when you have divided government, it can be a bit chaotic. Were there things in this bill that I did not like? Absolutely. I love the fact that we were going to give relief into our schools and property tax relief, and there are other things in this bill that I didn't like.",
+      "fullAnswer": "Well, would have signed it into law because we would have gotten a bipartisan deal actually done. I think folks understand here in the state of Wisconsin when you have divided government, it can be a bit chaotic. Were there things in this bill that I did not like? Absolutely. I love the fact that we were going to give relief into our schools and property tax relief, and there are other things in this bill that I didn't like.",
+      "question": "Quickly, that projected deficit factored in zero economic growth. Would you consider zero economic growth? Would that be part of a Roys administration if you cite that deficit?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 1072.61,
+      "endSec": 1091.77,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/affordability--david-crowley.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.1968341626226902,
+      "diarizationConfidence": 0.4242977724999998,
+      "flaggedInFirstPass": true,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "affordability",
+      "personSlug": "kelda-roys",
+      "quote": "Because at the end of the day, my job is to be a responsible steward of taxpayer dollars, and this would have created a $2,900,000,000 deficit down the road, which our schools and our health care system and our local governments cannot afford. It also would have spent the surplus before it even materialized. Look at what is happening with the economy.",
+      "fullAnswer": "Because at the end of the day, my job is to be a responsible steward of taxpayer dollars, and this would have created a $2,900,000,000 deficit down the road, which our schools and our health care system and our local governments cannot afford. It also would have spent the surplus before it even materialized. Look at what is happening with the economy. When we are spending money that we do not yet have and spending it in ways that do not actually help us solve the long term problem of getting more money into our public schools, giving property tax relief to property taxpayers, and making sure that we have a more fair, just tax system, All we are doing is throwing that money away on a political gimmick that was frankly cooked up by Robin Vos as he sees the blue wave coming and wanted to do anything that he could to either protect his members from losing their seats and run away from their terrible record on public education, which Tom Tiffany is partially responsible for.",
+      "question": "Miss Roys, you were one of the 15 Democratic senators who helped kill the deal. Why?",
+      "askedBy": "Matt Smith",
+      "startSec": 992.21,
+      "endSec": 1012.24,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/affordability--kelda-roys.mp3",
+      "sentiment": "negative",
+      "sentimentScore": -0.6267184214980415,
+      "diarizationConfidence": 0.8138633629775314,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "surplus",
+      "personSlug": "mandela-barnes",
+      "quote": "So no, I certainly wouldn't have signed the deal, but the way we give more money back to people, the way we actually return money to folks is by taxing the wealthy, taxing the billionaires, taxing these corporations that have been getting over on us, making money hand over fist while communities continue to starve for resources. This is how we can most effectively return money back to folks. On the issue of affordability, the best way we can close the affordability gap is to put more money in the pockets of hardworking people.",
+      "fullAnswer": "So no, I certainly wouldn't have signed the deal, but the way we give more money back to people, the way we actually return money to folks is by taxing the wealthy, taxing the billionaires, taxing these corporations that have been getting over on us, making money hand over fist while communities continue to starve for resources. This is how we can most effectively return money back to folks. On the issue of affordability, the best way we can close the affordability gap is to put more money in the pockets of hardworking people. Our minimum wage still $7.25 Costs have gone up, wages have not. But returning that money to the people, that means making the right investments in public education, making the investments in healthcare, taxing the wealthy, and implementing a working class tax cut for folks who work hard every single day and don't get the benefits that corporations get.",
+      "question": "Congressman Tom Tiffany is campaigning on the fact that he would return the entire surplus, he says, to taxpayers. Miss Hong, would you return the surplus to taxpayers, or how would you spend the projected $2,500,000,000",
+      "askedBy": "Gerron Jordan",
+      "startSec": 1287.65,
+      "endSec": 1314.22,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/surplus--mandela-barnes.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.014928121484962165,
+      "diarizationConfidence": 0.7912611177777776,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "surplus",
+      "personSlug": "joel-brennan",
+      "quote": "But the first thing that I would spend, the first $100,000,000, which I will do in January, will go into child care and early childhood education. It is a system that is broken. A billion dollars of productivity sits on the sidelines every year from especially from women, mainly from women who can't find affordable, accessible, or high quality child care. It is a k 12 and workforce issue. That's the first place I'd spend a $100,000,000.",
+      "fullAnswer": "But the first thing that I would spend, the first $100,000,000, which I will do in January, will go into child care and early childhood education. It is a system that is broken. A billion dollars of productivity sits on the sidelines every year from especially from women, mainly from women who can't find affordable, accessible, or high quality child care. It is a k 12 and workforce issue. That's the first place I'd spend a $100,000,000.",
+      "question": "Congressman Tom Tiffany is campaigning on the fact that he would return the entire surplus, he says, to taxpayers. Miss Hong, would you return the surplus to taxpayers, or how would you spend the projected $2,500,000,000",
+      "askedBy": "Gerron Jordan",
+      "startSec": 1210.73,
+      "endSec": 1234,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/surplus--joel-brennan.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.2788941817321851,
+      "diarizationConfidence": 0.9107156914285729,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "surplus",
+      "personSlug": "francesca-hong",
+      "quote": "Those are the taxpayers dollars, but investment is what we need, thinking about our shared future, our kids. It is an investment when we invest in public schools and ensuring that we are cutting property taxes, but doing right for our kids. Our campaign is about permanent affordability, and putting all of those surplus dollars, back into, taxpayers money.",
+      "fullAnswer": "Those are the taxpayers dollars, but investment is what we need, thinking about our shared future, our kids. It is an investment when we invest in public schools and ensuring that we are cutting property taxes, but doing right for our kids. Our campaign is about permanent affordability, and putting all of those surplus dollars, back into, taxpayers money. I think that it would be irresponsible, and the reason why that surplus deal was so problematic is that those who are on fixed income would not have received that check. Folks who are lower income would have received less.",
+      "question": "Congressman Tom Tiffany is campaigning on the fact that he would return the entire surplus, he says, to taxpayers. Miss Hong, would you return the surplus to taxpayers, or how would you spend the projected $2,500,000,000",
+      "askedBy": "Gerron Jordan",
+      "startSec": 1114.7,
+      "endSec": 1136.73,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/surplus--francesca-hong.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.15387322083868163,
+      "diarizationConfidence": 0.6904076884848487,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "income-taxes",
+      "personSlug": "mandela-barnes",
+      "quote": "Yeah, so I think that incomes over $1,000,000 should be taxed a little bit higher, even if it's temporary. The fact is we are in a real crisis right now and our necessities have not been seeing the resources, have not been seeing the funding.",
+      "fullAnswer": "Yeah, so I think that incomes over $1,000,000 should be taxed a little bit higher, even if it's temporary. The fact is we are in a real crisis right now and our necessities have not been seeing the resources, have not been seeing the funding. Again, there's no reason these school districts should be going to referendum every single year just to fund basic services And if we increase that tax rate by less than 1%, 0.9%, 0.8%, we do a great deal to be able to provide much more funding to our school districts and also help close the share of revenues.",
+      "question": "Barnes, under your plan, what is the specific income level where taxes would go up and what percentage would that top tax bracket pay?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 1380.89,
+      "endSec": 1395.24,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/income-taxes--mandela-barnes.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.07659529550995642,
+      "diarizationConfidence": 0.860316648446601,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "income-taxes",
+      "personSlug": "joel-brennan",
+      "quote": "You're gonna find that I have general agreement that people making over $1,000,000 should pay a little bit more, and we could talk about what that is. But I also think that there are other things, the manufacturing and agricultural tax credit, which is generally not paid to farmers, and which has continued to increase to the tune of about $400,000,000. I would like to continue you know, we're talking about raising taxes on the rich. One of the real successes of Tony Evers is making sure that we have had middle class tax cuts and ensuring that we can continue to do that.",
+      "fullAnswer": "You're gonna find that I have general agreement that people making over $1,000,000 should pay a little bit more, and we could talk about what that is. But I also think that there are other things, the manufacturing and agricultural tax credit, which is generally not paid to farmers, and which has continued to increase to the tune of about $400,000,000. I would like to continue you know, we're talking about raising taxes on the rich. One of the real successes of Tony Evers is making sure that we have had middle class tax cuts and ensuring that we can continue to do that. Now, the other thing about this, however, is that, you know, I like to win.",
+      "question": "Barnes, under your plan, what is the specific income level where taxes would go up and what percentage would that top tax bracket pay?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 1618.62,
+      "endSec": 1645.55,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/income-taxes--joel-brennan.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.16169136092692865,
+      "diarizationConfidence": 0.6219937329411769,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "income-taxes",
+      "personSlug": "david-crowley",
+      "quote": "We need to bring business owners and community members to the table. And let's actually have a real discussion about the entire system. I don't think that we should be just focusing on how we can increase taxes just particular for for for certain income earners when we haven't looked at the entire system. When it comes down to those who are making hand over fist, we absolutely need to to tax the ultra wealthy. We need to be smart about how we're doing things long term.",
+      "fullAnswer": "We need to bring business owners and community members to the table. And let's actually have a real discussion about the entire system. I don't think that we should be just focusing on how we can increase taxes just particular for for for certain income earners when we haven't looked at the entire system. When it comes down to those who are making hand over fist, we absolutely need to to tax the ultra wealthy. We need to be smart about how we're doing things long term.",
+      "question": "Barnes, under your plan, what is the specific income level where taxes would go up and what percentage would that top tax bracket pay?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 1519.96,
+      "endSec": 1543.15,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/income-taxes--david-crowley.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.022716366268437486,
+      "diarizationConfidence": 0.5802849754022993,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "income-taxes",
+      "personSlug": "francesca-hong",
+      "quote": "You know, discussing that hypothetical is, a little bit, I'm confused about that. However, let's look at all the other policies that we have talked about that we have been fighting for with our campaign.",
+      "fullAnswer": "You know, discussing that hypothetical is, a little bit, I'm confused about that. However, let's look at all the other policies that we have talked about that we have been fighting for with our campaign. When there is free childcare, when there is fully funded public schools, when we see some of these corporate loopholes and corporate welfare come to an end, when we have investment in rural roads, when there's legalization of cannabis, I think that we can improve the quality of life for millionaires and ensure that they too will be able to live, work, and thrive here in our state.",
+      "question": "Real quick before we move on, what if all the millionaires leave the state and go to a state near us that has a flat tax rate or or a lower tax rate? Then all of these plans collapse, correct?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 1734.54,
+      "endSec": 1748.2,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/income-taxes--francesca-hong.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.2898586509360489,
+      "diarizationConfidence": 0.631202888737863,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "income-taxes",
+      "personSlug": "kelda-roys",
+      "quote": "I agree with my colleagues that anyone who's earning over $1,000,000 a year should pay a slightly higher tax rate, but we also need to look at the corporate tax giveaways that have run rampant over the last fifteen years of Republican rule. We have rolled out the red carpet for Foxconn. The AI data center tax breaks are estimated to cost us $2,000,000,000.",
+      "fullAnswer": "I agree with my colleagues that anyone who's earning over $1,000,000 a year should pay a slightly higher tax rate, but we also need to look at the corporate tax giveaways that have run rampant over the last fifteen years of Republican rule. We have rolled out the red carpet for Foxconn. The AI data center tax breaks are estimated to cost us $2,000,000,000. All that at a time when we are spending $0 on early childhood education, when our public schools have been starved of resources, jacking up people's property taxes just to help our kids keep teachers in the classroom. So as a small business owner, it offends me that the largest businesses in the state are not only not paying their fair share of taxes, but they're often getting public resources.",
+      "question": "Barnes, under your plan, what is the specific income level where taxes would go up and what percentage would that top tax bracket pay?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 1560.68,
+      "endSec": 1580.01,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/income-taxes--kelda-roys.mp3",
+      "sentiment": "negative",
+      "sentimentScore": -0.3880787852998656,
+      "diarizationConfidence": 0.8974891746268673,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "property-taxes",
+      "personSlug": "mandela-barnes",
+      "quote": "Well first of all we have to get school funding off of the property tax pros. That's the biggest thing. The reason we have seen these historic property tax increases is again because communities all across the state of Wisconsin have voted to raise their own property taxes just to keep the doors open. It is a very irresponsible way to fund education, to fund our future, to prioritize our children.",
+      "fullAnswer": "Well first of all we have to get school funding off of the property tax pros. That's the biggest thing. The reason we have seen these historic property tax increases is again because communities all across the state of Wisconsin have voted to raise their own property taxes just to keep the doors open. It is a very irresponsible way to fund education, to fund our future, to prioritize our children. When I talked about Robin Vos not being a good negotiating partner, when I talked about the priorities in Wisconsin missing the mark, this is how we end up with a surplus because our schools don't have this funding and the resources that they need.",
+      "question": "Barnes. How would you make that happen?",
+      "askedBy": "Matt Smith",
+      "startSec": 1794.79,
+      "endSec": 1815.81,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/property-taxes--mandela-barnes.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.3103569408172163,
+      "diarizationConfidence": 0.8061023760344824,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "property-taxes",
+      "personSlug": "joel-brennan",
+      "quote": "It tax increase was mentioned a little bit by Mandela, but this spring when we all celebrated Chris Taylor's win that that night, that same night, 72 school districts went to referendum, 60 of them for operations, just to keep the lights on, not to build a new middle school, not to build a new science classroom. That is as as big a condemnation as we can get in Wisconsin. And so I would immediately scrap that funding formula, which is under a lawsuit right now, but it's probably going to take three years for that to work its way through the courts. Our kids don't have three more years to wait.",
+      "fullAnswer": "It tax increase was mentioned a little bit by Mandela, but this spring when we all celebrated Chris Taylor's win that that night, that same night, 72 school districts went to referendum, 60 of them for operations, just to keep the lights on, not to build a new middle school, not to build a new science classroom. That is as as big a condemnation as we can get in Wisconsin. And so I would immediately scrap that funding formula, which is under a lawsuit right now, but it's probably going to take three years for that to work its way through the courts. Our kids don't have three more years to wait. I would create a child centric formula where every kid has value regardless of where you live.",
+      "question": "Barnes. How would you make that happen?",
+      "askedBy": "Matt Smith",
+      "startSec": 1852.33,
+      "endSec": 1880.95,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/property-taxes--joel-brennan.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.11893031552664993,
+      "diarizationConfidence": 0.7155302601550397,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "property-taxes",
+      "personSlug": "david-crowley",
+      "quote": "It's also affecting renters as well because when property tax go up, landlords quite frankly pass those out down to those renters as well. And so we have to tackle property taxes by one investing in our education system, increasing the reimbursement rates as well for special education because our school districts shouldn't have to choose between mandated services and whether or not they're gonna have teachers. But as the only elected official who runs, you know, county government representing 19 different municipalities close to a million people, we have a lot of state mandated services.",
+      "fullAnswer": "It's also affecting renters as well because when property tax go up, landlords quite frankly pass those out down to those renters as well. And so we have to tackle property taxes by one investing in our education system, increasing the reimbursement rates as well for special education because our school districts shouldn't have to choose between mandated services and whether or not they're gonna have teachers. But as the only elected official who runs, you know, county government representing 19 different municipalities close to a million people, we have a lot of state mandated services. And with those state mandated services, those resources don't come down the pipeline. And so it's extremely important that we work at the state to to make sure that we are getting the local governments are getting enough resources to invest in things like public safety because the state of Wisconsin is near the bottom or dead last when it comes down to investments and such.",
+      "question": "And we're gonna get to education and vouchers here in just a second. Miss Roys, so I do wanna ask about property taxes. How do you bring property taxes down across the board?",
+      "askedBy": "Matt Smith",
+      "startSec": 2068.24,
+      "endSec": 2097.34,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/property-taxes--david-crowley.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.0049283088624684345,
+      "diarizationConfidence": 0.7213981832716031,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "property-taxes",
+      "personSlug": "francesca-hong",
+      "quote": "As I mentioned that we have already introduced legislation that would add a tax to the millionaire and increase the millionaire tax bracket as well as a billionaire tax. You know, this would help us fund, special education while lowering property taxes by up to 44%. It is essential that we return to two thirds funding and make sure that we are bringing a responsible end to the voucher program.",
+      "fullAnswer": "As I mentioned that we have already introduced legislation that would add a tax to the millionaire and increase the millionaire tax bracket as well as a billionaire tax. You know, this would help us fund, special education while lowering property taxes by up to 44%. It is essential that we return to two thirds funding and make sure that we are bringing a responsible end to the voucher program. This is a program that currently, the state is spending over $1,200,000,000, and I think that it is not just public school funding that is raising property taxes. Robin Vos and the Republican led legislature has been decreasing shared revenue, and and it is a deep inadequate funding for our local governments, and they too have had to go to referenda, and many are increasing property taxes.",
+      "question": "Barnes. How would you make that happen?",
+      "askedBy": "Matt Smith",
+      "startSec": 1921.15,
+      "endSec": 1943.93,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/property-taxes--francesca-hong.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.14000599263031988,
+      "diarizationConfidence": 0.7652948824817509,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "property-taxes",
+      "personSlug": "kelda-roys",
+      "quote": "So we do need more state resources to end this divisive cycle of referendums that are pitting neighbors against one another, grandparents against their grandkids' schools.",
+      "fullAnswer": "So we do need more state resources to end this divisive cycle of referendums that are pitting neighbors against one another, grandparents against their grandkids' schools. I also am the only candidate in this race that actually has a plan, not just a wish, but an actual plan to bring that private voucher scheme to a responsible end because the actual number is closer to $1,800,000,000 in each budget that is going directly out of the coffers of our local school districts into these private schemes, and they are unaccountable, and they can discriminate against kids, and none of us as taxpayers should find that acceptable.",
+      "question": "And we're gonna get to education and vouchers here in just a second. Miss Roys, so I do wanna ask about property taxes. How do you bring property taxes down across the board?",
+      "askedBy": "Matt Smith",
+      "startSec": 2021.67,
+      "endSec": 2030.87,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/property-taxes--kelda-roys.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.31526747402155175,
+      "diarizationConfidence": 0.8679934562264167,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "vouchers",
+      "personSlug": "mandela-barnes",
+      "quote": "Now I was very fortunate to know where I was gonna go home at night. I was very fortunate to not have to worry about where my next meal came from, but that's not the reality that far too many of our students face. And we're talking about education. We truly have to talk about the societal factors that impact how our students do or do not learn.",
+      "fullAnswer": "Now I was very fortunate to know where I was gonna go home at night. I was very fortunate to not have to worry about where my next meal came from, but that's not the reality that far too many of our students face. And we're talking about education. We truly have to talk about the societal factors that impact how our students do or do not learn. If we have these exorbitant rates of child poverty, it is going to impact the way that they learn, and as I have talked about vouchers, the main line is accountability, because we have seen horror stories where voucher operators close doors overnight.",
+      "question": "Mister Barnes, you're proposing a multi year sunset of the program as you've described it. What does that look like specifically in the city of Milwaukee?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 2220.44,
+      "endSec": 2238.57,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/vouchers--mandela-barnes.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.02024474812184905,
+      "diarizationConfidence": 0.9211158558558559,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "vouchers",
+      "personSlug": "joel-brennan",
+      "quote": "You know why? Because there are representatives in Milwaukee who represent the city of Milwaukee for whom more than half of the people who go who live there are sending their kids to private schools. Like, we have to live in the real world. This is an issue that is dividing Democrats because in Milwaukee, what parents deserve is a great option. And I want to make sure our public schools are better than any, bar none.",
+      "fullAnswer": "You know why? Because there are representatives in Milwaukee who represent the city of Milwaukee for whom more than half of the people who go who live there are sending their kids to private schools. Like, we have to live in the real world. This is an issue that is dividing Democrats because in Milwaukee, what parents deserve is a great option. And I want to make sure our public schools are better than any, bar none.",
+      "question": "Thank you, Mr. Barnes. Miss Roys, at what point in your plan do vouchers go away for tens of millions of children in Milwaukee, tens of thousands of children in Milwaukee?",
+      "askedBy": "Matt Smith",
+      "startSec": 2467.19,
+      "endSec": 2487.72,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/vouchers--joel-brennan.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.23002013380264308,
+      "diarizationConfidence": 0.7259661319480508,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "vouchers",
+      "personSlug": "david-crowley",
+      "quote": "You know, we've talked about how we went to referendum to make sure our public schools have what they need. And if we're going to referendum for the current capacity of students that they have now, how will we be able to bring on those students and make sure that we have great public schools moving forward? And so I don't think the question is whether or not we should have vouchers. The question should be how do we continue to invest in our public schools to make sure that they are the school of choice?",
+      "fullAnswer": "You know, we've talked about how we went to referendum to make sure our public schools have what they need. And if we're going to referendum for the current capacity of students that they have now, how will we be able to bring on those students and make sure that we have great public schools moving forward? And so I don't think the question is whether or not we should have vouchers. The question should be how do we continue to invest in our public schools to make sure that they are the school of choice?",
+      "question": "As we've heard, some of you are calling to end the voucher program. Mr Crowley, do you support eliminating or reducing vouchers in the city of Milwaukee?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 2160.11,
+      "endSec": 2181.51,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/vouchers--david-crowley.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.14917739348796508,
+      "diarizationConfidence": 0.7530421981250002,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "vouchers",
+      "personSlug": "francesca-hong",
+      "quote": "No, I'm a very proud, daughter of immigrants, a single mom where my son is going to the same public school district that I came through in my hometown of Madison. I believe that public dollars not only belong in public schools, but one of the reasons that privatization has grown across the country is that, you know, it's public institutions of education that are one of our last remaining democratic institutions, and if we don't have strong public schools, we can't have a strong democracy.",
+      "fullAnswer": "No, I'm a very proud, daughter of immigrants, a single mom where my son is going to the same public school district that I came through in my hometown of Madison. I believe that public dollars not only belong in public schools, but one of the reasons that privatization has grown across the country is that, you know, it's public institutions of education that are one of our last remaining democratic institutions, and if we don't have strong public schools, we can't have a strong democracy. Our plan would ensure, property tax transparency. I was in Luxembourg, Wisconsin, at the dairy breakfast talking to a gentleman who had no idea about the voucher program, and when he found out that the statewide program is where some of the public dollars were going into private schools, he was shocked. Ending that statewide program, and, implementing property tax transparency, and then moving to Milwaukee and Racine, and looking at accountability and transparency measures that is uniform across what public schools are having to, be audited for, and the different regulations that public schools are responsible for, and I will say I introduced the Healthy School Meals for All legislation, and that is a bill that would include all students in K through 12.",
+      "question": "Thank you, Mr. Barnes. Miss Roys, at what point in your plan do vouchers go away for tens of millions of children in Milwaukee, tens of thousands of children in Milwaukee?",
+      "askedBy": "Matt Smith",
+      "startSec": 2541.53,
+      "endSec": 2569.02,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/vouchers--francesca-hong.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.012760018638524964,
+      "diarizationConfidence": 0.6162630315165878,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "vouchers",
+      "personSlug": "kelda-roys",
+      "quote": "I think that's totally unacceptable as a taxpayer, and certainly as a parent. Every single child deserves a high quality public education, And what we have with the statewide expansion is essentially a program that has subsidized the private choices of wealthy parents. The vast majority of students in the statewide expansion were already in private school at their parents' expense before taxpayers started picking up the tab.",
+      "fullAnswer": "I think that's totally unacceptable as a taxpayer, and certainly as a parent. Every single child deserves a high quality public education, And what we have with the statewide expansion is essentially a program that has subsidized the private choices of wealthy parents. The vast majority of students in the statewide expansion were already in private school at their parents' expense before taxpayers started picking up the tab. I believe that public dollars belong in public schools, and if you take even $1 of public money, you need to be subject to accountability. And yes, over time, I am gonna bring the private voucher scheme to an end as we increase the quality and the capacity of our public schools, Because the most important thing to me as a parent and what I hope my legacy will be as governor is to restore Wisconsin in our rightful place as the best public education state in the nation.",
+      "question": "Thank you, Mr. Barnes. Miss Roys, at what point in your plan do vouchers go away for tens of millions of children in Milwaukee, tens of thousands of children in Milwaukee?",
+      "askedBy": "Matt Smith",
+      "startSec": 2369.57,
+      "endSec": 2392.72,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/vouchers--kelda-roys.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.17822004335036704,
+      "diarizationConfidence": 0.8557036473885324,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "data-centers",
+      "personSlug": "mandela-barnes",
+      "quote": "And we also have to have a renewable energy mandate to make sure that they are contributing energy back to the grid and I want us all to you know caution especially you know because I do again no new data center construction without those guardrails in place but even as the representative mentioned a full in urban Milwaukee was reported that a full data center moratorium may face legal repercussions.",
+      "fullAnswer": "And we also have to have a renewable energy mandate to make sure that they are contributing energy back to the grid and I want us all to you know caution especially you know because I do again no new data center construction without those guardrails in place but even as the representative mentioned a full in urban Milwaukee was reported that a full data center moratorium may face legal repercussions. Those were the words of the representatives, not mine, and it is important for us to empower the Department of Natural Resources to make sure that they have the funding to engage in the ongoing quality monitoring of these data centers to ensure that they aren't negatively impacting air or water quality.",
+      "question": "Thank you. Mister Brennan, if if lawmakers can agree and you believe in local control, what can you do to address the boom in data centers?",
+      "askedBy": "Matt Smith",
+      "startSec": 3001.22,
+      "endSec": 3021.24,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/data-centers--mandela-barnes.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.03338456234129948,
+      "diarizationConfidence": 1,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "data-centers",
+      "personSlug": "joel-brennan",
+      "quote": "Make sure that there are Wisconsin union workers who are building these if they happen here. And number four, make sure that there are never going to be the nondisclosure agreements that are the reason why people don't trust government, why the reason why they're they're so angry about these things. If we can demonstrate in that first hundred days and there's good legislation that's gone through 12 drafts, and Democrats and Republicans both, and stakeholders have had involvement in that.",
+      "fullAnswer": "Make sure that there are Wisconsin union workers who are building these if they happen here. And number four, make sure that there are never going to be the nondisclosure agreements that are the reason why people don't trust government, why the reason why they're they're so angry about these things. If we can demonstrate in that first hundred days and there's good legislation that's gone through 12 drafts, and Democrats and Republicans both, and stakeholders have had involvement in that. If we can do that in the first hundred days, it's not gonna make everybody happy, but it's gonna set the bar and take away that uncertainty and take away another reason for why people distrust government and why they're so angry. Like that's I think what governing is.",
+      "question": "Thank you. Mister Brennan, if if lawmakers can agree and you believe in local control, what can you do to address the boom in data centers?",
+      "askedBy": "Matt Smith",
+      "startSec": 2932.57,
+      "endSec": 2955.73,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/data-centers--joel-brennan.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.1003757338397778,
+      "diarizationConfidence": 0.6979567555384597,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "data-centers",
+      "personSlug": "david-crowley",
+      "quote": "Well, one, we need to it's unfortunate that the legislature actually left session without actually putting any guardrails in place. So as governor, we need to make sure that we're protecting ourselves from the data centers that are currently here. I do have the same concerns that many folks have across this state, but I think a moratorium, a short term moratorium doesn't address the long term concerns that we have.",
+      "fullAnswer": "Well, one, we need to it's unfortunate that the legislature actually left session without actually putting any guardrails in place. So as governor, we need to make sure that we're protecting ourselves from the data centers that are currently here. I do have the same concerns that many folks have across this state, but I think a moratorium, a short term moratorium doesn't address the long term concerns that we have. And so as governor, we will make sure that we hold these data centers accountable, that they pay, for the energy use, they pay for the grid upgrades, and they bring the Beyonce approach, bring your own new clean energy. We need these data centers to be as close to 100 renewable energy, as much as possible.",
+      "question": "If lawmakers can agree and if you believe in local control, what really can you do as governor, mister Crowley?",
+      "askedBy": "Matt Smith",
+      "startSec": 2700.97,
+      "endSec": 2721.24,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/data-centers--david-crowley.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.16459389362717047,
+      "diarizationConfidence": 0.7110911070312504,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "data-centers",
+      "personSlug": "francesca-hong",
+      "quote": "No. I introduced the legislation that puts a moratorium on the construction of new AI data centers, and I would call a special session into, place so that the legislature can take up that legislation or the other democratic legislation that had been introduced by my colleagues, and yet Robin Vos ended session early.",
+      "fullAnswer": "No. I introduced the legislation that puts a moratorium on the construction of new AI data centers, and I would call a special session into, place so that the legislature can take up that legislation or the other democratic legislation that had been introduced by my colleagues, and yet Robin Vos ended session early. I think it's important that we have enforceable regulation, that we bring union workers to the table, that this is very similar to what I believe could be seen as more collective bargaining to make sure that we're protecting union jobs, and that, you know, the, natural resources, we're letting some of the big tech companies know that they are not for sale, and until we fully fund the Department of Natural Resources, and we have the actual regulations to, hold polluters accountable that we are including in the Public Service Commission, you know, different types of phases where we have stricter legislation and clear definitions of how data centers can actually move forward. This moratorium is necessary so that we can responsibly and and put in enforcement mechanisms to protect communities, and seeing local governments already put moratoriums into play, we want people to have local control, but we also wanna make sure that there are the guardrails, the legal resource, and that if data centers are going to come here in our state, that they pay their own way and actually pay up front.",
+      "question": "If lawmakers can agree and if you believe in local control, what really can you do as governor, mister Crowley?",
+      "askedBy": "Matt Smith",
+      "startSec": 2790.91,
+      "endSec": 2810.38,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/data-centers--francesca-hong.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.1036118469123418,
+      "diarizationConfidence": 0.7332668986249978,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "data-centers",
+      "personSlug": "kelda-roys",
+      "quote": "Something that none of my colleagues have mentioned, even though we are all running for governor, is using executive power against the existing projects that are under construction and were put under construction over the strenuous objections of those communities. We have a Department of Natural Resources that should be protecting our air and our soil and our water. We have a public service commission that needs to be much more aggressive about making sure that the big guys are not asking us to subsidize them.",
+      "fullAnswer": "Something that none of my colleagues have mentioned, even though we are all running for governor, is using executive power against the existing projects that are under construction and were put under construction over the strenuous objections of those communities. We have a Department of Natural Resources that should be protecting our air and our soil and our water. We have a public service commission that needs to be much more aggressive about making sure that the big guys are not asking us to subsidize them. I have put forth the strongest legislation and the strongest plan of the candidates in this race to actually address and stop the unregulated development of data centers because I believe the status quo is totally unacceptable. The moratorium bill has very little support and is unlikely to pass, but the strong regulation bill that many of my colleagues have described is poised to pass in January.",
+      "question": "Thank you. Mister Brennan, if if lawmakers can agree and you believe in local control, what can you do to address the boom in data centers?",
+      "askedBy": "Matt Smith",
+      "startSec": 3038.58,
+      "endSec": 3066.05,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/data-centers--kelda-roys.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": -0.25376708352682636,
+      "diarizationConfidence": 0.7320073584313699,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "divided-government",
+      "personSlug": "mandela-barnes",
+      "quote": "To everybody watching at home, I want you to know that the establishment is trying to rig this election. They want you to choose between their preferred candidate, and also Republican billionaires are lining up to the tune of $3,500,000 to choose a Democratic nominee in this race. I'm here to say that's BS. I've been a progressive fighter who's taken on the tough fights, but also the only candidate on this stage who's actually defeating Tom Tiffany according to the most recent Marquette poll. We can get things done, but it starts on August 11.",
+      "fullAnswer": "To everybody watching at home, I want you to know that the establishment is trying to rig this election. They want you to choose between their preferred candidate, and also Republican billionaires are lining up to the tune of $3,500,000 to choose a Democratic nominee in this race. I'm here to say that's BS. I've been a progressive fighter who's taken on the tough fights, but also the only candidate on this stage who's actually defeating Tom Tiffany according to the most recent Marquette poll. We can get things done, but it starts on August 11.",
+      "question": "I apologize if I cut you off here. We are kind of running up against time. Everything you've talked about tonight relies on a democratically controlled legislature. Miss Hong, what happens if there's a divided government or Republicans control the legislature and your governor?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 3361.34,
+      "endSec": 3386.84,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/divided-government--mandela-barnes.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.06299189439353843,
+      "diarizationConfidence": 0.812126448645834,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "divided-government",
+      "personSlug": "joel-brennan",
+      "quote": "We can expand BadgerCare. We can stop having property taxpayers pitted against kids in Wisconsin, but we have to win in order to do that. For twenty five years, I have been somebody who has solved problems. I'll be a governor who's more interested in results than rhetoric. I hope that I can get your support on August 11 and November 3.",
+      "fullAnswer": "We can expand BadgerCare. We can stop having property taxpayers pitted against kids in Wisconsin, but we have to win in order to do that. For twenty five years, I have been somebody who has solved problems. I'll be a governor who's more interested in results than rhetoric. I hope that I can get your support on August 11 and November 3.",
+      "question": "I apologize if I cut you off here. We are kind of running up against time. Everything you've talked about tonight relies on a democratically controlled legislature. Miss Hong, what happens if there's a divided government or Republicans control the legislature and your governor?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 3268.18,
+      "endSec": 3287.78,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/divided-government--joel-brennan.mp3",
+      "sentiment": "neutral",
+      "sentimentScore": 0.18934584108571853,
+      "diarizationConfidence": 0.6007634261290318,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "divided-government",
+      "personSlug": "david-crowley",
+      "quote": "I wanna first and foremost thank you thank our moderators for hosting us, and I wanna thank all of you who are tuning in today. You know, my story is like Wisconsin's story. I grew up learning the values of hard work, resilience, and to stand up when somebody tries to knock you down. But people all across this state are struggling every single day, and I know what that feels like.",
+      "fullAnswer": "I wanna first and foremost thank you thank our moderators for hosting us, and I wanna thank all of you who are tuning in today. You know, my story is like Wisconsin's story. I grew up learning the values of hard work, resilience, and to stand up when somebody tries to knock you down. But people all across this state are struggling every single day, and I know what that feels like. They need a governor who's gonna deliver for them on day one, and that's why I have received the endorsements of folks like Tony Evers, governor Evers, our labor unions, and folks all across our state, because they know I will be delivering the results that's going to make a great impact.",
+      "question": "I apologize if I cut you off here. We are kind of running up against time. Everything you've talked about tonight relies on a democratically controlled legislature. Miss Hong, what happens if there's a divided government or Republicans control the legislature and your governor?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 3290.11,
+      "endSec": 3308.63,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/divided-government--david-crowley.mp3",
+      "sentiment": "positive",
+      "sentimentScore": 0.3548026792705059,
+      "diarizationConfidence": 0.6092512063709676,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "divided-government",
+      "personSlug": "francesca-hong",
+      "quote": "You know, I have passed bipartisan legislation, the one where it would require K-twelve schools to teach Asian American history. So much of working in government has to do with building strong relationships, and I have done that with Republicans.",
+      "fullAnswer": "You know, I have passed bipartisan legislation, the one where it would require K-twelve schools to teach Asian American history. So much of working in government has to do with building strong relationships, and I have done that with Republicans. I am willing to work with anyone at the table who wants to actually deliver for working class families, and improve lives, and work on policies that are going to be deliverables, and I believe that shared revenue, healthcare, and public education are three areas, and some of my top priorities where Republicans have shown some support, and I've talked to them about these issues, and so I believe that even with the split legislature, my focus and my leadership will ensure that we are governing to actually deliver for working class families across the state.",
+      "question": "I apologize if I cut you off here. We are kind of running up against time. Everything you've talked about tonight relies on a democratically controlled legislature. Miss Hong, what happens if there's a divided government or Republicans control the legislature and your governor?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 3131.89,
+      "endSec": 3146.63,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/divided-government--francesca-hong.mp3",
+      "sentiment": "positive",
+      "sentimentScore": 0.38267742256250453,
+      "diarizationConfidence": 0.5751900165441174,
+      "flaggedInFirstPass": true,
+      "clipVerified": true,
+      "voicesInClip": 1
+    },
+    {
+      "topicId": "divided-government",
+      "personSlug": "kelda-roys",
+      "quote": "All of us on this stage are good people. For twenty five years, I have been turning the good ideas that we've shared into state law in the toughest of political environments. I've stood up to bullies and billionaires just like Donald Trump, and I will never stop fighting to build the Wisconsin that all of us deserve working alongside you as I have throughout my career.",
+      "fullAnswer": "All of us on this stage are good people. For twenty five years, I have been turning the good ideas that we've shared into state law in the toughest of political environments. I've stood up to bullies and billionaires just like Donald Trump, and I will never stop fighting to build the Wisconsin that all of us deserve working alongside you as I have throughout my career. We need all hands on deck in this high stakes moment to protect our rights and freedoms, to deliver healthcare for all, and to make sure that every child has a great public school. I ask for your vote on August 11.",
+      "question": "I apologize if I cut you off here. We are kind of running up against time. Everything you've talked about tonight relies on a democratically controlled legislature. Miss Hong, what happens if there's a divided government or Republicans control the legislature and your governor?",
+      "askedBy": "Gerron Jordan",
+      "startSec": 3327.71,
+      "endSec": 3348.69,
+      "clip": "/audio/debate/wi-gov-dem-primary-debate/divided-government--kelda-roys.mp3",
+      "sentiment": "positive",
+      "sentimentScore": 0.5021211824832706,
+      "diarizationConfidence": 0.691292077522936,
+      "flaggedInFirstPass": false,
+      "clipVerified": true,
+      "voicesInClip": 1
+    }
+  ],
+  "tone": {
+    "the-race": {
+      "mandela-barnes": {
+        "score": -0.073,
+        "words": 310,
+        "turns": 4
+      },
+      "joel-brennan": {
+        "score": 0.029,
+        "words": 267,
+        "turns": 3
+      },
+      "david-crowley": {
+        "score": 0.147,
+        "words": 163,
+        "turns": 2
+      },
+      "francesca-hong": {
+        "score": 0.385,
+        "words": 162,
+        "turns": 2
+      },
+      "kelda-roys": {
+        "score": 0.24,
+        "words": 233,
+        "turns": 1
+      }
+    },
+    "public-safety": {
+      "mandela-barnes": {
+        "score": -0.051,
+        "words": 98,
+        "turns": 2
+      },
+      "joel-brennan": {
+        "score": 0.019,
+        "words": 243,
+        "turns": 3
+      },
+      "david-crowley": {
+        "score": 0.177,
+        "words": 171,
+        "turns": 2
+      },
+      "francesca-hong": {
+        "score": 0.173,
+        "words": 248,
+        "turns": 2
+      },
+      "kelda-roys": {
+        "score": 0.34,
+        "words": 185,
+        "turns": 2
+      }
+    },
+    "affordability": {
+      "david-crowley": {
+        "score": -0.105,
+        "words": 128,
+        "turns": 2
+      },
+      "kelda-roys": {
+        "score": -0.629,
+        "words": 216,
+        "turns": 2
+      }
+    },
+    "surplus": {
+      "mandela-barnes": {
+        "score": -0.107,
+        "words": 306,
+        "turns": 3
+      },
+      "joel-brennan": {
+        "score": -0.075,
+        "words": 335,
+        "turns": 5
+      },
+      "francesca-hong": {
+        "score": -0.142,
+        "words": 132,
+        "turns": 3
+      }
+    },
+    "income-taxes": {
+      "mandela-barnes": {
+        "score": -0.042,
+        "words": 131,
+        "turns": 2
+      },
+      "joel-brennan": {
+        "score": 0.055,
+        "words": 413,
+        "turns": 4
+      },
+      "david-crowley": {
+        "score": 0.004,
+        "words": 236,
+        "turns": 5
+      },
+      "francesca-hong": {
+        "score": 0.072,
+        "words": 261,
+        "turns": 5
+      },
+      "kelda-roys": {
+        "score": -0.363,
+        "words": 183,
+        "turns": 3
+      }
+    },
+    "property-taxes": {
+      "mandela-barnes": {
+        "score": -0.224,
+        "words": 183,
+        "turns": 3
+      },
+      "joel-brennan": {
+        "score": -0.069,
+        "words": 245,
+        "turns": 3
+      },
+      "david-crowley": {
+        "score": -0.072,
+        "words": 211,
+        "turns": 2
+      },
+      "francesca-hong": {
+        "score": -0.035,
+        "words": 177,
+        "turns": 2
+      },
+      "kelda-roys": {
+        "score": -0.209,
+        "words": 220,
+        "turns": 2
+      }
+    },
+    "vouchers": {
+      "mandela-barnes": {
+        "score": -0.208,
+        "words": 431,
+        "turns": 7
+      },
+      "joel-brennan": {
+        "score": -0.204,
+        "words": 347,
+        "turns": 8
+      },
+      "david-crowley": {
+        "score": 0.127,
+        "words": 180,
+        "turns": 3
+      },
+      "francesca-hong": {
+        "score": 0.013,
+        "words": 368,
+        "turns": 4
+      },
+      "kelda-roys": {
+        "score": -0.254,
+        "words": 278,
+        "turns": 3
+      }
+    },
+    "data-centers": {
+      "mandela-barnes": {
+        "score": -0.037,
+        "words": 218,
+        "turns": 2
+      },
+      "joel-brennan": {
+        "score": -0.107,
+        "words": 301,
+        "turns": 4
+      },
+      "david-crowley": {
+        "score": -0.084,
+        "words": 288,
+        "turns": 5
+      },
+      "francesca-hong": {
+        "score": 0.098,
+        "words": 283,
+        "turns": 3
+      },
+      "kelda-roys": {
+        "score": -0.056,
+        "words": 263,
+        "turns": 2
+      }
+    },
+    "divided-government": {
+      "mandela-barnes": {
+        "score": 0.104,
+        "words": 149,
+        "turns": 3
+      },
+      "david-crowley": {
+        "score": 0.189,
+        "words": 70,
+        "turns": 2
+      },
+      "francesca-hong": {
+        "score": 0.383,
+        "words": 136,
+        "turns": 1
+      }
+    },
+    "closing": {
+      "mandela-barnes": {
+        "score": 0.136,
+        "words": 129,
+        "turns": 2
+      },
+      "joel-brennan": {
+        "score": 0.064,
+        "words": 105,
+        "turns": 3
+      },
+      "david-crowley": {
+        "score": 0.373,
+        "words": 136,
+        "turns": 2
+      },
+      "francesca-hong": {
+        "score": 0.536,
+        "words": 100,
+        "turns": 2
+      },
+      "kelda-roys": {
+        "score": 0.502,
+        "words": 109,
+        "turns": 1
+      }
+    }
+  },
+  "method": {
+    "engine": "deepgram/nova-3+diarize+paragraphs+sentiment",
+    "segmentation": "paragraphs (utterances rejected — 15/342 mixed two speakers)",
+    "identification": "verbatim self-identifying phrase, asserted unique per speaker",
+    "speakers": [
+      {
+        "name": "Matt Smith",
+        "role": "moderator",
+        "evidence": "addressed as \"Matt\" by a candidate answering this speaker's question"
+      },
+      {
+        "name": "Announcer",
+        "role": "announcer",
+        "evidence": "reads the taped open and the moderator introductions"
+      },
+      {
+        "name": "Mandela Barnes",
+        "role": "candidate",
+        "evidence": "they spent over $50,000,000 to defeat me"
+      },
+      {
+        "name": "Joel Brennan",
+        "role": "candidate",
+        "evidence": "I put together as a secretary of administration two budgets for governor Evers"
+      },
+      {
+        "name": "David Crowley",
+        "role": "candidate",
+        "evidence": "I'm the county executive of the largest community"
+      },
+      {
+        "name": "Francesca Hong",
+        "role": "candidate",
+        "evidence": "I introduced the Healthy School Meals for All legislation"
+      },
+      {
+        "name": "Kelda Roys",
+        "role": "candidate",
+        "evidence": "I'm a mom and stepmom of five"
+      },
+      {
+        "name": "Gerron Jordan",
+        "role": "moderator",
+        "evidence": "sole remaining speaker; the open names exactly two moderators and the other is proved to be Matt Smith"
+      }
+    ],
+    "clipsVerified": {
+      "checked": 40,
+      "passed": 40,
+      "how": "each clip re-transcribed and re-diarized in isolation"
+    }
+  }
+}
