@@ -1,14 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { track } from "@/lib/analytics";
 
 const buttonClass =
   "press border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)]";
 const linkClass = "text-sm underline decoration-2 underline-offset-2";
 
+// Which decision surface is being shared, inferred from the URL path so callers
+// don't have to pass it. Returns null for pages outside the four we track.
+function shareSurface(url: string): "race" | "candidate" | "compare" | "brief" | null {
+  if (url.includes("/compare/")) return "compare";
+  if (url.includes("/candidates/")) return "candidate";
+  if (url.includes("/races/")) return "race";
+  if (url.includes("/brief")) return "brief";
+  return null;
+}
+
 export function ShareButton({ url, title }: { url: string; title: string }) {
   const [hasNativeShare, setHasNativeShare] = useState(false);
   const [copied, setCopied] = useState(false);
+  const surface = shareSurface(url);
+  const trackShare = () => {
+    if (surface) track("share", { surface });
+  };
 
   // Capability check happens after mount only — SSR has no `navigator`, and
   // checking here (not during render) keeps first paint stable across
@@ -19,6 +34,7 @@ export function ShareButton({ url, title }: { url: string; title: string }) {
 
   async function handleShare() {
     try {
+      trackShare();
       await navigator.share({ title, url });
     } catch (err) {
       // The user cancelling the native share sheet throws AbortError — not
@@ -30,6 +46,7 @@ export function ShareButton({ url, title }: { url: string; title: string }) {
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(url);
+      trackShare();
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -59,6 +76,7 @@ export function ShareButton({ url, title }: { url: string; title: string }) {
         target="_blank"
         rel="noopener noreferrer"
         className={linkClass}
+        onClick={trackShare}
       >
         Share on X
       </a>
@@ -67,6 +85,7 @@ export function ShareButton({ url, title }: { url: string; title: string }) {
         target="_blank"
         rel="noopener noreferrer"
         className={linkClass}
+        onClick={trackShare}
       >
         Share on Facebook
       </a>

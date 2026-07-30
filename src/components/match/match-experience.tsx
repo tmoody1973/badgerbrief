@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { track } from "@/lib/analytics";
 import { buildIssueMatch, type RaceInput } from "@/lib/issue-match";
 import { relevantRaces, type Districts } from "@/lib/districts";
 import { labelForSlug } from "@/lib/candidate-order";
@@ -40,8 +41,13 @@ export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
   );
 
   const toggle = useCallback(
-    (slug: string) =>
-      setSelected(selected.includes(slug) ? selected.filter((s) => s !== slug) : [...selected, slug]),
+    (slug: string) => {
+      const adding = !selected.includes(slug);
+      // First pick from an empty state = the voter starting the match tool.
+      // Deep-link arrivals (?issues=…) skip this but still count as complete.
+      if (adding && selected.length === 0) track("match_start");
+      setSelected(adding ? [...selected, slug] : selected.filter((s) => s !== slug));
+    },
     [selected, setSelected],
   );
 
@@ -77,6 +83,16 @@ export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
       (slug) => bySlug.get(slug) ?? { issueSlug: slug, label: labelForSlug(slug), races: [] },
     );
   }, [result, selected]);
+
+  // Fire once when a real match result first renders — the "complete" half of
+  // the start→complete funnel. answered = how many issues the voter weighed.
+  const completed = useRef(false);
+  useEffect(() => {
+    if (result && selected.length > 0 && !completed.current) {
+      completed.current = true;
+      track("match_complete", { answered: selected.length });
+    }
+  }, [result, selected.length]);
 
   return (
     <>

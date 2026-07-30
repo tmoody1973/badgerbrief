@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { track } from "@/lib/analytics";
 import {
   parseGuideStep,
   nextHref,
@@ -18,8 +20,17 @@ export function GuidedRail() {
   const pathname = usePathname();
   const params = useSearchParams();
   const step = parseGuideStep(params.get("guide"));
+  const isEs = pathname === "/es" || pathname.startsWith("/es/");
+
+  // Progression signal: fires each time the voter reaches a guide step, the
+  // same way section_jump validated the scroll UX. Before the early returns so
+  // the hook runs unconditionally.
+  useEffect(() => {
+    if (step !== null && !isEs) track("guided_path", { step: String(step) });
+  }, [step, isEs]);
+
   if (step === null) return null;
-  if (pathname === "/es" || pathname.startsWith("/es/")) return null;
+  if (isEs) return null;
 
   const label = GUIDE_STEPS.find((s) => s.step === step)?.label ?? "";
   const prev = prevHref(step);

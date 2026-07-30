@@ -1,6 +1,7 @@
 "use client";
 
 import { track as vercelTrack } from "@vercel/analytics";
+import { sendGAEvent } from "@next/third-parties/google";
 import { posthog, posthogReady } from "@/lib/posthog";
 
 /**
@@ -39,6 +40,14 @@ type Events = {
   voter_help_answered: { ok: boolean };
   brief_generate: { detail: "short" | "standard" | "deep" };
 
+  // — decision-support surfaces (MOO-409). The site informs; these are the
+  // features meant to help an undecided voter actually DECIDE. Measuring their
+  // use is the whole point. Public slugs/counts only — never a typed answer.
+  match_start: Record<string, never>;
+  match_complete: { answered: number };
+  share: { surface: "race" | "candidate" | "compare" | "brief" };
+  guided_path: { step: string };
+
   // — account funnel
   auth_start: { intent: "sign_in" | "sign_up"; from: "nav" | "brief" };
 
@@ -65,6 +74,14 @@ export function track<K extends keyof Events>(
   // key) is a silent no-op, never a thrown error into a render.
   try {
     if (posthogReady()) posthog.capture(name, props);
+  } catch {
+    // swallow — analytics must never break a page
+  }
+  // Third sink: GA4. Guarded on the Measurement ID so nothing is pushed to the
+  // dataLayer on builds where GA is off (dev, or before a property exists) —
+  // same vetted, PII-free event and props as the other two sinks.
+  try {
+    if (process.env.NEXT_PUBLIC_GA_ID) sendGAEvent("event", name, props ?? {});
   } catch {
     // swallow — analytics must never break a page
   }
