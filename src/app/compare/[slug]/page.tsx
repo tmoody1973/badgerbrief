@@ -6,11 +6,12 @@ import { DebateCompare } from "@/components/guide/debate-compare";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
 import { WhatThisMeans } from "@/components/guide/what-this-means";
+import { ShareButton } from "@/components/contribute/share-button";
 import { buildIssueComparison } from "@/lib/compare";
 import { getRace, listRaces } from "@/lib/data";
 import { getDebateForRace } from "@/lib/debates";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
-import { raceIdToSlug, slugToRaceId } from "@/lib/site";
+import { SITE_URL, raceIdToSlug, slugToRaceId } from "@/lib/site";
 
 export const revalidate = 300;
 
@@ -159,7 +160,11 @@ export default async function ComparePage({ params }: Props) {
         </div>
       )}
 
-      <div className="mt-10">
+      <div className="mt-10 flex flex-col gap-4">
+        <ShareButton
+          url={`${SITE_URL}/compare/${slug}`}
+          title={`Compare the ${race.office} candidates — BadgerBrief`}
+        />
         <LastUpdated date={race.dataAsOf} />
       </div>
     </main>

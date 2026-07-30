@@ -45,7 +45,10 @@ type Events = {
   // use is the whole point. Public slugs/counts only — never a typed answer.
   match_start: Record<string, never>;
   match_complete: { answered: number };
-  share: { surface: "race" | "candidate" | "compare" | "brief" };
+  share: {
+    surface: "race" | "candidate" | "compare" | "brief" | "match";
+    method: "web_share" | "copy" | "x" | "facebook" | "email" | "bluesky";
+  };
   guided_path: { step: string };
 
   // — account funnel
