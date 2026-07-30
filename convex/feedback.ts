@@ -13,7 +13,8 @@
  * Submissions land in an admin queue and are read by a person.
  */
 import { ConvexError, v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalAction } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { requireAdmin } from "./sponsors";
 
 const MAX_MESSAGE = 4000;
@@ -84,16 +85,94 @@ export const submit = mutation({
       throw new ConvexError("Add a way to reach you so we can follow up.");
     }
 
+    const pageUrl = safeUrl(args.pageUrl);
+    const contact = clip(args.contact);
     await ctx.db.insert("feedback", {
       kind: args.kind,
       message,
-      pageUrl: safeUrl(args.pageUrl),
+      pageUrl,
       sourceUrl,
-      contact: clip(args.contact),
+      contact,
       status: "new",
       submittedAt: Date.now(),
     });
+    // The admin queue is the system of record; email is just a heads-up. Fire
+    // it out-of-band (mutations can't do network I/O) and never let a mail
+    // failure fail the submission.
+    await ctx.scheduler.runAfter(0, internal.feedback.notify, {
+      kind: args.kind,
+      message,
+      pageUrl,
+      sourceUrl,
+      contact,
+    });
     return { received: true };
+  },
+});
+
+const KIND_LABEL: Record<string, string> = {
+  correction: "Correction",
+  question: "Question",
+  suggest_candidate: "Suggest candidate",
+  suggest_source: "Suggest source",
+  data_gap: "Data gap",
+  volunteer: "Volunteer",
+  other: "Other",
+};
+
+/**
+ * Email a feedback submission to the editor via Resend. No-op when
+ * RESEND_API_KEY is unset (dev, or before the key is configured), so the form
+ * keeps working with email off. Reads the CONVEX deployment env — set with
+ * `npx convex env set RESEND_API_KEY <key> --prod` (NOT .env.local / Vercel).
+ */
+export const notify = internalAction({
+  args: {
+    kind: v.string(),
+    message: v.string(),
+    pageUrl: v.optional(v.string()),
+    sourceUrl: v.optional(v.string()),
+    contact: v.optional(v.string()),
+  },
+  handler: async (_ctx, args) => {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return; // email off — admin queue still has it
+
+    // `feedback@badgerbrief.org` needs the domain verified in Resend; until
+    // then override with RESEND_FROM or fall back to Resend's shared test sender.
+    const from = process.env.RESEND_FROM ?? "BadgerBrief <onboarding@resend.dev>";
+    const to = process.env.FEEDBACK_NOTIFY_TO ?? "tarikjmoody@gmail.com";
+    const topic = KIND_LABEL[args.kind] ?? "Other";
+
+    const lines = [
+      args.message,
+      "",
+      args.pageUrl ? `Page: ${args.pageUrl}` : null,
+      args.sourceUrl ? `Source: ${args.sourceUrl}` : null,
+      args.contact ? `Contact: ${args.contact}` : null,
+    ].filter((l): l is string => l !== null);
+
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from,
+          to,
+          subject: `[badgerbrief] ${topic}`,
+          text: lines.join("\n"),
+        }),
+      });
+      if (!res.ok) {
+        console.error("Resend feedback notify failed", res.status, await res.text());
+      }
+    } catch (err) {
+      // Never let a mail failure escape — the submission already succeeded.
+      console.error("Resend feedback notify error", err);
+    }
   },
 });
 
