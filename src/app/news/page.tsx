@@ -53,6 +53,30 @@ export default async function NewsPage() {
           {dateline ? ` · updated ${dateline}` : ""}
         </p>
       </header>
+      {/* Breaking editorial update: a candidate withdrawal is exactly what a
+          voter guide must surface immediately. Retire after the campaign moves on. */}
+      <div className="mt-4 border-2 border-border bg-warning p-4 shadow-[var(--shadow-brutal)]">
+        <span className="font-mono text-[11px] font-bold uppercase tracking-widest">
+          Update · July 30, 2026
+        </span>
+        <p className="mt-1 font-bold">
+          Mandela Barnes has withdrawn from the Democratic primary for governor.
+        </p>
+        <p className="mt-2 text-sm">
+          <a href="/races/wi-gov-2026" className="font-bold underline decoration-2 underline-offset-2">
+            See the current Governor field →
+          </a>
+          {"  ·  "}
+          <a
+            href="https://fox11online.com/news/state/mandela-barnes-drops-out-of-the-democratic-primary-for-wisconsin-governor-gubernatorial-hong-crowley-brennan-roys"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline decoration-2 underline-offset-2"
+          >
+            Source: FOX 11 ↗
+          </a>
+        </p>
+      </div>
       <p className="mt-3 max-w-[68ch] text-sm text-muted-foreground">
         Coverage we&rsquo;ve tracked, linked out to the outlet that reported it. We don&rsquo;t summarize
         or rate the reporting.{" "}

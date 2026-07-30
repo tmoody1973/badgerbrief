@@ -76,11 +76,11 @@ export default function RootLayout({
           {/* Above the masthead so it is the first thing on every page, not
               just the home page. Retire this after the August 11 primary. */}
           <AnnouncementBar
-            id="wi-gov-debate-2026-07-28"
-            href="/debate/wi-gov-dem-primary-debate"
+            id="wi-gov-barnes-withdrew-2026-07-30"
+            href="/races/wi-gov-2026"
           >
-            New: the governor&apos;s debate, issue by issue — hear all five
-            candidates in their own voice →
+            Update: Mandela Barnes has withdrawn from the Democratic primary for
+            governor (July 30, 2026) →
           </AnnouncementBar>
           <SiteHeader />
           <Suspense fallback={null}>
