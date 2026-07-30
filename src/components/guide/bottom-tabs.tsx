@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { AuthNav } from "./auth-nav";
 import { NAV_LINKS } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
+import { IconHome, IconRaces, IconVote, IconChat, IconMore } from "./nav-icons";
 import { localeFromPath } from "@/lib/i18n/chrome-dict";
 import { chromeEn } from "@/lib/i18n/chrome-en";
 import { chromeEs } from "@/lib/i18n/chrome-es";
@@ -18,10 +19,10 @@ export function moreLinks(links: typeof NAV_LINKS) {
 }
 
 const TABS = [
-  { href: "/", en: "Home", es: "Inicio", glyph: "⌂" },
-  { href: "/races/wi-gov-2026", en: "Races", es: "Contiendas", glyph: "🗳" },
-  { href: "/vote", en: "Vote", es: "Votar", glyph: "✓" },
-  { href: "/chat", en: "Chat", es: "Chat", glyph: "💬" },
+  { href: "/", en: "Home", es: "Inicio", Icon: IconHome },
+  { href: "/races/wi-gov-2026", en: "Races", es: "Contiendas", Icon: IconRaces },
+  { href: "/vote", en: "Vote", es: "Votar", Icon: IconVote },
+  { href: "/chat", en: "Chat", es: "Chat", Icon: IconChat },
 ] as const;
 
 function isActive(pathname: string, href: string) {
@@ -67,15 +68,15 @@ export function BottomTabs() {
           const active = isActive(pathname, t.href);
           return (
             <Link key={t.href} href={localizeHref(t.href, locale)} aria-current={active ? "page" : undefined}
-              className={`flex min-h-14 flex-col items-center justify-center gap-0.5 font-mono text-[10px] font-bold uppercase tracking-wide ${active ? "text-primary" : "text-foreground"}`}>
-              <span aria-hidden className="text-lg leading-none">{t.glyph}</span>
+              className={`flex min-h-14 flex-col items-center justify-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wide ${active ? "text-primary" : "text-foreground"}`}>
+              <t.Icon className="h-6 w-6" />
               {t[locale]}
             </Link>
           );
         })}
         <button type="button" onClick={() => setMoreOpen((v) => !v)} aria-expanded={moreOpen}
-          className={`flex min-h-14 flex-col items-center justify-center gap-0.5 font-mono text-[10px] font-bold uppercase tracking-wide ${moreOpen ? "text-primary" : "text-foreground"}`}>
-          <span aria-hidden className="text-lg leading-none">···</span>
+          className={`flex min-h-14 flex-col items-center justify-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wide ${moreOpen ? "text-primary" : "text-foreground"}`}>
+          <IconMore className="h-6 w-6" />
           {locale === "es" ? "Más" : "More"}
         </button>
       </nav>
