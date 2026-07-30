@@ -13,6 +13,7 @@ import { SwRegister } from "@/components/guide/sw-register";
 import { KofiWidget } from "@/components/kofi-widget";
 import { AnnouncementBar } from "@/components/guide/announcement-bar";
 import { SiteFooter, SiteHeader } from "@/components/guide/chrome";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const displayFont = Archivo_Black({
@@ -59,6 +60,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // GA4 loads only when a Measurement ID is configured (set NEXT_PUBLIC_GA_ID
+  // in Vercel env). Absent — e.g. local dev, or before a property exists — it
+  // no-ops, so no gtag script ships and PostHog stays the primary analytics.
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
   return (
     <html
       lang="en"
@@ -88,6 +93,7 @@ export default function RootLayout({
         <Analytics />
         <PostHogProvider />
         <AnalyticsEvents />
+        {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
         <SwRegister />
         <KofiWidget />
       </body>
