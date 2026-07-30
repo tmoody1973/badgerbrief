@@ -91,6 +91,22 @@ export function SiteFooter() {
           </a>{" "}
           {footer.myVoteSuffix}
         </p>
+        {/* Site-wide links to the two directory hubs so crawlers (and readers)
+            reach every race and candidate page from any page. EN-only for now —
+            the hubs have no /es route, and sending Spanish readers to an English
+            page is worse than not linking (same rule as the debate banner). */}
+        {locale === "en" && (
+          <p className="border-t-2 border-dashed border-border pt-4">
+            Browse the ballot:{" "}
+            <Link href="/races" className="underline decoration-2 underline-offset-2">
+              All races
+            </Link>
+            {" · "}
+            <Link href="/candidates" className="underline decoration-2 underline-offset-2">
+              All candidates
+            </Link>
+          </p>
+        )}
         {/* Reachable from every page: a correction is only useful if the
             reader can report it at the moment they spot it. */}
         <p className="border-t-2 border-dashed border-border pt-4">

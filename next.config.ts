@@ -99,9 +99,13 @@ const nextConfig: NextConfig = {
    * linked working, and the homepage carries the district browser.
    */
   async redirects() {
+    // These chamber-wide races were superseded by one race per district. Send
+    // their old URLs to the /races hub, which lists every district race — a
+    // relevant destination Google treats as a real 301, rather than the
+    // homepage, which reads as a soft-404 "redirect to unrelated page."
     return [
-      { source: "/races/wi-state-senate-2026", destination: "/", permanent: true },
-      { source: "/races/wi-state-assembly-2026", destination: "/", permanent: true },
+      { source: "/races/wi-state-senate-2026", destination: "/races", permanent: true },
+      { source: "/races/wi-state-assembly-2026", destination: "/races", permanent: true },
     ];
   },
   async headers() {

@@ -216,6 +216,26 @@ export const listCandidateSlugs = query({
   },
 });
 
+// Lightweight fields for the /candidates directory hub and the sitemap's
+// per-URL lastmod. A separate query (not a reshape of listCandidateSlugs, which
+// three callers rely on returning a bare string[]) that avoids shipping the
+// heavy per-candidate blobs — background, finance, positions — a directory
+// listing never renders.
+export const listCandidateDirectory = query({
+  args: {},
+  handler: async (ctx) => {
+    const candidates = await ctx.db.query("candidates").collect();
+    return candidates.map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      party: c.party ?? null,
+      raceId: c.raceId,
+      status: c.status ?? null,
+      dataAsOf: c.dataAsOf,
+    }));
+  },
+});
+
 export const getVotingInfo = query({
   args: {},
   handler: async (ctx) => {
