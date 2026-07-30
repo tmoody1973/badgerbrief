@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useMutation } from "convex/react";
+import { ConvexError } from "convex/values";
 import { api } from "../../../convex/_generated/api";
 
 /**
@@ -72,10 +73,15 @@ export function FeedbackForm({ pageUrl }: { pageUrl?: string }) {
           });
           setState({ kind: "sent" });
         } catch (err) {
-          setState({
-            kind: "error",
-            message: err instanceof Error ? err.message : "Something went wrong — please try again.",
-          });
+          // Convex redacts a plain Error's message from the client in prod;
+          // only ConvexError.data crosses the wire. The submit mutation throws
+          // ConvexError for every user-facing validation, so read that first
+          // and keep a generic fallback for genuine server faults.
+          const message =
+            err instanceof ConvexError
+              ? String(err.data)
+              : "Something went wrong — please try again.";
+          setState({ kind: "error", message });
         }
       }}
     >

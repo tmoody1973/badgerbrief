@@ -12,7 +12,7 @@
  * Unauthenticated means untrusted, so nothing here is ever displayed publicly.
  * Submissions land in an admin queue and are read by a person.
  */
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./sponsors";
 
@@ -62,26 +62,26 @@ export const submit = mutation({
 
     const message = args.message.trim();
     if (message.length < 10) {
-      throw new Error("Please describe what's wrong in a little more detail.");
+      throw new ConvexError("Please describe what's wrong in a little more detail.");
     }
     if (message.length > MAX_MESSAGE) {
-      throw new Error("That's longer than this form accepts — please trim it.");
+      throw new ConvexError("That's longer than this form accepts — please trim it.");
     }
     // A correction has to be checkable. This is the same rule the rest of the
     // site follows, applied to the people correcting it. A suggested source
     // is, definitionally, the same claim: no link, nothing to check.
     const needsSource = args.kind === "correction" || args.kind === "suggest_source";
     if (needsSource && !args.sourceUrl?.trim()) {
-      throw new Error(
+      throw new ConvexError(
         "A source suggestion needs a link to the source.",
       );
     }
     const sourceUrl = safeUrl(args.sourceUrl);
     if (needsSource && args.sourceUrl?.trim() && !sourceUrl) {
-      throw new Error("The source link must be a web address starting with http:// or https://.");
+      throw new ConvexError("The source link must be a web address starting with http:// or https://.");
     }
     if (args.kind === "volunteer" && !args.contact?.trim()) {
-      throw new Error("Add a way to reach you so we can follow up.");
+      throw new ConvexError("Add a way to reach you so we can follow up.");
     }
 
     await ctx.db.insert("feedback", {
