@@ -523,6 +523,79 @@ export const votingRecord = query({
   },
 });
 
+const ISSUE_LABEL: Record<string, string> = {
+  healthcare: "Healthcare", education: "Education", "public-safety": "Public safety",
+  "taxes-budget": "Taxes & budget", abortion: "Abortion", housing: "Housing", immigration: "Immigration",
+  "environment-energy": "Environment & energy", "economy-jobs": "Economy & jobs",
+  "elections-democracy": "Elections & democracy", agriculture: "Agriculture",
+};
+
+/**
+ * Voting record grouped by issue, for the candidate page's issue tabs. Honesty
+ * gate: only substantive votes (isFinal) on bills the classifier approved
+ * (classifyStatus === "approved", with issueSlugs + outcome) are included —
+ * present/not_voting and unclassified/rejected bills are silently excluded
+ * rather than guessed at. A bill tagged with N issues appears under all N,
+ * each counted once. position pairs in the candidate's published stance on
+ * that issue, when one exists.
+ */
+export const votingRecordByIssue = query({
+  args: { candidateSlug: v.string(), raceId: v.string() },
+  handler: async (ctx, { candidateSlug, raceId }) => {
+    const lv = await ctx.db
+      .query("legislator_votes")
+      .withIndex("by_candidate", (q) => q.eq("candidateSlug", candidateSlug))
+      .collect();
+    type Entry = { direction: "for" | "against"; outcome: string; votedOn: string; billNumber: string; session: string; sourceUrl: string };
+    const byIssue = new Map<string, Entry[]>();
+    for (const p of lv) {
+      if (p.position !== "aye" && p.position !== "nay") continue;
+      const vote = await ctx.db
+        .query("legislative_votes")
+        .withIndex("by_voteKey", (q) => q.eq("voteKey", p.voteKey))
+        .unique();
+      if (!vote || !isFinal(vote.voteType)) continue;
+      const bill = await ctx.db
+        .query("bills")
+        .withIndex("by_session_bill", (q) => q.eq("session", vote.session).eq("billNumber", vote.billNumber))
+        .unique();
+      if (!bill || bill.classifyStatus !== "approved" || !bill.issueSlugs?.length || !bill.outcome) continue;
+      const entry: Entry = {
+        direction: p.position === "aye" ? "for" : "against",
+        outcome: bill.outcome,
+        votedOn: vote.votedOn,
+        billNumber: vote.billNumber,
+        session: vote.session,
+        sourceUrl: vote.sourceUrl,
+      };
+      for (const slug of bill.issueSlugs) {
+        const arr = byIssue.get(slug) ?? [];
+        arr.push(entry);
+        byIssue.set(slug, arr);
+      }
+    }
+    const positions = await ctx.db
+      .query("candidate_positions_published")
+      .withIndex("by_candidate_issue", (q) => q.eq("raceId", raceId).eq("candidateSlug", candidateSlug))
+      .collect();
+    const posBySlug = new Map(positions.map((p) => [p.issueSlug, p]));
+    return [...byIssue.entries()]
+      .map(([issueSlug, votes]) => {
+        votes.sort((a, b) => b.votedOn.localeCompare(a.votedOn));
+        const pos = posBySlug.get(issueSlug);
+        return {
+          issueSlug,
+          label: ISSUE_LABEL[issueSlug] ?? issueSlug,
+          forCount: votes.filter((v) => v.direction === "for").length,
+          againstCount: votes.filter((v) => v.direction === "against").length,
+          votes,
+          position: pos ? { stance: pos.stance, summary: pos.summary, sources: pos.sources } : undefined,
+        };
+      })
+      .sort((a, b) => b.votes.length - a.votes.length);
+  },
+});
+
 const PAGE_DEFAULT = 25;
 
 /**

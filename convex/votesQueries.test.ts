@@ -425,6 +425,93 @@ describe("votingRecordPage", () => {
   });
 });
 
+describe("votingRecordByIssue", () => {
+  test("votingRecordByIssue groups approved substantive votes by issue with for/against + position", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      const mkVote = async (av: string, bill: string, pos: "aye" | "nay") => {
+        await ctx.db.insert("legislative_votes", { voteKey: `2025-assembly-${av}`, session: "2025", chamber: "assembly", voteId: av, billNumber: bill, billTitle: "t", voteType: "PASSAGE", votedOn: "2025-03-01", ayes: 1, nays: 1, notVoting: 0, sourceUrl: `https://s/${av}`, ingestedAt: 0 } as any);
+        await ctx.db.insert("legislator_votes", { voteKey: `2025-assembly-${av}`, candidateSlug: "francesca-hong", position: pos, session: "2025" } as any);
+      };
+      await mkVote("av1", "AB 100", "aye");
+      await mkVote("av2", "AB 200", "nay");
+      await ctx.db.insert("bills", { session: "2025", billNumber: "AB 100", billUrl: "u", summary: "s", issueSlugs: ["healthcare"], outcome: "expand BadgerCare eligibility", classifyStatus: "approved", classifiedAt: 0, fetchedAt: 0 } as any);
+      await ctx.db.insert("bills", { session: "2025", billNumber: "AB 200", billUrl: "u", summary: "s", issueSlugs: ["healthcare"], outcome: "add a Medicaid work requirement", classifyStatus: "approved", classifiedAt: 0, fetchedAt: 0 } as any);
+      const draftId = await ctx.db.insert("candidate_positions_drafts", { candidateSlug: "francesca-hong", raceId: "WI-GOV-2026", issueSlug: "healthcare", stance: "support", summary: "Supports expanding coverage.", confidence: 1, sources: [], reviewStatus: "approved", extractedAt: 0 } as any);
+      await ctx.db.insert("candidate_positions_published", { candidateSlug: "francesca-hong", raceId: "WI-GOV-2026", issueSlug: "healthcare", stance: "support", summary: "Supports expanding coverage.", confidence: 1, sources: [], draftId, publishedAt: 0, lastReviewedAt: 0 } as any);
+    });
+    const groups = await t.query(api.votesQueries.votingRecordByIssue, { candidateSlug: "francesca-hong", raceId: "WI-GOV-2026" });
+    const hc = groups.find((g) => g.issueSlug === "healthcare")!;
+    expect(hc.forCount).toBe(1);
+    expect(hc.againstCount).toBe(1);
+    expect(hc.votes).toHaveLength(2);
+    expect(hc.votes.find((v) => v.billNumber === "AB 100")!.direction).toBe("for");
+    expect(hc.position?.summary).toBe("Supports expanding coverage.");
+  });
+
+  test("excludes votes on bills that are not approved-classified", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("legislative_votes", { voteKey: "2025-assembly-av3", session: "2025", chamber: "assembly", voteId: "av3", billNumber: "AB 300", billTitle: "t", voteType: "PASSAGE", votedOn: "2025-03-01", ayes: 1, nays: 1, notVoting: 0, sourceUrl: "https://s/av3", ingestedAt: 0 } as any);
+      await ctx.db.insert("legislator_votes", { voteKey: "2025-assembly-av3", candidateSlug: "francesca-hong", position: "aye", session: "2025" } as any);
+      // Unclassified: no issueSlugs/outcome/classifyStatus at all.
+      await ctx.db.insert("bills", { session: "2025", billNumber: "AB 300", billUrl: "u", summary: "s", fetchedAt: 0 } as any);
+    });
+    const groups = await t.query(api.votesQueries.votingRecordByIssue, { candidateSlug: "francesca-hong", raceId: "WI-GOV-2026" });
+    expect(groups).toHaveLength(0);
+  });
+
+  test("excludes non-substantive (procedural) votes even on an approved bill", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("legislative_votes", { voteKey: "2025-assembly-av4", session: "2025", chamber: "assembly", voteId: "av4", billNumber: "AB 400", billTitle: "t", voteType: "TABLE", votedOn: "2025-03-01", ayes: 1, nays: 1, notVoting: 0, sourceUrl: "https://s/av4", ingestedAt: 0 } as any);
+      await ctx.db.insert("legislator_votes", { voteKey: "2025-assembly-av4", candidateSlug: "francesca-hong", position: "aye", session: "2025" } as any);
+      await ctx.db.insert("bills", { session: "2025", billNumber: "AB 400", billUrl: "u", summary: "s", issueSlugs: ["housing"], outcome: "o", classifyStatus: "approved", classifiedAt: 0, fetchedAt: 0 } as any);
+    });
+    const groups = await t.query(api.votesQueries.votingRecordByIssue, { candidateSlug: "francesca-hong", raceId: "WI-GOV-2026" });
+    expect(groups).toHaveLength(0);
+  });
+
+  test("excludes present/not_voting positions from for/against", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("legislative_votes", { voteKey: "2025-assembly-av5", session: "2025", chamber: "assembly", voteId: "av5", billNumber: "AB 500", billTitle: "t", voteType: "PASSAGE", votedOn: "2025-03-01", ayes: 1, nays: 1, notVoting: 1, sourceUrl: "https://s/av5", ingestedAt: 0 } as any);
+      await ctx.db.insert("legislator_votes", { voteKey: "2025-assembly-av5", candidateSlug: "francesca-hong", position: "not_voting", session: "2025" } as any);
+      await ctx.db.insert("bills", { session: "2025", billNumber: "AB 500", billUrl: "u", summary: "s", issueSlugs: ["education"], outcome: "o", classifyStatus: "approved", classifiedAt: 0, fetchedAt: 0 } as any);
+    });
+    const groups = await t.query(api.votesQueries.votingRecordByIssue, { candidateSlug: "francesca-hong", raceId: "WI-GOV-2026" });
+    expect(groups).toHaveLength(0);
+  });
+
+  test("a bill tagged with two issues appears under both, counted once per issue", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("legislative_votes", { voteKey: "2025-assembly-av6", session: "2025", chamber: "assembly", voteId: "av6", billNumber: "AB 600", billTitle: "t", voteType: "PASSAGE", votedOn: "2025-03-01", ayes: 1, nays: 1, notVoting: 0, sourceUrl: "https://s/av6", ingestedAt: 0 } as any);
+      await ctx.db.insert("legislator_votes", { voteKey: "2025-assembly-av6", candidateSlug: "francesca-hong", position: "aye", session: "2025" } as any);
+      await ctx.db.insert("bills", { session: "2025", billNumber: "AB 600", billUrl: "u", summary: "s", issueSlugs: ["healthcare", "economy-jobs"], outcome: "o", classifyStatus: "approved", classifiedAt: 0, fetchedAt: 0 } as any);
+    });
+    const groups = await t.query(api.votesQueries.votingRecordByIssue, { candidateSlug: "francesca-hong", raceId: "WI-GOV-2026" });
+    expect(groups).toHaveLength(2);
+    expect(groups.map((g) => g.issueSlug).sort()).toEqual(["economy-jobs", "healthcare"]);
+    for (const g of groups) {
+      expect(g.forCount).toBe(1);
+      expect(g.votes).toHaveLength(1);
+    }
+  });
+
+  test("no published position for an issue leaves position undefined", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("legislative_votes", { voteKey: "2025-assembly-av7", session: "2025", chamber: "assembly", voteId: "av7", billNumber: "AB 700", billTitle: "t", voteType: "PASSAGE", votedOn: "2025-03-01", ayes: 1, nays: 1, notVoting: 0, sourceUrl: "https://s/av7", ingestedAt: 0 } as any);
+      await ctx.db.insert("legislator_votes", { voteKey: "2025-assembly-av7", candidateSlug: "francesca-hong", position: "aye", session: "2025" } as any);
+      await ctx.db.insert("bills", { session: "2025", billNumber: "AB 700", billUrl: "u", summary: "s", issueSlugs: ["immigration"], outcome: "o", classifyStatus: "approved", classifiedAt: 0, fetchedAt: 0 } as any);
+    });
+    const groups = await t.query(api.votesQueries.votingRecordByIssue, { candidateSlug: "francesca-hong", raceId: "WI-GOV-2026" });
+    const g = groups.find((x) => x.issueSlug === "immigration")!;
+    expect(g.position).toBeUndefined();
+  });
+});
+
 describe("legislator_votes.session", () => {
   test("storeRollCall records the session on the legislator_votes row", async () => {
     const t = convexTest(schema, modules);
