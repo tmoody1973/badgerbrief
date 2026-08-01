@@ -124,6 +124,33 @@ export const financeGaps = internalQuery({
   },
 });
 
+/**
+ * Weekly alert: email the editor (via the shared feedback.notify Resend channel)
+ * if the completeness audit finds any gap. Silent when clean — only pages when a
+ * finance_totals row is missing receipts or cash-on-hand. No-op on email without
+ * RESEND_API_KEY (the audit still runs and returns its count).
+ */
+export const financeGapAlert = internalAction({
+  args: {},
+  handler: async (ctx): Promise<{ count: number; alerted: boolean }> => {
+    const { count, gaps } = await ctx.runQuery(internal.finance.financeGaps, {});
+    if (count === 0) return { count: 0, alerted: false };
+    const lines = gaps.map(
+      (g) => `• ${g.raceId} / ${g.candidateSlug} (${g.source}): missing ${g.missing.join(", ")}`,
+    );
+    await ctx.runAction(internal.feedback.notify, {
+      kind: "data_gap",
+      message:
+        `${count} finance_totals row(s) missing receipts or cash-on-hand:\n\n` +
+        `${lines.join("\n")}\n\n` +
+        `Fix: re-run scripts/import-sunshine.mjs (receipts) or ` +
+        `scripts/import-sunshine-balances.mjs (cash-on-hand), or check ` +
+        `scripts/sunshine-committees.json. Audit: npx convex run finance:financeGaps --prod`,
+    });
+    return { count, alerted: true };
+  },
+});
+
 export const listFecCandidates = internalQuery({
   args: {},
   handler: async (ctx) => {

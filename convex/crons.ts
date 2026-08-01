@@ -178,4 +178,17 @@ crons.weekly(
   {},
 );
 
+// Mondays 14:00 UTC = 8:00 AM Central — weekly finance completeness check.
+// Emails the editor (via feedback.notify) ONLY if a finance_totals row is
+// missing receipts or cash-on-hand; silent when clean. Catches the Sunshine
+// two-source gap (receipts from the transactions CSV vs cash-on-hand from the
+// report API) automatically instead of by spot-check. No-op on email without
+// RESEND_API_KEY.
+crons.weekly(
+  "finance completeness audit",
+  { dayOfWeek: "monday", hourUTC: 14, minuteUTC: 0 },
+  internal.finance.financeGapAlert,
+  {},
+);
+
 export default crons;

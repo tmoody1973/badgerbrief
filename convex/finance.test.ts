@@ -49,6 +49,20 @@ test("financeGaps flags rows missing receipts or cash-on-hand, skips complete ro
   expect(bySlug["zeros"]).toBeUndefined();
 });
 
+test("financeGapAlert: alerted=false when clean, true when a gap exists", async () => {
+  const t = convexTest(schema, modules);
+  // no rows → clean, no alert
+  expect(await t.action(internal.finance.financeGapAlert, {})).toEqual({ count: 0, alerted: false });
+  // a row missing receipts → alert fires (feedback.notify no-ops without RESEND_API_KEY)
+  await t.run(async (ctx) => {
+    await ctx.db.insert("finance_totals", {
+      candidateSlug: "gapped", raceId: "R", source: "sunshine", cashOnHand: 5, fetchedAt: 0,
+    });
+  });
+  const r = await t.action(internal.finance.financeGapAlert, {});
+  expect(r).toEqual({ count: 1, alerted: true });
+});
+
 test("upsertCommitteeFunding inserts then replaces by committee name", async () => {
   const t = convexTest(schema, modules);
   await t.mutation(internal.finance.upsertCommitteeFunding, rpw);
