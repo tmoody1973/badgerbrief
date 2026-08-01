@@ -41,6 +41,35 @@ describe("bill classification storage", () => {
   });
 });
 
+describe("listForReview", () => {
+  test("returns pending + needs_review bills (default statuses), excluding approved and unclassified", async () => {
+    const t = setup();
+    await t.run(async (ctx) => {
+      await ctx.db.insert("bills", {
+        session: "2025", billNumber: "AB 100", billUrl: "u", summary: "s1", fetchedAt: 0,
+        issueSlugs: ["healthcare"], outcome: "expand BadgerCare eligibility", classifyConfidence: 0.9, classifyStatus: "approved", classifiedAt: 0,
+      });
+      await ctx.db.insert("bills", {
+        session: "2025", billNumber: "AB 200", billUrl: "u", summary: "s2", fetchedAt: 0,
+        issueSlugs: ["education"], outcome: "increase school funding", classifyConfidence: 0.6, classifyStatus: "pending", classifiedAt: 0,
+      });
+      await ctx.db.insert("bills", {
+        session: "2025", billNumber: "AB 300", billUrl: "u", summary: "s3", fetchedAt: 0,
+        issueSlugs: ["taxes-budget"], outcome: "cut the state income tax", classifyConfidence: 0.4, classifyStatus: "needs_review", classifiedAt: 0,
+      });
+      await ctx.db.insert("bills", { session: "2025", billNumber: "AB 400", billUrl: "u", summary: "s4", fetchedAt: 0 }); // unclassified
+    });
+    const rows = await t.query(internal.billClassify.listForReview, {});
+    expect(rows.map((r) => r.billNumber)).toEqual(["AB 300", "AB 200"]); // classifyStatus asc ("needs_review" < "pending"), then billNumber
+    const pending = rows.find((r) => r.billNumber === "AB 200")!;
+    expect(pending.outcome).toBe("increase school funding");
+    expect(pending.issueSlugs).toEqual(["education"]);
+    const review = rows.find((r) => r.billNumber === "AB 300")!;
+    expect(review.outcome).toBe("cut the state income tax");
+    expect(review.issueSlugs).toEqual(["taxes-budget"]);
+  });
+});
+
 describe("bill classify prompt", () => {
   test("constrains to the 11 issues, demands a neutral YES-vote outcome, embeds the LRB summary", () => {
     const p = buildBillClassifyPrompt("AB 100 relating to health coverage", "This bill would expand BadgerCare eligibility.");

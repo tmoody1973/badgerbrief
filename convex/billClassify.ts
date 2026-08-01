@@ -53,6 +53,27 @@ export const pendingBillsForCandidates = internalQuery({
   },
 });
 
+export const listForReview = internalQuery({
+  args: { statuses: v.optional(v.array(v.string())) },
+  handler: async (ctx, { statuses }) => {
+    const wanted = new Set(statuses ?? ["pending", "needs_review"]);
+    const rows = await ctx.db.query("bills").collect();
+    return rows
+      .filter((b) => b.classifyStatus && wanted.has(b.classifyStatus))
+      .sort((a, b) => a.classifyStatus!.localeCompare(b.classifyStatus!) || a.billNumber.localeCompare(b.billNumber))
+      .map((b) => ({
+        session: b.session,
+        billNumber: b.billNumber,
+        billUrl: b.billUrl,
+        summary: b.summary,
+        issueSlugs: b.issueSlugs,
+        outcome: b.outcome,
+        classifyConfidence: b.classifyConfidence,
+        classifyStatus: b.classifyStatus,
+      }));
+  },
+});
+
 export const ISSUE_SLUGS = [
   "healthcare", "education", "public-safety", "taxes-budget", "abortion", "housing",
   "immigration", "environment-energy", "economy-jobs", "elections-democracy", "agriculture",
