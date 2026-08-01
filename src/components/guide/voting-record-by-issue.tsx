@@ -5,12 +5,17 @@ import { api } from "../../../convex/_generated/api";
 export function VotingRecordByIssue({ candidateSlug, raceId }: { candidateSlug: string; raceId: string }) {
   const groups = useQuery(api.votesQueries.votingRecordByIssue, { candidateSlug, raceId });
   if (!groups || groups.length === 0) return null;
+  // Federal (U.S. House) bill outcomes come from the nonpartisan Congressional
+  // Research Service; Wisconsin ones from the Legislative Reference Bureau.
+  const summarySource = raceId.includes("US-HOUSE")
+    ? "Congressional Research Service"
+    : "Legislative Reference Bureau";
   return (
     <section className="mt-8">
       <h3 className="font-display text-lg">How they voted, by issue</h3>
       <p className="mt-1 text-sm text-muted-foreground">
         Their final-passage votes on the bills we&rsquo;ve grouped by issue. Each line is their vote plus what a YES did — from the
-        nonpartisan Legislative Reference Bureau. The bill is one click away; nothing here rates the candidate.
+        nonpartisan {summarySource}. The bill is one click away; nothing here rates the candidate.
       </p>
       <div className="mt-4 flex flex-col gap-5">
         {groups.map((g) => (
