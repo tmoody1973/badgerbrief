@@ -25,6 +25,9 @@ export default function ForecastPage() {
         public poll combined into one picture, with the uncertainty out loud. It never names a
         winner, because the honest answer depends on assumptions you can move yourself.
       </p>
+      <p className="mt-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+        A three-part lesson: a lead is not a lock · the witnesses disagree · you be the forecaster.
+      </p>
       <ForecastExperience raceId="WI-GOV-2026" airtime={airtime} />
     </main>
   );

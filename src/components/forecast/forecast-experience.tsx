@@ -11,6 +11,9 @@ import {
   headToHead,
   ACTIVE_DEM,
 } from "@/lib/forecast";
+import { Witnesses } from "./witnesses";
+import { BlendLab } from "./blend-lab";
+import { pollShares, socialShares, adSpendShares, newsShares } from "@/lib/forecast-signals";
 
 function Bars({
   data,
@@ -119,6 +122,8 @@ export function ForecastExperience({
 }) {
   const rawPolls = useQuery(api.pollsQueries.forRace, { raceId });
   const social = useQuery(api.social.socialForRace, { raceId });
+  const adMoney = useQuery(api.adMoney.adMoneyForRace, { raceId });
+  const newsTone = useQuery(api.newsTone.newsToneForRace, { raceId });
   const tiffany = useMemo(() => headToHead(), []);
 
   const [halfLife, setHalfLife] = useState(21);
@@ -143,6 +148,44 @@ export function ForecastExperience({
     }
     return out;
   }, [social]);
+
+  // adMoneyForRace returns CandidateAdMoney (slug/supportSpend/attackSpend), not the
+  // {candidateSlug, totalSpend} shape adSpendShares expects — adapt it here.
+  // supportSpend = money spent promoting the candidate (own + allied), the closest
+  // read on "where the campaign thinks the vote is"; attackSpend is money spent
+  // against them by others, not a revealed belief of their own.
+  const adSpendInput = useMemo(
+    () =>
+      adMoney
+        ? {
+            candidates: adMoney.candidates.map((c) => ({
+              candidateSlug: c.slug,
+              totalSpend: c.supportSpend,
+            })),
+          }
+        : undefined,
+    [adMoney],
+  );
+
+  const witnessSignals = useMemo(
+    () => ({
+      "Polls": pollShares(avg),
+      "Social reach": socialShares(social),
+      "Ad spend": adSpendShares(adSpendInput),
+      "News tone": newsShares(newsTone),
+    }),
+    [avg, social, adSpendInput, newsTone],
+  );
+
+  const blendSignals = useMemo(
+    () => ({
+      polls: pollShares(avg),
+      social: socialShares(social),
+      adspend: adSpendShares(adSpendInput),
+      news: newsShares(newsTone),
+    }),
+    [avg, social, adSpendInput, newsTone],
+  );
 
   if (!rawPolls) {
     return <p className="mt-8 font-mono text-xs text-muted-foreground">Loading polls…</p>;
@@ -252,6 +295,9 @@ export function ForecastExperience({
           <Bars data={reach} max={Math.max(...Object.values(reach), 1)} suffix="" />
         </section>
       )}
+
+      <Witnesses signals={witnessSignals} />
+      <BlendLab signals={blendSignals} />
 
       <p className="font-mono text-xs text-muted-foreground">
         Poll aggregation + live social reach · not a prediction · built to show how to read a race.
