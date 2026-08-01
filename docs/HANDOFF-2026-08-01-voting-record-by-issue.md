@@ -61,7 +61,15 @@ Because bills are SHARED within a chamber/session, most Assembly bills are alrea
 show data. Expanding = classify the remaining bills (ones other members voted on that Hong/Roys
 didn't) and approve them.
 
-### HOW TO EXPAND (the active next task)
+### EXPANSION STATUS: WI legislators DONE (2026-08-01)
+Shared chamber bills + candidate-agnostic UI mean **every WI Assembly/Senate incumbent is already
+live** with their own record — no work needed (verified: 14 others had 0 unclassified bills; Emerson
+D-91 renders her own distinct counts). **Only frontier left = US House (631 votes each):** federal
+bills have no WI-LRB summary so the classifier skips them — needs a **Congress.gov bill-summary
+source wired into the `bills` cache first** (v2 data build). The steps below apply if new WI roll
+calls get ingested (weekly cron) or once federal summaries exist.
+
+### HOW TO EXPAND (for future WI bills or, post-federal-summaries, US House)
 1. Get the tracked-legislator slugs (candidates with `legislator_votes`). ~89+ WI Assembly/Senate
    incumbents; US House members have ~631 votes each.
 2. `npx convex run billClassifyRun:classifyPendingBills '{"candidateSlugs":[<all slugs>],"limit":40}' --prod`
