@@ -75,6 +75,7 @@ import type * as scout from "../scout.js";
 import type * as scoutQueries from "../scoutQueries.js";
 import type * as seed from "../seed.js";
 import type * as siteMap from "../siteMap.js";
+import type * as social from "../social.js";
 import type * as sponsorEnrich from "../sponsorEnrich.js";
 import type * as sponsors from "../sponsors.js";
 import type * as tvExtractAgent from "../tvExtractAgent.js";
@@ -158,6 +159,7 @@ declare const fullApi: ApiFromModules<{
   scoutQueries: typeof scoutQueries;
   seed: typeof seed;
   siteMap: typeof siteMap;
+  social: typeof social;
   sponsorEnrich: typeof sponsorEnrich;
   sponsors: typeof sponsors;
   tvExtractAgent: typeof tvExtractAgent;

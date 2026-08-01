@@ -11,6 +11,16 @@ crons.daily(
   {},
 );
 
+// 11:30 UTC — daily follower snapshot per candidate (SocialFetch). No-op until
+// SOCIALFETCH_API_KEY is set. Accumulates one row/candidate/platform/day so we
+// can track follower growth through the Aug 11 primary.
+crons.daily(
+  "snapshot social followers",
+  { hourUTC: 11, minuteUTC: 30 },
+  internal.social.syncSocial,
+  {},
+);
+
 // 11:00 UTC — propose new article sources for human review (MOO-322).
 crons.daily(
   "scout article sources",

@@ -25,3 +25,26 @@ export const setCandidacyStatus = internalMutation({
     return { candidate: `${raceId}/${slug}`, from: before, to: status };
   },
 });
+
+/**
+ * Correct a candidate's `background` blurb. Same narrow, CLI-only pattern as
+ * setCandidacyStatus — for fixing a published factual error before the next
+ * re-seed (e.g. an unsourced/false endorsement).
+ */
+export const setCandidateBackground = internalMutation({
+  args: {
+    raceId: v.string(),
+    slug: v.string(),
+    background: v.string(),
+  },
+  handler: async (ctx, { raceId, slug, background }) => {
+    const c = await ctx.db
+      .query("candidates")
+      .withIndex("by_slug", (q) => q.eq("raceId", raceId).eq("slug", slug))
+      .unique();
+    if (!c) throw new Error(`candidate not found: ${raceId}/${slug}`);
+    const before = c.background;
+    await ctx.db.patch(c._id, { background });
+    return { candidate: `${raceId}/${slug}`, from: before, to: background };
+  },
+});

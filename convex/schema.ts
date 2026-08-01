@@ -200,6 +200,21 @@ export default defineSchema({
     fetchedAt: v.number(),
   }).index("by_candidate", ["raceId", "candidateSlug"]),
 
+  // Daily social-media snapshots (via SocialFetch). SocialFetch returns a
+  // point-in-time follower count, NOT history — so we log one row per
+  // candidate/platform/day and compute growth from our own accumulated rows.
+  // Buzz != votes: this is attention/momentum context, never a predictor.
+  social_snapshots: defineTable({
+    candidateSlug: v.string(),
+    raceId: v.string(),
+    platform: v.string(), // "x" | "instagram" | "facebook" | "youtube"
+    handle: v.string(),
+    followers: v.optional(v.number()),
+    capturedAt: v.number(),
+  })
+    .index("by_candidate", ["raceId", "candidateSlug"])
+    .index("by_candidate_platform", ["candidateSlug", "platform"]),
+
   // Second-hop money tracing (MOO-320): where a big committee donor's own
   // money comes from, pulled from Sunshine report data. One row per committee
   // per cycle window; topSources bounded to 10 so the array stays small.
