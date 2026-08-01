@@ -890,11 +890,14 @@ Expected: all green.
 
 Run: `npx next build` — expected: `/forecast` compiles.
 
-- [ ] **Step 5: Deploy + browser-verify** (per `docs/HANDOFF-2026-07-31-forecast-social.md`)
+- [ ] **Step 5: Verify the production build (branch — do NOT deploy)**
 
+Run: `npx next build` — expected: compiles, `/forecast` route builds. This is the branch-scoped completion bar for this task.
+
+**Deploy is DEFERRED to post-merge (controller-run), not part of this task.** The agreed flow is: branch → final whole-branch review → merge to main → deploy as usual. When that happens the controller (not a task subagent) will:
 - Convex first (schema + newsTone): `git stash push -q -m wip -- convex/voterHelp.ts && npx convex deploy --yes && git stash pop -q`
-- Seed tone once: `npx convex run newsTone:classifyPendingArticles '{"limit":25}' --prod`
-- Frontend: clean-worktree `vercel --prod` (see handoff).
+- Seed tone once: `npx convex run newsToneClassify:classifyPendingArticles '{"limit":25}' --prod`  *(note: `newsToneClassify`, not `newsTone` — the classifier is in the split `"use node"` file)*
+- Frontend: clean-worktree `vercel --prod` (see `docs/HANDOFF-2026-07-31-forecast-social.md`).
 - Load `https://badgerbrief.org/forecast` in a browser: confirm Act 2 shows four disagreeing share bars, Act 3 sliders re-order the field and the leader flips when polls weight is dropped, turnout toggle tilts, and NO composite number is printed anywhere.
 
 - [ ] **Step 6: Commit**
