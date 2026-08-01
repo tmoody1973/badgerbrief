@@ -2,6 +2,7 @@ import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { api, internal } from "./_generated/api";
 import schema from "./schema";
+import { buildToneRubricPrompt } from "./newsTone";
 
 const modules = import.meta.glob(["./**/*.ts", "./**/*.js", "!./**/*.test.ts", "!./**/*.d.ts"]);
 const setup = () => convexTest(schema, modules);
@@ -39,5 +40,16 @@ describe("newsTone", () => {
     expect(hong.count).toBe(3);
     expect(hong.net).toBe(0); // positive - negative
     expect(hong.stories).toHaveLength(3);
+  });
+});
+
+describe("tone rubric prompt", () => {
+  test("anchors tone TO the candidate and warns about the slams-opponent trap", () => {
+    const p = buildToneRubricPrompt("Hong slams Tiffany on taxes", "attack line", "Francesca Hong");
+    expect(p).toContain("Francesca Hong");
+    expect(p.toLowerCase()).toContain("toward"); // scored toward the candidate
+    expect(p).toContain("Hong slams Tiffany on taxes"); // headline embedded
+    // the trap: an attack BY the candidate is positive-for-them
+    expect(p.toLowerCase()).toContain("attacks an opponent");
   });
 });
