@@ -34,21 +34,20 @@ export const pendingBillsForCandidates = internalQuery({
   args: { candidateSlugs: v.array(v.string()) },
   handler: async (ctx, { candidateSlugs }) => {
     // distinct (session, billNumber) from these candidates' SUBSTANTIVE votes
-    const wanted = new Map<string, { session: string; billNumber: string }>();
+    const wanted = new Map<string, { session: string; billNumber: string; billTitle: string }>();
     for (const slug of candidateSlugs) {
       const lv = await ctx.db.query("legislator_votes").withIndex("by_candidate", (q) => q.eq("candidateSlug", slug)).collect();
       for (const p of lv) {
         const vote = await ctx.db.query("legislative_votes").withIndex("by_voteKey", (q) => q.eq("voteKey", p.voteKey)).unique();
         if (!vote || !isFinal(vote.voteType)) continue;
-        wanted.set(`${vote.session}-${vote.billNumber}`, { session: vote.session, billNumber: vote.billNumber });
+        wanted.set(`${vote.session}-${vote.billNumber}`, { session: vote.session, billNumber: vote.billNumber, billTitle: vote.billTitle });
       }
     }
     const out: Array<{ session: string; billNumber: string; billTitle: string; summary: string }> = [];
-    for (const { session, billNumber } of wanted.values()) {
+    for (const { session, billNumber, billTitle } of wanted.values()) {
       const bill = await ctx.db.query("bills").withIndex("by_session_bill", (q) => q.eq("session", session).eq("billNumber", billNumber)).unique();
       if (!bill || bill.classifyStatus || bill.summary === null) continue; // already classified or no LRB text to anchor
-      const anyVote = await ctx.db.query("legislative_votes").withIndex("by_bill", (q) => q.eq("billNumber", billNumber)).first();
-      out.push({ session, billNumber, billTitle: anyVote?.billTitle ?? billNumber, summary: bill.summary });
+      out.push({ session, billNumber, billTitle: billTitle || billNumber, summary: bill.summary });
     }
     return out;
   },
