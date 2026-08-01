@@ -742,6 +742,14 @@ export default defineSchema({
     billUrl: v.string(),
     summary: v.union(v.string(), v.null()),
     fetchedAt: v.number(),
+    // Bill → issue classification (voting-record-by-issue). Neutral, LRB-anchored.
+    issueSlugs: v.optional(v.array(v.string())),
+    outcome: v.optional(v.string()), // "a YES vote would […]", ≤ ~12 words
+    classifyConfidence: v.optional(v.number()),
+    classifyStatus: v.optional(
+      v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected"), v.literal("needs_review")),
+    ),
+    classifiedAt: v.optional(v.number()),
   }).index("by_session_bill", ["session", "billNumber"]),
 
   // ---------- chat usage tracking (MOO-410) ----------
