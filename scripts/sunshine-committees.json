@@ -1,5 +1,5 @@
 {
-  "_comment": "Explicit Sunshine committee \u2192 candidate mapping, verified against real export names + Related Office + Registrant Party. Unmatched committees are REPORTED by import-sunshine.mjs, never guessed. 'Wisconsin Rebuild' (Gov, Ind) intentionally unmapped \u2014 could be any of four seeded independents.",
+  "_comment": "Explicit Sunshine committee → candidate mapping, verified against real export names + Related Office + Registrant Party. Unmatched committees are REPORTED by import-sunshine.mjs, never guessed. 'Wisconsin Rebuild' (Gov, Ind) intentionally unmapped — could be any of four seeded independents.",
   "Josh Schoemann for Governor": {
     "candidateSlug": "josh-schoemann",
     "raceId": "WI-GOV-2026",
@@ -12,23 +12,28 @@
   },
   "Ryan Strnad for Governor": {
     "candidateSlug": "ryan-strnad",
-    "raceId": "WI-GOV-2026"
+    "raceId": "WI-GOV-2026",
+    "registrantId": "0103889"
   },
   "Kaul for Attorney General": {
     "candidateSlug": "josh-kaul",
-    "raceId": "WI-AG-2026"
+    "raceId": "WI-AG-2026",
+    "registrantId": "0105879"
   },
   "Pete for Wisconsin": {
     "candidateSlug": "pete-karas",
-    "raceId": "WI-SOS-2026"
+    "raceId": "WI-SOS-2026",
+    "registrantId": "0105008"
   },
   "Friends of John Leiber": {
     "candidateSlug": "john-leiber",
-    "raceId": "WI-TREAS-2026"
+    "raceId": "WI-TREAS-2026",
+    "registrantId": "0106014"
   },
   "Sarah for Wisconsin": {
     "candidateSlug": "sarah-godlewski",
-    "raceId": "WI-LTGOV-2026"
+    "raceId": "WI-LTGOV-2026",
+    "registrantId": "0105995"
   },
   "Kelda for Governor": {
     "candidateSlug": "kelda-roys",
