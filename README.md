@@ -9,10 +9,12 @@ BadgerBrief helps Wisconsin voters make sense of the 2026 election: what's on th
 Key capabilities:
 
 - **Race & candidate guides** — every 2026 Wisconsin race (Governor, statewide, U.S. House, Legislature, Supreme Court) with candidate profiles, positions, and ballot status.
+- **Voting records by issue** — for incumbents, actual roll-call votes grouped by the same 11-issue taxonomy as candidate positions, each translated to a plain "Voted for/against a bill to [outcome]" drawn from the nonpartisan bill summary (Wisconsin LRB analyses; U.S. House CRS summaries via Congress.gov) and shown next to what the candidate *said* on that issue. Every bill→issue classification is LLM-drafted and **human-approved before it's public** — factual for/against counts, no scores or ratings.
 - **Campaign finance** — receipts, disbursements, and donors from the FEC (OpenFEC) and the Wisconsin Ethics Commission ("Sunshine"), including second-hop committee funding.
 - **Political ad tracking** — sponsor, spend, and reach from the **Meta Ad Library**, **Google political ads**, and **broadcast TV** (FCC political files), with reviewer-approved **sponsor profiles** ("who is this group?") and outside-spending analysis.
 - **Coverage & source transparency** (`/news`) — tracked reporting on the 2026 races from Wisconsin newsrooms, linked out to the outlet that reported it. We don't summarize or rate the journalism; we do show who owns and funds each outlet. Only dates read from an article's own publication metadata are ever displayed.
 - **Candidate interviews** — WisconsinEye's Campaign 2026 sit-downs, transcribed with speaker diarization so answers are separated from the interviewer's questions, quoted verbatim and timestamped to the recording. Every candidate in a race answers the same interviewer, so the answers are directly comparable.
+- **Forecast** (`/forecast`) — not a prediction but a lesson in reading election signals: polls, social reach, ad spend, news tone, and turnout, each with its weight and its limits, backed by a sourced methodology. Deliberately publishes no quotable "who's winning" number.
 - **Personalized brief** (`/brief`) — an agent assembles a per-voter summary of their ballot.
 - **Voter Help chat** (`/chat`) — a streaming assistant for ballot questions, gated by an evaluation suite.
 - **Editorial pipeline** — article discovery, extraction, QA scoring, and a `/admin` review queue; every model call is traced in Arize and gated by a golden-dataset eval before deploy.
@@ -87,6 +89,7 @@ badgerbrief/
 │   │   ├── compare/[slug]/  # side-by-side candidate compare
 │   │   ├── ads/             # ad tracker (Meta/Google/TV spending)
 │   │   ├── news/            # coverage hub + /news/about methodology
+│   │   ├── forecast/        # election-signals lesson (polls, ads, turnout)
 │   │   ├── brief/           # personalized voter brief
 │   │   ├── chat/            # Voter Help chat (gated)
 │   │   ├── vote/            # voting info
@@ -123,6 +126,7 @@ badgerbrief/
 | `ANTHROPIC_API_KEY` | Claude (editorial agents, chat, extraction) | Yes |
 | `ARIZE_SPACE_ID`, `ARIZE_API_KEY`, `ARIZE_PROJECT_NAME` | LLM tracing + evals | Optional (agents degrade gracefully if absent) |
 | `OPENFEC_API_KEY` | Federal campaign finance + committee lookups | For finance/sponsors |
+| `CONGRESS_API_KEY` | U.S. House roll-call votes + federal bill (CRS) summaries, via Congress.gov | For federal voting records |
 | `FIRECRAWL_API_KEY` | Article + campaign-site scraping | For editorial pipeline |
 | `PERPLEXITY_API_KEY` | Web-grounded sponsor descriptions | For sponsor profiles |
 | `BROWSERBASE_API_KEY`, `BROWSERBASE_PROJECT_ID` | Hosted browser for FCC TV political files | For TV ad sync |
@@ -136,6 +140,7 @@ badgerbrief/
 - **Broadcast TV ads (MOO-318):** FCC political files are Akamai-blocked to plain requests, so a Browserbase browser enumerates each station's folders and downloads order PDFs; `mupdf` unwraps PDF-portfolio filings; Claude extracts the order + the NAB disclosure (which candidate/issue the ad is about). TV spend is exact and every order links to its stored source PDF.
 - **Coverage discovery:** a daily scout asks Perplexity for reporting on each tracked candidate, bounded by an allowlist of Wisconsin newsrooms in `convex/lib/scoutParse.ts` (`WI_OUTLETS`) — Milwaukee and Madison dailies, public media, the commercial and PBS TV stations, and the statewide nonprofits. That one list is the single source of truth for three things: Perplexity's `search_domain_filter`, the URL gate on everything we store, and the display name shown as credit. **Perplexity silently truncates the domain filter past 20 entries**, so the list is capped and asserted at import — adding a 21st outlet must be a deliberate swap, not a silent no-op. Outlets discovered this way are created as `draft` and render nothing until a human approves them in `/admin → Outlets`.
 - **Interview quotes:** audio is downloaded by hand through WisconsinEye's own terms gate and transcribed **locally** (Deepgram `nova-3` with diarization), so their media never enters the app and no media URL is ever stored — their terms prohibit sharing the download link, and `convex/quoteIngest.ts` enforces that in code. Every extracted quote must appear verbatim in the diarized turn it claims or it is discarded; a human still approves each one. Quotes are **not** paired with the interviewer's question: diarization is reliable for who is speaking but not for where an exchange ends, and a wrong question above a quote is fabricated context.
+- **Voting records:** roll-call votes come from the Wisconsin Legislature and, for the U.S. House, Congress.gov — federal member positions are cross-checked against the House Clerk's own XML before anything is stored (two disagreeing official sources → the vote is refused, not guessed). Each bill is tagged to voter issues by an LLM that reads **only** the nonpartisan bill summary (WI Legislative Reference Bureau analysis / federal CRS summary) and describes what a YES vote does in neutral language; low-confidence or issue-less bills route to review, and **nothing reaches a profile until a human approves it** — the public query hard-filters to `approved`.
 - **Sponsor profiles:** OpenFEC committee facts + a Perplexity-sourced, cited one-liner, confirmed by a human — so voters see "who is House Majority PAC?" with sources.
 - **Trust posture:** ad→candidate attribution and editorial claims are always human-reviewed; low-confidence matches route to `/admin`, never auto-published.
 
