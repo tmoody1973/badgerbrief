@@ -296,7 +296,7 @@ export function ForecastExperience({
         </section>
       )}
 
-      <Witnesses signals={witnessSignals} />
+      <Witnesses signals={witnessSignals} newsDetail={newsTone} />
       <BlendLab signals={blendSignals} />
 
       <p className="font-mono text-xs text-muted-foreground">
