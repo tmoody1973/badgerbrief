@@ -30,6 +30,13 @@ export type AboutDict = {
     disclosureBody: string;
     p3: string;
   };
+  openSource: {
+    heading: string;
+    body1: string;
+    body2: string;
+    repoUrl: string;
+    repoCta: string;
+  };
   wrong: {
     heading: string;
     p1: string;
@@ -83,6 +90,15 @@ export const aboutEn: AboutDict = {
       " Tarik is Director of Strategy and Innovation at Radio Milwaukee, and an appointed commissioner of the Milwaukee City Plan Commission. Both are stated here on purpose. The Plan Commission is a city land-use body — it has no role in the state legislative, congressional, or statewide races this guide covers — and he has no involvement in any race on BadgerBrief. Every candidate is treated identically, by the same sourced method, with no endorsements. Neither role funds or directs this site.",
     p3:
       "This is not a news organisation and does not claim to be one. It is one person’s attempt to make public records legible, held to a simple rule: if a claim is on this site, its source is one click away, and if it turns out to be wrong, it gets corrected in public.",
+  },
+  openSource: {
+    heading: "Open source, and a learning project",
+    body1:
+      "The code that runs BadgerBrief is open source and built with Claude Code. Anyone can read exactly how it works — how each source is pulled, checked, and shown on the page — and any developer who wants to improve it, or check the code for themselves, is welcome to.",
+    body2:
+      "It is also a learning project. Building it in the open is how Tarik is learning to work with data, databases, and APIs — so the guide gets better as the learning does, and the way it is made stays visible instead of hidden.",
+    repoUrl: "https://github.com/tmoody1973/badgerbrief",
+    repoCta: "See the code on GitHub →",
   },
   wrong: {
     heading: "If something is wrong",

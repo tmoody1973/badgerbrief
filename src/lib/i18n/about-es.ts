@@ -46,6 +46,15 @@ export const aboutEs: AboutDict = {
     p3:
       "Esto no es una organización de noticias y no pretende serlo. Es el intento de una persona de hacer legibles los registros públicos, sujeto a una regla simple: si una afirmación está en este sitio, su fuente está a un clic de distancia, y si resulta ser incorrecta, se corrige públicamente.",
   },
+  openSource: {
+    heading: "Código abierto, y un proyecto de aprendizaje",
+    body1:
+      "El código que hace funcionar BadgerBrief es de código abierto y está construido con Claude Code. Cualquiera puede ver exactamente cómo funciona — cómo se obtiene, verifica y muestra cada fuente en la página — y cualquier persona desarrolladora que quiera mejorarlo, o revisar el código por su cuenta, es bienvenida a hacerlo.",
+    body2:
+      "También es un proyecto de aprendizaje. Construirlo de forma abierta es la manera en que Tarik está aprendiendo a trabajar con datos, bases de datos y APIs — así la guía mejora a medida que avanza el aprendizaje, y la forma en que se hace permanece visible en lugar de oculta.",
+    repoUrl: "https://github.com/tmoody1973/badgerbrief",
+    repoCta: "Ver el código en GitHub →",
+  },
   wrong: {
     heading: "Si algo está mal",
     p1:

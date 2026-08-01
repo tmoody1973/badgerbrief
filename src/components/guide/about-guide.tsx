@@ -80,6 +80,22 @@ export function AboutGuide({ dict, lang }: { dict: AboutDict; lang: "en" | "es" 
       </section>
 
       <section className="mt-8">
+        <h2 className="font-display text-xl">{dict.openSource.heading}</h2>
+        <p className="mt-2 max-w-[60ch]">{dict.openSource.body1}</p>
+        <p className="mt-3 max-w-[60ch]">{dict.openSource.body2}</p>
+        <p className="mt-3">
+          <a
+            href={dict.openSource.repoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline decoration-2 underline-offset-2"
+          >
+            {dict.openSource.repoCta}
+          </a>
+        </p>
+      </section>
+
+      <section className="mt-8">
         <h2 className="font-display text-xl">{dict.wrong.heading}</h2>
         <p className="mt-2 max-w-[60ch]">{dict.wrong.p1}</p>
         <p className="mt-4">
