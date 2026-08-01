@@ -15,6 +15,7 @@ import { InTheNews } from "@/components/guide/in-the-news";
 import { InterviewQuotes } from "@/components/guide/interview-quotes";
 import { BallotContext } from "@/components/guide/ballot-context";
 import { VotingRecord } from "@/components/guide/voting-record";
+import { VotingRecordByIssue } from "@/components/guide/voting-record-by-issue";
 import { WhatThisMeans } from "@/components/guide/what-this-means";
 import { isInterviewQuote } from "@/lib/interview-quote";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
@@ -274,6 +275,7 @@ export default async function CandidatePage({ params }: Props) {
               candidateSlug={candidate.slug}
               candidateName={candidate.name}
             />
+            <VotingRecordByIssue candidateSlug={candidate.slug} raceId={candidate.raceId} />
           </>
         )}
 
