@@ -1,7 +1,9 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
 
-// Final-passage vote types (mirror of votesQueries.isFinal — kept in sync).
+// WI-only final-passage check (PASSAGE/CONCURRENCE/ADOPTION). Intentionally NOT
+// the full federal-aware votesQueries.isFinal — the `bills` cache only holds
+// WI LRB-analyzed bills, so the federal House patterns there don't apply here.
 const FINAL_TYPES = ["PASSAGE", "CONCURRENCE", "ADOPTION"];
 const isFinal = (voteType: string) => {
   const t = voteType.toUpperCase();

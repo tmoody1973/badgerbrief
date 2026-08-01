@@ -9,8 +9,8 @@ export function VotingRecordByIssue({ candidateSlug, raceId }: { candidateSlug: 
     <section className="mt-8">
       <h3 className="font-display text-lg">How they voted, by issue</h3>
       <p className="mt-1 text-sm text-muted-foreground">
-        Every final-passage vote, grouped by issue. Each line is their vote plus what a YES did — drawn from the nonpartisan
-        Legislative Reference Bureau. The bill is one click away; nothing here rates the candidate.
+        Their final-passage votes on the bills we&rsquo;ve grouped by issue. Each line is their vote plus what a YES did — from the
+        nonpartisan Legislative Reference Bureau. The bill is one click away; nothing here rates the candidate.
       </p>
       <div className="mt-4 flex flex-col gap-5">
         {groups.map((g) => (
@@ -28,7 +28,7 @@ export function VotingRecordByIssue({ candidateSlug, raceId }: { candidateSlug: 
               {g.votes.map((v) => (
                 <li key={`${v.session}-${v.billNumber}-${v.votedOn}`} className="grid grid-cols-[1.2rem_1fr_auto] items-baseline gap-2 text-sm">
                   <span className={v.direction === "for" ? "text-success" : "text-destructive"}>{v.direction === "for" ? "✓" : "✗"}</span>
-                  <span>Voted {v.direction} {v.outcome}</span>
+                  <span>Voted {v.direction} a bill to {v.outcome}</span>
                   <a href={v.sourceUrl} target="_blank" rel="noopener noreferrer" className="whitespace-nowrap font-mono text-xs text-muted-foreground underline decoration-dotted underline-offset-2">
                     {v.votedOn.slice(0, 4)} · bill ↗
                   </a>
