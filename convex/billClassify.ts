@@ -76,6 +76,28 @@ export const listForReview = internalQuery({
   },
 });
 
+/**
+ * Bulk-approve every `pending` classification (the human reviewer scanned them
+ * and accepted them as a batch). Only touches `pending` — `needs_review` and
+ * `rejected` are left alone. Optionally pass `billNumbers` (session|billNumber)
+ * to approve only a subset.
+ */
+export const approvePending = internalMutation({
+  args: { only: v.optional(v.array(v.string())) },
+  handler: async (ctx, { only }) => {
+    const set = only ? new Set(only) : null;
+    const rows = await ctx.db.query("bills").collect();
+    let approved = 0;
+    for (const b of rows) {
+      if (b.classifyStatus !== "pending") continue;
+      if (set && !set.has(`${b.session}|${b.billNumber}`)) continue;
+      await ctx.db.patch(b._id, { classifyStatus: "approved", classifiedAt: Date.now() });
+      approved++;
+    }
+    return { approved };
+  },
+});
+
 export const ISSUE_SLUGS = [
   "healthcare", "education", "public-safety", "taxes-budget", "abortion", "housing",
   "immigration", "environment-energy", "economy-jobs", "elections-democracy", "agriculture",
