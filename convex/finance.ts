@@ -100,6 +100,30 @@ export const logFetch = internalMutation({
   },
 });
 
+/**
+ * Completeness audit: finance_totals rows missing receipts or cash-on-hand.
+ * Both should be populated for every tracked candidate; a gap means an importer
+ * didn't fully land — e.g. Sunshine's two-source split (receipts from the
+ * transactions CSV via import-sunshine.mjs, cash-on-hand from the report API via
+ * import-sunshine-balances.mjs), where one script ran but the other didn't.
+ * Run: `npx convex run finance:financeGaps --prod`
+ */
+export const financeGaps = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("finance_totals").collect();
+    const gaps = rows.flatMap((r) => {
+      const missing: string[] = [];
+      if (r.receipts === undefined) missing.push("receipts");
+      if (r.cashOnHand === undefined) missing.push("cashOnHand");
+      return missing.length
+        ? [{ candidateSlug: r.candidateSlug, raceId: r.raceId, source: r.source, missing }]
+        : [];
+    });
+    return { count: gaps.length, gaps };
+  },
+});
+
 export const listFecCandidates = internalQuery({
   args: {},
   handler: async (ctx) => {

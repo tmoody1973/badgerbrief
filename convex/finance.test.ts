@@ -23,6 +23,32 @@ const rpw = {
   sourceNote: "WI Ethics Commission (Sunshine) filings, campaignfinance.wi.gov",
 };
 
+test("financeGaps flags rows missing receipts or cash-on-hand, skips complete rows", async () => {
+  const t = convexTest(schema, modules);
+  await t.run(async (ctx) => {
+    await ctx.db.insert("finance_totals", {
+      candidateSlug: "complete", raceId: "R", source: "sunshine", receipts: 100, cashOnHand: 50, fetchedAt: 0,
+    });
+    await ctx.db.insert("finance_totals", {
+      candidateSlug: "no-receipts", raceId: "R", source: "sunshine", cashOnHand: 50, fetchedAt: 0,
+    });
+    await ctx.db.insert("finance_totals", {
+      candidateSlug: "no-coh", raceId: "R", source: "openfec", receipts: 100, fetchedAt: 0,
+    });
+    // 0 is a real value, not a gap
+    await ctx.db.insert("finance_totals", {
+      candidateSlug: "zeros", raceId: "R", source: "sunshine", receipts: 0, cashOnHand: 0, fetchedAt: 0,
+    });
+  });
+  const { count, gaps } = await t.query(internal.finance.financeGaps, {});
+  expect(count).toBe(2);
+  const bySlug = Object.fromEntries(gaps.map((g) => [g.candidateSlug, g.missing]));
+  expect(bySlug["no-receipts"]).toEqual(["receipts"]);
+  expect(bySlug["no-coh"]).toEqual(["cashOnHand"]);
+  expect(bySlug["complete"]).toBeUndefined();
+  expect(bySlug["zeros"]).toBeUndefined();
+});
+
 test("upsertCommitteeFunding inserts then replaces by committee name", async () => {
   const t = convexTest(schema, modules);
   await t.mutation(internal.finance.upsertCommitteeFunding, rpw);
