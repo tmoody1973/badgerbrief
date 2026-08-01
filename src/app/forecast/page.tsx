@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ForecastExperience } from "@/components/forecast/forecast-experience";
+import { ForecastMethodology } from "@/components/forecast/forecast-methodology";
 import { debateAirtime } from "@/lib/forecast";
 import debate from "@/data/debates/wi-gov-dem-primary-debate.json";
 
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 export default function ForecastPage() {
   const airtime = debateAirtime(debate.tone as Parameters<typeof debateAirtime>[0]);
   return (
+    <>
     <main className="mx-auto w-full max-w-3xl px-4 py-10">
       <p className="font-mono text-xs font-bold uppercase tracking-widest text-primary">
         Poll aggregation · uncertainty
@@ -30,5 +32,7 @@ export default function ForecastPage() {
       </p>
       <ForecastExperience raceId="WI-GOV-2026" airtime={airtime} />
     </main>
+    <ForecastMethodology />
+    </>
   );
 }

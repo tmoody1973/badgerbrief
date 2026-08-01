@@ -2,11 +2,11 @@
 import { useMemo, useState } from "react";
 import { blend, rank, applyTurnoutTilt, type Shares, type SignalKey, type TurnoutScenario } from "@/lib/signals";
 
-const SIGNAL_ORDER: Array<{ key: SignalKey; label: string }> = [
-  { key: "polls", label: "Polls" },
-  { key: "social", label: "Social reach" },
-  { key: "adspend", label: "Ad spend" },
-  { key: "news", label: "News tone" },
+const SIGNAL_ORDER: Array<{ key: SignalKey; label: string; hint: string }> = [
+  { key: "polls", label: "Polls", hint: "The standard read of the race." },
+  { key: "social", label: "Social reach", hint: "Online following — buzz, not votes." },
+  { key: "adspend", label: "Ad spend", hint: "Where campaigns bet their money." },
+  { key: "news", label: "News tone", hint: "How the news coverage leans." },
 ];
 
 export function BlendLab({ signals }: { signals: Partial<Record<SignalKey, Shares>> }) {
@@ -28,10 +28,13 @@ export function BlendLab({ signals }: { signals: Partial<Record<SignalKey, Share
         Decide how much to trust each witness. The order below is <i>your</i> forecast — and it changes with your
         assumptions. <b className="text-foreground">That movement is the point. There is no &ldquo;right&rdquo; number.</b>
       </p>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Each slider is how much you trust that witness — slide it up to count it more, down to ignore it.
+      </p>
 
       {/* weight sliders */}
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        {SIGNAL_ORDER.map(({ key, label }) => {
+        {SIGNAL_ORDER.map(({ key, label, hint }) => {
           const available = signals[key] && Object.keys(signals[key]!).length > 0;
           return (
             <label key={key} className={`block ${available ? "" : "opacity-40"}`}>
@@ -43,6 +46,7 @@ export function BlendLab({ signals }: { signals: Partial<Record<SignalKey, Share
                 onChange={(e) => setWeights((w) => ({ ...w, [key]: Number(e.target.value) }))}
                 className="mt-2 w-full accent-primary"
               />
+              <span className="mt-1 block text-xs text-muted-foreground">{hint}</span>
             </label>
           );
         })}

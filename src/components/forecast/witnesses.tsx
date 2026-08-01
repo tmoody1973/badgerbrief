@@ -27,6 +27,11 @@ function NewsToneDetail({ rows }: { rows: NewsToneRow[] }) {
   if (withStories.length === 0) return null;
   return (
     <div className="mt-3 flex flex-col gap-2 border-t border-dashed border-border pt-3">
+      <p className="font-mono text-[11px] text-muted-foreground">
+        Coverage tone per candidate — <span className="font-bold text-success">+ favorable</span>,{" "}
+        <span className="font-bold">· neutral</span>,{" "}
+        <span className="font-bold text-destructive">− unfavorable</span>. Tap a name to read the headlines.
+      </p>
       {withStories.map((r) => (
         <details key={r.candidateSlug} className="group">
           <summary className="flex cursor-pointer list-none items-center gap-3">
@@ -110,8 +115,8 @@ export function Witnesses({
     <section className="border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
       <h2 className="font-display text-2xl">Meet the witnesses</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        The same field, measured four different ways — as each candidate&apos;s <b className="text-foreground">share of the field</b>.
-        Watch them disagree. Every witness lies in its own way.
+        The same field, measured four different ways — as each candidate&apos;s <b className="text-foreground">share of the field</b>{" "}
+        (their slice of the total). Watch them disagree. Every witness lies in its own way.
       </p>
       <div className="mt-4">
         {Object.entries(signals).map(([label, shares]) => (
