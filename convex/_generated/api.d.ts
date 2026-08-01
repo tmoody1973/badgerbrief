@@ -59,6 +59,7 @@ import type * as lib_votingRecord from "../lib/votingRecord.js";
 import type * as maintenance from "../maintenance.js";
 import type * as monitor from "../monitor.js";
 import type * as monitorQueries from "../monitorQueries.js";
+import type * as newsTone from "../newsTone.js";
 import type * as outletEnrich from "../outletEnrich.js";
 import type * as outlets from "../outlets.js";
 import type * as pollsQueries from "../pollsQueries.js";
@@ -143,6 +144,7 @@ declare const fullApi: ApiFromModules<{
   maintenance: typeof maintenance;
   monitor: typeof monitor;
   monitorQueries: typeof monitorQueries;
+  newsTone: typeof newsTone;
   outletEnrich: typeof outletEnrich;
   outlets: typeof outlets;
   pollsQueries: typeof pollsQueries;

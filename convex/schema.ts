@@ -478,6 +478,12 @@ export default defineSchema({
     proposedAt: v.number(),
     decidedAt: v.optional(v.number()),
     traceId: v.optional(v.string()),
+    // News-tone signal (forecasting class). Tone is scored TOWARD this article's
+    // candidate ("X slams Y" = positive-for-X). Undefined until classified.
+    tone: v.optional(v.union(v.literal("positive"), v.literal("neutral"), v.literal("negative"))),
+    toneConfidence: v.optional(v.number()),
+    toneRationale: v.optional(v.string()),
+    toneClassifiedAt: v.optional(v.number()),
   })
     .index("by_url", ["url"])
     .index("by_urlKey", ["urlKey"])
