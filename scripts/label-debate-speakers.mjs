@@ -96,6 +96,16 @@ const PEOPLE = [
  *      Matt" — and that question came from this speaker.
  * So the speaker Hong calls "Matt" is Matt Smith; the other non-announcer
  * moderator is Gerron Jordan. Both are asserted below.
+ *
+ * ⚠️ KNOWN DEFECT (found 2026-08-01, corrected in the published data by Tarik):
+ * this address-proof produced a SWAPPED moderator assignment — every "Matt
+ * Smith" turn was actually Gerron Jordan and vice versa — because "…is, Matt"
+ * sits at a speaker boundary and diarization attributed it to the wrong
+ * moderator cluster. The published transcript.json + main JSON `askedBy` were
+ * corrected with a global Matt↔Gerron swap. This proof is NOT reliable on its
+ * own: if you ever re-run this script, VERIFY the two moderator labels against
+ * the source video (youtubeId) before publishing, and swap them if they land
+ * reversed again.
  */
 const MODERATOR_ADDRESSED_AS_MATT =
   "bringing a responsible end to the voucher program is, Matt";
