@@ -31,3 +31,25 @@ describe("signals math", () => {
     expect(rank({ a: 0.2, b: 0.5, c: 0.3 }).map((r) => r.slug)).toEqual(["b", "c", "a"]);
   });
 });
+
+import { applyTurnoutTilt, TURNOUT_PROFILE } from "./signals";
+
+describe("turnout tilt", () => {
+  test("broad scenario leaves shares unchanged", () => {
+    const s = { "francesca-hong": 0.6, "kelda-roys": 0.4 };
+    expect(applyTurnoutTilt(s, "broad")).toEqual(s);
+  });
+
+  test("hardcore scenario tilts by profile then renormalizes to sum 1", () => {
+    const s = { a: 0.5, b: 0.5 };
+    const tilted = applyTurnoutTilt(s, "hardcore", { a: 0.5, b: 1.5 });
+    expect(tilted.b).toBeGreaterThan(tilted.a);
+    expect(tilted.a + tilted.b).toBeCloseTo(1);
+  });
+
+  test("default profile has an entry for every active Dem slug", () => {
+    for (const slug of ["francesca-hong", "david-crowley", "joel-brennan", "kelda-roys"]) {
+      expect(TURNOUT_PROFILE[slug]).toBeGreaterThan(0);
+    }
+  });
+});

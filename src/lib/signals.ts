@@ -41,3 +41,33 @@ export function rank(blended: Shares): Array<{ slug: string; value: number }> {
     .map(([slug, value]) => ({ slug, value }))
     .sort((a, b) => b.value - a.value);
 }
+
+export type TurnoutScenario = "broad" | "hardcore";
+
+/**
+ * ILLUSTRATIVE, hand-set turnout propensity for a "hardcore" (small, older,
+ * high-info August-primary) electorate. >1 = relatively favored when the
+ * electorate shrinks to its most reliable voters; <1 = relatively favored by a
+ * broad, younger, online-heavy electorate. These are a teaching device, NOT a
+ * measured model (we have no turnout crosstabs) — surfaced as such in the UI.
+ * This is a calibration knob: tune the numbers as judgment improves.
+ */
+export const TURNOUT_PROFILE: Record<string, number> = {
+  "francesca-hong": 0.85, // strength skews young/online → fades in a hardcore electorate
+  "david-crowley": 1.0,
+  "joel-brennan": 1.1, // establishment/older-leaning → relatively favored
+  "kelda-roys": 1.05,
+};
+
+/** Tilt shares by a turnout profile, then renormalize back to share-of-field. */
+export function applyTurnoutTilt(
+  shares: Shares,
+  scenario: TurnoutScenario,
+  profile: Record<string, number> = TURNOUT_PROFILE,
+): Shares {
+  if (scenario === "broad") return shares;
+  const tilted = Object.fromEntries(
+    Object.entries(shares).map(([slug, v]) => [slug, v * (profile[slug] ?? 1)]),
+  );
+  return toShares(tilted);
+}
