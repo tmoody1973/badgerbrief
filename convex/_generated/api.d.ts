@@ -14,6 +14,7 @@ import type * as ads from "../ads.js";
 import type * as adsTv from "../adsTv.js";
 import type * as audit from "../audit.js";
 import type * as billClassify from "../billClassify.js";
+import type * as billClassifyRun from "../billClassifyRun.js";
 import type * as bills from "../bills.js";
 import type * as billsQueries from "../billsQueries.js";
 import type * as briefAgent from "../briefAgent.js";
@@ -101,6 +102,7 @@ declare const fullApi: ApiFromModules<{
   adsTv: typeof adsTv;
   audit: typeof audit;
   billClassify: typeof billClassify;
+  billClassifyRun: typeof billClassifyRun;
   bills: typeof bills;
   billsQueries: typeof billsQueries;
   briefAgent: typeof briefAgent;

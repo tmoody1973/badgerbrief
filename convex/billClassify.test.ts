@@ -2,6 +2,7 @@ import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { internal } from "./_generated/api";
 import schema from "./schema";
+import { buildBillClassifyPrompt } from "./billClassify";
 
 const modules = import.meta.glob(["./**/*.ts", "./**/*.js", "!./**/*.test.ts", "!./**/*.d.ts"]);
 const setup = () => convexTest(schema, modules);
@@ -37,5 +38,16 @@ describe("bill classification storage", () => {
     const pending = await t.query(internal.billClassify.pendingBillsForCandidates, { candidateSlugs: ["francesca-hong"] });
     expect(pending.map((p) => p.billNumber)).toEqual(["AB 100"]); // AB 200 excluded (procedural)
     expect(pending[0].summary).toBe("This bill would expand BadgerCare.");
+  });
+});
+
+describe("bill classify prompt", () => {
+  test("constrains to the 11 issues, demands a neutral YES-vote outcome, embeds the LRB summary", () => {
+    const p = buildBillClassifyPrompt("AB 100 relating to health coverage", "This bill would expand BadgerCare eligibility.");
+    expect(p).toContain("This bill would expand BadgerCare eligibility.");
+    expect(p.toLowerCase()).toContain("yes vote"); // outcome is framed as what a YES does
+    expect(p).toContain("healthcare");
+    expect(p).toContain("public-safety"); // the fixed slug list is present
+    expect(p.toLowerCase()).toContain("do not"); // neutrality guard present
   });
 });

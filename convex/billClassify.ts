@@ -52,3 +52,23 @@ export const pendingBillsForCandidates = internalQuery({
     return out;
   },
 });
+
+export const ISSUE_SLUGS = [
+  "healthcare", "education", "public-safety", "taxes-budget", "abortion", "housing",
+  "immigration", "environment-energy", "economy-jobs", "elections-democracy", "agriculture",
+] as const;
+
+export function buildBillClassifyPrompt(title: string, lrbSummary: string): string {
+  return [
+    `Classify a Wisconsin bill into the voter issues it touches, and describe what a YES vote does.`,
+    `Pick 1-2 issues from EXACTLY this list: ${ISSUE_SLUGS.join(", ")}.`,
+    `Write "outcome": a neutral, factual phrase (≤ 12 words) completing "a YES vote would ___", taken from what the bill does.`,
+    `Rules:`,
+    `- Describe the BILL only. Do NOT judge it, and do NOT describe any legislator.`,
+    `- Neutral wording — no "reform", "crack down", "protect", "attack" or other loaded verbs.`,
+    `- If it fits no issue on the list, return an empty issueSlugs array.`,
+    ``,
+    `Bill: ${title}`,
+    `Nonpartisan LRB summary: ${lrbSummary}`,
+  ].join("\n");
+}
