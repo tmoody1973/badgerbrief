@@ -48,6 +48,29 @@ describe("unenrichedBillsForSession", () => {
   });
 });
 
+describe("unenrichedFederalBillsForSession", () => {
+  test("returns distinct us_house billNumbers not yet cached, ignoring other chambers", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      const fed = (voteId: string, billNumber: string) => ctx.db.insert("legislative_votes", {
+        voteKey: `119-house-${voteId}`, session: "119", chamber: "us_house", voteId, billNumber,
+        billTitle: "X", voteType: "On Passage", votedOn: "2025-01-01", ayes: 1, nays: 0,
+        notVoting: 0, present: 0, result: "Passed", measure: billNumber, sourceUrl: "http://x", ingestedAt: 0,
+      } as any);
+      await fed("1-1", "HR 1");
+      await fed("1-2", "HR 1"); // same bill, second roll call
+      await fed("1-3", "HR 22");
+    });
+    // A WI vote in a different session must not leak in.
+    await seedRoll(t, "2025", "assembly", "av1", "AB 1");
+    // HR 1 already cached.
+    await t.mutation(internal.billsQueries.storeBill, { session: "119", billNumber: "HR 1", billUrl: "http://u", summary: "x" });
+
+    const out = await t.query(internal.billsQueries.unenrichedFederalBillsForSession, { session: "119" });
+    expect(out.sort()).toEqual(["HR 22"]);
+  });
+});
+
 describe("sessionsWithVotes", () => {
   test("returns distinct sessions with roll calls, newest first", async () => {
     const t = convexTest(schema, modules);

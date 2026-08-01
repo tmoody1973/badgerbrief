@@ -39,6 +39,19 @@ describe("bill classification storage", () => {
     expect(pending.map((p) => p.billNumber)).toEqual(["AB 100"]); // AB 200 excluded (procedural)
     expect(pending[0].summary).toBe("This bill would expand BadgerCare.");
   });
+
+  test("pendingBillsForCandidates includes federal final votes whose type is not WI-shaped", async () => {
+    const t = setup();
+    await t.run(async (ctx) => {
+      // US House final passage — "...Suspend the Rules and Pass" has no "PASSAGE"
+      // substring, so a WI-only isFinal would wrongly drop it.
+      await ctx.db.insert("legislative_votes", { voteKey: "119-house-h1", session: "119", chamber: "us_house", voteId: "1-10", billNumber: "HR 3838", billTitle: "t", voteType: "On Motion to Suspend the Rules and Pass", votedOn: "2025-03-01", ayes: 300, nays: 100, notVoting: 5, present: 0, result: "Passed", measure: "HR 3838", sourceUrl: "s", ingestedAt: 0 } as any);
+      await ctx.db.insert("legislator_votes", { voteKey: "119-house-h1", candidateSlug: "some-rep", position: "aye", session: "119" } as any);
+      await ctx.db.insert("bills", { session: "119", billNumber: "HR 3838", billUrl: "u", summary: "This bill would fund rural broadband.", fetchedAt: 0 });
+    });
+    const pending = await t.query(internal.billClassify.pendingBillsForCandidates, { candidateSlugs: ["some-rep"] });
+    expect(pending.map((p) => p.billNumber)).toEqual(["HR 3838"]);
+  });
 });
 
 describe("listForReview", () => {
@@ -78,5 +91,12 @@ describe("bill classify prompt", () => {
     expect(p).toContain("healthcare");
     expect(p).toContain("public-safety"); // the fixed slug list is present
     expect(p.toLowerCase()).toContain("do not"); // neutrality guard present
+  });
+
+  test("is jurisdiction-neutral so a federal CRS summary is not framed as a Wisconsin/LRB bill", () => {
+    const p = buildBillClassifyPrompt("HR 1 One Big Beautiful Bill Act", "This act reduces taxes and increases the debt limit.");
+    expect(p).toContain("This act reduces taxes and increases the debt limit.");
+    expect(p).not.toMatch(/Wisconsin/i);
+    expect(p).not.toMatch(/\bLRB\b/);
   });
 });

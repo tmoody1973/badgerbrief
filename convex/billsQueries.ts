@@ -88,6 +88,32 @@ export const unenrichedBillsForSession = internalQuery({
 });
 
 /**
+ * Distinct US-House billNumbers voted on in this Congress that have no bills row
+ * yet. Federal counterpart of unenrichedBillsForSession — the CRS-summary enrich
+ * action (billsFederal.ts) drives off this. Reads one chamber via
+ * by_session_chamber, so it stays well under the 4096-document query limit.
+ */
+export const unenrichedFederalBillsForSession = internalQuery({
+  args: { session: v.string() },
+  handler: async (ctx, { session }): Promise<string[]> => {
+    const rows = await ctx.db
+      .query("legislative_votes")
+      .withIndex("by_session_chamber", (q) => q.eq("session", session).eq("chamber", "us_house"))
+      .collect();
+    const billNumbers = new Set(rows.map((r) => r.billNumber));
+    const out: string[] = [];
+    for (const billNumber of billNumbers) {
+      const existing = await ctx.db
+        .query("bills")
+        .withIndex("by_session_bill", (q) => q.eq("session", session).eq("billNumber", billNumber))
+        .unique();
+      if (!existing) out.push(billNumber);
+    }
+    return out;
+  },
+});
+
+/**
  * Distinct sessions that have any roll call, so the enrich action covers every
  * ingested session automatically — it can never fall behind a new vote backfill
  * the way a hand-maintained session list would.

@@ -1,13 +1,20 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
 
-// WI-only final-passage check (PASSAGE/CONCURRENCE/ADOPTION). Intentionally NOT
-// the full federal-aware votesQueries.isFinal — the `bills` cache only holds
-// WI LRB-analyzed bills, so the federal House patterns there don't apply here.
-const FINAL_TYPES = ["PASSAGE", "CONCURRENCE", "ADOPTION"];
+// Final-passage check, kept in step with votesQueries.FINAL_VOTE_TYPES (mirrored
+// rather than imported to avoid the api-circularity TS quirk documented there).
+// Federal-aware now that the `bills` cache also holds US-House CRS summaries: a
+// federal final vote ("...Suspend the Rules and Pass") has no "PASSAGE"
+// substring, so the WI-only list would have wrongly excluded it from the queue.
+const FINAL_TYPES = [
+  // Wisconsin
+  "PASSAGE", "CONCURRENCE", "ADOPTION",
+  // U.S. House
+  "AND PASS", "TO CONCUR", "AND AGREE", "AGREEING TO THE RESOLUTION",
+];
 const isFinal = (voteType: string) => {
   const t = voteType.toUpperCase();
-  return FINAL_TYPES.some((f) => t.includes(f)) || t.includes("ON PASSAGE");
+  return FINAL_TYPES.some((f) => t.includes(f));
 };
 
 export const setBillClassification = internalMutation({
@@ -103,9 +110,12 @@ export const ISSUE_SLUGS = [
   "immigration", "environment-energy", "economy-jobs", "elections-democracy", "agriculture",
 ] as const;
 
-export function buildBillClassifyPrompt(title: string, lrbSummary: string): string {
+// Jurisdiction-neutral: the same wording classifies a Wisconsin bill (LRB
+// summary) or a US-House bill (CRS summary). Naming a specific state would
+// mislead the model on the federal branch, and the issue taxonomy is shared.
+export function buildBillClassifyPrompt(title: string, summary: string): string {
   return [
-    `Classify a Wisconsin bill into the voter issues it touches, and describe what a YES vote does.`,
+    `Classify a legislative bill into the voter issues it touches, and describe what a YES vote does.`,
     `Pick 1-2 issues from EXACTLY this list: ${ISSUE_SLUGS.join(", ")}.`,
     `Write "outcome": a neutral, factual phrase (≤ 12 words) completing "a YES vote would ___", taken from what the bill does.`,
     `Rules:`,
@@ -114,6 +124,6 @@ export function buildBillClassifyPrompt(title: string, lrbSummary: string): stri
     `- If it fits no issue on the list, return an empty issueSlugs array.`,
     ``,
     `Bill: ${title}`,
-    `Nonpartisan LRB summary: ${lrbSummary}`,
+    `Nonpartisan summary: ${summary}`,
   ].join("\n");
 }
