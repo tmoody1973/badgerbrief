@@ -8,6 +8,7 @@ import {
   parsePrimaryPolls,
   project,
   winProbability,
+  headToHead,
   ACTIVE_DEM,
 } from "@/lib/forecast";
 
@@ -15,10 +16,12 @@ function Bars({
   data,
   max,
   suffix = "%",
+  format,
 }: {
   data: Record<string, number>;
   max: number;
   suffix?: string;
+  format?: (v: number) => string;
 }) {
   const rows = Object.entries(data).sort((a, b) => b[1] - a[1]);
   return (
@@ -33,8 +36,40 @@ function Bars({
             />
           </span>
           <span className="text-right font-mono text-sm tabular-nums text-muted-foreground">
-            {suffix === "%" ? Math.round(v) : v.toLocaleString()}
-            {suffix === "%" ? "%" : ""}
+            {format ? format(v) : suffix === "%" ? `${Math.round(v)}%` : v.toLocaleString()}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Bars centered on 0: leads Tiffany grows right (green), trails grows left (red). */
+function DivergingBars({ data }: { data: Record<string, number> }) {
+  const rows = Object.entries(data).sort((a, b) => b[1] - a[1]);
+  const maxAbs = Math.max(...rows.map(([, v]) => Math.abs(v)), 1);
+  return (
+    <div className="mt-4 flex flex-col gap-2.5">
+      {rows.map(([name, v]) => (
+        <div key={name} className="grid grid-cols-[4.5rem_1fr_3.6rem] items-center gap-3">
+          <span className="font-mono text-sm">{name}</span>
+          <span className="relative block h-4 border border-border bg-muted">
+            <span className="absolute inset-y-0 left-1/2 w-px bg-border" />
+            {v >= 0 ? (
+              <span
+                className="absolute inset-y-0 left-1/2 bg-success transition-[width] duration-300"
+                style={{ width: `${(v / maxAbs) * 50}%` }}
+              />
+            ) : (
+              <span
+                className="absolute inset-y-0 right-1/2 bg-destructive transition-[width] duration-300"
+                style={{ width: `${(-v / maxAbs) * 50}%` }}
+              />
+            )}
+          </span>
+          <span className="text-right font-mono text-sm tabular-nums text-muted-foreground">
+            {v > 0 ? "+" : ""}
+            {v.toFixed(1)}
           </span>
         </div>
       ))}
@@ -75,9 +110,16 @@ function Slider({
   );
 }
 
-export function ForecastExperience({ raceId }: { raceId: string }) {
+export function ForecastExperience({
+  raceId,
+  airtime,
+}: {
+  raceId: string;
+  airtime: Record<string, number>;
+}) {
   const rawPolls = useQuery(api.pollsQueries.forRace, { raceId });
   const social = useQuery(api.social.socialForRace, { raceId });
+  const tiffany = useMemo(() => headToHead(), []);
 
   const [halfLife, setHalfLife] = useState(21);
   const [split, setSplit] = useState(0);
@@ -163,6 +205,41 @@ export function ForecastExperience({ raceId }: { raceId: string }) {
           undecided bloc. Widen the slider and watch the “lock” melt into a real race.
         </p>
       </section>
+
+      {/* vs. Tom Tiffany — general-election head-to-head */}
+      <section className="border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
+        <h2 className="font-display text-2xl">If it were vs. Tom Tiffany today</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Average general-election margin against the likely Republican nominee. Right of center
+          (green) = leads Tiffany; left (red) = trails.
+        </p>
+        <DivergingBars data={tiffany} />
+        <p className="mt-4 border-l-2 border-primary bg-muted/40 p-3 text-sm text-muted-foreground">
+          <b className="text-foreground">Barely a signal:</b> every matchup is within the margin of
+          error, most rest on a single poll, and some are months old. November looks close no matter
+          the nominee.
+        </p>
+      </section>
+
+      {/* debate airtime */}
+      {Object.keys(airtime).length > 0 && (
+        <section className="border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
+          <h2 className="font-display text-2xl">Who got the airtime</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Estimated minutes each candidate spoke across the debate (words ÷ 130 wpm).{" "}
+            <span className="font-mono text-xs">*</span> Barnes has since withdrawn.
+          </p>
+          <Bars
+            data={airtime}
+            max={Math.max(...Object.values(airtime), 1) * 1.05}
+            format={(v) => `${v.toFixed(1)} min`}
+          />
+          <p className="mt-4 border-l-2 border-primary bg-muted/40 p-3 text-sm text-muted-foreground">
+            <b className="text-foreground">Airtime ≠ support:</b> Brennan spoke the most, but the
+            poll leader is Hong.
+          </p>
+        </section>
+      )}
 
       {/* social reach (live) */}
       {Object.keys(reach).length > 0 && (

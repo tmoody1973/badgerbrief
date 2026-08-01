@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parsePct, sampleSize, parsePrimaryPolls, aggregate, project, winProbability } from "./forecast";
+import { parsePct, sampleSize, parsePrimaryPolls, aggregate, project, winProbability, headToHead, debateAirtime } from "./forecast";
 
 describe("forecast helpers", () => {
   test("parsePct handles %, ranges, junk", () => {
@@ -46,5 +46,23 @@ describe("forecast helpers", () => {
     const total = Object.values(wp).reduce((a, b) => a + b, 0);
     expect(total).toBeCloseTo(100, 0);
     expect(wp.Hong).toBeGreaterThan(50); // clear polling lead
+  });
+
+  test("headToHead averages the curated Tiffany matchups", () => {
+    const hh = headToHead();
+    expect(hh.Hong).toBeCloseTo(-1); // (+3 -3 -3)/3
+    expect(hh.Crowley).toBeCloseTo(1);
+    expect(hh.Roys).toBeCloseTo(-4);
+    expect(hh.Brennan).toBeCloseTo(-3);
+  });
+
+  test("debateAirtime sums words to minutes and marks Barnes withdrawn", () => {
+    const tone = {
+      t1: { "francesca-hong": { words: 130 }, "mandela-barnes": { words: 260 } },
+      t2: { "francesca-hong": { words: 130 } },
+    };
+    const air = debateAirtime(tone);
+    expect(air.Hong).toBe(2); // 260 words / 130 wpm
+    expect(air["Barnes*"]).toBe(2); // withdrawn marker
   });
 });

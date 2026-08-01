@@ -113,6 +113,62 @@ export function project(avg: Record<string, number>, split: number): {
   return { projected, leftover };
 }
 
+// ---------------------------------------------------------------------------
+// vs. Tom Tiffany — curated general-election head-to-head margins.
+// Raw poll values were messy text ("Hong trails by 3"), so they were hand-read
+// once. Positive = Dem leads Tiffany, negative = trails. Kept as raw matchups so
+// the averaged margin is reproducible, not a magic number.
+export const TIFFANY_MATCHUPS: Array<{ cand: string; margin: number; pollster: string; date: string }> = [
+  { cand: "Hong", margin: 3, pollster: "Wedgewood", date: "2026-07-06" },
+  { cand: "Hong", margin: -3, pollster: "Marquette", date: "2026-07-16" },
+  { cand: "Hong", margin: -3, pollster: "TIPP", date: "2026-03-23" },
+  { cand: "Crowley", margin: 1, pollster: "TIPP", date: "2026-03-23" },
+  { cand: "Roys", margin: -4, pollster: "Marquette", date: "2026-07-16" },
+  { cand: "Brennan", margin: -3, pollster: "Marquette", date: "2026-07-16" },
+];
+
+/** Average head-to-head margin vs. Tiffany per Dem (Hong -1, Crowley +1, Roys -4, Brennan -3). */
+export function headToHead(
+  matchups: typeof TIFFANY_MATCHUPS = TIFFANY_MATCHUPS,
+): Record<string, number> {
+  const sum: Record<string, number> = {};
+  const count: Record<string, number> = {};
+  for (const m of matchups) {
+    sum[m.cand] = (sum[m.cand] ?? 0) + m.margin;
+    count[m.cand] = (count[m.cand] ?? 0) + 1;
+  }
+  return Object.fromEntries(Object.keys(sum).map((c) => [c, sum[c] / count[c]]));
+}
+
+// ---------------------------------------------------------------------------
+// Debate airtime — how many minutes each candidate spoke.
+export type ToneTopic = Record<string, { score?: number; words?: number; turns?: number }>;
+export const WORDS_PER_MINUTE = 130;
+
+/** slug -> display label for the debate (includes withdrawn Barnes, marked *). */
+export const DEBATE_LABELS: Record<string, string> = {
+  "joel-brennan": "Brennan",
+  "mandela-barnes": "Barnes*",
+  "francesca-hong": "Hong",
+  "kelda-roys": "Roys",
+  "david-crowley": "Crowley",
+};
+
+/** Sum words across every topic per candidate -> estimated speaking minutes. */
+export function debateAirtime(tone: Record<string, ToneTopic>): Record<string, number> {
+  const words: Record<string, number> = {};
+  for (const topic of Object.values(tone)) {
+    for (const [slug, v] of Object.entries(topic)) {
+      words[slug] = (words[slug] ?? 0) + (v.words ?? 0);
+    }
+  }
+  const out: Record<string, number> = {};
+  for (const [slug, label] of Object.entries(DEBATE_LABELS)) {
+    if (words[slug]) out[label] = Math.round((words[slug] / WORDS_PER_MINUTE) * 10) / 10;
+  }
+  return out;
+}
+
 // Box-Muller gaussian with a spare value.
 function makeRng() {
   let spare: number | null = null;

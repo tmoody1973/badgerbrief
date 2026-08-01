@@ -11,6 +11,7 @@ export const chromeEs: ChromeDict = {
     "/match": "Qué te importa",
     "/ads": "Rastreador de anuncios",
     "/news": "Noticias",
+    "/forecast": "Pronóstico",
     "/vote": "Cómo votar",
     "/chat": "Ayuda al votante",
     "/brief": "Mi resumen",

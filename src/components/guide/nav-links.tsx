@@ -4,6 +4,7 @@ export const NAV_LINKS = [
   { href: "/match", label: "What Matters" },
   { href: "/ads", label: "Ad Tracker" },
   { href: "/news", label: "News" },
+  { href: "/forecast", label: "Forecast" },
   { href: "/vote", label: "How to vote" },
   { href: "/chat", label: "Voter Help" },
   { href: "/brief", label: "My Brief" },
