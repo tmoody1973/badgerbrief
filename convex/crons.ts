@@ -191,4 +191,23 @@ crons.weekly(
   {},
 );
 
+// Mondays + Thursdays 14:15 UTC — staleness check for WI Sunshine finance.
+// The completeness audit above catches MISSING data; this catches STALE data:
+// it emails the editor when a committee has filed a newer periodic report (e.g.
+// the Fall Pre-Primary) than the coverage we've ingested, so the manual import
+// gets re-run promptly around filing deadlines. Twice weekly because report
+// windows cluster near elections. Silent when everything is current.
+crons.weekly(
+  "sunshine staleness check (Mon)",
+  { dayOfWeek: "monday", hourUTC: 14, minuteUTC: 15 },
+  internal.sunshineMonitor.checkStaleness,
+  {},
+);
+crons.weekly(
+  "sunshine staleness check (Thu)",
+  { dayOfWeek: "thursday", hourUTC: 14, minuteUTC: 15 },
+  internal.sunshineMonitor.checkStaleness,
+  {},
+);
+
 export default crons;

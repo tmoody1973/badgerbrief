@@ -125,6 +125,21 @@ export const financeGaps = internalQuery({
 });
 
 /**
+ * Coverage label per ingested Sunshine committee — what report period we last
+ * imported. Feeds the staleness monitor (sunshineMonitor.ts), which compares it
+ * to the newest report actually filed on the WI CFIS site.
+ */
+export const sunshineCoverage = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("finance_totals").collect();
+    return rows
+      .filter((r) => r.source === "sunshine")
+      .map((r) => ({ candidateSlug: r.candidateSlug, raceId: r.raceId, coverageEndDate: r.coverageEndDate }));
+  },
+});
+
+/**
  * Weekly alert: email the editor (via the shared feedback.notify Resend channel)
  * if the completeness audit finds any gap. Silent when clean — only pages when a
  * finance_totals row is missing receipts or cash-on-hand. No-op on email without
