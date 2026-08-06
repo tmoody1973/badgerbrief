@@ -251,6 +251,45 @@ export default defineSchema({
     committee: v.optional(v.string()),
   }).index("by_candidate", ["raceId", "candidateSlug"]),
 
+  // Precomputed funding breakdowns (spec: 2026-08-06-finance-drilldown).
+  // One doc per candidate per source, written by import-sunshine-breakdowns.mjs.
+  // Every `count` = distinct donors by contributor name, never transactions.
+  finance_breakdowns: defineTable({
+    candidateSlug: v.string(),
+    raceId: v.string(),
+    source: v.union(v.literal("openfec"), v.literal("sunshine")),
+    coverageEndDate: v.optional(v.string()),
+    fetchedAt: v.number(),
+    categories: v.array(
+      v.object({
+        key: v.string(), // individuals | party | union | pac | business | other
+        amount: v.number(),
+        count: v.number(),
+        topDonors: v.array(
+          v.object({
+            name: v.string(),
+            amount: v.number(),
+            location: v.optional(v.string()),
+          }),
+        ),
+      }),
+    ),
+    sizeBuckets: v.array(
+      v.object({
+        key: v.string(), // small (<$200) | mid ($200–999) | large (>=$1,000)
+        amount: v.number(),
+        count: v.number(),
+      }),
+    ),
+    geo: v.object({
+      inState: v.object({ amount: v.number(), count: v.number() }),
+      outOfState: v.object({ amount: v.number(), count: v.number() }),
+      unknown: v.object({ amount: v.number(), count: v.number() }),
+    }),
+    monthly: v.array(v.object({ month: v.string(), receipts: v.number() })),
+    takeaways: v.array(v.string()),
+  }).index("by_candidate", ["raceId", "candidateSlug"]),
+
   // Sponsor profiles (MOO-318 follow-up): who's behind an outside-group ad.
   // One row per normalized sponsor name, reused across all that group's ads.
   // Reviewer-assisted: FEC/Sunshine facts + a Perplexity-sourced one-liner, then

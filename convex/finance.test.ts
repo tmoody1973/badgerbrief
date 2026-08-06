@@ -49,6 +49,36 @@ test("financeGaps flags rows missing receipts or cash-on-hand, skips complete ro
   expect(bySlug["zeros"]).toBeUndefined();
 });
 
+test("upsertBreakdown inserts then updates in place", async () => {
+  const t = convexTest(schema, modules);
+  const doc = {
+    candidateSlug: "david-crowley",
+    raceId: "WI-GOV-2026",
+    source: "sunshine" as const,
+    coverageEndDate: "filings through Aug 3, 2026",
+    categories: [
+      { key: "individuals", amount: 100, count: 2, topDonors: [{ name: "A", amount: 60 }] },
+    ],
+    sizeBuckets: [{ key: "small", amount: 100, count: 2 }],
+    geo: {
+      inState: { amount: 100, count: 2 },
+      outOfState: { amount: 0, count: 0 },
+      unknown: { amount: 0, count: 0 },
+    },
+    monthly: [{ month: "2026-07", receipts: 100 }],
+    takeaways: ["test sentence"],
+  };
+  await t.mutation(internal.finance.upsertBreakdown, doc);
+  await t.mutation(internal.finance.upsertBreakdown, {
+    ...doc,
+    takeaways: ["updated sentence"],
+  });
+  const rows = await t.run((ctx) => ctx.db.query("finance_breakdowns").collect());
+  expect(rows).toHaveLength(1);
+  expect(rows[0].takeaways).toEqual(["updated sentence"]);
+  expect(rows[0].fetchedAt).toBeGreaterThan(0);
+});
+
 test("financeGapAlert: alerted=false when clean, true when a gap exists", async () => {
   const t = convexTest(schema, modules);
   // no rows → clean, no alert

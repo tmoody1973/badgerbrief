@@ -79,6 +79,56 @@ export const replaceContributions = internalMutation({
   },
 });
 
+const breakdownFields = {
+  candidateSlug: v.string(),
+  raceId: v.string(),
+  source: financeSource,
+  coverageEndDate: v.optional(v.string()),
+  categories: v.array(
+    v.object({
+      key: v.string(),
+      amount: v.number(),
+      count: v.number(),
+      topDonors: v.array(
+        v.object({
+          name: v.string(),
+          amount: v.number(),
+          location: v.optional(v.string()),
+        }),
+      ),
+    }),
+  ),
+  sizeBuckets: v.array(
+    v.object({ key: v.string(), amount: v.number(), count: v.number() }),
+  ),
+  geo: v.object({
+    inState: v.object({ amount: v.number(), count: v.number() }),
+    outOfState: v.object({ amount: v.number(), count: v.number() }),
+    unknown: v.object({ amount: v.number(), count: v.number() }),
+  }),
+  monthly: v.array(v.object({ month: v.string(), receipts: v.number() })),
+  takeaways: v.array(v.string()),
+};
+
+export const upsertBreakdown = internalMutation({
+  args: breakdownFields,
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("finance_breakdowns")
+      .withIndex("by_candidate", (q) =>
+        q.eq("raceId", args.raceId).eq("candidateSlug", args.candidateSlug),
+      )
+      .collect();
+    const match = existing.find((b) => b.source === args.source);
+    const doc = { ...args, fetchedAt: Date.now() };
+    if (match) {
+      await ctx.db.patch(match._id, doc);
+      return match._id;
+    }
+    return await ctx.db.insert("finance_breakdowns", doc);
+  },
+});
+
 export const logFetch = internalMutation({
   args: {
     url: v.string(),
