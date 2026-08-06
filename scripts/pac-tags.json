@@ -1,0 +1,22 @@
+{
+  "_comment": "Explicit contributor-name → tag map for finance_breakdowns categories. Exact names as they appear in Sunshine data. Tags: party | union | business-assoc | ideological. Untagged Registrant rows stay category 'pac'. Curated only — never keyword-guessed. import-sunshine-breakdowns.mjs prints big untagged committee donors so this list can grow.",
+  "Republican Party of Wisconsin": "party",
+  "Democratic Party of Wisconsin": "party",
+  "Democratic Party of Wisconsin - Segregated Fund": "party",
+  "Assembly Democratic Camp Comm": "party",
+  "State Senate Democratic Committee": "party",
+  "Republican Party of Milwaukee County": "party",
+  "WEAC PAC": "union",
+  "Wisconsin Pipe Trades Association PAC Fund": "union",
+  "International Union of Operating Engineers Local 139 PAC": "union",
+  "United Food & Commercial Workers International Union Active Ballot Club": "union",
+  "Prof Firefighters of WI PAC": "union",
+  "Wisconsin Credit Union Legislative Action Fund": "business-assoc",
+  "Alliance of Bankers for WI ": "business-assoc",
+  "WMC Conduit ": "business-assoc",
+  "Realtors Direct Giver Program ": "business-assoc",
+  "RANW PAC": "business-assoc",
+  "Volunteers for Agriculture VFA": "business-assoc",
+  "WI Medical PAC": "business-assoc",
+  "Pro-Life WI Victory Fund PAC": "ideological"
+}
