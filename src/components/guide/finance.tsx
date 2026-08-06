@@ -1,4 +1,5 @@
 import type { Doc } from "../../../convex/_generated/dataModel";
+import { MixBarMini, MixLegend } from "./financeBreakdown";
 
 const fmt = (n?: number) =>
   n === undefined
@@ -293,10 +294,12 @@ function FinanceRows({
   rows,
   nameBySlug,
   headerHidden,
+  breakdownBySlug,
 }: {
   rows: Doc<"finance_totals">[];
   nameBySlug: Map<string, string>;
   headerHidden?: boolean;
+  breakdownBySlug?: Map<string, Doc<"finance_breakdowns">>;
 }) {
   return (
     <div className="overflow-x-auto border-2 border-border bg-card shadow-[var(--shadow-brutal)]">
@@ -305,6 +308,9 @@ function FinanceRows({
           <tr className="border-b-2 border-border bg-secondary text-left">
             <th className="px-3 py-2 font-display text-sm">Candidate</th>
             <th className="px-3 py-2 font-mono text-xs font-bold uppercase">Raised</th>
+            {!!breakdownBySlug?.size && (
+              <th className="px-3 py-2 font-mono text-xs font-bold uppercase">Where it&apos;s from</th>
+            )}
             <th className="px-3 py-2 font-mono text-xs font-bold uppercase">Spent</th>
             <th className="px-3 py-2 font-mono text-xs font-bold uppercase">Cash on hand</th>
             <th className="px-3 py-2 font-mono text-xs font-bold uppercase">Through</th>
@@ -317,6 +323,14 @@ function FinanceRows({
                 {nameBySlug.get(t.candidateSlug) ?? t.candidateSlug}
               </td>
               <td className="px-3 py-2 font-mono">{fmt(t.receipts)}</td>
+              {!!breakdownBySlug?.size && (
+                <td className="px-3 py-2">
+                  {(() => {
+                    const b = breakdownBySlug?.get(t.candidateSlug);
+                    return b ? <MixBarMini categories={b.categories} /> : <span className="font-mono text-xs">—</span>;
+                  })()}
+                </td>
+              )}
               <td className="px-3 py-2 font-mono">{fmt(t.disbursements)}</td>
               <td className="px-3 py-2 font-mono">{fmt(t.cashOnHand)}</td>
               <td className="px-3 py-2 font-mono text-xs">{t.coverageEndDate ?? "—"}</td>
@@ -331,12 +345,19 @@ function FinanceRows({
 export function RaceFinanceTable({
   finance,
   candidates,
+  breakdowns,
 }: {
   finance: Doc<"finance_totals">[];
   candidates: Doc<"candidates">[];
+  breakdowns?: Doc<"finance_breakdowns">[];
 }) {
   if (finance.length === 0) return null;
   const nameBySlug = new Map(candidates.map((c) => [c.slug, c.name]));
+  const breakdownBySlug = new Map(
+    (breakdowns ?? [])
+      .filter((b) => b.source === "sunshine")
+      .map((b) => [b.candidateSlug, b]),
+  );
   const rows = [...finance].sort(
     (a, b) => (b.receipts ?? 0) - (a.receipts ?? 0),
   );
@@ -345,8 +366,11 @@ export function RaceFinanceTable({
   return (
     <section id="money" className="mt-8 scroll-mt-16">
       <h2 className="font-display text-2xl">Who has raised the most money?</h2>
+      {breakdownBySlug.size > 0 && (
+        <MixLegend keys={["individuals", "party", "union", "pac", "business", "other"]} />
+      )}
       <div className="mt-3">
-        <FinanceRows rows={top} nameBySlug={nameBySlug} />
+        <FinanceRows rows={top} nameBySlug={nameBySlug} breakdownBySlug={breakdownBySlug} />
       </div>
       {rest.length > 0 && (
         <details className="mt-2">
@@ -356,7 +380,7 @@ export function RaceFinanceTable({
           {/* ponytail: second table inside <details> (a <details> can't live
               in <tbody>); columns may not align exactly with the top table. */}
           <div className="mt-2">
-            <FinanceRows rows={rest} nameBySlug={nameBySlug} headerHidden />
+            <FinanceRows rows={rest} nameBySlug={nameBySlug} headerHidden breakdownBySlug={breakdownBySlug} />
           </div>
         </details>
       )}

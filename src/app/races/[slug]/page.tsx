@@ -111,7 +111,7 @@ export default async function RacePage({ params }: Props) {
   const { slug } = await params;
   const data = await getRace(slugToRaceId(slug));
   if (!data) notFound();
-  const { race, candidates, finance } = data;
+  const { race, candidates, finance, financeBreakdowns } = data;
   const adMoney = await getAdMoneyForRace(slugToRaceId(slug));
   const tvAds = await getTvAdsForRace(slugToRaceId(slug));
   const inTheNews = await getInTheNewsForRace(race.raceId);
@@ -269,7 +269,7 @@ export default async function RacePage({ params }: Props) {
           people the reader has just met. */}
       <RacePolls polls={polls} raceName={race.office} />
 
-      <RaceFinanceTable finance={finance} candidates={candidates} />
+      <RaceFinanceTable finance={finance} candidates={candidates} breakdowns={financeBreakdowns} />
 
       <RaceAdMoney data={adMoney} />
 

@@ -33,7 +33,7 @@ export const getRace = query({
       .query("candidates")
       .withIndex("by_race", (q) => q.eq("raceId", raceId))
       .collect();
-    const [positions, finance] = await Promise.all([
+    const [positions, finance, financeBreakdowns] = await Promise.all([
       ctx.db
         .query("candidate_positions_published")
         .withIndex("by_candidate_issue", (q) => q.eq("raceId", raceId))
@@ -42,8 +42,12 @@ export const getRace = query({
         .query("finance_totals")
         .withIndex("by_candidate", (q) => q.eq("raceId", raceId))
         .collect(),
+      ctx.db
+        .query("finance_breakdowns")
+        .withIndex("by_candidate", (q) => q.eq("raceId", raceId))
+        .collect(),
     ]);
-    return { race, candidates, positions, finance };
+    return { race, candidates, positions, finance, financeBreakdowns };
   },
 });
 
