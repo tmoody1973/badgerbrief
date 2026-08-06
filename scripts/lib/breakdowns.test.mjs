@@ -84,4 +84,40 @@ describe("computeBreakdowns", () => {
     const p = computeBreakdowns(csv, TAGS).get("P Comm");
     expect(p.takeaways).toContain("Over 60% of this campaign's money came from party committees.");
   });
+
+  test("missing Transaction Type column treats rows as contributions", () => {
+    const headerNoType =
+      "ID,Transaction Date,Amount,Registrant Name,Contributor Name,Contributor Entity Type,Contributor City,Contributor State,Related Ballot Event Name";
+    const rowNoType = (id, date, amount, committee, donor, entityType, city, state, event = "") =>
+      [id, date, amount, committee, donor, entityType, city, state, event].join(",");
+    const csv = [
+      headerNoType,
+      rowNoType(1, "2026-01-15", 100, "No Type Comm", "Dave D", "Individual", "Madison", "WI"),
+      rowNoType(2, "2026-01-16", 50, "No Type Comm", "Eve E", "Individual", "Chicago", "IL"),
+    ].join("\n");
+    const nt = computeBreakdowns(csv, {}).get("No Type Comm");
+    expect(nt.categories.find((c) => c.key === "individuals")).toMatchObject({ amount: 150, count: 2 });
+  });
+
+  test("size bucket boundaries: $200 lands in mid, not small", () => {
+    const csv = [
+      HEADER,
+      row(1, "2026-01-01", 200, "Boundary Comm", "Contribution", "Exact 200", "Individual", "", ""),
+    ].join("\n");
+    const b = computeBreakdowns(csv, {}).get("Boundary Comm");
+    const byKey = Object.fromEntries(b.sizeBuckets.map((s) => [s.key, s]));
+    expect(byKey.mid).toMatchObject({ amount: 200, count: 1 });
+    expect(byKey.small ?? { count: 0 }).toMatchObject({ count: 0 });
+  });
+
+  test("size bucket boundaries: $1000 lands in large, not mid", () => {
+    const csv = [
+      HEADER,
+      row(1, "2026-01-01", 1000, "Boundary Comm", "Contribution", "Exact 1000", "Individual", "", ""),
+    ].join("\n");
+    const b = computeBreakdowns(csv, {}).get("Boundary Comm");
+    const byKey = Object.fromEntries(b.sizeBuckets.map((s) => [s.key, s]));
+    expect(byKey.large).toMatchObject({ amount: 1000, count: 1 });
+    expect(byKey.mid ?? { count: 0 }).toMatchObject({ count: 0 });
+  });
 });

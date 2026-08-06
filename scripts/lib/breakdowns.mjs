@@ -56,9 +56,10 @@ export function computeBreakdowns(csvText, pacTags, { cycle = "2026" } = {}) {
   for (const row of rows.slice(1)) {
     const committee = (row[iCommittee] ?? "").trim();
     const amount = Number((row[iAmount] ?? "").replace(/[$,]/g, ""));
-    const type = (row[iType] ?? "").trim().toLowerCase();
+    const type = iType >= 0 ? (row[iType] ?? "").trim().toLowerCase() : "";
     if (!committee || !Number.isFinite(amount)) continue;
-    if (!(type.includes("contribution") || type.includes("receipt"))) continue;
+    const isIn = !type || type.includes("contribution") || type.includes("receipt");
+    if (!isIn) continue;
     const event = iEvent >= 0 ? (row[iEvent] ?? "").trim() : "";
     if (event && !event.includes(cycle)) continue;
 
