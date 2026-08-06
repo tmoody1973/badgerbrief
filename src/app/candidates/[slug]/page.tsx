@@ -6,6 +6,7 @@ import { CandidatePhoto } from "@/components/guide/candidate-photo";
 import { sourceLabel } from "@/lib/source-label";
 import { CandidateAds } from "@/components/guide/candidate-ads";
 import { FinanceDetail, FinanceSummary } from "@/components/guide/finance";
+import { FinanceBreakdownSection } from "@/components/guide/financeBreakdown";
 import {
   LastUpdated,
   PartyBadge,
@@ -109,7 +110,7 @@ export default async function CandidatePage({ params }: Props) {
     getInTheNewsForCandidate(slug),
   ]);
   if (!data) notFound();
-  const { candidate, race, field, positions, quotes, finance, contributions, committeeFunding, ads, votingRecordSummary } = data;
+  const { candidate, race, field, positions, quotes, finance, contributions, committeeFunding, ads, votingRecordSummary, financeBreakdowns } = data;
 
   // WisconsinEye interview answers get their own section: every candidate in
   // the race sat for the same interview, so the answers are comparable across
@@ -309,6 +310,9 @@ export default async function CandidatePage({ params }: Props) {
             totals={finance}
             contributions={contributions}
             committeeFunding={committeeFunding}
+          />
+          <FinanceBreakdownSection
+            breakdown={financeBreakdowns?.find((b) => b.source === "sunshine")}
           />
 
           <CandidateAds ads={ads} candidateName={candidate.name} enrichedKeys={enrichedKeys} />

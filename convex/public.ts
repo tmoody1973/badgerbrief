@@ -94,7 +94,7 @@ export const getCandidateBySlug = query({
       .query("races")
       .withIndex("by_race_id", (q) => q.eq("raceId", candidate.raceId))
       .unique();
-    const [positions, quotes, finance, contributions, ads] = await Promise.all([
+    const [positions, quotes, finance, contributions, ads, financeBreakdowns] = await Promise.all([
       ctx.db
         .query("candidate_positions_published")
         .withIndex("by_candidate_issue", (q) =>
@@ -123,6 +123,12 @@ export const getCandidateBySlug = query({
       // human confirmed are about this candidate (support or attack). MOO-309.
       ctx.db
         .query("ads")
+        .withIndex("by_candidate", (q) =>
+          q.eq("raceId", candidate.raceId).eq("candidateSlug", slug),
+        )
+        .collect(),
+      ctx.db
+        .query("finance_breakdowns")
         .withIndex("by_candidate", (q) =>
           q.eq("raceId", candidate.raceId).eq("candidateSlug", slug),
         )
@@ -204,6 +210,7 @@ export const getCandidateBySlug = query({
       committeeFunding,
       ads,
       votingRecordSummary,
+      financeBreakdowns,
     };
   },
 });
