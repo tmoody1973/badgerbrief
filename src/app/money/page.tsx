@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: "Follow the money — Wisconsin 2026 | BadgerBrief",
   description:
     "Who funds Wisconsin's 2026 campaigns — every reported donor, searchable, with funding breakdowns for each state race.",
+  alternates: { canonical: "/money" },
 };
 
 const fmt = (n: number) =>
