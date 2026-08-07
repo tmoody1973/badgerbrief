@@ -7,7 +7,7 @@ import { parseCsv } from "./sunshine.mjs";
 
 const CATEGORY_ORDER = ["individuals", "party", "union", "pac", "business", "other"];
 
-function categoryFor(entityType, donorName, pacTags) {
+export function categoryFor(entityType, donorName, pacTags) {
   const t = (entityType ?? "").trim().toLowerCase();
   if (t === "individual") return "individuals";
   if (t === "registrant") {
@@ -20,16 +20,16 @@ function categoryFor(entityType, donorName, pacTags) {
   return "other"; // Anonymous, Unregistered, Depository, empty
 }
 
-function normalizeState(s) {
+export function normalizeState(s) {
   const up = (s ?? "").trim().toUpperCase();
   if (!up) return "unknown";
   return up === "WI" || up === "WISCONSIN" ? "inState" : "outOfState";
 }
 
-const location = (city, state) =>
+export const location = (city, state) =>
   [city, state].map((s) => (s ?? "").trim()).filter(Boolean).join(", ") || undefined;
 
-function idx(headers, name) {
+export function idx(headers, name) {
   const norm = (x) => x.toLowerCase().replace(/[^a-z0-9]/g, "");
   return headers.findIndex((h) => norm(h) === norm(name) || norm(h).startsWith(norm(name)));
 }
