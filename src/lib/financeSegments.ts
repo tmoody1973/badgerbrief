@@ -17,8 +17,8 @@ export type BreakdownCategory = {
 export const CATEGORY_META: Record<string, { label: string; color: string; text: string }> = {
   individuals: { label: "Individuals", color: "#0072B2", text: "#FFFFFF" },
   party: { label: "Party committees", color: "#E69F00", text: "#1A1A1A" },
-  union: { label: "Union PACs", color: "#009E73", text: "#FFFFFF" },
-  pac: { label: "PACs & committees", color: "#CC79A7", text: "#FFFFFF" },
+  union: { label: "Union PACs", color: "#009E73", text: "#1A1A1A" },
+  pac: { label: "PACs & committees", color: "#CC79A7", text: "#1A1A1A" },
   business: { label: "Businesses", color: "#56B4E9", text: "#1A1A1A" },
   other: { label: "Other", color: "#8B8B8B", text: "#1A1A1A" },
 };
