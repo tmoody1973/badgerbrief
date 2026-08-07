@@ -60,3 +60,61 @@ export const searchDonors = query({
       .take(20);
   },
 });
+
+// Fixed prominence order for the /money hub; unknown raceIds append after.
+const RACE_ORDER = ["WI-GOV-2026", "WI-AG-2026", "WI-LTGOV-2026", "WI-SOS-2026", "WI-TREAS-2026"];
+
+/** Race-by-race money overview for /money. finance_totals is ~30 rows — the
+ * one sanctioned full-table read in this module; all joins are indexed. */
+export const raceMoney = query({
+  args: {},
+  handler: async (ctx) => {
+    const totals = (await ctx.db.query("finance_totals").collect()).filter(
+      (t) => t.source === "sunshine" && (t.receipts ?? 0) > 0,
+    );
+    const byRace = new Map<string, typeof totals>();
+    for (const t of totals) {
+      const arr = byRace.get(t.raceId) ?? [];
+      arr.push(t);
+      byRace.set(t.raceId, arr);
+    }
+    const races = [];
+    for (const [raceId, rows] of byRace) {
+      const race = await ctx.db
+        .query("races")
+        .withIndex("by_race_id", (q) => q.eq("raceId", raceId))
+        .unique();
+      const candidates = await ctx.db
+        .query("candidates")
+        .withIndex("by_race", (q) => q.eq("raceId", raceId))
+        .collect();
+      const breakdowns = await ctx.db
+        .query("finance_breakdowns")
+        .withIndex("by_candidate", (q) => q.eq("raceId", raceId))
+        .collect();
+      const nameBySlug = new Map(candidates.map((c) => [c.slug, c.name]));
+      const bdBySlug = new Map(
+        breakdowns.filter((b) => b.source === "sunshine").map((b) => [b.candidateSlug, b]),
+      );
+      races.push({
+        raceId,
+        office: race?.office ?? raceId,
+        candidates: [...rows]
+          .sort((a, b) => (b.receipts ?? 0) - (a.receipts ?? 0))
+          .map((t) => ({
+            slug: t.candidateSlug,
+            name: nameBySlug.get(t.candidateSlug) ?? t.candidateSlug,
+            receipts: t.receipts ?? 0,
+            categories: bdBySlug.get(t.candidateSlug)?.categories ?? null,
+            coverageEndDate: t.coverageEndDate,
+          })),
+      });
+    }
+    races.sort((a, b) => {
+      const ia = RACE_ORDER.indexOf(a.raceId);
+      const ib = RACE_ORDER.indexOf(b.raceId);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+    return races;
+  },
+});

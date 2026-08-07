@@ -52,3 +52,35 @@ test("profile aggregates across candidates; null when unknown", async () => {
   expect(p?.donors.map((d) => d.candidateSlug).sort()).toEqual(["francesca-hong", "kelda-roys"]);
   expect(await t.query(api.donors.profile, { donorKey: "nobody" })).toBeNull();
 });
+
+test("raceMoney groups sunshine totals with names, categories, and fixed order", async (
+) => {
+  const t = convexTest(schema, modules);
+  await t.run(async (ctx) => {
+    await ctx.db.insert("races", { raceId: "WI-AG-2026", electionSlug: "wi-2026", office: "Attorney General", level: "State Executive", sources: [], dataAsOf: "2026-08-07" });
+    await ctx.db.insert("races", { raceId: "WI-GOV-2026", electionSlug: "wi-2026", office: "Governor", level: "State Executive", sources: [], dataAsOf: "2026-08-07" });
+    await ctx.db.insert("candidates", { slug: "josh-kaul", raceId: "WI-AG-2026", name: "Josh Kaul", sources: [], dataAsOf: "2026-08-07" });
+    await ctx.db.insert("candidates", { slug: "david-crowley", raceId: "WI-GOV-2026", name: "David Crowley", sources: [], dataAsOf: "2026-08-07" });
+    await ctx.db.insert("candidates", { slug: "francesca-hong", raceId: "WI-GOV-2026", name: "Francesca Hong", sources: [], dataAsOf: "2026-08-07" });
+    const totals = [
+      { candidateSlug: "josh-kaul", raceId: "WI-AG-2026", source: "sunshine" as const, receipts: 100, fetchedAt: 1 },
+      { candidateSlug: "david-crowley", raceId: "WI-GOV-2026", source: "sunshine" as const, receipts: 200, coverageEndDate: "filings through Aug 3, 2026", fetchedAt: 1 },
+      { candidateSlug: "francesca-hong", raceId: "WI-GOV-2026", source: "sunshine" as const, receipts: 300, fetchedAt: 1 },
+      { candidateSlug: "gwen-moore", raceId: "WI-US-HOUSE-D4-2026", source: "openfec" as const, receipts: 999, fetchedAt: 1 },
+    ];
+    for (const x of totals) await ctx.db.insert("finance_totals", x);
+    await ctx.db.insert("finance_breakdowns", {
+      candidateSlug: "francesca-hong", raceId: "WI-GOV-2026", source: "sunshine",
+      categories: [{ key: "individuals", amount: 300, count: 3, topDonors: [] }],
+      sizeBuckets: [], geo: { inState: { amount: 0, count: 0 }, outOfState: { amount: 0, count: 0 }, unknown: { amount: 0, count: 0 } },
+      monthly: [], takeaways: [], fetchedAt: 1,
+    });
+  });
+  const races = await t.query(api.donors.raceMoney, {});
+  expect(races.map((r) => r.raceId)).toEqual(["WI-GOV-2026", "WI-AG-2026"]); // openfec-only race absent; GOV first
+  expect(races[0].office).toBe("Governor");
+  expect(races[0].candidates.map((c) => c.slug)).toEqual(["francesca-hong", "david-crowley"]); // receipts desc
+  expect(races[0].candidates[0].name).toBe("Francesca Hong");
+  expect(races[0].candidates[0].categories?.[0].key).toBe("individuals");
+  expect(races[0].candidates[1].categories).toBeNull(); // no breakdown doc
+});
