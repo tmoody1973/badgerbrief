@@ -78,7 +78,8 @@ export function DonorSearch() {
         </ul>
       )}
       <p className="mt-2 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-        Names as reported; the same person may appear under multiple spellings
+        Names as reported; the same person may appear under multiple spellings · Totals reflect top
+        matches — tap a donor for exact figures
       </p>
     </div>
   );
