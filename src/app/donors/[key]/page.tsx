@@ -6,6 +6,14 @@ import { CATEGORY_META } from "@/lib/financeSegments";
 
 export const revalidate = 300;
 
+const safeDecode = (s: string) => {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s; // already-decoded or malformed — use as-is; unknown keys hit the not-found state
+  }
+};
+
 const fmt = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
@@ -13,7 +21,7 @@ type Props = { params: Promise<{ key: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { key } = await params;
-  const profile = await fetchQuery(api.donors.profile, { donorKey: decodeURIComponent(key) });
+  const profile = await fetchQuery(api.donors.profile, { donorKey: safeDecode(key) });
   return {
     title: profile
       ? `${profile.donors[0].donorName} — campaign giving | BadgerBrief`
@@ -24,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DonorPage({ params }: Props) {
   const { key } = await params;
-  const donorKey = decodeURIComponent(key);
+  const donorKey = safeDecode(key);
   const profile = await fetchQuery(api.donors.profile, { donorKey });
 
   if (!profile) {
@@ -52,7 +60,8 @@ export default async function DonorPage({ params }: Props) {
     .flatMap((d) => d.gifts.map((g) => ({ ...g, candidateSlug: d.candidateSlug })))
     .sort((a, b) => ((a.date ?? "") < (b.date ?? "") ? 1 : -1));
   const truncated = donors.some((d) => d.giftsTruncated);
-  const coverage = display.coverageEndDate;
+  const coverages = [...new Set(donors.map((d) => d.coverageEndDate).filter(Boolean))];
+  const coverage = coverages.length === 1 ? coverages[0] : undefined;
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
