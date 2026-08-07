@@ -47,6 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/es/vote`, lastModified: fallback, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/races`, lastModified: fallback, changeFrequency: "daily", priority: 0.9 },
     { url: `${SITE_URL}/candidates`, lastModified: fallback, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/money`, lastModified: fallback, changeFrequency: "daily", priority: 0.8 },
     { url: `${SITE_URL}/news`, lastModified: fallback, changeFrequency: "daily", priority: 0.8 },
     { url: `${SITE_URL}/news/about`, lastModified: fallback, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/methodology`, lastModified: fallback, changeFrequency: "monthly", priority: 0.4 },

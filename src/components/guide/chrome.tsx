@@ -105,6 +105,10 @@ export function SiteFooter() {
             <Link href="/candidates" className="underline decoration-2 underline-offset-2">
               All candidates
             </Link>
+            {" · "}
+            <Link href="/money" className="underline decoration-2 underline-offset-2">
+              Follow the money
+            </Link>
           </p>
         )}
         {/* Reachable from every page: a correction is only useful if the
