@@ -111,12 +111,12 @@ test("upsertCommitteeFunding inserts then replaces by committee name", async () 
   expect(rows[0].topSources[0].amount).toBe(3000000);
 });
 
-const donorDoc = (n: number) => ({
+const donorDoc = (n: number, source: "sunshine" | "openfec" = "sunshine") => ({
   donorKey: `donor ${n}`,
   donorName: `Donor ${n}`,
   candidateSlug: "david-crowley",
   raceId: "WI-GOV-2026",
-  source: "sunshine" as const,
+  source,
   category: "individuals",
   total: n * 100,
   giftCount: 1,
@@ -149,4 +149,40 @@ test("insertDonors stamps fetchedAt; clearDonors pages until done", async () => 
   expect(deleted).toBe(3);
   const left = await t.run((ctx) => ctx.db.query("donor_totals").collect());
   expect(left).toHaveLength(0);
+});
+
+test("clearDonors paginates multi-page deletes and filters by source", async () => {
+  const t = convexTest(schema, modules);
+  // Insert 1,050 sunshine donors (forces pagination at 1000-item page size)
+  const sunshineDocs = Array.from({ length: 1050 }, (_, i) => donorDoc(i, "sunshine"));
+  await t.mutation(internal.finance.insertDonors, { docs: sunshineDocs });
+  // Insert 5 openfec donors for the same candidate
+  const openfecDocs = Array.from({ length: 5 }, (_, i) => donorDoc(5000 + i, "openfec"));
+  await t.mutation(internal.finance.insertDonors, { docs: openfecDocs });
+  const allRows = await t.run((ctx) => ctx.db.query("donor_totals").collect());
+  expect(allRows).toHaveLength(1055);
+
+  // Clear only sunshine donors via paginated loop
+  let cursor: string | null = null;
+  let deleted = 0;
+  let iterations = 0;
+  for (;;) {
+    const res: { deleted: number; continueCursor: string | null; isDone: boolean } = await t.mutation(internal.finance.clearDonors, {
+      raceId: "WI-GOV-2026",
+      candidateSlug: "david-crowley",
+      source: "sunshine",
+      cursor,
+    });
+    deleted += res.deleted;
+    iterations++;
+    if (res.isDone) break;
+    cursor = res.continueCursor;
+  }
+  // 1,050 sunshine rows deleted, loop required ≥2 iterations (first page ~1000, second ~50)
+  expect(deleted).toBe(1050);
+  expect(iterations).toBeGreaterThanOrEqual(2);
+  // 5 openfec rows remain, untouched by source filter
+  const remaining = await t.run((ctx) => ctx.db.query("donor_totals").collect());
+  expect(remaining).toHaveLength(5);
+  expect(remaining.every((r) => r.source === "openfec")).toBe(true);
 });
