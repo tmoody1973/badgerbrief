@@ -34,9 +34,28 @@ function idx(headers, name) {
   return headers.findIndex((h) => norm(h) === norm(name) || norm(h).startsWith(norm(name)));
 }
 
-export function computeBreakdowns(csvText, pacTags, { cycle = "2026" } = {}) {
+// A partial final month (the CSV's coverage window ends mid-month) renders as
+// a full-height bar and misleads readers about momentum — so it's dropped
+// from `monthly`. "Partial" means windowEnd isn't its month's last day.
+function partialMonthKey(windowEnd) {
+  if (!windowEnd) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(windowEnd);
+  if (!m) return null;
+  const [, yStr, moStr, dStr] = m;
+  const y = Number(yStr);
+  const mo = Number(moStr);
+  const d = Number(dStr);
+  const lastDay = new Date(Date.UTC(y, mo, 0)).getUTCDate();
+  return d < lastDay ? windowEnd.slice(0, 7) : null;
+}
+
+export function computeBreakdowns(csvText, pacTags, { cycle = "2026", windowEnd = null } = {}) {
   const rows = parseCsv(csvText);
   if (rows.length < 2) return new Map();
+  const trimmedTags = Object.fromEntries(
+    Object.entries(pacTags).map(([k, v]) => [k.trim(), v]),
+  );
+  const dropMonth = partialMonthKey(windowEnd);
   const H = rows[0];
   const iDate = idx(H, "Transaction Date");
   const iAmount = idx(H, "Amount");
@@ -67,7 +86,7 @@ export function computeBreakdowns(csvText, pacTags, { cycle = "2026" } = {}) {
     const entity = perCommittee.get(committee) ?? { donors: new Map(), monthly: new Map() };
     const d = entity.donors.get(donor) ?? {
       amount: 0,
-      category: categoryFor(row[iEntity], donor, pacTags),
+      category: categoryFor(row[iEntity], donor, trimmedTags),
       city: (row[iCity] ?? "").trim(),
       state: (row[iState] ?? "").trim(),
     };
@@ -129,6 +148,7 @@ export function computeBreakdowns(csvText, pacTags, { cycle = "2026" } = {}) {
     }
 
     const monthlyArr = [...monthly.entries()]
+      .filter(([month]) => month !== dropMonth)
       .sort(([a], [b]) => (a < b ? -1 : 1))
       .map(([month, receipts]) => ({ month, receipts: round(receipts) }));
 

@@ -120,4 +120,38 @@ describe("computeBreakdowns", () => {
     expect(byKey.large).toMatchObject({ amount: 1000, count: 1 });
     expect(byKey.mid ?? { count: 0 }).toMatchObject({ count: 0 });
   });
+
+  test("pac-tags trailing-space key matches trimmed donor name", () => {
+    const csv = [
+      HEADER,
+      row(1, "2026-01-01", 400, "Tag Comm", "Contribution", "WEAC PAC", "Registrant", "", ""),
+    ].join("\n");
+    const b = computeBreakdowns(csv, { "WEAC PAC ": "union" }).get("Tag Comm");
+    const byKey = Object.fromEntries(b.categories.map((c) => [c.key, c]));
+    expect(byKey.union).toMatchObject({ amount: 400, count: 1 });
+    expect(byKey.pac).toBeUndefined();
+  });
+
+  test("windowEnd mid-month drops that month's monthly entry, prior months survive", () => {
+    const csv = [
+      HEADER,
+      row(1, "2026-07-15", 100, "Window Comm", "Contribution", "Alice A", "Individual", "", ""),
+      row(2, "2026-08-01", 50, "Window Comm", "Contribution", "Bob B", "Individual", "", ""),
+    ].join("\n");
+    const b = computeBreakdowns(csv, {}, { windowEnd: "2026-08-03" }).get("Window Comm");
+    expect(b.monthly).toEqual([{ month: "2026-07", receipts: 100 }]);
+    // Category totals are unaffected — only the monthly array is trimmed.
+    const total = b.categories.reduce((s, c) => s + c.amount, 0);
+    expect(total).toBe(150);
+  });
+
+  test("windowEnd on a month's true last day drops nothing", () => {
+    const csv = [
+      HEADER,
+      row(1, "2026-07-15", 100, "Window Comm", "Contribution", "Alice A", "Individual", "", ""),
+      row(2, "2026-07-31", 50, "Window Comm", "Contribution", "Bob B", "Individual", "", ""),
+    ].join("\n");
+    const b = computeBreakdowns(csv, {}, { windowEnd: "2026-07-31" }).get("Window Comm");
+    expect(b.monthly).toEqual([{ month: "2026-07", receipts: 150 }]);
+  });
 });

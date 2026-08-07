@@ -1225,3 +1225,8 @@ git status --short   # only files from this plan should appear; commit or leave 
 - Spec coverage: table/mutation (T1), state column (T2), pac-tags (T3), lib + takeaways (T4), CLI + eyeball gate + segment math (T5), candidate UI incl. callout/bar/tiles/momentum/drill-down + render-nothing (T6), race column + legend (T7), prod import + live check (T8). Out-of-scope items untouched.
 - Spec's "component render tests" are implemented as pure-function tests on `computeSegments` (sum-to-100, absent → `[]`) because the repo has no DOM test environment; the render-nothing guard is a one-line conditional exercised in T6/T7 manual verification.
 - Type/name consistency: `finance:upsertBreakdown`, `financeBreakdowns` query field, `FinanceBreakdownSection`, `MixBarMini`, `MixLegend`, `computeSegments`, `CATEGORY_META` used consistently across tasks.
+
+## Post-review deviations resolved
+
+- F1: the spec's coverage/basis micro-label under the breakdown section was a spec requirement this plan omitted from Task 6 — now rendered in `FinanceBreakdownSection`.
+- F2: the spec's sub-1%-category collapse into `other` was a spec requirement this plan's `computeSegments` skipped — now implemented, with a `<1%` display guard as a belt-and-suspenders backstop.

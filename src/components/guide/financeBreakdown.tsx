@@ -11,6 +11,9 @@ const fmt = (n: number) =>
     maximumFractionDigits: 0,
   }).format(n);
 
+/** "0%" reads as a lie for a sub-1% slice that's still nonzero — show "<1%" instead. */
+const pctLabel = (pct: number) => (pct === 0 ? "<1" : String(pct));
+
 /** Plain-English takeaways, warning-box style (renders nothing when empty). */
 function Takeaways({ takeaways }: { takeaways: string[] }) {
   if (takeaways.length === 0) return null;
@@ -41,7 +44,8 @@ function FundingMixBar({ categories }: { categories: BreakdownCategory[] }) {
             key={s.key}
             type="button"
             aria-expanded={open === s.key}
-            title={`${s.label}: ${s.pct}% (${fmt(s.amount)})`}
+            aria-label={`${s.label}: ${pctLabel(s.pct)}% (${fmt(s.amount)})`}
+            title={`${s.label}: ${pctLabel(s.pct)}% (${fmt(s.amount)})`}
             onClick={() => setOpen(open === s.key ? null : s.key)}
             style={{ width: `${s.pct}%`, backgroundColor: s.color }}
             className={`h-full min-w-[2px] border-r border-border last:border-r-0 ${
@@ -49,7 +53,7 @@ function FundingMixBar({ categories }: { categories: BreakdownCategory[] }) {
             }`}
           >
             {s.pct >= 12 && (
-              <span className="px-1 font-mono text-[10px] font-bold text-white [text-shadow:0_1px_1px_rgba(0,0,0,0.6)]">
+              <span className="px-1 font-mono text-[10px] font-bold" style={{ color: s.text }}>
                 {s.pct}%
               </span>
             )}
@@ -61,6 +65,7 @@ function FundingMixBar({ categories }: { categories: BreakdownCategory[] }) {
           <button
             key={s.key}
             type="button"
+            aria-expanded={open === s.key}
             onClick={() => setOpen(open === s.key ? null : s.key)}
             className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-muted-foreground"
           >
@@ -68,7 +73,7 @@ function FundingMixBar({ categories }: { categories: BreakdownCategory[] }) {
               className="inline-block h-2.5 w-2.5 border border-border"
               style={{ backgroundColor: s.color }}
             />
-            {s.label} {s.pct}%
+            {s.label} {pctLabel(s.pct)}%
           </button>
         ))}
       </div>
@@ -119,7 +124,9 @@ function SegmentPanel({ segment }: { segment: Segment }) {
 function SizeGeoTiles({ breakdown }: { breakdown: Doc<"finance_breakdowns"> }) {
   const size = breakdown.sizeBuckets;
   const sizeTotal = size.reduce((s, b) => s + b.amount, 0);
-  const small = size.find((b) => b.key === "small");
+  // Default small to zero rather than hiding the tile — "0% from donations
+  // under $200" is newsworthy for all-big-donor candidates, not an absence.
+  const small = size.find((b) => b.key === "small") ?? { key: "small", amount: 0, count: 0 };
   const geo = breakdown.geo;
   const geoKnown = geo.inState.amount + geo.outOfState.amount;
   const bucketLabel: Record<string, string> = {
@@ -129,7 +136,7 @@ function SizeGeoTiles({ breakdown }: { breakdown: Doc<"finance_breakdowns"> }) {
   };
   return (
     <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-      {sizeTotal > 0 && small && (
+      {sizeTotal > 0 && (
         <details className="border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]">
           <summary className="cursor-pointer">
             <span className="font-display text-xl">
@@ -276,6 +283,12 @@ export function FinanceBreakdownSection({
       <FundingMixBar categories={breakdown.categories} />
       <SizeGeoTiles breakdown={breakdown} />
       <MomentumBars monthly={breakdown.monthly} />
+      {breakdown.coverageEndDate && (
+        <p className="mt-2 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+          Itemized contributions, {breakdown.coverageEndDate} · Source: WI Ethics Commission
+          (Sunshine)
+        </p>
+      )}
     </section>
   );
 }
