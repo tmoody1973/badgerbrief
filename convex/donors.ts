@@ -5,42 +5,50 @@ import { query } from "./_generated/server";
 /** Public read-only donor queries (spec: 2026-08-07-donor-explorer). All
  * indexed-only — no table scans. */
 
+// v1 is sunshine-only; revisit these guards when openfec rosters ship (donor
+// identities must not merge across sources).
+
 export const roster = query({
   args: {
     raceId: v.string(),
     candidateSlug: v.string(),
     paginationOpts: paginationOptsValidator,
   },
-  handler: async (ctx, { raceId, candidateSlug, paginationOpts }) =>
-    await ctx.db
+  handler: async (ctx, { raceId, candidateSlug, paginationOpts }) => {
+    const page = await ctx.db
       .query("donor_totals")
       .withIndex("by_candidate_total", (q) =>
         q.eq("raceId", raceId).eq("candidateSlug", candidateSlug),
       )
       .order("desc")
-      .paginate(paginationOpts),
+      .paginate(paginationOpts);
+    return { ...page, page: page.page.filter((d) => d.source === "sunshine") };
+  },
 });
 
 export const searchRoster = query({
   args: { raceId: v.string(), candidateSlug: v.string(), term: v.string() },
   handler: async (ctx, { raceId, candidateSlug, term }) => {
     if (term.trim().length < 2) return [];
-    return await ctx.db
+    const rows = await ctx.db
       .query("donor_totals")
       .withSearchIndex("search_name", (q) =>
         q.search("donorName", term).eq("raceId", raceId).eq("candidateSlug", candidateSlug),
       )
       .take(20);
+    return rows.filter((d) => d.source === "sunshine");
   },
 });
 
 export const profile = query({
   args: { donorKey: v.string() },
   handler: async (ctx, { donorKey }) => {
-    const donors = await ctx.db
-      .query("donor_totals")
-      .withIndex("by_donor", (q) => q.eq("donorKey", donorKey))
-      .collect();
+    const donors = (
+      await ctx.db
+        .query("donor_totals")
+        .withIndex("by_donor", (q) => q.eq("donorKey", donorKey))
+        .collect()
+    ).filter((d) => d.source === "sunshine");
     if (donors.length === 0) return null;
     donors.sort((a, b) => b.total - a.total);
     return {
@@ -54,10 +62,11 @@ export const searchDonors = query({
   args: { term: v.string() },
   handler: async (ctx, { term }) => {
     if (term.trim().length < 2) return [];
-    return await ctx.db
+    const rows = await ctx.db
       .query("donor_totals")
       .withSearchIndex("search_name", (q) => q.search("donorName", term))
       .take(20);
+    return rows.filter((d) => d.source === "sunshine");
   },
 });
 

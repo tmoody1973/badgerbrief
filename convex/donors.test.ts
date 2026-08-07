@@ -42,6 +42,19 @@ test("roster pages in descending total order", async () => {
   expect(rest.page.map((d) => d.total)).toEqual([50]);
 });
 
+test("roster excludes openfec rows (v1 is sunshine-only)", async () => {
+  const t = convexTest(schema, modules);
+  await t.mutation(internal.finance.insertDonors, {
+    docs: [doc("a", 50), { ...doc("a", 999), source: "openfec" as const }],
+  });
+  const page = await t.query(api.donors.roster, {
+    raceId: "WI-GOV-2026",
+    candidateSlug: "david-crowley",
+    paginationOpts: { cursor: null, numItems: 10 },
+  });
+  expect(page.page.map((d) => d.total)).toEqual([50]);
+});
+
 test("profile aggregates across candidates; null when unknown", async () => {
   const t = convexTest(schema, modules);
   await t.mutation(internal.finance.insertDonors, {
@@ -51,6 +64,19 @@ test("profile aggregates across candidates; null when unknown", async () => {
   expect(p?.grandTotal).toBe(87000);
   expect(p?.donors.map((d) => d.candidateSlug).sort()).toEqual(["francesca-hong", "kelda-roys"]);
   expect(await t.query(api.donors.profile, { donorKey: "nobody" })).toBeNull();
+});
+
+test("profile excludes openfec rows: grandTotal and candidate list stay sunshine-only", async () => {
+  const t = convexTest(schema, modules);
+  await t.mutation(internal.finance.insertDonors, {
+    docs: [
+      doc("weac pac", 86000, "kelda-roys"),
+      { ...doc("weac pac", 5000, "kelda-roys"), source: "openfec" as const },
+    ],
+  });
+  const p = await t.query(api.donors.profile, { donorKey: "weac pac" });
+  expect(p?.grandTotal).toBe(86000);
+  expect(p?.donors.map((d) => d.candidateSlug)).toEqual(["kelda-roys"]);
 });
 
 test("raceMoney groups sunshine totals with names, categories, and fixed order", async (
