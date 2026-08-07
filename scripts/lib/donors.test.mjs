@@ -56,18 +56,20 @@ describe("computeDonorRosters", () => {
 
   test("gifts capped at 500 newest with exact totals", () => {
     const many = [HEADER];
-    for (let i = 1; i <= 600; i++) {
-      const mm = String((i % 12) + 1).padStart(2, "0");
-      const dd = String((i % 27) + 1).padStart(2, "0");
-      many.push(row(i, `2026-${mm}-${dd}`, 1, "Big Comm", "Contribution", "Recurring R", "Individual", "", ""));
+    // Phase A: 100 older gifts dated 2026-01-15 with amount 1
+    for (let i = 1; i <= 100; i++) {
+      many.push(row(i, "2026-01-15", 1, "Big Comm", "Contribution", "Recurring R", "Individual", "", ""));
+    }
+    // Phase B: 500 newer gifts dated 2026-06-01 with amount 2
+    for (let i = 101; i <= 600; i++) {
+      many.push(row(i, "2026-06-01", 2, "Big Comm", "Contribution", "Recurring R", "Individual", "", ""));
     }
     const big = computeDonorRosters(many.join("\n"), {}).get("Big Comm")[0];
     expect(big.giftCount).toBe(600);
-    expect(big.total).toBe(600);
+    expect(big.total).toBe(1100); // 100*1 + 500*2
     expect(big.gifts).toHaveLength(500);
     expect(big.giftsTruncated).toBe(true);
-    // capped list keeps the NEWEST gifts (still date-ascending)
-    const dates = big.gifts.map((g) => g.date);
-    expect(dates).toEqual([...dates].sort());
+    // after capping, all 500 capped gifts are from Phase B (newest)
+    expect(big.gifts.every((g) => g.date === "2026-06-01" && g.amount === 2)).toBe(true);
   });
 });

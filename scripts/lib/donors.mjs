@@ -74,7 +74,10 @@ export function computeDonorRosters(csvText, pacTags, { cycle = "2026" } = {}) {
   const out = new Map();
   for (const [committee, donors] of perCommittee) {
     const list = [...donors.values()].map((d) => {
-      d.gifts.sort((a, b) => ((a.date ?? "") < (b.date ?? "") ? -1 : 1));
+      d.gifts.sort((a, b) => {
+        const da = a.date ?? "", db = b.date ?? "";
+        return da < db ? -1 : da > db ? 1 : 0;
+      });
       const doc = { ...d };
       if (doc.gifts.length > GIFT_CAP) {
         doc.gifts = doc.gifts.slice(-GIFT_CAP); // keep newest, still ascending
