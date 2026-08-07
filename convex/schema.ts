@@ -290,6 +290,34 @@ export default defineSchema({
     takeaways: v.array(v.string()),
   }).index("by_candidate", ["raceId", "candidateSlug"]),
 
+  // Full donor rosters (spec: 2026-08-07-donor-explorer). One doc per
+  // (donor, candidate, source); gifts embedded, capped at the 500 newest
+  // (giftsTruncated flags the cap; total/giftCount stay exact). donorKey is
+  // the trimmed, whitespace-collapsed, LOWERCASED reported name — exact-name
+  // identity, never fuzzy-merged.
+  donor_totals: defineTable({
+    donorKey: v.string(),
+    donorName: v.string(),
+    candidateSlug: v.string(),
+    raceId: v.string(),
+    source: v.union(v.literal("openfec"), v.literal("sunshine")),
+    category: v.string(), // individuals | party | union | pac | business | other
+    location: v.optional(v.string()),
+    state: v.optional(v.string()), // normalized two-letter-ish code, e.g. "WI"
+    total: v.number(),
+    giftCount: v.number(),
+    gifts: v.array(v.object({ date: v.optional(v.string()), amount: v.number() })),
+    giftsTruncated: v.optional(v.boolean()),
+    coverageEndDate: v.optional(v.string()),
+    fetchedAt: v.number(),
+  })
+    .index("by_candidate_total", ["raceId", "candidateSlug", "total"])
+    .index("by_donor", ["donorKey"])
+    .searchIndex("search_name", {
+      searchField: "donorName",
+      filterFields: ["raceId", "candidateSlug"],
+    }),
+
   // Sponsor profiles (MOO-318 follow-up): who's behind an outside-group ad.
   // One row per normalized sponsor name, reused across all that group's ads.
   // Reviewer-assisted: FEC/Sunshine facts + a Perplexity-sourced one-liner, then

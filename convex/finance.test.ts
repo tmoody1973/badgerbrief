@@ -110,3 +110,43 @@ test("upsertCommitteeFunding inserts then replaces by committee name", async () 
   expect(rows[0].receiptsTotal).toBe(9000000);
   expect(rows[0].topSources[0].amount).toBe(3000000);
 });
+
+const donorDoc = (n: number) => ({
+  donorKey: `donor ${n}`,
+  donorName: `Donor ${n}`,
+  candidateSlug: "david-crowley",
+  raceId: "WI-GOV-2026",
+  source: "sunshine" as const,
+  category: "individuals",
+  total: n * 100,
+  giftCount: 1,
+  gifts: [{ date: "2026-07-01", amount: n * 100 }],
+  coverageEndDate: "filings through Aug 3, 2026",
+});
+
+test("insertDonors stamps fetchedAt; clearDonors pages until done", async () => {
+  const t = convexTest(schema, modules);
+  await t.mutation(internal.finance.insertDonors, {
+    docs: [donorDoc(1), donorDoc(2), donorDoc(3)],
+  });
+  const rows = await t.run((ctx) => ctx.db.query("donor_totals").collect());
+  expect(rows).toHaveLength(3);
+  expect(rows.every((r) => r.fetchedAt > 0)).toBe(true);
+
+  let cursor: string | null = null;
+  let deleted = 0;
+  for (;;) {
+    const res: { deleted: number; continueCursor: string | null; isDone: boolean } = await t.mutation(internal.finance.clearDonors, {
+      raceId: "WI-GOV-2026",
+      candidateSlug: "david-crowley",
+      source: "sunshine",
+      cursor,
+    });
+    deleted += res.deleted;
+    if (res.isDone) break;
+    cursor = res.continueCursor;
+  }
+  expect(deleted).toBe(3);
+  const left = await t.run((ctx) => ctx.db.query("donor_totals").collect());
+  expect(left).toHaveLength(0);
+});

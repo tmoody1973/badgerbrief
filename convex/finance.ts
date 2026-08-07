@@ -129,6 +129,58 @@ export const upsertBreakdown = internalMutation({
   },
 });
 
+const donorFields = {
+  donorKey: v.string(),
+  donorName: v.string(),
+  candidateSlug: v.string(),
+  raceId: v.string(),
+  source: financeSource,
+  category: v.string(),
+  location: v.optional(v.string()),
+  state: v.optional(v.string()),
+  total: v.number(),
+  giftCount: v.number(),
+  gifts: v.array(v.object({ date: v.optional(v.string()), amount: v.number() })),
+  giftsTruncated: v.optional(v.boolean()),
+  coverageEndDate: v.optional(v.string()),
+};
+
+/** Delete one page of a candidate's donor rows for a source; loop via cursor. */
+export const clearDonors = internalMutation({
+  args: {
+    raceId: v.string(),
+    candidateSlug: v.string(),
+    source: financeSource,
+    cursor: v.union(v.string(), v.null()),
+  },
+  handler: async (ctx, { raceId, candidateSlug, source, cursor }) => {
+    const page = await ctx.db
+      .query("donor_totals")
+      .withIndex("by_candidate_total", (q) =>
+        q.eq("raceId", raceId).eq("candidateSlug", candidateSlug),
+      )
+      .paginate({ cursor, numItems: 1000 });
+    let deleted = 0;
+    for (const row of page.page) {
+      if (row.source !== source) continue;
+      await ctx.db.delete(row._id);
+      deleted++;
+    }
+    return { deleted, continueCursor: page.continueCursor, isDone: page.isDone };
+  },
+});
+
+export const insertDonors = internalMutation({
+  args: { docs: v.array(v.object(donorFields)) },
+  handler: async (ctx, { docs }) => {
+    const now = Date.now();
+    for (const d of docs) {
+      await ctx.db.insert("donor_totals", { ...d, fetchedAt: now });
+    }
+    return docs.length;
+  },
+});
+
 export const logFetch = internalMutation({
   args: {
     url: v.string(),
