@@ -28,6 +28,7 @@ import type * as demoWorkflow from "../demoWorkflow.js";
 import type * as donors from "../donors.js";
 import type * as feedback from "../feedback.js";
 import type * as finance from "../finance.js";
+import type * as financeChatTools from "../financeChatTools.js";
 import type * as helloAgent from "../helloAgent.js";
 import type * as houseVotes from "../houseVotes.js";
 import type * as indexNow from "../indexNow.js";
@@ -121,6 +122,7 @@ declare const fullApi: ApiFromModules<{
   donors: typeof donors;
   feedback: typeof feedback;
   finance: typeof finance;
+  financeChatTools: typeof financeChatTools;
   helloAgent: typeof helloAgent;
   houseVotes: typeof houseVotes;
   indexNow: typeof indexNow;

@@ -52,3 +52,25 @@ export function ensureTelemetry(): NodeTracerProvider | null {
 export function tracer(): Tracer {
   return trace.getTracer("badgerbrief-agents");
 }
+
+/** Manual TOOL span wrapper (no-op passthrough when telemetry is off). */
+export async function withToolSpan(
+  toolName: string,
+  threadId: string | undefined,
+  input: unknown,
+  fn: () => Promise<string>,
+): Promise<string> {
+  return await tracer().startActiveSpan(toolName, async (span) => {
+    span.setAttribute("openinference.span.kind", "TOOL");
+    span.setAttribute("tool.name", toolName);
+    if (threadId) span.setAttribute("session.id", threadId);
+    span.setAttribute("input.value", JSON.stringify(input).slice(0, 4000));
+    try {
+      const out = await fn();
+      span.setAttribute("output.value", out.slice(0, 4000));
+      return out;
+    } finally {
+      span.end();
+    }
+  });
+}
