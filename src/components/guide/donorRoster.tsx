@@ -86,7 +86,13 @@ function RosterBody({ raceId, candidateSlug }: { raceId: string; candidateSlug: 
       </ul>
       {rows.length === 0 && (
         <p className="mt-2 text-sm text-muted-foreground">
-          {searching ? "No donors match that search." : "Loading donors…"}
+          {searching
+            ? "No donors match that search."
+            : paged.status === "Exhausted"
+              ? category
+                ? "No donors in this category."
+                : "No donor-level data available yet."
+              : "Loading donors…"}
         </p>
       )}
       {!searching && paged.status === "CanLoadMore" && (
