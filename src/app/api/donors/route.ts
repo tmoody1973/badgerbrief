@@ -8,7 +8,8 @@ import { api } from "../../../../convex/_generated/api";
  */
 
 const csvCell = (s: string | number | undefined) => {
-  const v = String(s ?? "");
+  let v = String(s ?? "");
+  if (/^[=+\-@]/.test(v)) v = `'${v}`; // neutralize spreadsheet formula injection (CWE-1236)
   return /[",\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
 };
 
