@@ -7,6 +7,7 @@ import { sourceLabel } from "@/lib/source-label";
 import { CandidateAds } from "@/components/guide/candidate-ads";
 import { FinanceDetail, FinanceSummary } from "@/components/guide/finance";
 import { FinanceBreakdownSection } from "@/components/guide/financeBreakdown";
+import { DonorRosterSection } from "@/components/guide/donorRoster";
 import {
   LastUpdated,
   PartyBadge,
@@ -312,6 +313,11 @@ export default async function CandidatePage({ params }: Props) {
             committeeFunding={committeeFunding}
           />
           <FinanceBreakdownSection
+            breakdown={financeBreakdowns?.find((b) => b.source === "sunshine")}
+          />
+          <DonorRosterSection
+            raceId={candidate.raceId}
+            candidateSlug={candidate.slug}
             breakdown={financeBreakdowns?.find((b) => b.source === "sunshine")}
           />
 
