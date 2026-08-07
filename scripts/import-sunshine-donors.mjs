@@ -27,30 +27,45 @@ const pacTags = JSON.parse(readFileSync(new URL("./pac-tags.json", import.meta.u
 function run(fn, payload) {
   const argv = ["convex", "run", fn, JSON.stringify(payload), "--typecheck", "disable"];
   if (PROD) argv.push("--prod");
-  return execFileSync("npx", argv, { stdio: ["ignore", "pipe", "inherit"] }).toString();
+  try {
+    return execFileSync("npx", argv, { stdio: ["ignore", "pipe", "inherit"] }).toString();
+  } catch (err) {
+    console.error(`retrying ${fn}…`);
+    return execFileSync("npx", argv, { stdio: ["ignore", "pipe", "inherit"] }).toString();
+  }
 }
 
 const rosters = computeDonorRosters(readFileSync(csvPath, "utf8"), pacTags);
 let committees = 0;
+const failed = [];
 for (const [committee, donors] of rosters) {
   const match = mapping[committee];
   if (!match) continue; // import-sunshine.mjs already reports unmatched committees
   const base = { candidateSlug: match.candidateSlug, raceId: match.raceId, source: "sunshine" };
 
-  let cursor = null;
-  for (;;) {
-    const out = JSON.parse(run("finance:clearDonors", { ...base, cursor }));
-    if (out.isDone) break;
-    cursor = out.continueCursor;
+  try {
+    let cursor = null;
+    for (;;) {
+      const out = JSON.parse(run("finance:clearDonors", { ...base, cursor }));
+      if (out.isDone) break;
+      cursor = out.continueCursor;
+    }
+    for (let i = 0; i < donors.length; i += 500) {
+      const docs = donors.slice(i, i + 500).map((d) => ({ ...d, ...base, coverageEndDate: coverage }));
+      run("finance:insertDonors", { docs });
+    }
+    committees++;
+    console.log(
+      `✓ ${committee} → ${match.candidateSlug}: ${donors.length.toLocaleString("en-US")} donors, ` +
+        `top: ${donors[0]?.donorName} ($${(donors[0]?.total ?? 0).toLocaleString("en-US")})`,
+    );
+  } catch (err) {
+    console.error(`✗ ${committee}: ${err.message} — rerun the script to self-heal this committee`);
+    failed.push(committee);
   }
-  for (let i = 0; i < donors.length; i += 500) {
-    const docs = donors.slice(i, i + 500).map((d) => ({ ...d, ...base, coverageEndDate: coverage }));
-    run("finance:insertDonors", { docs });
-  }
-  committees++;
-  console.log(
-    `✓ ${committee} → ${match.candidateSlug}: ${donors.length.toLocaleString("en-US")} donors, ` +
-      `top: ${donors[0]?.donorName} ($${(donors[0]?.total ?? 0).toLocaleString("en-US")})`,
-  );
 }
 console.log(`\nImported rosters for ${committees} committees.`);
+if (failed.length > 0) {
+  console.error(`FAILED committees (${failed.length}): ${failed.join(", ")} — rerun the script`);
+  process.exit(1);
+}
