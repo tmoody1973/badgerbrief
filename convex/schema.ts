@@ -7,6 +7,34 @@ export const sourceLink = v.object({
   url: v.string(),
 });
 
+/** Which state file a general-election fact came from. */
+export const ballotSource = v.object({
+  url: v.string(),
+  documentDate: v.string(), // the file's own date, e.g. "2026-10-06"
+  retrievedAt: v.string(), // ISO time we downloaded it
+});
+
+/**
+ * Nov 3 general-election facts for one candidate, from the state's list.
+ * `ballotName` is the state's "Name On Ballot" verbatim. `runningMate` is the
+ * other person on a governor ticket.
+ */
+export const candidateGeneral = v.object({
+  onBallot: v.boolean(),
+  ballotName: v.optional(v.string()),
+  party: v.optional(v.string()),
+  ballotOrder: v.optional(v.number()),
+  runningMate: v.optional(v.string()),
+  source: ballotSource,
+});
+
+/** Whether a race is a separate contest on the Nov 3 ballot, and why not. */
+export const raceGeneral = v.object({
+  onBallot: v.boolean(),
+  note: v.optional(v.string()),
+  source: ballotSource,
+});
+
 const reviewStatus = v.union(
   v.literal("pending"),
   v.literal("approved"),
@@ -101,6 +129,7 @@ export default defineSchema({
     districts: v.optional(v.any()),
     campaignFinanceInfo: v.optional(v.any()),
     sources: v.array(sourceLink),
+    general: v.optional(raceGeneral),
     dataAsOf: v.string(),
   }).index("by_race_id", ["raceId"]),
 
@@ -138,6 +167,7 @@ export default defineSchema({
     socialMedia: v.optional(v.record(v.string(), v.string())),
     campaignFinanceInfo: v.optional(v.any()),
     sources: v.array(sourceLink),
+    general: v.optional(candidateGeneral),
     dataAsOf: v.string(),
   })
     .index("by_race", ["raceId"])
