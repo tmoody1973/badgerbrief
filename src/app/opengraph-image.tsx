@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { CURRENT_ELECTION } from "@/lib/election";
 
 /**
  * The social share card — what a link to badgerbrief.org shows when it's texted,
@@ -92,7 +93,7 @@ export default function OpengraphImage() {
                     letterSpacing: 1,
                   }}
                 >
-                  PRIMARY · AUG 11, 2026
+                  {CURRENT_ELECTION.badge}
                 </div>
                 <div
                   style={{

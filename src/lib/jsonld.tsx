@@ -1,4 +1,5 @@
 import { SITE_NAME, SITE_URL } from "./site";
+import { CURRENT_ELECTION } from "@/lib/election";
 
 /**
  * JSON-LD builders. Combined per page via @graph (context declared once).
@@ -47,18 +48,15 @@ export function organizationNode(): JsonLdNode {
   };
 }
 
-export function electionEventNode(e: {
-  primaryDate: string;
-  generalDate: string;
-}): JsonLdNode {
+export function electionEventNode(e: { generalDate: string }): JsonLdNode {
   return {
     "@type": "Event",
-    "@id": `${SITE_URL}/#election-2026-primary`,
-    name: "Wisconsin Partisan Primary 2026",
-    startDate: "2026-08-11",
+    "@id": `${SITE_URL}/#election-2026-general`,
+    name: CURRENT_ELECTION.eventName,
+    startDate: CURRENT_ELECTION.isoDate,
     eventStatus: "https://schema.org/EventScheduled",
     location: { "@type": "State", name: "Wisconsin" },
-    description: `Wisconsin partisan primary (${e.primaryDate}); general election ${e.generalDate}.`,
+    description: `Wisconsin general election (${e.generalDate}).`,
     organizer: { "@id": `${SITE_URL}/#org` },
   };
 }
