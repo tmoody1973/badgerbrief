@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { CURRENT_ELECTION, PRIMARY_ARCHIVE, formatIsoDate } from "./election";
+import { GENERAL_ELECTION_DATE } from "../../convex/lib/ballot";
 
 describe("CURRENT_ELECTION", () => {
   test("its dates agree with each other", () => {
@@ -24,4 +25,8 @@ describe("formatIsoDate", () => {
   test("returns the input unchanged when it is not a date", () => {
     expect(formatIsoDate("filings through Aug 3")).toBe("filings through Aug 3");
   });
+});
+
+test("the backend's copy of the election date matches the website's", () => {
+  expect(GENERAL_ELECTION_DATE).toBe(CURRENT_ELECTION.longDate);
 });

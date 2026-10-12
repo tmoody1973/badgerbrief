@@ -60,3 +60,10 @@ export function generalPersonName(candidate: {
   const surname = (name: string) => name.trim().split(/\s+/).at(-1)?.toLowerCase();
   return halves.find((half) => surname(half) === surname(candidate.name)) ?? candidate.name;
 }
+
+
+/**
+ * The general election's date, for backend text (job prompts). The website's
+ * copy lives in src/lib/election.ts; src/lib/election.test.ts keeps them equal.
+ */
+export const GENERAL_ELECTION_DATE = "November 3, 2026";
