@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { isOnBallot } from "@/lib/ballot-status";
+import { wasOnPrimaryBallot } from "@/lib/ballot-status";
 import { getRace } from "@/lib/data";
 import { raceIdToSlug } from "@/lib/site";
 
@@ -33,7 +33,7 @@ export async function DebateWhoWasThere({
   const data = await getRace(raceId);
   if (!data) return null;
 
-  const onBallot = data.candidates.filter((c) => isOnBallot(c.status));
+  const onBallot = data.candidates.filter((c) => wasOnPrimaryBallot(c.status));
   const dems = onBallot.filter((c) => c.party === "Democratic");
   const missing = dems.filter((c) => !onStage.includes(c.slug));
   const reps = onBallot.filter((c) => c.party === "Republican");
