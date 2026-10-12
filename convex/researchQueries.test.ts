@@ -14,12 +14,16 @@ function setup() {
   return convexTest(schema, modules);
 }
 
+const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
+
+// On the November ballot: the research and site-map jobs only work on those.
 const baseCandidate = {
   slug: "joel-brennan",
   raceId: "WI-GOV-2026",
   name: "Joel Brennan",
   sources: [],
   dataAsOf: "2026-07-18",
+  general: { onBallot: true, source: SOURCE },
 };
 
 const baseArticleSource = {
@@ -82,14 +86,14 @@ describe("listResearchTargets", () => {
     });
   });
 
-  test("excludes withdrawn/suspended candidates from both campaign-site and article targets", async () => {
+  test("excludes candidates who are not on the November ballot from both campaign-site and article targets", async () => {
     const t = setup();
     await t.run((ctx) =>
       ctx.db.insert("candidates", {
         ...baseCandidate,
         slug: "sara-rodriguez",
         name: "Sara Rodriguez",
-        status: "Withdrawn (July 17, 2026)",
+        general: { onBallot: false, source: SOURCE },
         socialMedia: { campaign_website: "https://www.sararodriguez.com" },
       }),
     );

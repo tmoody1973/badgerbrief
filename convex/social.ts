@@ -20,16 +20,11 @@ import {
   query,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { isOnGeneralBallot } from "./lib/ballot";
 
-// Prototype scope: the active WI-GOV Democratic field. Extend the slug list (or
-// drop the filter) to track more candidates once the approach is proven.
+// Scope: the governor candidates on the November ballot. The list follows the
+// state's certified ballot, so it needs no edit when the field changes.
 const TRACK_RACE = "WI-GOV-2026";
-const TRACK_SLUGS = [
-  // Active Democratic field
-  "francesca-hong", "david-crowley", "kelda-roys", "joel-brennan",
-  // Republican frontrunner (for the general-election matchup)
-  "tom-tiffany",
-];
 const API = "https://api.socialfetch.dev/v1";
 
 /** Last path segment of a profile URL: ".../FrancescaHongWI/" -> "FrancescaHongWI". */
@@ -98,7 +93,7 @@ export const candidatesToTrack = internalQuery({
       .withIndex("by_race", (q) => q.eq("raceId", TRACK_RACE))
       .collect();
     return rows
-      .filter((c) => TRACK_SLUGS.includes(c.slug) && c.socialMedia)
+      .filter((c) => isOnGeneralBallot(c) && c.socialMedia)
       .map((c) => ({
         slug: c.slug,
         raceId: c.raceId,

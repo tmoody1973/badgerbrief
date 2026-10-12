@@ -5,6 +5,7 @@ import {
   internalQuery,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { isOnGeneralBallot } from "./lib/ballot";
 
 /**
  * Campaign finance sync. Federal: OpenFEC API (daily cron). State: Sunshine
@@ -213,7 +214,12 @@ export const logFetch = internalMutation({
 export const financeGaps = internalQuery({
   args: {},
   handler: async (ctx) => {
-    const rows = await ctx.db.query("finance_totals").collect();
+    const candidates = await ctx.db.query("candidates").collect();
+    const onBallot = new Set(candidates.filter(isOnGeneralBallot).map((c) => `${c.raceId}/${c.slug}`));
+    // A gap for someone who is not on the ballot is not worth an editor's Monday.
+    const rows = (await ctx.db.query("finance_totals").collect()).filter((r) =>
+      onBallot.has(`${r.raceId}/${r.candidateSlug}`),
+    );
     const gaps = rows.flatMap((r) => {
       const missing: string[] = [];
       if (r.receipts === undefined) missing.push("receipts");
