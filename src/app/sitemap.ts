@@ -4,6 +4,7 @@ import {
   listRaces,
 } from "@/lib/data";
 import { SITE_URL, raceIdToSlug } from "@/lib/site";
+import { archiveEntries } from "@/lib/sitemap-archive";
 
 export const revalidate = 3600;
 
@@ -75,5 +76,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),
+    ...archiveEntries(races.map((r) => r.raceId), fallback),
   ];
 }

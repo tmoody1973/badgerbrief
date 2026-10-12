@@ -73,15 +73,11 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col pb-16 sm:pb-0">
         <Providers>
           <StoreUser />
-          {/* Above the masthead so it is the first thing on every page, not
-              just the home page. The Oct 14 registration deadline in this
-              message expires: replace it in the Phase 1a deploy. */}
-          <AnnouncementBar
-            id="general-2026-register-by-oct-14"
-            href="/vote"
-          >
-            The Aug 11 primary is over. General election: Tuesday, Nov 3.
-            Register online or by mail (postmarked) by Wed, Oct 14 →
+          {/* Above the masthead so it is the first thing on every page. This
+              message names Oct 20; replace it once early voting is under way. */}
+          <AnnouncementBar id="general-2026-early-voting-oct-20" href="/vote">
+            General election: Tuesday, Nov 3. In-person absentee voting may begin Oct 20. Deadlines and how to
+            vote →
           </AnnouncementBar>
           <SiteHeader />
           <Suspense fallback={null}>
