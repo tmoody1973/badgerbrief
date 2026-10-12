@@ -9,6 +9,7 @@ import {
   raceRatingLabel,
 } from "@/lib/i18n/race-card-dict";
 import { PartyBadge, StatusBadge } from "./labels";
+import { generalBallotName, generalParty } from "../../../convex/lib/ballot";
 
 export function RaceCard({
   race,
@@ -102,6 +103,32 @@ export function CandidateCard({
             {candidate.currentOccupation}
           </p>
         )}
+    </Link>
+  );
+}
+
+/**
+ * A candidate as printed on the Nov 3 ballot: the state's name (a governor
+ * ticket reads "Tom Tiffany / David Varnam") and the state's party label.
+ */
+export function GeneralCandidateCard({ candidate }: { candidate: Doc<"candidates"> }) {
+  return (
+    <Link
+      href={`/candidates/${candidate.slug}`}
+      className="press block min-w-0 border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]"
+    >
+      <h3 className="font-display text-sm leading-tight">{generalBallotName(candidate)}</h3>
+      <div className="mt-1.5 flex flex-wrap gap-1.5">
+        <PartyBadge party={generalParty(candidate)} />
+        {candidate.incumbent && (
+          <span className="border border-border bg-secondary px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase">
+            Incumbent
+          </span>
+        )}
+      </div>
+      {candidate.currentOccupation && candidate.currentOccupation !== "Unknown" && (
+        <p className="mt-1.5 truncate text-xs text-muted-foreground">{candidate.currentOccupation}</p>
+      )}
     </Link>
   );
 }
