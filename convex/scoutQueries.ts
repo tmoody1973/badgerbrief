@@ -8,6 +8,7 @@ import { internalMutation, internalQuery } from "./_generated/server";
 import { canonicalOutletName } from "./lib/outlets";
 import { canonicalArticleKey } from "./lib/articleUrl";
 import { inNewsScope } from "./lib/jobScope";
+import { scoutHealthAlert } from "./lib/scoutHealth";
 
 /** Bare hostname for the outlet's `domain` field; undefined if unparseable. */
 const hostOf = (url: string): string | undefined => {
@@ -232,5 +233,48 @@ export const backfillArticleUrlKeys = internalMutation({
       }
     }
     return { keyed, deleted, continueCursor: page.continueCursor, isDone: page.isDone };
+  },
+});
+
+
+/**
+ * Record how a run went. Opens an alert when the run is unhealthy, keeps a
+ * single alert open while the condition lasts, and closes it on the next
+ * healthy run. Returns the message of a NEWLY opened alert so the caller can
+ * email it once.
+ */
+export const recordRunHealth = internalMutation({
+  args: {
+    attempted: v.number(),
+    errors: v.number(),
+    proposed: v.number(),
+    sampleError: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<string | null> => {
+    const newest = await ctx.db.query("article_sources").order("desc").first();
+    const daysSinceLastArticle = newest ? Math.floor((Date.now() - newest.proposedAt) / 86_400_000) : null;
+    const alert = scoutHealthAlert({ ...args, daysSinceLastArticle });
+
+    const unresolved = await ctx.db
+      .query("alerts")
+      .withIndex("by_resolved", (q) => q.eq("resolved", false))
+      .take(5000);
+    const mine = unresolved.filter((a) => a.refTable === "article_sources" && a.refId?.startsWith("article-scout:"));
+
+    if (!alert) {
+      for (const a of mine) await ctx.db.patch("alerts", a._id, { resolved: true });
+      return null;
+    }
+    if (mine.some((a) => a.refId === alert.refId)) return null;
+    await ctx.db.insert("alerts", {
+      kind: alert.kind,
+      severity: alert.severity,
+      refTable: "article_sources",
+      refId: alert.refId,
+      message: alert.message,
+      resolved: false,
+      createdAt: Date.now(),
+    });
+    return alert.message;
   },
 });

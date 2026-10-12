@@ -342,3 +342,18 @@ test("the news job covers on-ballot statewide and U.S. House candidates, with ea
     "house-on | U.S. House — Wisconsin District 3",
   ]);
 });
+
+test("a failing news job raises one alert, not one a day, and a healthy run closes it", async () => {
+  const t = convexTest(schema, modules);
+  const failing = { attempted: 32, errors: 32, proposed: 0, sampleError: "perplexity request failed (http 401)" };
+  const open = () => t.run(async (ctx) => (await ctx.db.query("alerts").collect()).filter((a) => !a.resolved));
+
+  const first = await t.mutation(internal.scoutQueries.recordRunHealth, failing);
+  expect(first).toContain("32 of 32 searches failed");
+  expect(await t.mutation(internal.scoutQueries.recordRunHealth, failing)).toBeNull();
+  expect(await open()).toHaveLength(1);
+  expect((await open())[0]).toMatchObject({ kind: "sync_failure", severity: "critical", refTable: "article_sources", refId: "article-scout:failing" });
+
+  await t.mutation(internal.scoutQueries.recordRunHealth, { attempted: 32, errors: 0, proposed: 4 });
+  expect(await open()).toHaveLength(0);
+});

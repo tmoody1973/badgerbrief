@@ -7,7 +7,7 @@
  * never auto-publishes (Global Constraints: agents never publish).
  */
 import { v } from "convex/values";
-import { internalAction } from "./_generated/server";
+import { internalAction, type ActionCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { trace } from "@opentelemetry/api";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
@@ -145,6 +145,22 @@ async function fetchScoutContent(body: unknown): Promise<string> {
   return content;
 }
 
+/** Record the run's health; email the editor once when a new alert opens. */
+async function reportHealth(
+  ctx: Pick<ActionCtx, "runMutation" | "runAction">,
+  summaries: CandidateSummary[],
+  fatal?: string,
+) {
+  const failed = summaries.filter((s) => s.status === "error");
+  const opened: string | null = await ctx.runMutation(internal.scoutQueries.recordRunHealth, {
+    attempted: fatal ? 1 : summaries.length,
+    errors: fatal ? 1 : failed.length,
+    proposed: summaries.reduce((n, s) => n + (s.proposed ?? 0), 0),
+    sampleError: fatal ?? failed[0]?.error,
+  });
+  if (opened) await ctx.runAction(internal.feedback.notify, { kind: "data_gap", message: opened });
+}
+
 /** The daily sweep: pick candidates, ask Perplexity, filter, propose. */
 export const run = internalAction({
   args: {
@@ -155,6 +171,7 @@ export const run = internalAction({
     // Throw at call time (never import time) so `convex dev --once` pushes
     // cleanly before the key is provisioned.
     if (!process.env.PERPLEXITY_API_KEY) {
+      await reportHealth(ctx, [], "PERPLEXITY_API_KEY not set");
       throw new Error("PERPLEXITY_API_KEY not set");
     }
 
@@ -306,6 +323,7 @@ export const run = internalAction({
       }
     }
 
+    await reportHealth(ctx, summaries);
     return summaries;
   },
 });
