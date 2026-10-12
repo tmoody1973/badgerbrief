@@ -36,6 +36,8 @@ import {
   personNode,
 } from "@/lib/jsonld";
 import { raceIdToSlug, SITE_URL } from "@/lib/site";
+import { isOnGeneralBallot } from "../../../../convex/lib/ballot";
+import { candidateDescription } from "@/lib/candidate-ballot";
 
 export const revalidate = 300;
 
@@ -66,13 +68,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     data.quotes?.length ? "quotes" : null,
   ].filter(Boolean) as string[];
 
-  const who = `${candidate.name}${candidate.party ? ` (${candidate.party})` : ""}`;
-  const ballot = candidate.incumbent ? ", the incumbent," : "";
-  const description = has.length
-    ? `${who}${ballot} is running for ${office} in Wisconsin's August 11, 2026 primary. ${
-        has.slice(0, 3).join(", ").replace(/, ([^,]*)$/, " and $1")
-      }, every claim linked to its source.`
-    : `${who}${ballot} is on the ballot for ${office} in Wisconsin's August 11, 2026 primary. Candidate details from the Wisconsin Elections Commission.`;
+  const description = candidateDescription({
+    who: `${candidate.name}${candidate.party ? ` (${candidate.party})` : ""}`,
+    office,
+    onBallot: isOnGeneralBallot(candidate),
+    incumbent: Boolean(candidate.incumbent),
+    has,
+  });
 
   return {
     title,
@@ -195,6 +197,11 @@ export default async function CandidatePage({ params }: Props) {
             </h1>
             <PartyBadge party={candidate.party} />
             <StatusBadge status={candidate.status} />
+            {!isOnGeneralBallot(candidate) && (
+              <span className="border-2 border-border bg-muted px-2 py-0.5 font-mono text-xs font-bold uppercase">
+                Not on the Nov 3 ballot
+              </span>
+            )}
             {candidate.incumbent && (
               <span className="border-2 border-border bg-secondary px-2 py-0.5 font-mono text-xs font-bold uppercase">
                 Incumbent
@@ -219,7 +226,8 @@ export default async function CandidatePage({ params }: Props) {
             candidateName={candidate.name}
             raceId={race.raceId}
             raceOffice={race.office}
-            primaryDate={race.primaryDate}
+            raceOnBallot={race.general?.onBallot}
+            raceNote={race.general?.note}
             opponents={field}
           />
         )}

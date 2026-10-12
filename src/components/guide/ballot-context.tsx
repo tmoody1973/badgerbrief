@@ -1,87 +1,68 @@
 import Link from "next/link";
+import { ballotSummary, type FieldEntry } from "@/lib/candidate-ballot";
+import { PRIMARY_ARCHIVE } from "@/lib/election";
 import { raceIdToSlug } from "@/lib/site";
 
 /**
- * The race a candidate is actually running in — opponents, incumbent, dates.
+ * The race a candidate is in on Nov 3, 2026, and who else is on that ballot.
  *
- * WHY THIS EXISTS. Importing every candidate on the ballot from the WEC list
- * created ~220 pages carrying nothing but a name and a party: no positions, no
- * quotes, no finance, no votes. As pages they were close to empty, and a mass
- * of near-identical stubs is assessed site-wide — it can drag down the pages
- * that did the work.
- *
- * The fix is not to hide them. A voter guide that omits a name on the ballot
- * has failed at its one job, and every one of these people IS on the ballot.
- * The fix is that a page about a candidate should answer the question a voter
- * actually arrives with — "who am I choosing between?" — which is answerable
- * for every candidate from data already held, and differs for each of the 116
- * districts.
- *
- * It also links the incumbent's voting record, which is the most defensible
- * thing on the site: 3,000+ roll calls parsed and reconciled per legislator,
- * available nowhere else in this form. A challenger's page is exactly where a
- * voter wants it.
+ * WHY THIS EXISTS. Most candidate pages carry only a name and a party. What a
+ * voter arrives asking is "who am I choosing between?", and that is answerable
+ * for every candidate from the state's list. It also links the incumbent's
+ * voting record, which a challenger's page is exactly where a voter wants.
  */
-type Opponent = {
-  slug: string;
-  name: string;
-  party?: string;
-  incumbent?: boolean;
-  status?: string;
-  hasRecord?: boolean;
-};
-
-const isOnBallot = (status?: string) => (status ?? "Active") === "Active";
-
-const meta =
-  "font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground";
+const meta = "font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground";
+const linkClass = "underline decoration-2 underline-offset-2";
 
 export function BallotContext({
   candidateSlug,
   candidateName,
   raceId,
   raceOffice,
-  primaryDate,
+  raceOnBallot,
+  raceNote,
   opponents,
 }: {
   candidateSlug: string;
   candidateName: string;
   raceId: string;
   raceOffice: string;
-  primaryDate?: string;
-  opponents: Opponent[];
+  /** undefined when the race's November facts are not loaded. */
+  raceOnBallot?: boolean;
+  raceNote?: string;
+  opponents: FieldEntry[];
 }) {
-  const others = opponents.filter((o) => o.slug !== candidateSlug && isOnBallot(o.status));
-  const incumbent = opponents.find((o) => o.incumbent && o.slug !== candidateSlug);
   const me = opponents.find((o) => o.slug === candidateSlug);
+  const position = (o: FieldEntry) => o.ballotOrder ?? Number.POSITIVE_INFINITY;
+  const others = opponents
+    .filter((o) => o.slug !== candidateSlug && o.onGeneralBallot)
+    .sort((a, b) => position(a) - position(b) || a.name.localeCompare(b.name));
+  const incumbent = others.find((o) => o.incumbent);
+  const raceSlug = raceIdToSlug(raceId);
+  const showOthers = me?.onGeneralBallot && raceOnBallot !== false && others.length > 0;
 
   return (
     <section id="ballot" className="mt-6 scroll-mt-16 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
-      <h2 className="font-display text-xl">
-        What is {candidateName} running for?
-      </h2>
+      <h2 className="font-display text-xl">Is {candidateName} on the November 3 ballot?</h2>
       <p className="mt-2 max-w-[54ch]">
-        {candidateName} is on the ballot for{" "}
-        <Link href={`/races/${raceIdToSlug(raceId)}`} className="font-bold underline decoration-2 underline-offset-2">
-          {raceOffice}
+        {ballotSummary({ candidateName, office: raceOffice, me, others, raceOnBallot, raceNote })}
+      </p>
+      <p className="mt-2 text-sm">
+        <Link href={`/races/${raceSlug}`} className={`font-bold ${linkClass}`}>
+          {raceOffice} on the November ballot →
         </Link>
-        {primaryDate ? ` in the ${primaryDate} Wisconsin partisan primary` : ""}
-        {me?.incumbent ? ", as the incumbent" : ""}.
-        {others.length === 0
-          ? " No other candidate filed for this seat."
-          : ` ${others.length === 1 ? "One other candidate is" : `${others.length} other candidates are`} on the ballot.`}
       </p>
 
-      {others.length > 0 && (
+      {showOthers && (
         <>
           <p className={`mt-3 ${meta}`}>Also on this ballot</p>
           <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
             {others.map((o) => (
               <li key={o.slug} className="text-sm">
-                <Link href={`/candidates/${o.slug}`} className="underline decoration-2 underline-offset-2">
-                  {o.name}
+                <Link href={`/candidates/${o.slug}`} className={linkClass}>
+                  {o.ballotName}
                 </Link>
-                {o.party ? <span className="text-muted-foreground"> ({o.party})</span> : null}
+                {o.generalParty ? <span className="text-muted-foreground"> ({o.generalParty})</span> : null}
                 {o.incumbent ? <span className="text-muted-foreground"> · incumbent</span> : null}
               </li>
             ))}
@@ -89,14 +70,19 @@ export function BallotContext({
         </>
       )}
 
-      {incumbent?.hasRecord && (
-        // The single most useful link on a challenger's page: what the person
-        // they are running against actually voted for.
+      {!me?.onGeneralBallot && (
         <p className="mt-3 text-sm">
-          <Link
-            href={`/candidates/${incumbent.slug}#votes`}
-            className="underline decoration-2 underline-offset-2"
-          >
+          <Link href={`${PRIMARY_ARCHIVE.path}/races/${raceSlug}`} className={linkClass}>
+            See everyone who ran in the {PRIMARY_ARCHIVE.label} →
+          </Link>
+        </p>
+      )}
+
+      {me?.onGeneralBallot && incumbent?.hasRecord && (
+        // The most useful link on a challenger's page: what the person they
+        // are running against actually voted for.
+        <p className="mt-3 text-sm">
+          <Link href={`/candidates/${incumbent.slug}#votes`} className={linkClass}>
             See {incumbent.name}&rsquo;s voting record →
           </Link>
         </p>
