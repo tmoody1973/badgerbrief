@@ -43,7 +43,7 @@ export function readWecWorkbook(xlsxPath) {
 /** WEC prints a blank row for every party fielding no candidate in a contest. */
 const hasCandidate = (r) => Boolean(r["Name On Ballot"]);
 
-const decode = (s) =>
+export const decode = (s) =>
   s
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
