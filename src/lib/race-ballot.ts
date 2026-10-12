@@ -95,3 +95,36 @@ export function raceFaq<C extends CandidateLike>(
     ...(incumbent ? [{ q: `Who currently holds ${office}?`, a: `${incumbent} is the incumbent.` }] : []),
   ];
 }
+
+type PollLike = {
+  pollType: string;
+  groups: readonly { rows: readonly { label: string; candidateSlug: string | null }[] }[];
+};
+
+/** A poll line that is not a person: "Undecided", "Other candidate", "Undecided/Other". */
+const NOT_A_CANDIDATE = /^(undecided|others?|someone else|don'?t know|not sure|unsure|refused|none|neither|no opinion)\b/i;
+
+/**
+ * Which polls belong on the November page. A poll qualifies only if it is not
+ * a primary poll, links at least one candidate, every linked candidate is on
+ * the November ballot, and every unlinked line is plainly not a person.
+ * Anything else (a July "Hong vs. Tiffany" matchup, a generic-Democrat
+ * hypothetical, a line naming someone we could not link) stays in the archive:
+ * when in doubt a poll is kept off the November page, never dropped.
+ */
+export function splitPolls<P extends PollLike>(
+  polls: readonly P[],
+  onBallotSlugs: ReadonlySet<string>,
+): { november: P[]; archive: P[] } {
+  const isNovember = (poll: P) => {
+    if (/primary/i.test(poll.pollType)) return false;
+    const rows = poll.groups.flatMap((g) => g.rows);
+    return (
+      rows.some((r) => r.candidateSlug !== null) &&
+      rows.every((r) =>
+        r.candidateSlug !== null ? onBallotSlugs.has(r.candidateSlug) : NOT_A_CANDIDATE.test(r.label.trim()),
+      )
+    );
+  };
+  return { november: polls.filter(isNovember), archive: polls.filter((p) => !isNovember(p)) };
+}

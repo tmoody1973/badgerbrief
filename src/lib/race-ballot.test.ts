@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { ballotLine, buildRaceBallot, countSentence, raceDescription, raceFaq } from "./race-ballot";
+import { ballotLine, buildRaceBallot, countSentence, raceDescription, raceFaq, splitPolls } from "./race-ballot";
 
 const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
 const on = (ballotName: string, party: string | undefined, ballotOrder: number) => ({
@@ -103,5 +103,34 @@ describe("raceDescription and raceFaq", () => {
     expect(raceFaq("Wisconsin Supreme Court", b)).toEqual([
       { q: "Is Wisconsin Supreme Court on the November 3, 2026 ballot?", a: "Decided in the April 7, 2026 spring election." },
     ]);
+  });
+});
+
+describe("splitPolls", () => {
+  const row = (label: string, candidateSlug: string | null) => ({ label, value: "45%", candidateSlug });
+  const poll = (pollType: string, rows: ReturnType<typeof row>[]) => ({ pollType, groups: [{ label: null, rows }] });
+  const onBallot = new Set(["tom-tiffany", "david-crowley"]);
+
+  const real = poll("General election matchup", [row("Crowley", "david-crowley"), row("Tiffany", "tom-tiffany"), row("Other", null)]);
+  // Production holds seven of these: a matchup polled in July that never happened.
+  const hypothetical = poll("General election matchup", [row("Hong", "francesca-hong"), row("Tiffany", "tom-tiffany"), row("Other", null)]);
+  const primary = poll("Democratic primary", [row("Crowley", "david-crowley"), row("Undecided", null)]);
+  const generic = poll("General election matchup", [row("Tiffany", "tom-tiffany"), row("note", null)]);
+  const unlinkedName = poll("General election matchup", [row("Tiffany", "tom-tiffany"), row("Josh Kaul (undeclared)", null)]);
+  const nobodyLinked = poll("General election matchup", [row("Undecided", null)]);
+
+  test("the November page gets only polls whose every named candidate is on the ballot", () => {
+    const { november, archive } = splitPolls([real, hypothetical, primary, generic, unlinkedName, nobodyLinked], onBallot);
+    expect(november).toEqual([real]);
+    expect(archive).toEqual([hypothetical, primary, generic, unlinkedName, nobodyLinked]);
+  });
+
+  test("with no ballot loaded, every poll stays in the archive", () => {
+    expect(splitPolls([real, primary], new Set()).november).toEqual([]);
+  });
+
+  test("undecided and other lines do not disqualify a poll", () => {
+    const p = poll("General election matchup", [row("Crowley", "david-crowley"), row("Tiffany", "tom-tiffany"), row("Undecided/Other", null), row("Other candidate", null)]);
+    expect(splitPolls([p], onBallot).november).toEqual([p]);
   });
 });

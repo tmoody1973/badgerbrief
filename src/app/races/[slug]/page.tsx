@@ -22,7 +22,7 @@ import {
 } from "@/lib/data";
 import { CURRENT_ELECTION, PRIMARY_ARCHIVE, formatIsoDate } from "@/lib/election";
 import { JsonLd, breadcrumbNode, faqNode, organizationNode, personNode } from "@/lib/jsonld";
-import { buildRaceBallot, countSentence, raceDescription, raceFaq } from "@/lib/race-ballot";
+import { buildRaceBallot, countSentence, raceDescription, raceFaq, splitPolls } from "@/lib/race-ballot";
 import { raceIdToSlug, slugToRaceId, SITE_URL } from "@/lib/site";
 
 export const revalidate = 300;
@@ -73,11 +73,11 @@ export default async function RacePage({ params }: Props) {
     getPollsForRace(race.raceId),
   ]);
   // The November page is about the November field. Rows for people who are not
-  // on the ballot, and polls of the finished primary, live in the archive.
+  // on the ballot, and polls that name anyone who is not, live in the archive.
   const raceFinance = finance.filter((f) => slugs.has(f.candidateSlug));
   const raceBreakdowns = financeBreakdowns.filter((b) => slugs.has(b.candidateSlug));
   const adMoney = { ...adMoneyAll, candidates: adMoneyAll.candidates.filter((c) => slugs.has(c.slug)) };
-  const polls = pollsAll.filter((p) => !/primary/i.test(p.pollType));
+  const polls = splitPolls(pollsAll, slugs).november;
 
   const navSections: NavSection[] = [
     ...(onBallot.length > 0 ? [{ id: "candidates", label: "On the ballot", count: onBallot.length }] : []),

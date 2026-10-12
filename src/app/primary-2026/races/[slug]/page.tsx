@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { generalField } from "../../../../../convex/lib/ballot";
 import { notFound } from "next/navigation";
 import { ArchiveBanner } from "@/components/guide/archive-banner";
 import { PrimaryRaceView } from "@/components/guide/primary-race-view";
@@ -7,6 +8,7 @@ import { SourceList } from "@/components/guide/sources";
 import { getPollsForRace, getRace, listRaces } from "@/lib/data";
 import { PRIMARY_ARCHIVE } from "@/lib/election";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
+import { splitPolls } from "@/lib/race-ballot";
 import { raceIdToSlug, slugToRaceId } from "@/lib/site";
 
 export const revalidate = 300;
@@ -37,7 +39,9 @@ export default async function ArchivedRacePage({ params }: Props) {
   const data = await getRace(slugToRaceId(slug));
   if (!data) notFound();
   const { race, candidates } = data;
-  const polls = (await getPollsForRace(race.raceId)).filter((p) => /primary/i.test(p.pollType));
+  // Everything the November page leaves out, so no published poll disappears.
+  const onBallot = new Set(generalField(candidates).map((c) => c.slug));
+  const polls = splitPolls(await getPollsForRace(race.raceId), onBallot).archive;
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
