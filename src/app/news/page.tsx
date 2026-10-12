@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { NewsFeed } from "@/components/guide/news-feed";
 import { getHubArticles, listRaces } from "@/lib/data";
+import { PRIMARY_ARCHIVE } from "@/lib/election";
 import { JsonLd, newsCollectionNode, organizationNode } from "@/lib/jsonld";
 
 export const revalidate = 300;
@@ -17,7 +19,10 @@ export const metadata: Metadata = {
 const HUB_FETCH_LIMIT = 500;
 
 export default async function NewsPage() {
-  const [items, races] = await Promise.all([getHubArticles(), listRaces()]);
+  const [all, races] = await Promise.all([getHubArticles(), listRaces()]);
+  // General-election coverage only. Primary-season coverage has its own page.
+  const items = all.filter((r) => !r.article.archive);
+  const archivedCount = all.length - items.length;
   // raceId → office, so the race filter chips read "Governor" not "WI-GOV-2026".
   const raceLabels = Object.fromEntries(races.map((r) => [r.raceId, r.office]));
   // Dateline = the newest VERIFIED publication date we hold. Never "today" —
@@ -53,30 +58,6 @@ export default async function NewsPage() {
           {dateline ? ` · updated ${dateline}` : ""}
         </p>
       </header>
-      {/* Breaking editorial update: a candidate withdrawal is exactly what a
-          voter guide must surface immediately. Retire after the campaign moves on. */}
-      <div className="mt-4 border-2 border-border bg-warning p-4 shadow-[var(--shadow-brutal)]">
-        <span className="font-mono text-[11px] font-bold uppercase tracking-widest">
-          Update · July 30, 2026
-        </span>
-        <p className="mt-1 font-bold">
-          Mandela Barnes has withdrawn from the Democratic primary for governor.
-        </p>
-        <p className="mt-2 text-sm">
-          <a href="/races/wi-gov-2026" className="font-bold underline decoration-2 underline-offset-2">
-            See the current Governor field →
-          </a>
-          {"  ·  "}
-          <a
-            href="https://fox11online.com/news/state/mandela-barnes-drops-out-of-the-democratic-primary-for-wisconsin-governor-gubernatorial-hong-crowley-brennan-roys"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline decoration-2 underline-offset-2"
-          >
-            Source: FOX 11 ↗
-          </a>
-        </p>
-      </div>
       <p className="mt-3 max-w-[68ch] text-sm text-muted-foreground">
         Coverage we&rsquo;ve tracked, linked out to the outlet that reported it. We don&rsquo;t summarize
         or rate the reporting.{" "}
@@ -84,7 +65,20 @@ export default async function NewsPage() {
           How we handle coverage ↗
         </a>
       </p>
-      <NewsFeed items={items} raceLabels={raceLabels} />
+      {items.length === 0 ? (
+        <p className="mt-6 border-2 border-dashed border-border bg-card p-6 text-sm text-muted-foreground">
+          No general-election coverage tracked yet.
+        </p>
+      ) : (
+        <NewsFeed items={items} raceLabels={raceLabels} />
+      )}
+      {archivedCount > 0 && (
+        <p className="mt-8 text-sm">
+          <Link href={`${PRIMARY_ARCHIVE.path}/news`} className="font-bold underline decoration-2 underline-offset-2">
+            Coverage from the {PRIMARY_ARCHIVE.label} season ({archivedCount}) →
+          </Link>
+        </p>
+      )}
     </main>
   );
 }

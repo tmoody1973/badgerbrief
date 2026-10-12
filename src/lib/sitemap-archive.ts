@@ -12,6 +12,7 @@ export function archiveEntries(raceIds: readonly string[], lastModified: Date): 
   });
   return [
     entry(PRIMARY_ARCHIVE.path, 0.3),
+    entry(`${PRIMARY_ARCHIVE.path}/news`, 0.2),
     ...raceIds.map((id) => entry(`${PRIMARY_ARCHIVE.path}/races/${raceIdToSlug(id)}`, 0.2)),
   ];
 }

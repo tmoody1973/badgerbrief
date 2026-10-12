@@ -43,6 +43,11 @@ export default async function PrimaryArchivePage() {
         <h2 className="font-display text-2xl">Also in the archive</h2>
         <ul className="mt-3 list-disc space-y-1 pl-5">
           <li>
+            <Link href={`${PRIMARY_ARCHIVE.path}/news`} className={linkClass}>
+              News coverage from the primary season
+            </Link>
+          </li>
+          <li>
             <Link href="/debate/wi-gov-dem-primary-debate" className={linkClass}>
               The July 28 Democratic primary debate for governor
             </Link>

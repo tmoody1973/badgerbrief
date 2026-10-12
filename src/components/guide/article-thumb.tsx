@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 
 /**
@@ -82,10 +85,13 @@ export function ArticleThumb({
   size?: Size;
   outlet?: string;
 }) {
-  if (src) {
+  // A publisher's image URL can exist and still fail to load. When it does,
+  // fall through to the same initials mark used when there is no image.
+  const [failed, setFailed] = useState(false);
+  if (src && !failed) {
     return (
       <div className={`${BOX[size]} overflow-hidden border-2 border-border bg-card`}>
-        <Image src={src} alt="" aria-hidden="true" fill sizes={SIZES[size]} className="object-cover" />
+        <Image src={src} alt="" aria-hidden="true" fill sizes={SIZES[size]} className="object-cover" onError={() => setFailed(true)} />
       </div>
     );
   }
