@@ -185,6 +185,57 @@ describe("applyGeneralBallot", () => {
     ).rejects.toThrow(/WI-NOPE-2026/);
   });
 
+  test("refuses a file that does not cover every stored candidate", async () => {
+    // Otherwise a block written by an older file could survive and keep
+    // someone "on the ballot" who is no longer listed.
+    const t = setup();
+    await seedGovernor(t);
+    await expect(
+      t.mutation(internal.generalBallot.applyGeneralBallot, { ...certified, candidates: [certified.candidates[0]] }),
+    ).rejects.toThrow(/francesca-hong/);
+    expect((await candidate(t, "david-crowley"))?.general).toBeUndefined();
+  });
+
+  test("refuses a file that does not cover every stored race", async () => {
+    const t = setup();
+    await seedGovernor(t);
+    await expect(
+      t.mutation(internal.generalBallot.applyGeneralBallot, { ...certified, races: [] }),
+    ).rejects.toThrow(/WI-GOV-2026/);
+    expect((await candidate(t, "david-crowley"))?.general).toBeUndefined();
+  });
+
+  test("refuses a new candidate whose address is used in another race", async () => {
+    const t = setup();
+    await seedGovernor(t);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("races", {
+        raceId: "WI-AG-2026", electionSlug: "wi-2026", office: "Attorney General of Wisconsin",
+        level: "State Executive", sources: [], dataAsOf: "2026-07-17",
+      });
+      await ctx.db.insert("candidates", { slug: "pat-example", raceId: "WI-AG-2026", name: "Pat Example", sources: [], dataAsOf: "2026-07-17" });
+    });
+    await expect(
+      t.mutation(internal.generalBallot.applyGeneralBallot, {
+        ...certified,
+        races: [...certified.races, { raceId: "WI-AG-2026", onBallot: true }],
+        candidates: [...certified.candidates, { raceId: "WI-AG-2026", slug: "pat-example", onBallot: false }],
+      }),
+    ).rejects.toThrow(/already used/);
+    expect((await candidate(t, "david-crowley"))?.general).toBeUndefined();
+  });
+
+  test("the read-back carries the ballot name, party and order", async () => {
+    const t = setup();
+    await seedGovernor(t);
+    await t.mutation(internal.generalBallot.applyGeneralBallot, certified);
+    const rows = await t.query(internal.generalBallot.onBallotSlugs, {});
+    expect(rows.find((r) => r.slug === "david-crowley")).toEqual({
+      raceId: "WI-GOV-2026", slug: "david-crowley",
+      ballotName: "David Crowley / Sarah Godlewski", party: "Democratic", ballotOrder: 2,
+    });
+  });
+
   test("onBallotSlugs reads back who is on the ballot", async () => {
     const t = setup();
     await seedGovernor(t);

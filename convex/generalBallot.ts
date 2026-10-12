@@ -12,8 +12,9 @@ import { ballotSource } from "./schema";
  * and ads hang off those.
  *
  * Every race and candidate is looked up before anything is written, so an
- * unknown one throws with the database untouched. Re-running with the same
- * input gives the same data.
+ * unknown one throws with the database untouched. The whole file is applied in
+ * ONE call, which is one transaction: it lands completely or not at all.
+ * Re-running with the same input gives the same data.
  */
 
 const SOURCE_NAME = "Wisconsin Elections Commission — November 3, 2026 General Election candidates";
@@ -30,6 +31,32 @@ function newCandidateGeneral(
     ballotOrder: input.ballotOrder,
     source,
   };
+}
+
+/**
+ * The file must account for every stored race and candidate. Otherwise a
+ * block written by an older file could survive and keep someone "on the
+ * ballot" who is no longer listed. It also ties a file to its database: one
+ * built from a different database will not cover this one, and is refused
+ * before anything is written.
+ */
+function assertFileCoversDatabase(
+  file: {
+    races: { raceId: string }[];
+    candidates: { raceId: string; slug: string }[];
+    newCandidates: { raceId: string; slug: string }[];
+  },
+  storedRaces: { raceId: string }[],
+  storedCandidates: { raceId: string; slug: string }[],
+) {
+  const races = new Set(file.races.map((r) => r.raceId));
+  const missingRace = storedRaces.find((r) => !races.has(r.raceId));
+  if (missingRace) throw new Error(`the file does not cover stored race ${missingRace.raceId}`);
+
+  const key = (c: { raceId: string; slug: string }) => `${c.raceId}/${c.slug}`;
+  const candidates = new Set([...file.candidates, ...file.newCandidates].map(key));
+  const missing = storedCandidates.find((c) => !candidates.has(key(c)));
+  if (missing) throw new Error(`the file does not cover stored candidate ${key(missing)}`);
 }
 
 export const applyGeneralBallot = internalMutation({
@@ -86,9 +113,19 @@ export const applyGeneralBallot = internalMutation({
       if (!candidate) throw new Error(`no candidate ${input.raceId}/${input.slug}`);
       candidatePatches.push({ id: candidate._id, input });
     }
+    // ceiling: 5,000 candidates and 1,000 races. The tables hold about 340
+    // and 132; the project's Convex rules ask for bounded reads.
+    const storedCandidates = await ctx.db.query("candidates").take(5000);
+    const storedRaces = await ctx.db.query("races").take(1000);
+    assertFileCoversDatabase(args, storedRaces, storedCandidates);
+
     const additions: { existingId: Id<"candidates"> | null; input: (typeof args.newCandidates)[number] }[] = [];
     for (const input of args.newCandidates) {
       if (!(await findRace(input.raceId))) throw new Error(`no race ${input.raceId}`);
+      // Candidate pages are looked up by address alone, so it must be unique
+      // across every race.
+      const elsewhere = storedCandidates.find((c) => c.slug === input.slug && c.raceId !== input.raceId);
+      if (elsewhere) throw new Error(`address ${input.slug} is already used in ${elsewhere.raceId}`);
       const existing = await findCandidate(input.raceId, input.slug);
       additions.push({ existingId: existing?._id ?? null, input });
     }
@@ -138,6 +175,12 @@ export const onBallotSlugs = internalQuery({
     const all = await ctx.db.query("candidates").take(5000);
     return all
       .filter((c) => c.general?.onBallot === true)
-      .map((c) => ({ raceId: c.raceId, slug: c.slug }));
+      .map((c) => ({
+        raceId: c.raceId,
+        slug: c.slug,
+        ballotName: c.general?.ballotName ?? null,
+        party: c.general?.party ?? null,
+        ballotOrder: c.general?.ballotOrder ?? null,
+      }));
   },
 });

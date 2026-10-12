@@ -121,6 +121,13 @@ describe("buildGeneralBallot", () => {
     expect(contests.has("WI-GOV-2026")).toBe(true);
   });
 
+  test("stores an accented name as text, not as a raw character code", () => {
+    const { contests } = buildGeneralBallot([
+      row({ "Name On Ballot": "Tony Casta&#xF1;eda", "Political Party": "Democratic", Contest: "STATE SENATOR DISTRICT 5" }),
+    ]);
+    expect(contests.get("WI-STATE-SENATE-D5-2026")[0].ballotName).toBe("Tony Castañeda");
+  });
+
   test("refuses the primary spreadsheet", () => {
     const primary = rows.map((r) => ({ ...r, Election: "2026 Partisan Primary" }));
     expect(() => buildGeneralBallot(primary)).toThrow(/2026 General Election/);

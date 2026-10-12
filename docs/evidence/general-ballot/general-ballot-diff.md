@@ -5,7 +5,7 @@ Source: https://elections.wi.gov/media/41846/download (file dated 2026-10-06, re
 ## Totals
 
 - On the November ballot: 245 (plus 2 running mates, listed below)
-- Stored, not on the November ballot: 73
+- Stored, not on the November ballot: 75
 - New to us: 15
 - Unresolved: 0
 - Races with one candidate: 9
@@ -47,8 +47,8 @@ Source: https://elections.wi.gov/media/41846/download (file dated 2026-10-06, re
 
 ## Stored races with no November contest
 
-- WI-LTGOV-2026: Not a separate November contest. Each party's nominee is the running mate on a governor ticket.
-- WI-SCOTUS-2026: Decided in the April 7, 2026 spring election.
+- WI-LTGOV-2026: Not a separate November contest. Each party's nominee is the running mate on a governor ticket. Marked off the ballot: Will Martin.
+- WI-SCOTUS-2026: Decided in the April 7, 2026 spring election. Marked off the ballot: Chris Taylor.
 - WI-STATE-SENATE-2026: Replaced by one race per district.
 - WI-STATE-ASSEMBLY-2026: Replaced by one race per district.
 

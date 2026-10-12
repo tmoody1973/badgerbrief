@@ -44,8 +44,13 @@ const dbCandidates = query("public:listCandidateDirectory").map((c) => ({
   ...(c.status ? { status: c.status } : {}),
 }));
 
-const diff = diffAll({ dbRaces, dbCandidates, contests });
-const certification = toCertification({ diff, source, dataAsOf: new Date().toISOString().slice(0, 10) });
+const diff = diffAll({ dbRaces, dbCandidates, contests, unrecognized });
+const certification = toCertification({
+  diff,
+  source,
+  dataAsOf: new Date().toISOString().slice(0, 10),
+  database: prod ? "prod" : "dev",
+});
 
 mkdirSync(OUT_DIR, { recursive: true });
 writeFileSync(join(OUT_DIR, "general-ballot-diff.md"), toMarkdown({ diff, source }));
@@ -57,7 +62,8 @@ console.log(`state contests: ${contests.size} | stored races: ${dbRaces.length} 
 console.log(`on the November ballot: ${onBallot} | new to us: ${certification.newCandidates.length} | unresolved: ${certification.unresolved.length}`);
 console.log(`wrote ${join(OUT_DIR, "general-ballot-diff.md")} and general-ballot-certification.json`);
 
-if (unrecognized.length > 0) {
-  console.error(`UNRECOGNIZED state contests (the state may have changed its wording): ${unrecognized.join("; ")}`);
+// Unrecognized contests are already inside `unresolved`, so one check covers both.
+if (certification.unresolved.length > 0) {
+  console.error("UNRESOLVED items remain. The file cannot be applied until a person settles them.");
+  process.exit(1);
 }
-if (unrecognized.length > 0 || certification.unresolved.length > 0) process.exit(1);

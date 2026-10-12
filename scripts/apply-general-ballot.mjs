@@ -4,12 +4,13 @@
  *
  *   node scripts/apply-general-ballot.mjs --file <certification.json> [--prod]
  *
- * Refuses a file that is unsigned or still has unresolved items. Safe to run
- * twice: the backend function gives the same result each time.
+ * Refuses a file that is unsigned, has unresolved items, or was compared
+ * against a different database. The whole file goes in ONE backend call, which
+ * is one transaction: it lands completely or not at all. Safe to run twice.
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { assertCertified, chunk } from "./lib/ballot-diff.mjs";
+import { assertCertified, assertTarget } from "./lib/ballot-diff.mjs";
 
 const args = process.argv.slice(2);
 const flag = (name) => {
@@ -17,6 +18,7 @@ const flag = (name) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 const prod = args.includes("--prod");
+const target = prod ? "prod" : "dev";
 const path = flag("file");
 if (!path) {
   console.error("--file <certification.json> is required");
@@ -25,6 +27,7 @@ if (!path) {
 
 const file = JSON.parse(readFileSync(path, "utf8"));
 assertCertified(file);
+assertTarget(file, target);
 
 const run = (fn, payload) => {
   const argv = ["convex", "run", ...(prod ? ["--prod"] : []), fn, JSON.stringify(payload)];
@@ -32,26 +35,31 @@ const run = (fn, payload) => {
 };
 
 console.log(`target: ${prod ? "PRODUCTION" : "dev"} | certified by ${file.certifiedBy} on ${file.certifiedAt}`);
-const base = { source: file.source, dataAsOf: file.dataAsOf };
-const totals = { racesPatched: 0, candidatesPatched: 0, candidatesInserted: 0 };
-const add = (r) => Object.keys(totals).forEach((k) => (totals[k] += r[k]));
+const result = run("generalBallot:applyGeneralBallot", {
+  source: file.source,
+  dataAsOf: file.dataAsOf,
+  races: file.races,
+  candidates: file.candidates,
+  newCandidates: file.newCandidates,
+});
+console.log(result);
 
-// Races and new candidates first, then stored candidates 100 at a time. Each
-// call is one transaction; a failure stops here and a re-run is safe.
-add(run("generalBallot:applyGeneralBallot", { ...base, races: file.races, candidates: [], newCandidates: file.newCandidates }));
-for (const group of chunk(file.candidates, 100)) {
-  add(run("generalBallot:applyGeneralBallot", { ...base, races: [], candidates: group, newCandidates: [] }));
-}
-console.log(totals);
-
+// Read back what the database now holds and compare it with the file, field by field.
 const key = (c) => `${c.raceId}/${c.slug}`;
-const expected = new Set([...file.candidates.filter((c) => c.onBallot), ...file.newCandidates].map(key));
-const actual = new Set(run("generalBallot:onBallotSlugs", {}).map(key));
-const missing = [...expected].filter((k) => !actual.has(k));
-const extra = [...actual].filter((k) => !expected.has(k));
+const shown = (ballotName, party, ballotOrder) => JSON.stringify({ ballotName: ballotName ?? null, party: party ?? null, ballotOrder: ballotOrder ?? null });
+const expected = new Map([
+  ...file.candidates.filter((c) => c.onBallot).map((c) => [key(c), shown(c.ballotName, c.party, c.ballotOrder)]),
+  ...file.newCandidates.map((c) => [key(c), shown(c.name, c.party, c.ballotOrder)]),
+]);
+const actual = new Map(
+  run("generalBallot:onBallotSlugs", {}).map((c) => [key(c), shown(c.ballotName, c.party, c.ballotOrder)]),
+);
+const missing = [...expected.keys()].filter((k) => !actual.has(k));
+const extra = [...actual.keys()].filter((k) => !expected.has(k));
+const different = [...expected.keys()].filter((k) => actual.has(k) && actual.get(k) !== expected.get(k));
 console.log(`on the ballot — file: ${expected.size} | database: ${actual.size}`);
-if (missing.length > 0 || extra.length > 0) {
-  console.error("MISMATCH", { missing, extra });
+if (missing.length > 0 || extra.length > 0 || different.length > 0) {
+  console.error("MISMATCH", { missing, extra, different });
   process.exit(1);
 }
 console.log("database matches the certified file");

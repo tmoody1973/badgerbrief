@@ -1,5 +1,14 @@
 import { describe, expect, test } from "vitest";
-import { buildDistricts, slugify, surnameOf } from "./wec-legislative.mjs";
+import { buildDistricts, decode, slugify, surnameOf } from "./wec-legislative.mjs";
+
+describe("decode", () => {
+  test("decodes the numeric character codes the state file uses for accents", () => {
+    // Production already holds a candidate stored as "Tony Casta&#xF1;eda".
+    expect(decode("Tony Casta&#xF1;eda")).toBe("Tony Castañeda");
+    expect(decode("Jos&#233; Pe&#241;a")).toBe("José Peña");
+    expect(decode("Smith &amp; Jones")).toBe("Smith & Jones");
+  });
+});
 
 describe("surnameOf", () => {
   test("drops generational suffixes the Legislature does not print", () => {

@@ -45,6 +45,9 @@ const hasCandidate = (r) => Boolean(r["Name On Ballot"]);
 
 export const decode = (s) =>
   s
+    // Numeric character references carry accents: "Casta&#xF1;eda".
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(Number(dec)))
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
