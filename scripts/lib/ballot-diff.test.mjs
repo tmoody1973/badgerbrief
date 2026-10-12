@@ -239,6 +239,9 @@ describe("toMarkdown and chunk", () => {
   test("the report names the counts a reviewer needs", () => {
     const md = toMarkdown({ diff: fixture(), source: SOURCE });
     expect(md).toContain("On the November ballot: 2");
+    // The certifier must be able to add the totals up: running mates are on
+    // the ballot too, but counted in their own section.
+    expect(md).toContain("On the November ballot: 2 (plus 2 running mates, listed below)");
     expect(md).toContain("Francesca Hong");
     expect(md).toContain("Unresolved: 1");
     expect(md).toContain("2026-10-06");

@@ -260,7 +260,7 @@ export function toMarkdown({ diff, source }) {
     "",
     "## Totals",
     "",
-    `- On the November ballot: ${advancing.length}`,
+    `- On the November ballot: ${advancing.length} (plus ${diff.runningMates.linked.length} running mates, listed below)`,
     `- Stored, not on the November ballot: ${gone.length}`,
     `- New to us: ${fresh.length}`,
     `- Unresolved: ${unresolved.length}`,
