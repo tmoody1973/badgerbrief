@@ -67,4 +67,15 @@ describe("scheduled jobs work only on candidates on the November ballot", () => 
     expect(count).toBe(1);
     expect(gaps[0]).toMatchObject({ candidateSlug: "on-ballot", missing: ["cashOnHand"] });
   });
+
+  test("the finance report lists on-ballot statewide and House candidates with no finance record", async () => {
+    const t = await seeded();
+    await t.run(async (ctx) => {
+      await ctx.db.insert("races", { raceId: "WI-GOV-2026", electionSlug: "wi-2026", office: "Governor of Wisconsin", level: "State Executive", sources: [], dataAsOf: "2026-10-12" });
+      await ctx.db.insert("candidates", person("on-ballot-no-finance", ON));
+    });
+    const { count, missing } = await t.query(internal.finance.financeMissing, {});
+    expect(count).toBe(1);
+    expect(missing).toEqual([{ raceId: "WI-GOV-2026", candidateSlug: "on-ballot-no-finance", name: "on-ballot-no-finance" }]);
+  });
 });

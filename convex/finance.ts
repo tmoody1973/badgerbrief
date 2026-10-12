@@ -6,6 +6,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { isOnGeneralBallot } from "./lib/ballot";
+import { inNewsScope } from "./lib/jobScope";
 
 /**
  * Campaign finance sync. Federal: OpenFEC API (daily cron). State: Sunshine
@@ -229,6 +230,29 @@ export const financeGaps = internalQuery({
         : [];
     });
     return { count: gaps.length, gaps };
+  },
+});
+
+/**
+ * On-ballot candidates for statewide executive offices and the U.S. House who
+ * have no finance record at all. financeGaps cannot see them: it reads the
+ * finance rows that exist. Read-only.
+ * Run: `npx convex run finance:financeMissing --prod`
+ */
+export const financeMissing = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const [candidates, races, totals] = await Promise.all([
+      ctx.db.query("candidates").collect(),
+      ctx.db.query("races").collect(),
+      ctx.db.query("finance_totals").collect(),
+    ]);
+    const levelByRace = new Map(races.map((r) => [r.raceId, r.level]));
+    const hasFinance = new Set(totals.map((t) => `${t.raceId}/${t.candidateSlug}`));
+    const missing = candidates
+      .filter((c) => inNewsScope(c, levelByRace.get(c.raceId)) && !hasFinance.has(`${c.raceId}/${c.slug}`))
+      .map((c) => ({ raceId: c.raceId, candidateSlug: c.slug, name: c.name }));
+    return { count: missing.length, missing };
   },
 });
 
