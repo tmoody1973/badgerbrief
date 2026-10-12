@@ -1,5 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { ballotLine, buildRaceBallot, countSentence, raceDescription, raceFaq, splitPolls } from "./race-ballot";
+import {
+  ballotLine, buildRaceBallot, compareDescription, compareIntro, countSentence, keepOnBallot,
+  novemberAdMoney, novemberNotes, raceDescription, raceFaq, shareLines, splitPolls,
+} from "./race-ballot";
 
 const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
 const on = (ballotName: string, party: string | undefined, ballotOrder: number) => ({
@@ -132,5 +135,79 @@ describe("splitPolls", () => {
   test("undecided and other lines do not disqualify a poll", () => {
     const p = poll("General election matchup", [row("Crowley", "david-crowley"), row("Tiffany", "tom-tiffany"), row("Undecided/Other", null), row("Other candidate", null)]);
     expect(splitPolls([p], onBallot).november).toEqual([p]);
+  });
+});
+
+describe("what the compare page and share cards say", () => {
+  const ltgov = buildRaceBallot(
+    { office: "Lieutenant Governor of Wisconsin", general: { onBallot: false, note: "Not a separate November contest.", source: SOURCE } },
+    [{ slug: "sarah-godlewski", name: "Sarah Godlewski", primaryParty: "Democratic", general: on("David Crowley / Sarah Godlewski", "Democratic", 2) }],
+  );
+  const one = buildRaceBallot(governor, [field[2]]);
+  const two = buildRaceBallot(governor, field);
+  const notLoaded = buildRaceBallot({ office: "Governor of Wisconsin" }, field);
+
+  test("running mates are never presented as a contest to compare", () => {
+    expect(compareIntro(ltgov)).toBe("Not a separate November contest.");
+    expect(compareDescription("Lieutenant Governor of Wisconsin", ltgov)).toBe("Lieutenant Governor of Wisconsin: Not a separate November contest.");
+    expect(shareLines(ltgov)).toEqual({
+      raceEyebrow: "Wisconsin 2026",
+      raceSubtitle: "Not a separate November contest.",
+      compareSubtitle: "Not a separate November contest.",
+    });
+  });
+
+  test("one candidate reads as one candidate, with nothing to compare", () => {
+    expect(compareIntro(one)).toBe("One candidate is on the November 3, 2026 ballot for this office, so there is nothing to compare.");
+    expect(compareDescription("Governor of Wisconsin", one)).not.toMatch(/1 candidates/);
+    expect(shareLines(one)).toMatchObject({ raceSubtitle: "1 candidate on the November 3 ballot", compareSubtitle: "1 candidate on the November 3 ballot" });
+  });
+
+  test("a real contest is counted", () => {
+    expect(compareIntro(two)).toMatch(/^The 2 candidates on the November 3, 2026 ballot, side by side/);
+    expect(compareDescription("Governor of Wisconsin", two)).toBe(
+      "Where the 2 candidates on the November 3, 2026 ballot for Governor of Wisconsin stand, issue by issue — every stance linked to its source.",
+    );
+    expect(shareLines(two)).toEqual({
+      raceEyebrow: "On the November 3 ballot",
+      raceSubtitle: "2 candidates on the November 3 ballot · compare where they stand",
+      compareSubtitle: "2 candidates side by side, issue by issue — every stance sourced",
+    });
+  });
+
+  test("a race that is not loaded says so, and claims no count", () => {
+    expect(compareIntro(notLoaded)).toBe("The November 3, 2026 ballot for this office has not been loaded into the guide yet.");
+    expect(shareLines(notLoaded).raceEyebrow).toBe("Wisconsin 2026");
+    expect(JSON.stringify(shareLines(notLoaded))).not.toMatch(/\d candidate/);
+  });
+});
+
+describe("rows that belong on the November page", () => {
+  const slugs = new Set(["tom-tiffany", "david-crowley"]);
+
+  test("keepOnBallot drops rows tied to someone off the ballot and keeps rows tied to nobody", () => {
+    const rows = [{ id: 1, candidateSlug: "david-crowley" }, { id: 2, candidateSlug: "mandela-barnes" }, { id: 3 }, { id: 4, candidateSlug: null }];
+    expect(keepOnBallot(rows, slugs).map((r) => r.id)).toEqual([1, 3, 4]);
+  });
+
+  test("novemberAdMoney keeps on-ballot cards", () => {
+    const data = { totalSpend: 10, candidates: [{ slug: "tom-tiffany" }, { slug: "kelda-roys" }] };
+    expect(novemberAdMoney(data, slugs)).toEqual({ totalSpend: 10, candidates: [{ slug: "tom-tiffany" }] });
+    expect(data.candidates).toHaveLength(2);
+  });
+
+  test("novemberAdMoney is null when the only tracked ads belong to people off the ballot", () => {
+    // Otherwise the page prints "No ads tracked in this race yet", which is false.
+    expect(novemberAdMoney({ totalSpend: 10, candidates: [{ slug: "kelda-roys" }] }, slugs)).toBeNull();
+  });
+
+  test("novemberAdMoney passes through a race with no tracked ads at all", () => {
+    expect(novemberAdMoney({ totalSpend: 0, candidates: [] }, slugs)).toEqual({ totalSpend: 0, candidates: [] });
+  });
+
+  test("novemberNotes hides a note written about the primary", () => {
+    expect(novemberNotes("The Republican to receive the most votes in the primary will advance to the general election.")).toBeUndefined();
+    expect(novemberNotes("Open seat after redistricting.")).toBe("Open seat after redistricting.");
+    expect(novemberNotes(undefined)).toBeUndefined();
   });
 });

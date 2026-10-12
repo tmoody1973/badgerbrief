@@ -128,3 +128,75 @@ export function splitPolls<P extends PollLike>(
   };
   return { november: polls.filter(isNovember), archive: polls.filter((p) => !isNovember(p)) };
 }
+
+const ON_NOV_3 = `on the ${CURRENT_ELECTION.longDate} ballot`;
+const NOT_LOADED = `The ${CURRENT_ELECTION.longDate} ballot for this office has not been loaded into the guide yet.`;
+
+/** The compare page's opening line. Running mates are not a contest to compare. */
+export function compareIntro<C>(ballot: RaceBallot<C>): string {
+  if (ballot.kind === "no-contest") return ballot.note;
+  if (ballot.kind === "not-loaded") return NOT_LOADED;
+  const n = ballot.onBallot.length;
+  if (n === 0) return `No candidates are ${ON_NOV_3} for this office.`;
+  if (n === 1) return `One candidate is ${ON_NOV_3} for this office, so there is nothing to compare.`;
+  return `The ${n} candidates ${ON_NOV_3}, side by side, issue by issue. Every stance is a sourced summary — follow the source links to read it in context. This is not a ranking or endorsement.`;
+}
+
+export function compareDescription<C extends CandidateLike>(office: string, ballot: RaceBallot<C>): string {
+  if (ballot.kind === "contest" && ballot.onBallot.length > 1) {
+    return `Where the ${ballot.onBallot.length} candidates ${ON_NOV_3} for ${office} stand, issue by issue — every stance linked to its source.`;
+  }
+  return raceDescription(office, ballot);
+}
+
+/** Text for the race and compare share images. */
+export function shareLines<C>(ballot: RaceBallot<C>): {
+  raceEyebrow: string;
+  raceSubtitle: string;
+  compareSubtitle: string;
+} {
+  if (ballot.kind === "no-contest") {
+    return { raceEyebrow: "Wisconsin 2026", raceSubtitle: ballot.note, compareSubtitle: ballot.note };
+  }
+  if (ballot.kind === "not-loaded" || ballot.onBallot.length === 0) {
+    return {
+      raceEyebrow: "Wisconsin 2026",
+      raceSubtitle: "Candidates, campaign finance, and sourced coverage",
+      compareSubtitle: "Where the candidates stand, issue by issue — every stance sourced",
+    };
+  }
+  const n = ballot.onBallot.length;
+  const count = `${n} candidate${n === 1 ? "" : "s"} on the November 3 ballot`;
+  return {
+    raceEyebrow: "On the November 3 ballot",
+    raceSubtitle: n > 1 ? `${count} · compare where they stand` : count,
+    compareSubtitle: n > 1 ? `${n} candidates side by side, issue by issue — every stance sourced` : count,
+  };
+}
+
+/** Rows tied to a candidate stay only if that candidate is on the ballot. */
+export function keepOnBallot<R extends { candidateSlug?: string | null }>(
+  rows: readonly R[],
+  onBallotSlugs: ReadonlySet<string>,
+): R[] {
+  return rows.filter((r) => !r.candidateSlug || onBallotSlugs.has(r.candidateSlug));
+}
+
+/**
+ * Ad-money cards for the November field. Null when ads were tracked but every
+ * one belongs to someone off the ballot: the section is then left out, because
+ * its empty state ("No ads tracked in this race yet") would be false.
+ */
+export function novemberAdMoney<D extends { candidates: readonly { slug: string }[] }>(
+  data: D,
+  onBallotSlugs: ReadonlySet<string>,
+): D | null {
+  const candidates = data.candidates.filter((c) => onBallotSlugs.has(c.slug));
+  if (data.candidates.length > 0 && candidates.length === 0) return null;
+  return { ...data, candidates };
+}
+
+/** A race note written about the primary belongs in the archive, not on the November page. */
+export function novemberNotes(notes: string | undefined): string | undefined {
+  return notes && !/primar/i.test(notes) ? notes : undefined;
+}

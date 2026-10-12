@@ -27,6 +27,7 @@ export function ballotSummary({
   others,
   raceOnBallot,
   raceNote,
+  hadPrimary,
 }: {
   candidateName: string;
   office: string;
@@ -35,9 +36,12 @@ export function ballotSummary({
   others: readonly FieldEntry[];
   raceOnBallot: boolean | undefined;
   raceNote?: string;
+  /** False for a race that was never on the August primary ballot (the spring Supreme Court race). */
+  hadPrimary: boolean;
 }): string {
   if (!me?.onGeneralBallot) {
-    return `${candidateName} is not ${ON} for ${office}. This page is kept as a record of the ${PRIMARY_ARCHIVE.label}.`;
+    const why = hadPrimary ? `This page is kept as a record of the ${PRIMARY_ARCHIVE.label}.` : (raceNote ?? "");
+    return `${candidateName} is not ${ON} for ${office}. ${why}`.trim();
   }
   if (raceOnBallot === false) {
     return `${candidateName} is ${ON} as part of the ticket "${me.ballotName}".${raceNote ? ` ${raceNote}` : ""}`;
@@ -54,6 +58,9 @@ export function candidateDescription({
   onBallot,
   incumbent,
   has,
+  hadPrimary,
+  raceNote,
+  ticket,
 }: {
   who: string;
   office: string;
@@ -61,12 +68,34 @@ export function candidateDescription({
   incumbent: boolean;
   /** What the page actually holds, e.g. ["published positions", "voting record"]. */
   has: readonly string[];
+  hadPrimary: boolean;
+  raceNote?: string;
+  /** Set for a running mate: the governor ticket as printed on the ballot. */
+  ticket?: string;
 }): string {
   if (!onBallot) {
-    return `${who} is not ${ON} for ${office}. This page is a record of the ${PRIMARY_ARCHIVE.label}.`;
+    const why = hadPrimary ? `This page is a record of the ${PRIMARY_ARCHIVE.label}.` : (raceNote ?? "");
+    return `${who} is not ${ON} for ${office}. ${why}`.trim();
   }
-  const opening = `${who}${incumbent ? ", the incumbent," : ""} is ${ON} for ${office}.`;
+  const opening = ticket
+    ? `${who} is ${ON} as part of the ticket "${ticket}".`
+    : `${who}${incumbent ? ", the incumbent," : ""} is ${ON} for ${office}.`;
   if (has.length === 0) return `${opening} Candidate details from the Wisconsin Elections Commission.`;
   const list = has.slice(0, 3).join(", ").replace(/, ([^,]*)$/, " and $1");
-  return `${opening} ${list}, every claim linked to its source.`;
+  return `${opening} On this page: ${list}, every claim linked to its source.`;
+}
+
+/** The line under a candidate's name on their share image. */
+export function candidateShareSubtitle({
+  onBallot,
+  party,
+  incumbent,
+}: {
+  onBallot: boolean;
+  party: string | undefined;
+  incumbent: boolean;
+}): string | undefined {
+  if (!onBallot) return `Not ${ON}`;
+  if (!party) return incumbent ? "Incumbent" : undefined;
+  return incumbent ? `${party} · Incumbent` : party;
 }

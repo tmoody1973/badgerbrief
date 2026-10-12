@@ -43,3 +43,20 @@ export function generalField<
     .filter(isOnGeneralBallot)
     .sort((a, b) => position(a) - position(b) || a.name.localeCompare(b.name));
 }
+
+/**
+ * The state's printing of this PERSON's name. A governor ticket is printed as
+ * "David Crowley / Sarah Godlewski"; on a page about one of them, the name is
+ * that person's half. Falls back to the stored name when nothing matches.
+ */
+export function generalPersonName(candidate: {
+  name: string;
+  general?: { ballotName?: string };
+}): string {
+  const printed = candidate.general?.ballotName;
+  if (!printed) return candidate.name;
+  const halves = printed.split(" / ");
+  if (halves.length === 1) return printed;
+  const surname = (name: string) => name.trim().split(/\s+/).at(-1)?.toLowerCase();
+  return halves.find((half) => surname(half) === surname(candidate.name)) ?? candidate.name;
+}

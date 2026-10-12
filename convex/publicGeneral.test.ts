@@ -33,7 +33,8 @@ describe("public queries carry November ballot facts", () => {
     const t = await seeded();
     const rows = await t.query(api.public.listCandidateDirectory, {});
     const by = Object.fromEntries(rows.map((r) => [r.slug, r]));
-    expect(by["pete-karas"]).toMatchObject({ onGeneralBallot: true, generalParty: "Wisconsin Green" });
+    expect(by["pete-karas"]).toMatchObject({ onGeneralBallot: true, generalParty: "Wisconsin Green", ballotName: "Pete Karas" });
+    expect(by["no-block"].ballotName).toBe("No Block");
     expect(by["someone-else"]).toMatchObject({ onGeneralBallot: false, generalParty: "Democratic" });
     expect(by["no-block"]).toMatchObject({ onGeneralBallot: false, generalParty: null });
   });

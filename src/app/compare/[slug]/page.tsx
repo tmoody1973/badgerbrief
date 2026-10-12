@@ -10,8 +10,9 @@ import { buildIssueComparison } from "@/lib/compare";
 import { getRace, listRaces } from "@/lib/data";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
 import { SITE_URL, raceIdToSlug, slugToRaceId } from "@/lib/site";
-import { generalField } from "../../../../convex/lib/ballot";
+import { generalParty, generalPersonName } from "../../../../convex/lib/ballot";
 import { PRIMARY_ARCHIVE } from "@/lib/election";
+import { buildRaceBallot, compareDescription, compareIntro } from "@/lib/race-ballot";
 
 export const revalidate = 300;
 
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!data) return {};
   return {
     title: `Compare ${data.race.office} candidates — Wisconsin 2026`,
-    description: `Where the ${generalField(data.candidates).length} candidates on the November 3, 2026 ballot for ${data.race.office} stand, issue by issue — every stance linked to its source.`,
+    description: compareDescription(data.race.office, buildRaceBallot(data.race, data.candidates)),
     alternates: { canonical: `/compare/${slug}` },
   };
 }
@@ -38,7 +39,10 @@ export default async function ComparePage({ params }: Props) {
   const data = await getRace(slugToRaceId(slug));
   if (!data) notFound();
   const { race } = data;
-  const candidates = generalField(data.candidates);
+  // Running mates on a governor ticket are on the ballot, but they are not a
+  // contest to compare: only a real November contest fills this page.
+  const ballot = buildRaceBallot(race, data.candidates);
+  const candidates = ballot.kind === "contest" ? ballot.onBallot : [];
   const onBallot = new Set(candidates.map((c) => c.slug));
   const positions = data.positions.filter((p) => onBallot.has(p.candidateSlug));
   const { issues, totalOnRecord } = buildIssueComparison(candidates, positions);
@@ -74,11 +78,7 @@ export default async function ComparePage({ params }: Props) {
         How do the {race.office} candidates compare?
       </h1>
       <p className="mt-2 max-w-2xl">
-        {candidates.length === 0
-          ? "No candidates are on the November 3, 2026 ballot for this office."
-          : candidates.length === 1
-            ? "One candidate is on the November 3, 2026 ballot for this office, so there is nothing to compare."
-            : `The ${candidates.length} candidates on the November 3, 2026 ballot, side by side, issue by issue. Every stance is a sourced summary — follow the source links to read it in context. This is not a ranking or endorsement.`}{" "}
+        {compareIntro(ballot)}{" "}
         <Link href={`${PRIMARY_ARCHIVE.path}/races/${slug}`} className="underline decoration-2 underline-offset-2">
           See the August primary field
         </Link>
@@ -93,7 +93,7 @@ export default async function ComparePage({ params }: Props) {
         </Link>
       </p>
 
-      {totalOnRecord === 0 ? (
+      {candidates.length < 2 ? null : totalOnRecord === 0 ? (
         <div className="mt-6 border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
           <p className="font-display text-lg">No sourced positions on record yet for these candidates.</p>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -125,9 +125,9 @@ export default async function ComparePage({ params }: Props) {
                         href={`/candidates/${candidate.slug}`}
                         className="font-bold underline decoration-2 underline-offset-2"
                       >
-                        {candidate.name}
+                        {generalPersonName(candidate)}
                       </Link>
-                      <PartyBadge party={candidate.party} />
+                      <PartyBadge party={generalParty(candidate)} />
                       {candidate.incumbent && (
                         <span className="border border-border bg-secondary px-1 font-mono text-[10px] font-bold uppercase">
                           Inc.

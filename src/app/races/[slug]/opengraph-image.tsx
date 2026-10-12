@@ -1,6 +1,6 @@
 import { getRace } from "@/lib/data";
 import { slugToRaceId } from "@/lib/site";
-import { generalField } from "../../../../convex/lib/ballot";
+import { buildRaceBallot, shareLines } from "@/lib/race-ballot";
 import { OG_SIZE, OG_CONTENT_TYPE, ogCard } from "@/lib/og-card";
 
 // Per-race share card: a link to a race previews with THAT office and how many
@@ -19,14 +19,11 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   }
 
   const office = data.race.office;
-  const count = generalField(data.candidates).length;
-  const subtitle = count
-    ? `${count} candidate${count === 1 ? "" : "s"} on the November 3 ballot · compare where they stand`
-    : "Candidates, campaign finance, and sourced coverage";
+  const lines = shareLines(buildRaceBallot(data.race, data.candidates));
 
   return ogCard({
-    eyebrow: "On your ballot",
+    eyebrow: lines.raceEyebrow,
     title: /wisconsin/i.test(office) ? office : `${office}`,
-    subtitle,
+    subtitle: lines.raceSubtitle,
   });
 }

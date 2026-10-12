@@ -21,6 +21,7 @@ export function BallotContext({
   raceOffice,
   raceOnBallot,
   raceNote,
+  hadPrimary,
   opponents,
 }: {
   candidateSlug: string;
@@ -30,6 +31,8 @@ export function BallotContext({
   /** undefined when the race's November facts are not loaded. */
   raceOnBallot?: boolean;
   raceNote?: string;
+  /** False for a race that was never on the August primary ballot. */
+  hadPrimary: boolean;
   opponents: FieldEntry[];
 }) {
   const me = opponents.find((o) => o.slug === candidateSlug);
@@ -45,11 +48,11 @@ export function BallotContext({
     <section id="ballot" className="mt-6 scroll-mt-16 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
       <h2 className="font-display text-xl">Is {candidateName} on the November 3 ballot?</h2>
       <p className="mt-2 max-w-[54ch]">
-        {ballotSummary({ candidateName, office: raceOffice, me, others, raceOnBallot, raceNote })}
+        {ballotSummary({ candidateName, office: raceOffice, me, others, raceOnBallot, raceNote, hadPrimary })}
       </p>
       <p className="mt-2 text-sm">
         <Link href={`/races/${raceSlug}`} className={`font-bold ${linkClass}`}>
-          {raceOffice} on the November ballot →
+          {raceOnBallot === false ? `About ${raceOffice}` : `${raceOffice} on the November ballot`} →
         </Link>
       </p>
 
@@ -70,7 +73,7 @@ export function BallotContext({
         </>
       )}
 
-      {!me?.onGeneralBallot && (
+      {!me?.onGeneralBallot && hadPrimary && (
         <p className="mt-3 text-sm">
           <Link href={`${PRIMARY_ARCHIVE.path}/races/${raceSlug}`} className={linkClass}>
             See everyone who ran in the {PRIMARY_ARCHIVE.label} →

@@ -1,10 +1,5 @@
 import { describe, expect, test } from "vitest";
-import {
-  generalBallotName,
-  generalField,
-  generalParty,
-  isOnGeneralBallot,
-} from "./ballot";
+import { generalBallotName, generalField, generalParty, generalPersonName, isOnGeneralBallot } from "./ballot";
 
 describe("isOnGeneralBallot", () => {
   test("true only when the state's list says so", () => {
@@ -54,5 +49,22 @@ describe("generalField", () => {
     const before = field.map((c) => c.name);
     generalField(field);
     expect(field.map((c) => c.name)).toEqual(before);
+  });
+});
+
+describe("generalPersonName", () => {
+  test("uses the state's printing of the person's own name", () => {
+    expect(generalPersonName({ name: "John Leiber", general: { ballotName: "John S. Leiber" } })).toBe("John S. Leiber");
+  });
+
+  test("picks the person's half of a governor ticket", () => {
+    const ticket = { ballotName: "David Crowley / Sarah Godlewski" };
+    expect(generalPersonName({ name: "David Crowley", general: ticket })).toBe("David Crowley");
+    expect(generalPersonName({ name: "Sarah Godlewski", general: ticket })).toBe("Sarah Godlewski");
+  });
+
+  test("falls back to the stored name when there is no ballot name, or no half matches", () => {
+    expect(generalPersonName({ name: "Francesca Hong" })).toBe("Francesca Hong");
+    expect(generalPersonName({ name: "Someone Else", general: { ballotName: "A Person / B Person" } })).toBe("Someone Else");
   });
 });

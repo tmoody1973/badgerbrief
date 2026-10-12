@@ -36,10 +36,19 @@ import {
   personNode,
 } from "@/lib/jsonld";
 import { raceIdToSlug, SITE_URL } from "@/lib/site";
-import { isOnGeneralBallot } from "../../../../convex/lib/ballot";
+import { generalParty, generalPersonName, isOnGeneralBallot } from "../../../../convex/lib/ballot";
+import { hadAugustPrimary } from "@/lib/ballot-status";
 import { candidateDescription } from "@/lib/candidate-ballot";
 
 export const revalidate = 300;
+
+/**
+ * The candidate with the name and party the state prints. "Names always come
+ * from the state" (design section 3); the page address never changes.
+ */
+function asPrinted<C extends { name: string; party?: string; general?: { ballotName?: string; party?: string } }>(c: C): C {
+  return { ...c, name: generalPersonName(c), party: generalParty(c) };
+}
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -52,7 +61,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await getCandidateBySlug(slug);
   if (!data) return {};
-  const { candidate, race } = data;
+  const { race } = data;
+  const candidate = asPrinted(data.candidate);
   const office = race?.office ?? "Wisconsin 2026";
   const title = `${candidate.name} — ${office}`;
 
@@ -74,6 +84,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     onBallot: isOnGeneralBallot(candidate),
     incumbent: Boolean(candidate.incumbent),
     has,
+    hadPrimary: hadAugustPrimary(race ?? {}),
+    raceNote: race?.general?.note,
+    // A running mate is on the ballot through a governor ticket, not a contest of their own.
+    ticket: race?.general?.onBallot === false ? candidate.general?.ballotName : undefined,
   });
 
   return {
@@ -113,7 +127,8 @@ export default async function CandidatePage({ params }: Props) {
     getInTheNewsForCandidate(slug),
   ]);
   if (!data) notFound();
-  const { candidate, race, field, positions, quotes, finance, contributions, committeeFunding, ads, votingRecordSummary, financeBreakdowns } = data;
+  const { race, field, positions, quotes, finance, contributions, committeeFunding, ads, votingRecordSummary, financeBreakdowns } = data;
+  const candidate = asPrinted(data.candidate);
 
   // WisconsinEye interview answers get their own section: every candidate in
   // the race sat for the same interview, so the answers are comparable across
@@ -228,6 +243,7 @@ export default async function CandidatePage({ params }: Props) {
             raceOffice={race.office}
             raceOnBallot={race.general?.onBallot}
             raceNote={race.general?.note}
+            hadPrimary={hadAugustPrimary(race)}
             opponents={field}
           />
         )}

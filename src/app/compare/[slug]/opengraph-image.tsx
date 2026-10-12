@@ -1,6 +1,6 @@
 import { getRace } from "@/lib/data";
 import { slugToRaceId } from "@/lib/site";
-import { generalField } from "../../../../convex/lib/ballot";
+import { buildRaceBallot, shareLines } from "@/lib/race-ballot";
 import { OG_SIZE, OG_CONTENT_TYPE, ogCard } from "@/lib/og-card";
 
 // Per-race share card for the side-by-side comparison page. Framed as "compare"
@@ -18,10 +18,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   }
 
   const office = data.race.office;
-  const count = generalField(data.candidates).length;
-  const subtitle = count
-    ? `${count} candidate${count === 1 ? "" : "s"} side by side, issue by issue — every stance sourced`
-    : "Where the candidates stand, issue by issue — every stance sourced";
+  const subtitle = shareLines(buildRaceBallot(data.race, data.candidates)).compareSubtitle;
 
   return ogCard({ eyebrow: "Compare candidates", title: office, subtitle });
 }

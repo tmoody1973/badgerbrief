@@ -1,6 +1,6 @@
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { CandidateCard } from "@/components/guide/cards";
-import { partySectionId, primaryField, wasOnPrimaryBallot } from "@/lib/ballot-status";
+import { hadAugustPrimary, partySectionId, primaryField, wasOnPrimaryBallot } from "@/lib/ballot-status";
 import { PRIMARY_ARCHIVE } from "@/lib/election";
 
 /** On-ballot candidates in a compact grid; the rest in a collapsed fold. */
@@ -38,6 +38,17 @@ export function PrimaryRaceView({ race, candidates }: { race: Doc<"races">; cand
   const nonPartisan = field.filter((c) => !c.primaryParty);
   const byParty = (party: string) => field.filter((c) => c.primaryParty === party);
 
+  if (!hadAugustPrimary(race)) {
+    return (
+      <>
+        <h1 className="font-display mt-2 text-3xl leading-tight sm:text-4xl">{race.office}</h1>
+        <p className="mt-3 max-w-2xl text-lg">
+          This office was not on the {PRIMARY_ARCHIVE.label} ballot. {race.general?.note}
+        </p>
+      </>
+    );
+  }
+
   return (
     <>
       <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
@@ -49,6 +60,7 @@ export function PrimaryRaceView({ race, candidates }: { race: Doc<"races">; cand
       <p className="mt-3 max-w-2xl text-lg">
         {field.length === 1 ? "1 candidate was" : `${field.length} candidates were`} listed for this office.
       </p>
+      {race.notes && <p className="mt-3 max-w-2xl">{race.notes}</p>}
 
       {parties.map((party) => (
         <section key={party} id={partySectionId(party)} className="mt-8 scroll-mt-16">

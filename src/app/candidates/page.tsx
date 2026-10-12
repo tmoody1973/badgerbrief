@@ -122,7 +122,7 @@ export default async function CandidatesIndexPage() {
                           href={`/candidates/${c.slug}`}
                           className="underline decoration-1 underline-offset-2 hover:decoration-2"
                         >
-                          {c.name}
+                          {c.ballotName}
                         </Link>
                         {c.generalParty ? (
                           <span className="ml-1 font-mono text-xs text-muted-foreground">

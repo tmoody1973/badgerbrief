@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArchiveBanner } from "@/components/guide/archive-banner";
+import { hadAugustPrimary } from "@/lib/ballot-status";
 import { listRaces } from "@/lib/data";
 import { PRIMARY_ARCHIVE } from "@/lib/election";
 import { splitHomeRaces } from "@/lib/home-races";
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 const linkClass = "font-bold underline decoration-2 underline-offset-2";
 
 export default async function PrimaryArchivePage() {
-  const { byLevel } = splitHomeRaces(await listRaces());
+  const { byLevel } = splitHomeRaces((await listRaces()).filter(hadAugustPrimary));
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">

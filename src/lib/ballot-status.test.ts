@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it, test } from "vitest";
-import { partySectionId, primaryField, wasOnPrimaryBallot } from "./ballot-status";
+import { hadAugustPrimary, partySectionId, primaryField, wasOnPrimaryBallot } from "./ballot-status";
 
 describe("wasOnPrimaryBallot", () => {
   it("treats undefined and Active as on-ballot", () => {
@@ -50,5 +50,14 @@ describe("primaryField", () => {
       { slug: "no-block-yet", primaryParty: "Democratic" },
     ]);
     expect(field.map((c) => c.slug)).toEqual(["ran-and-advanced", "ran-and-left", "nonpartisan-race", "no-block-yet"]);
+  });
+});
+
+describe("hadAugustPrimary", () => {
+  test("is true only for a race whose primary was August 11, 2026", () => {
+    expect(hadAugustPrimary({ primaryDate: "August 11, 2026" })).toBe(true);
+    // Wisconsin Supreme Court, decided in the spring.
+    expect(hadAugustPrimary({ primaryDate: "February 17, 2026 (if needed)" })).toBe(false);
+    expect(hadAugustPrimary({})).toBe(false);
   });
 });

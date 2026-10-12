@@ -6,6 +6,7 @@
  * list. These helpers read the old free-text `status` field and exist so the
  * archive can show the primary as it was.
  */
+import { PRIMARY_ARCHIVE } from "./election";
 
 /**
  * Whether a candidate was on the printed PRIMARY ballot. Only "not on" and
@@ -27,6 +28,11 @@ export function primaryField<C extends { primaryParty?: string; general?: { onBa
   candidates: readonly C[],
 ): C[] {
   return candidates.filter((c) => Boolean(c.primaryParty) || c.general?.onBallot !== true);
+}
+
+/** Whether a race was on the August 11, 2026 primary ballot at all. The spring Supreme Court race was not. */
+export function hadAugustPrimary(race: { primaryDate?: string }): boolean {
+  return Boolean(race.primaryDate?.includes(PRIMARY_ARCHIVE.longDate));
 }
 
 /**

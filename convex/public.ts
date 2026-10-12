@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 import { query } from "./_generated/server";
-import { generalBallotName, generalParty, isOnGeneralBallot } from "./lib/ballot";
+import { generalBallotName, generalParty, generalPersonName, isOnGeneralBallot } from "./lib/ballot";
 
 /** Read-only queries for the public guide. Published/seeded data only. */
 
@@ -249,6 +249,8 @@ export const listCandidateDirectory = query({
       dataAsOf: c.dataAsOf,
       onGeneralBallot: isOnGeneralBallot(c),
       generalParty: generalParty(c) ?? null,
+      // The state's printing of this person's name; the stored name otherwise.
+      ballotName: generalPersonName(c),
     }));
   },
 });

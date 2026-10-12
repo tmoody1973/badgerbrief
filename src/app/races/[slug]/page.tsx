@@ -22,7 +22,16 @@ import {
 } from "@/lib/data";
 import { CURRENT_ELECTION, PRIMARY_ARCHIVE, formatIsoDate } from "@/lib/election";
 import { JsonLd, breadcrumbNode, faqNode, organizationNode, personNode } from "@/lib/jsonld";
-import { buildRaceBallot, countSentence, raceDescription, raceFaq, splitPolls } from "@/lib/race-ballot";
+import {
+  buildRaceBallot,
+  countSentence,
+  keepOnBallot,
+  novemberAdMoney,
+  novemberNotes,
+  raceDescription,
+  raceFaq,
+  splitPolls,
+} from "@/lib/race-ballot";
 import { raceIdToSlug, slugToRaceId, SITE_URL } from "@/lib/site";
 
 export const revalidate = 300;
@@ -66,7 +75,7 @@ export default async function RacePage({ params }: Props) {
   const slugs = new Set(onBallot.map((c) => c.slug));
   const archiveHref = `${PRIMARY_ARCHIVE.path}/races/${slug}`;
 
-  const [adMoneyAll, tvAds, inTheNews, pollsAll] = await Promise.all([
+  const [adMoneyAll, tvAdsAll, inTheNews, pollsAll] = await Promise.all([
     getAdMoneyForRace(raceId),
     getTvAdsForRace(raceId),
     getInTheNewsForRace(race.raceId),
@@ -76,13 +85,15 @@ export default async function RacePage({ params }: Props) {
   // on the ballot, and polls that name anyone who is not, live in the archive.
   const raceFinance = finance.filter((f) => slugs.has(f.candidateSlug));
   const raceBreakdowns = financeBreakdowns.filter((b) => slugs.has(b.candidateSlug));
-  const adMoney = { ...adMoneyAll, candidates: adMoneyAll.candidates.filter((c) => slugs.has(c.slug)) };
+  const adMoney = novemberAdMoney(adMoneyAll, slugs);
+  const tvAds = keepOnBallot(tvAdsAll, slugs);
+  const notes = novemberNotes(race.notes);
   const polls = splitPolls(pollsAll, slugs).november;
 
   const navSections: NavSection[] = [
     ...(onBallot.length > 0 ? [{ id: "candidates", label: "On the ballot", count: onBallot.length }] : []),
     ...(raceFinance.length > 0 ? [{ id: "money", label: "The money" }] : []),
-    ...(adMoney.candidates.length > 0 ? [{ id: "ad-money", label: "Ad money" }] : []),
+    ...(adMoney && adMoney.candidates.length > 0 ? [{ id: "ad-money", label: "Ad money" }] : []),
     ...(tvAds.length > 0 ? [{ id: "tv-ads", label: "TV ads" }] : []),
     ...(polls.length > 0 ? [{ id: "polls", label: "Polls", count: polls.length }] : []),
     ...(inTheNews.length > 0 ? [{ id: "news", label: "In the news", count: inTheNews.length }] : []),
@@ -170,12 +181,12 @@ export default async function RacePage({ params }: Props) {
         </>
       )}
 
-      {(race.officeDescription || race.districtDescription || race.notes) && (
+      {(race.officeDescription || race.districtDescription || notes) && (
         <div className="mt-6 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
           <h2 className="font-display text-xl">Why this race matters</h2>
           {race.officeDescription && <p className="mt-2">{race.officeDescription}</p>}
           {race.districtDescription && <p className="mt-2">{race.districtDescription}</p>}
-          {race.notes && <p className="mt-2">{race.notes}</p>}
+          {notes && <p className="mt-2">{notes}</p>}
         </div>
       )}
 
@@ -208,7 +219,7 @@ export default async function RacePage({ params }: Props) {
 
       <RaceFinanceTable finance={raceFinance} candidates={onBallot} breakdowns={raceBreakdowns} />
 
-      <RaceAdMoney data={adMoney} />
+      {adMoney && <RaceAdMoney data={adMoney} />}
 
       <RaceTvAds ads={tvAds} />
 
