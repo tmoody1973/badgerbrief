@@ -18,7 +18,7 @@ export const chromeEs: ChromeDict = {
     "/about": "Acerca de",
     "/methodology": "Metodología",
   },
-  ctaAug11: "11 de agosto",
+  ctaElectionDay: "3 de noviembre",
   footer: {
     mission:
       "BadgerBrief es una guía electoral de Wisconsin no partidista y con fuentes enlazadas. " +

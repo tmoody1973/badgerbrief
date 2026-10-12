@@ -11,10 +11,10 @@ export const homeEs: HomeDict = {
   crumbs: { home: "Inicio" },
   stamp: "Wisconsin 2026",
   h1: "Conozca su papeleta antes de rellenarla.",
-  introBeforeDate: "La primaria partidista de Wisconsin es el",
+  introBeforeDate: "La elección general de Wisconsin es el",
   introAfterDate:
     ". Esta es una guía no partidista y con fuentes verificables para cada contienda estatal y del Congreso en ella — quién se postula, qué dicen y exactamente cómo votar.",
-  primaryDateFallback: "11 de agosto de 2026",
+  electionDateFallback: "3 de noviembre de 2026",
   howToVoteCta: "Cómo votar →",
   governorsRaceCta: "Contienda por gobernador",
   matchCta: "¿Qué te importa? →",
@@ -22,7 +22,7 @@ export const homeEs: HomeDict = {
   // so this never renders — kept only to satisfy the ES-key-parity test.
   startHereCta: "New here? Start here →",
   deadlines: {
-    heading: "¿Cuáles son los plazos de la primaria de Wisconsin de 2026?",
+    heading: "¿Cuáles son los plazos para votar en Wisconsin en noviembre de 2026?",
     pollsOpenPrefix: "Las urnas abren",
     detailsPrefix: "Los detalles de voto ausente, registro y voto anticipado están en la",
     linkText: "página de cómo votar",

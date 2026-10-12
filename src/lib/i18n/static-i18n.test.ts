@@ -30,6 +30,14 @@ describe("ES dict parity", () => {
   test("home: ES dict has the same keys as EN dict", () => {
     expect(keyPaths(homeEs)).toEqual(keyPaths(homeEn));
   });
+  test("home: intro and deadlines name the general election, not the primary", () => {
+    expect(homeEn.introBeforeDate.toLowerCase()).not.toContain("primary");
+    expect(homeEn.electionDateFallback).toBe("November 3, 2026");
+    expect(homeEn.deadlines.heading.toLowerCase()).not.toContain("primary");
+    expect(homeEs.introBeforeDate.toLowerCase()).not.toContain("primaria");
+    expect(homeEs.electionDateFallback).toBe("3 de noviembre de 2026");
+    expect(homeEs.deadlines.heading.toLowerCase()).not.toContain("primaria");
+  });
   test("about: ES dict has the same keys as EN dict", () => {
     expect(keyPaths(aboutEs)).toEqual(keyPaths(aboutEn));
   });

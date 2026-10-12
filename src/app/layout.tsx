@@ -74,13 +74,14 @@ export default function RootLayout({
         <Providers>
           <StoreUser />
           {/* Above the masthead so it is the first thing on every page, not
-              just the home page. Retire this after the August 11 primary. */}
+              just the home page. The Oct 14 registration deadline in this
+              message expires: replace it in the Phase 1a deploy. */}
           <AnnouncementBar
-            id="wi-gov-barnes-withdrew-2026-07-30"
-            href="/races/wi-gov-2026"
+            id="general-2026-register-by-oct-14"
+            href="/vote"
           >
-            Update: Mandela Barnes has withdrawn from the Democratic primary for
-            governor (July 30, 2026) →
+            The Aug 11 primary is over. General election: Tuesday, Nov 3.
+            Register online or by mail (postmarked) by Wed, Oct 14 →
           </AnnouncementBar>
           <SiteHeader />
           <Suspense fallback={null}>

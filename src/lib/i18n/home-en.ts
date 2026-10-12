@@ -6,7 +6,7 @@ export type HomeDict = {
   h1: string;
   introBeforeDate: string;
   introAfterDate: string;
-  primaryDateFallback: string;
+  electionDateFallback: string;
   howToVoteCta: string;
   governorsRaceCta: string;
   matchCta: string;
@@ -45,16 +45,16 @@ export const homeEn: HomeDict = {
   crumbs: { home: "Home" },
   stamp: "Wisconsin 2026",
   h1: "Know your ballot before you fill it in.",
-  introBeforeDate: "The Wisconsin partisan primary is",
+  introBeforeDate: "Wisconsin's general election is",
   introAfterDate:
     ". This is a non-partisan, source-linked guide to every statewide and congressional race on it — who's running, what they say, and exactly how to vote.",
-  primaryDateFallback: "August 11, 2026",
+  electionDateFallback: "November 3, 2026",
   howToVoteCta: "How to vote →",
   governorsRaceCta: "Governor's race",
   matchCta: "What matters to you? →",
   startHereCta: "New here? Start here →",
   deadlines: {
-    heading: "When are the 2026 Wisconsin primary deadlines?",
+    heading: "When are Wisconsin's November 2026 voting deadlines?",
     pollsOpenPrefix: "Polls are open",
     detailsPrefix: "Absentee, registration, and early-voting details are on the",
     linkText: "how-to-vote page",

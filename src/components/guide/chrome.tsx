@@ -46,7 +46,7 @@ export function SiteHeader() {
               href={localizeHref("/vote", locale)}
               className="whitespace-nowrap border-2 border-border bg-primary px-2 py-1 text-primary-foreground shadow-[var(--shadow-brutal)]"
             >
-              {dict.ctaAug11}
+              {dict.ctaElectionDay}
             </Link>
             <AuthNav />
             <ThemeToggle />

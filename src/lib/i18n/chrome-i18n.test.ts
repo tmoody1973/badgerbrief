@@ -7,7 +7,9 @@ import { localeFromPath } from "./chrome-dict";
 describe("chrome dict parity + locale detection", () => {
   test("ES chrome has every key EN has", () => {
     expect(Object.keys(chromeEs.navLabels).sort()).toEqual(Object.keys(chromeEn.navLabels).sort());
-    expect(chromeEs.ctaAug11).not.toBe(chromeEn.ctaAug11);
+    expect(chromeEs.ctaElectionDay).not.toBe(chromeEn.ctaElectionDay);
+    expect(chromeEn.ctaElectionDay).toBe("Nov 3");
+    expect(chromeEs.ctaElectionDay).toBe("3 de noviembre");
   });
   test("localeFromPath detects /es", () => {
     expect(localeFromPath("/es")).toBe("es");

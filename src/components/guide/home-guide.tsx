@@ -56,7 +56,7 @@ export function HomeGuide({
         </h1>
         <p className="mt-4 max-w-2xl text-lg">
           {dict.introBeforeDate}{" "}
-          <strong>{election?.primaryDate ?? dict.primaryDateFallback}</strong>
+          <strong>{election?.generalDate ?? dict.electionDateFallback}</strong>
           {dict.introAfterDate}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
@@ -121,7 +121,7 @@ export function HomeGuide({
           <h2 className="font-display text-lg">{dict.deadlines.heading}</h2>
           <p className="mt-1 text-sm">
             {dict.deadlines.pollsOpenPrefix} {votingInfo.pollsOpen}–{votingInfo.pollsClose} on{" "}
-            {votingInfo.primaryDate}. {dict.deadlines.detailsPrefix}{" "}
+            {election?.generalDate ?? dict.electionDateFallback}. {dict.deadlines.detailsPrefix}{" "}
             <Link href={lang === "es" ? "/es/vote" : "/vote"} className="font-bold underline decoration-2">
               {dict.deadlines.linkText}
             </Link>

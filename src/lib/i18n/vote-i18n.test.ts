@@ -21,3 +21,24 @@ describe("ES dict parity", () => {
     }
   });
 });
+
+describe("ES dict names the general election", () => {
+  const info = { primaryDate: "August 11, 2026", pollsOpen: "7:00 AM", pollsClose: "8:00 PM", photoIdRequired: true } as unknown as Parameters<typeof voteEs.faqs>[0];
+  const d = {
+    electionDate: "November 3, 2026",
+    registration: [] as [string, string][], absenteeRequest: [["by_mail", "y"]] as [string, string][], absenteeReturn: [] as [string, string][],
+    early: { available: true, start_date: "October 20, 2026", end_date: "November 1, 2026" },
+  };
+  test("date and wording are November's, not the primary's", () => {
+    const faqs = voteEs.faqs(info, d);
+    expect(faqs[0].a).toContain("3 de noviembre de 2026");
+    expect(faqs[0].a).not.toContain("11 de agosto");
+    expect(voteEs.h1.toLowerCase()).not.toContain("primaria");
+    expect(voteEs.meta.description).not.toContain("11 de agosto");
+  });
+  test("early voting is stated as possible, not promised", () => {
+    const early = voteEs.faqs(info, d).find((f) => f.q.includes("anticipada"));
+    expect(early?.a).toContain("puede comenzar");
+    expect(early?.a).not.toContain(" va del ");
+  });
+});

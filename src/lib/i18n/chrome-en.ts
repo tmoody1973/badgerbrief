@@ -15,7 +15,7 @@ export const chromeEn: ChromeDict = {
     "/about": "About",
     "/methodology": "Methodology",
   },
-  ctaAug11: "Aug 11",
+  ctaElectionDay: "Nov 3",
   footer: {
     mission:
       "BadgerBrief is a non-partisan, source-linked Wisconsin voter guide. " +

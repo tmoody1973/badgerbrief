@@ -10,8 +10,9 @@ export type VoteDict = {
   lang: "en" | "es";
   meta: { title: string; description: string };
   h1: string;
-  intro: (info: VotingInfo, myVoteLabel: string) => ReactNode;
+  intro: (info: VotingInfo, myVoteLabel: string, electionDate: string) => ReactNode;
   faqs: (info: VotingInfo, d: {
+    electionDate: string; // elections.generalDate — not voting_info.primaryDate
     registration: [string, string][];
     absenteeRequest: [string, string][];
     absenteeReturn: [string, string][];

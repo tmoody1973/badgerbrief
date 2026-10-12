@@ -10,17 +10,17 @@ function humanizeKey(key: string): string {
 export const voteEn: VoteDict = {
   lang: "en",
   meta: {
-    title: "How to vote in the Wisconsin 2026 primary",
+    title: "How to vote in Wisconsin's November 3, 2026 general election",
     description:
-      "Registration deadlines, absentee ballot rules, early voting dates, photo ID requirements, and polling hours for the August 11, 2026 Wisconsin primary — every rule linked to its official source.",
+      "Registration deadlines, absentee ballot rules, early voting dates, photo ID requirements, and polling hours for the November 3, 2026 Wisconsin general election — every rule linked to its official source.",
   },
-  h1: "How do I vote in the Wisconsin 2026 primary?",
-  intro: (info, myVoteLabel) =>
+  h1: "How do I vote in Wisconsin's November 3 general election?",
+  intro: (info, myVoteLabel, electionDate) =>
     createElement(
       Fragment,
       null,
-      "The primary is ",
-      createElement("strong", null, info.primaryDate),
+      "The general election is ",
+      createElement("strong", null, electionDate),
       ", polls open ",
       info.pollsOpen,
       "–",
@@ -40,8 +40,8 @@ export const voteEn: VoteDict = {
     ),
   faqs: (info, d) => [
     {
-      q: "When is the 2026 Wisconsin primary election?",
-      a: `The Wisconsin partisan primary is ${info.primaryDate}. Polls are open ${info.pollsOpen} to ${info.pollsClose} ${info.timezone ?? ""}.`.trim(),
+      q: "When is the 2026 Wisconsin general election?",
+      a: `Wisconsin's general election is ${d.electionDate}. Polls are open ${info.pollsOpen} to ${info.pollsClose} ${info.timezone ?? ""}.`.trim(),
     },
     {
       q: "How do I register to vote in Wisconsin?",
@@ -56,7 +56,8 @@ export const voteEn: VoteDict = {
       a:
         d.absenteeRequest
           .map(([mode, deadline]) => `${humanizeKey(mode)}: ${deadline}`)
-          .join("; ") + ". Request through myvote.wi.gov.",
+          .join("; ") +
+        ". Request through myvote.wi.gov. Different deadlines apply to military, hospitalized and indefinitely confined voters — see MyVote.",
     },
     {
       q: "When must my Wisconsin absentee ballot be returned?",
@@ -68,7 +69,7 @@ export const voteEn: VoteDict = {
       ? [
           {
             q: "Does Wisconsin have early voting in 2026?",
-            a: `Yes. In-person absentee (early) voting runs ${d.early.start_date} through ${d.early.end_date}. Locations and hours vary by municipality — check myvote.wi.gov.`,
+            a: `Yes. In-person absentee (early) voting may begin as early as ${d.early.start_date} and may run through ${d.early.end_date}. Dates, locations and hours vary by municipality — check myvote.wi.gov.`,
           },
         ]
       : []),
@@ -103,7 +104,7 @@ export const voteEn: VoteDict = {
   toggle: { label: "Español", href: "/es/vote" },
   myVoteLabel: "MyVote Wisconsin",
   ballotBasics: {
-    text: "New to voting? See how the partisan primary works and what the party labels mean",
+    text: "New to voting? See what the party labels on your ballot mean",
     href: "/ballot-basics",
   },
 };

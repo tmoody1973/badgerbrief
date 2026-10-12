@@ -6,10 +6,10 @@ import type { VoteDict } from "./vote-dict";
  * information — verified before publish, same gate as the English source rows
  * (MOO-398). Access translations mirror scripts/voter-access-seed.json.
  *
- * The primary DATE is hardcoded in Spanish prose ("el 11 de agosto de 2026")
- * rather than read from info.primaryDate, which is stored as an English string
- * ("August 11, 2026"). ceiling: this is a one-off 2026-primary slice — if the
- * primary date ever changes in the data, update these two strings by hand.
+ * The election DATE is hardcoded in Spanish prose ("el 3 de noviembre de 2026")
+ * rather than read from the electionDate argument, which is stored as an
+ * English string ("November 3, 2026"). ceiling: one election at a time — if the
+ * date changes in the data, update these strings by hand.
  */
 
 const ES_DEADLINE_LABELS: Record<string, string> = {
@@ -87,17 +87,17 @@ const ACCESS_ES: Record<
 export const voteEs: VoteDict = {
   lang: "es",
   meta: {
-    title: "Cómo votar en las primarias de Wisconsin de 2026",
+    title: "Cómo votar en la elección general de Wisconsin del 3 de noviembre de 2026",
     description:
-      "Plazos de inscripción, reglas para votar en ausencia, fechas de votación anticipada, requisitos de identificación con foto y horarios de las urnas para las primarias de Wisconsin del 11 de agosto de 2026: cada regla enlazada a su fuente oficial.",
+      "Plazos de inscripción, reglas para votar en ausencia, fechas de votación anticipada, requisitos de identificación con foto y horarios de las urnas para la elección general de Wisconsin del 3 de noviembre de 2026: cada regla enlazada a su fuente oficial.",
   },
-  h1: "¿Cómo voto en las primarias de Wisconsin de 2026?",
+  h1: "¿Cómo voto en la elección general de Wisconsin del 3 de noviembre?",
   intro: (info, myVoteLabel) =>
     createElement(
       Fragment,
       null,
-      "Las primarias son ",
-      createElement("strong", null, "el 11 de agosto de 2026"),
+      "La elección general es ",
+      createElement("strong", null, "el 3 de noviembre de 2026"),
       ", las urnas abren de ",
       info.pollsOpen,
       " a ",
@@ -117,8 +117,8 @@ export const voteEs: VoteDict = {
     ),
   faqs: (info, d) => [
     {
-      q: "¿Cuándo son las primarias de Wisconsin de 2026?",
-      a: `Las primarias partidistas de Wisconsin son el 11 de agosto de 2026. Las urnas están abiertas de ${info.pollsOpen} a ${info.pollsClose} ${info.timezone ?? ""}.`.trim(),
+      q: "¿Cuándo es la elección general de Wisconsin de 2026?",
+      a: `La elección general de Wisconsin es el 3 de noviembre de 2026. Las urnas están abiertas de ${info.pollsOpen} a ${info.pollsClose} ${info.timezone ?? ""}.`.trim(),
     },
     {
       q: "¿Cómo me inscribo para votar en Wisconsin?",
@@ -133,7 +133,8 @@ export const voteEs: VoteDict = {
       a:
         d.absenteeRequest
           .map(([mode, deadline]) => `${ES_DEADLINE_LABELS[mode] ?? mode}: ${deadline}`)
-          .join("; ") + ". Solicítela en myvote.wi.gov.",
+          .join("; ") +
+        ". Solicítela en myvote.wi.gov. Se aplican plazos distintos a los votantes militares, hospitalizados o confinados indefinidamente: consulte MyVote.",
     },
     {
       q: "¿Cuándo debo devolver mi boleta de voto en ausencia de Wisconsin?",
@@ -145,7 +146,7 @@ export const voteEs: VoteDict = {
       ? [
           {
             q: "¿Wisconsin tiene votación anticipada en 2026?",
-            a: `Sí. La votación en ausencia en persona (anticipada) va del ${d.early.start_date} al ${d.early.end_date}. Los lugares y horarios varían según el municipio: consulte myvote.wi.gov.`,
+            a: `Sí. La votación en ausencia en persona (anticipada) puede comenzar a partir del ${d.early.start_date} y puede extenderse hasta el ${d.early.end_date}. Las fechas, los lugares y los horarios varían según el municipio: consulte myvote.wi.gov.`,
           },
         ]
       : []),

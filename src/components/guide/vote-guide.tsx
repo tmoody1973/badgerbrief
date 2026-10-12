@@ -20,10 +20,12 @@ function deadlineRows(map: DeadlineMap): [string, string][] {
 export function VoteGuide({
   dict,
   info,
+  electionDate,
   access,
 }: {
   dict: VoteDict;
   info: VotingInfo;
+  electionDate: string;
   access: VoterAccessRow[];
 }) {
   const registration = deadlineRows(info.voterRegistration as DeadlineMap);
@@ -38,6 +40,7 @@ export function VoteGuide({
     | undefined;
 
   const faqs = dict.faqs(info, {
+    electionDate,
     registration,
     absenteeRequest,
     absenteeReturn,
@@ -78,7 +81,7 @@ export function VoteGuide({
       <h1 className="mt-4 font-display text-3xl leading-tight sm:text-4xl">
         {dict.h1}
       </h1>
-      <p className="mt-3 text-lg">{dict.intro(info, dict.myVoteLabel)}</p>
+      <p className="mt-3 text-lg">{dict.intro(info, dict.myVoteLabel, electionDate)}</p>
 
       {dict.ballotBasics && (
         <p className="mt-3 font-mono text-xs text-muted-foreground">
@@ -124,7 +127,7 @@ export function VoteGuide({
             </li>
           ))}
           <li>
-            ☐ {dict.checklist.vote}: {info.primaryDate}, {info.pollsOpen}–
+            ☐ {dict.checklist.vote}: {electionDate}, {info.pollsOpen}–
             {info.pollsClose}
           </li>
         </ul>

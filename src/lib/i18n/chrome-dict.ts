@@ -2,7 +2,7 @@ import type { Locale } from "./locale";
 
 export type ChromeDict = {
   navLabels: Record<string, string>;
-  ctaAug11: string;
+  ctaElectionDay: string;
   footer: {
     mission: string;
     missionLink: string;

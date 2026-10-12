@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { VoteGuide } from "@/components/guide/vote-guide";
 import { voteEn } from "@/lib/i18n/vote-en";
 import { hreflangFor } from "@/lib/i18n/locale";
-import { getVoterAccess, getVotingInfo } from "@/lib/data";
+import { getElection, getVoterAccess, getVotingInfo } from "@/lib/data";
 
 export const revalidate = 300;
 
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
 };
 
 export default async function VotePage() {
-  const info = await getVotingInfo();
-  if (!info) notFound();
+  const [info, election] = await Promise.all([getVotingInfo(), getElection()]);
+  if (!info || !election) notFound();
   const access = (await getVoterAccess()) ?? [];
-  return <VoteGuide dict={voteEn} info={info} access={access} />;
+  return <VoteGuide dict={voteEn} info={info} electionDate={election.generalDate} access={access} />;
 }
