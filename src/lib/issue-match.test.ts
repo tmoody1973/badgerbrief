@@ -8,43 +8,69 @@ const pos = (candidateSlug: string, issueSlug: string) => ({
 const races: RaceInput[] = [
   {
     raceId: "WI-GOV-2026", office: "Governor",
-    candidates: [{ slug: "barnes", name: "Mandela Barnes" }, { slug: "roys", name: "Kelda Roys" }],
-    positions: [pos("barnes", "healthcare"), pos("roys", "healthcare"), pos("barnes", "abortion")],
+    candidates: [{ slug: "crowley", name: "David Crowley" }, { slug: "tiffany", name: "Tom Tiffany" }],
+    positions: [pos("crowley", "healthcare"), pos("tiffany", "healthcare"), pos("crowley", "abortion")],
   },
   {
     raceId: "WI-AG-2026", office: "Attorney General",
     candidates: [{ slug: "kaul", name: "Josh Kaul" }, { slug: "toney", name: "Eric Toney" }],
     positions: [pos("kaul", "healthcare")],
   },
+  {
+    // On the voter's ballot, with no published position on anything.
+    raceId: "WI-STATE-ASSEMBLY-D3-2026", office: "State Assembly — District 3",
+    candidates: [{ slug: "goodwin", name: "Michael J. Goodwin" }],
+    positions: [],
+  },
+  // A race with nobody on the ballot has nothing to show.
+  { raceId: "WI-EMPTY-2026", office: "Empty", candidates: [], positions: [] },
 ];
 
 describe("buildIssueMatch", () => {
-  it("groups issue-primary in selection order; races with coverage only; on/noRecord per race", () => {
+  it("groups by issue in selection order, with positions where they exist", () => {
     const { groups, totalOnRecord } = buildIssueMatch(races, ["healthcare", "abortion"]);
     expect(groups.map((g) => g.issueSlug)).toEqual(["healthcare", "abortion"]);
     expect(groups[0].label).toBe("Healthcare");
-    // healthcare: both races have coverage
     expect(groups[0].races.map((r) => r.raceId)).toEqual(["WI-GOV-2026", "WI-AG-2026"]);
-    // gov healthcare onRecord alpha by last name: Barnes, Roys
-    expect(groups[0].races[0].onRecord.map((r) => r.candidate.slug)).toEqual(["barnes", "roys"]);
-    // AG healthcare: kaul on record, toney no record
     expect(groups[0].races[1].onRecord.map((r) => r.candidate.slug)).toEqual(["kaul"]);
     expect(groups[0].races[1].noRecord.map((c) => c.slug)).toEqual(["toney"]);
-    // abortion: only Governor has coverage -> AG dropped from this group
+    expect(totalOnRecord).toBe(4);
+  });
+
+  it("names a race that has positions on another chosen issue but not this one", () => {
+    // Before: Attorney General vanished from the abortion section and appeared nowhere else.
+    const { groups } = buildIssueMatch(races, ["healthcare", "abortion"]);
     expect(groups[1].races.map((r) => r.raceId)).toEqual(["WI-GOV-2026"]);
-    expect(totalOnRecord).toBe(4); // gov healthcare 2 + ag healthcare 1 + gov abortion 1
+    expect(groups[1].silent).toEqual([{ raceId: "WI-AG-2026", office: "Attorney General" }]);
+    expect(groups[0].silent).toEqual([]);
   });
 
-  it("selecting an uncovered issue yields no group; dup selections dedupe", () => {
-    expect(buildIssueMatch(races, ["immigration"])).toEqual({ groups: [], totalOnRecord: 0 });
-    const { groups } = buildIssueMatch(races, ["abortion", "abortion"]);
-    expect(groups).toHaveLength(1);
+  it("lists every race with no position on any chosen issue, with its candidates", () => {
+    const { uncovered } = buildIssueMatch(races, ["healthcare", "abortion"]);
+    expect(uncovered).toEqual([
+      { raceId: "WI-STATE-ASSEMBLY-D3-2026", office: "State Assembly — District 3", candidates: [{ slug: "goodwin", name: "Michael J. Goodwin" }] },
+    ]);
   });
 
-  it("preserves selection order regardless of relative coverage size", () => {
-    // abortion has less coverage (1 race) than healthcare (2 races) in the
-    // fixture, so this proves order comes from selection, not coverage.
-    const { groups } = buildIssueMatch(races, ["abortion", "healthcare"]);
-    expect(groups.map((g) => g.issueSlug)).toEqual(["abortion", "healthcare"]);
+  it("every race with candidates appears exactly once per issue, or once in the uncovered list", () => {
+    const { groups, uncovered } = buildIssueMatch(races, ["healthcare", "abortion", "immigration"]);
+    const withCandidates = races.filter((r) => r.candidates.length > 0).map((r) => r.raceId).sort();
+    for (const g of groups) {
+      const shown = [...g.races.map((r) => r.raceId), ...g.silent.map((r) => r.raceId), ...uncovered.map((r) => r.raceId)].sort();
+      expect(shown).toEqual(withCandidates);
+    }
+  });
+
+  it("an issue nobody has a position on still gets its section", () => {
+    const { groups, uncovered, totalOnRecord } = buildIssueMatch(races, ["immigration"]);
+    expect(groups).toEqual([{ issueSlug: "immigration", label: "Immigration", races: [], silent: [] }]);
+    expect(uncovered.map((r) => r.raceId)).toEqual(["WI-GOV-2026", "WI-AG-2026", "WI-STATE-ASSEMBLY-D3-2026"]);
+    expect(totalOnRecord).toBe(0);
+  });
+
+  it("dedupes repeated selections and does not change its inputs", () => {
+    const before = JSON.stringify(races);
+    expect(buildIssueMatch(races, ["abortion", "abortion"]).groups).toHaveLength(1);
+    expect(JSON.stringify(races)).toBe(before);
   });
 });
