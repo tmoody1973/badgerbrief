@@ -2,16 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LastUpdated, PartyBadge } from "@/components/guide/labels";
-import { DebateCompare } from "@/components/guide/debate-compare";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
 import { WhatThisMeans } from "@/components/guide/what-this-means";
 import { ShareButton } from "@/components/contribute/share-button";
 import { buildIssueComparison } from "@/lib/compare";
 import { getRace, listRaces } from "@/lib/data";
-import { getDebateForRace } from "@/lib/debates";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
 import { SITE_URL, raceIdToSlug, slugToRaceId } from "@/lib/site";
+import { generalParty, generalPersonName } from "../../../../convex/lib/ballot";
+import { PRIMARY_ARCHIVE } from "@/lib/election";
+import { buildRaceBallot, compareDescription, compareIntro } from "@/lib/race-ballot";
 
 export const revalidate = 300;
 
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!data) return {};
   return {
     title: `Compare ${data.race.office} candidates — Wisconsin 2026`,
-    description: `Where the ${data.candidates.length} candidates for ${data.race.office} stand, issue by issue — every stance linked to its source.`,
+    description: compareDescription(data.race.office, buildRaceBallot(data.race, data.candidates)),
     alternates: { canonical: `/compare/${slug}` },
   };
 }
@@ -36,20 +37,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ComparePage({ params }: Props) {
   const { slug } = await params;
   const data = await getRace(slugToRaceId(slug));
-  if (!data || data.candidates.length === 0) notFound();
-  const { race, candidates, positions } = data;
+  if (!data) notFound();
+  const { race } = data;
+  // Running mates on a governor ticket are on the ballot, but they are not a
+  // contest to compare: only a real November contest fills this page.
+  const ballot = buildRaceBallot(race, data.candidates);
+  const candidates = ballot.kind === "contest" ? ballot.onBallot : [];
+  const onBallot = new Set(candidates.map((c) => c.slug));
+  const positions = data.positions.filter((p) => onBallot.has(p.candidateSlug));
   const { issues, totalOnRecord } = buildIssueComparison(candidates, positions);
-  const debate = getDebateForRace(race.raceId);
 
-  const navSections: NavSection[] = [
-    // The debate is the densest comparison on the page, so it leads the nav.
-    ...(debate ? [{ id: "debate", label: "The debate" }] : []),
-    ...issues.map((i) => ({
-      id: i.issueSlug,
-      label: i.label,
-      count: i.onRecord.length,
-    })),
-  ];
+  const navSections: NavSection[] = issues.map((i) => ({
+    id: i.issueSlug,
+    label: i.label,
+    count: i.onRecord.length,
+  }));
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
@@ -76,9 +78,11 @@ export default async function ComparePage({ params }: Props) {
         How do the {race.office} candidates compare?
       </h1>
       <p className="mt-2 max-w-2xl">
-        The {candidates.length} candidates side by side, issue by issue. Every
-        stance is a sourced summary — follow the source links to read it in
-        context. This is not a ranking or endorsement.
+        {compareIntro(ballot)}{" "}
+        <Link href={`${PRIMARY_ARCHIVE.path}/races/${slug}`} className="underline decoration-2 underline-offset-2">
+          See the August primary field
+        </Link>
+        .
       </p>
       <p className="mt-3">
         <Link
@@ -89,24 +93,12 @@ export default async function ComparePage({ params }: Props) {
         </Link>
       </p>
 
-      {/* The densest comparison in the race leads the page. */}
-      {debate && (
-        <div className="mt-6">
-          <DebateCompare raceId={race.raceId} />
-        </div>
-      )}
-
-      {totalOnRecord === 0 ? (
+      {candidates.length < 2 ? null : totalOnRecord === 0 ? (
         <div className="mt-6 border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
-          <p className="font-display text-lg">
-            {debate
-              ? "Beyond the debate, no sourced positions are on record yet."
-              : "No sourced positions on record yet for these candidates."}
-          </p>
+          <p className="font-display text-lg">No sourced positions on record yet for these candidates.</p>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            {debate
-              ? "Debate answers are what the candidates said out loud, not stances we have classified. As candidates publish positions we can source and summarise, they will appear here issue by issue alongside them."
-              : "When candidates publish positions we can source, they’ll appear here issue by issue. In the meantime, see each candidate’s page for background, finance, and coverage."}
+            When candidates publish positions we can source, they’ll appear here issue by issue. In the meantime,
+            see each candidate’s page for background, finance, and coverage.
           </p>
           <Link
             href={`/races/${slug}`}
@@ -133,9 +125,9 @@ export default async function ComparePage({ params }: Props) {
                         href={`/candidates/${candidate.slug}`}
                         className="font-bold underline decoration-2 underline-offset-2"
                       >
-                        {candidate.name}
+                        {generalPersonName(candidate)}
                       </Link>
-                      <PartyBadge party={candidate.party} />
+                      <PartyBadge party={generalParty(candidate)} />
                       {candidate.incumbent && (
                         <span className="border border-border bg-secondary px-1 font-mono text-[10px] font-bold uppercase">
                           Inc.

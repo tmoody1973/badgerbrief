@@ -1,3 +1,5 @@
+import { generalParty, generalPersonName, isOnGeneralBallot } from "../../../../convex/lib/ballot";
+import { candidateShareSubtitle } from "@/lib/candidate-ballot";
 import { getCandidateBySlug } from "@/lib/data";
 import { OG_SIZE, OG_CONTENT_TYPE, ogCard, fetchImageDataUri, initials } from "@/lib/og-card";
 
@@ -18,11 +20,14 @@ export default async function Image({ params }: { params: Promise<{ slug: string
 
   const { candidate, race } = data;
   const office = race?.office ?? "Wisconsin 2026";
-  const party = candidate.party
-    ? `${candidate.party}${candidate.incumbent ? " · Incumbent" : ""}`
-    : candidate.incumbent
-      ? "Incumbent"
-      : undefined;
+  const name = generalPersonName(candidate);
+  // The card carries a "GENERAL · NOV 3" badge, so it must say so when the
+  // candidate is not on that ballot.
+  const subtitle = candidateShareSubtitle({
+    onBallot: isOnGeneralBallot(candidate),
+    party: generalParty(candidate),
+    incumbent: Boolean(candidate.incumbent),
+  });
 
   // Photo when available, prefetched with a timeout so a dead Ballotpedia URL
   // falls back to initials instead of failing the whole card.
@@ -30,9 +35,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
 
   return ogCard({
     eyebrow: office,
-    title: candidate.name,
-    subtitle: party,
+    title: name,
+    subtitle,
     photo,
-    initialsText: initials(candidate.name),
+    initialsText: initials(name),
   });
 }

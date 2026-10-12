@@ -10,16 +10,8 @@ const LEVEL_ES: Record<string, string> = {
   "State Legislative": "Legislativo Estatal",
 };
 
-const RATING_ES: Record<string, string> = {
-  "Toss-up": "Reñida",
-};
-
 export function raceLevelLabel(level: string, locale: Locale): string {
   return locale === "es" ? LEVEL_ES[level] ?? level : level;
-}
-
-export function raceRatingLabel(rating: string, locale: Locale): string {
-  return locale === "es" ? RATING_ES[rating] ?? rating : rating;
 }
 
 export function incumbentPrefix(locale: Locale): string {

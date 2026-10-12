@@ -29,8 +29,8 @@ export const homeEs: HomeDict = {
     suffix: ", con cada plazo enlazado a su fuente oficial.",
   },
   races: {
-    heading: "¿Qué contiendas hay en la papeleta de la primaria de Wisconsin de 2026?",
-    countSuffix: " contiendas: cargos estatales, los ocho distritos de la Cámara de EE. UU., la corte suprema estatal y la legislatura.",
+    heading: "¿Qué contiendas hay en la papeleta de Wisconsin del 3 de noviembre de 2026?",
+    countSuffix: " contiendas: cargos estatales, los ocho distritos de la Cámara de EE. UU. y la legislatura.",
     districtRacesSummary: (count) => `Encuentre las contiendas de su distrito (${count})`,
   },
   // First-pass Spanish — Tarik verifies. Ko-fi button label "Support me" is the

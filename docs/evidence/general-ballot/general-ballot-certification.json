@@ -1,0 +1,3010 @@
+{
+  "source": {
+    "url": "https://elections.wi.gov/media/41846/download",
+    "documentDate": "2026-10-06",
+    "retrievedAt": "2026-10-12T21:32:56Z"
+  },
+  "dataAsOf": "2026-10-12",
+  "database": "prod",
+  "certifiedBy": "Tarik Moody",
+  "certifiedAt": "2026-10-12",
+  "unresolved": [],
+  "races": [
+    {
+      "raceId": "WI-GOV-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-AG-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-SOS-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-TREAS-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-US-HOUSE-D1-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-US-HOUSE-D2-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-US-HOUSE-D3-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-US-HOUSE-D4-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-US-HOUSE-D5-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-US-HOUSE-D8-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D1-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D3-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D5-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D7-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D9-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D11-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D13-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D15-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D17-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D19-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D21-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D23-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D25-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D27-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D29-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D31-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D33-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D1-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D2-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D3-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D4-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D5-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D6-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D7-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D8-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D9-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D10-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D11-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D12-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D13-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D14-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D15-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D16-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D17-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D18-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D19-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D20-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D21-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D22-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D23-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D24-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D25-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D26-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D27-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D28-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D29-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D30-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D31-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D32-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D33-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D34-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D35-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D36-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D37-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D38-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D39-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D40-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D41-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D42-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D43-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D44-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D45-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D46-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D47-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D48-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D49-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D50-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D51-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D52-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D53-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D54-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D55-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D56-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D57-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D58-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D59-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D60-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D61-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D62-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D63-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D64-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D65-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D66-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D67-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D68-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D69-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D70-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D71-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D72-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D73-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D74-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D75-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D76-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D77-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D78-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D79-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D80-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D81-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D82-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D83-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D84-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D85-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D86-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D87-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D88-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D89-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D90-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D91-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D92-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D93-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D94-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D95-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D96-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D97-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D98-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D99-2026",
+      "onBallot": true
+    },
+    {
+      "raceId": "WI-LTGOV-2026",
+      "onBallot": false,
+      "note": "Not a separate November contest. Each party's nominee is the running mate on a governor ticket."
+    },
+    {
+      "raceId": "WI-SCOTUS-2026",
+      "onBallot": false,
+      "note": "Decided in the April 7, 2026 spring election."
+    },
+    {
+      "raceId": "WI-STATE-SENATE-2026",
+      "onBallot": false,
+      "note": "Replaced by one race per district."
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-2026",
+      "onBallot": false,
+      "note": "Replaced by one race per district."
+    }
+  ],
+  "candidates": [
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "tom-tiffany",
+      "onBallot": true,
+      "ballotName": "Tom Tiffany / David Varnam",
+      "party": "Republican",
+      "ballotOrder": 1,
+      "runningMate": "David Varnam"
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "david-crowley",
+      "onBallot": true,
+      "ballotName": "David Crowley / Sarah Godlewski",
+      "party": "Democratic",
+      "ballotOrder": 2,
+      "runningMate": "Sarah Godlewski"
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "joel-brennan",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "francesca-hong",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "brett-hulsey",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "tim-jacobson",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "missy-hughes",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "sara-rodriguez",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "kelda-roys",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "zachary-roper",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "ryan-strnad",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "andy-manske",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "josh-schoemann",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "oliver-carranza",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "crystal-harper",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "mike-kohn",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "korey-streich",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "mandela-barnes",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-AG-2026",
+      "slug": "eric-toney",
+      "onBallot": true,
+      "ballotName": "Eric Toney",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-AG-2026",
+      "slug": "josh-kaul",
+      "onBallot": true,
+      "ballotName": "Josh Kaul",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-SOS-2026",
+      "slug": "jay-schroeder",
+      "onBallot": true,
+      "ballotName": "Jay Schroeder",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-SOS-2026",
+      "slug": "jocasta-zamarripa",
+      "onBallot": true,
+      "ballotName": "JoCasta Zamarripa",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-SOS-2026",
+      "slug": "pete-karas",
+      "onBallot": true,
+      "ballotName": "Pete Karas",
+      "party": "Wisconsin Green",
+      "ballotOrder": 3
+    },
+    {
+      "raceId": "WI-SOS-2026",
+      "slug": "brayden-myer",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-SOS-2026",
+      "slug": "nathan-pollnow",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-SOS-2026",
+      "slug": "cindy-werner",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-TREAS-2026",
+      "slug": "john-leiber",
+      "onBallot": true,
+      "ballotName": "John S. Leiber",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-TREAS-2026",
+      "slug": "yee-leng-xiong",
+      "onBallot": true,
+      "ballotName": "Yee Leng Xiong",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-TREAS-2026",
+      "slug": "dylan-ray-helmenstine",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D1-2026",
+      "slug": "bryan-steil",
+      "onBallot": true,
+      "ballotName": "Bryan Steil",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-US-HOUSE-D1-2026",
+      "slug": "mitchell-berman",
+      "onBallot": true,
+      "ballotName": "Mitchell Berman",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-US-HOUSE-D1-2026",
+      "slug": "peter-burgelis",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D1-2026",
+      "slug": "lorenzo-j-santos",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D1-2026",
+      "slug": "miguel-aranda",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D2-2026",
+      "slug": "mark-pocan",
+      "onBallot": true,
+      "ballotName": "Mark Pocan",
+      "party": "Democratic",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-US-HOUSE-D2-2026",
+      "slug": "douglas-alexander",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D3-2026",
+      "slug": "derrick-van-orden",
+      "onBallot": true,
+      "ballotName": "Derrick Van Orden",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-US-HOUSE-D3-2026",
+      "slug": "rebecca-cooke",
+      "onBallot": true,
+      "ballotName": "Rebecca Cooke",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-US-HOUSE-D3-2026",
+      "slug": "emily-berge",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D4-2026",
+      "slug": "tim-rogers",
+      "onBallot": true,
+      "ballotName": "Tim Rogers",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-US-HOUSE-D4-2026",
+      "slug": "gwen-moore",
+      "onBallot": true,
+      "ballotName": "Gwen Moore",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-US-HOUSE-D4-2026",
+      "slug": "amy-donahue",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D4-2026",
+      "slug": "purnima-nath",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D5-2026",
+      "slug": "scott-fitzgerald",
+      "onBallot": true,
+      "ballotName": "Scott Fitzgerald",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-US-HOUSE-D5-2026",
+      "slug": "andrew-beck",
+      "onBallot": true,
+      "ballotName": "Andrew Beck",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "slug": "glenn-grothman",
+      "onBallot": true,
+      "ballotName": "Glenn Grothman",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "slug": "brad-smith",
+      "onBallot": true,
+      "ballotName": "Brad Smith",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "slug": "matthew-arndt",
+      "onBallot": true,
+      "ballotName": "Matthew Arndt",
+      "party": "Wisconsin Green",
+      "ballotOrder": 3
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "slug": "amanda-bell",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "slug": "michael-alfonso",
+      "onBallot": true,
+      "ballotName": "Michael Alfonso",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "slug": "fred-clark",
+      "onBallot": true,
+      "ballotName": "Fred Clark",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "slug": "jessi-ebben",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "slug": "kevin-hermening",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "slug": "donald-raihala",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "slug": "niina-threlfall-baum",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "slug": "cheryl-ann-runkel",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "slug": "chris-armstrong",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "slug": "ginger-murray",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D8-2026",
+      "slug": "tony-wied",
+      "onBallot": true,
+      "ballotName": "Tony Wied",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-US-HOUSE-D8-2026",
+      "slug": "rick-crosson",
+      "onBallot": true,
+      "ballotName": "Rick Crosson",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-US-HOUSE-D8-2026",
+      "slug": "mark-christopher-scheffler",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-US-HOUSE-D8-2026",
+      "slug": "katrina-deville",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D1-2026",
+      "slug": "nic-cravillion",
+      "onBallot": true,
+      "ballotName": "Nic Cravillion",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D1-2026",
+      "slug": "barbara-bittner",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D1-2026",
+      "slug": "jacob-vandenplas",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D1-2026",
+      "slug": "katie-baney",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D3-2026",
+      "slug": "tim-carpenter",
+      "onBallot": true,
+      "ballotName": "Tim Carpenter",
+      "party": "Democratic",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D5-2026",
+      "slug": "mike-roberts",
+      "onBallot": true,
+      "ballotName": "Mike Roberts",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D5-2026",
+      "slug": "robyn-vining",
+      "onBallot": true,
+      "ballotName": "Robyn Vining",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D7-2026",
+      "slug": "mike-moeller",
+      "onBallot": true,
+      "ballotName": "Mike Moeller",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D7-2026",
+      "slug": "chris-j-larson",
+      "onBallot": true,
+      "ballotName": "Chris J. Larson",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D9-2026",
+      "slug": "amy-binsfeld",
+      "onBallot": true,
+      "ballotName": "Amy Binsfeld",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D11-2026",
+      "slug": "ellen-schutt",
+      "onBallot": true,
+      "ballotName": "Ellen Schutt",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D11-2026",
+      "slug": "adam-duda",
+      "onBallot": true,
+      "ballotName": "Adam Duda",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D11-2026",
+      "slug": "nick-polce",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D11-2026",
+      "slug": "sandy-wiedmeyer",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D11-2026",
+      "slug": "steven-j-doelder",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D13-2026",
+      "slug": "john-jagler",
+      "onBallot": true,
+      "ballotName": "John Jagler",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D13-2026",
+      "slug": "sasha-ripley",
+      "onBallot": true,
+      "ballotName": "Sasha Ripley",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D15-2026",
+      "slug": "scott-fleming",
+      "onBallot": true,
+      "ballotName": "Scott Fleming",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D15-2026",
+      "slug": "mark-spreitzer",
+      "onBallot": true,
+      "ballotName": "Mark Spreitzer",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D17-2026",
+      "slug": "howard-marklein",
+      "onBallot": true,
+      "ballotName": "Howard Marklein",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D17-2026",
+      "slug": "jenna-jacobson",
+      "onBallot": true,
+      "ballotName": "Jenna Jacobson",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D17-2026",
+      "slug": "corrine-hendrickson",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D17-2026",
+      "slug": "lisa-rose-white",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D19-2026",
+      "slug": "rachael-ann-cabral-guevara",
+      "onBallot": true,
+      "ballotName": "Rachael Ann Cabral-Guevara",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D19-2026",
+      "slug": "emily-daniels-tseffos",
+      "onBallot": true,
+      "ballotName": "Emily Daniels Tseffos",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D21-2026",
+      "slug": "jim-croft",
+      "onBallot": true,
+      "ballotName": "Jim Croft",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D21-2026",
+      "slug": "trevor-jung",
+      "onBallot": true,
+      "ballotName": "Trevor Jung",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D23-2026",
+      "slug": "romaine-robert-quinn",
+      "onBallot": true,
+      "ballotName": "Romaine Robert Quinn",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D23-2026",
+      "slug": "jeff-foster",
+      "onBallot": true,
+      "ballotName": "Jeff Foster",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D23-2026",
+      "slug": "richard-pulcher",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D25-2026",
+      "slug": "erik-severson",
+      "onBallot": true,
+      "ballotName": "Erik Severson",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D25-2026",
+      "slug": "charly-ray",
+      "onBallot": true,
+      "ballotName": "Charly Ray",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D25-2026",
+      "slug": "angie-sapik",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D27-2026",
+      "slug": "dianne-hesselbein",
+      "onBallot": true,
+      "ballotName": "Dianne Hesselbein",
+      "party": "Democratic",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D29-2026",
+      "slug": "cory-tomczyk",
+      "onBallot": true,
+      "ballotName": "Cory Tomczyk",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D29-2026",
+      "slug": "gillian-battino",
+      "onBallot": true,
+      "ballotName": "Gillian Battino",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D31-2026",
+      "slug": "michele-magadance-skinner",
+      "onBallot": true,
+      "ballotName": "Michele Magadance Skinner",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D31-2026",
+      "slug": "jeff-smith",
+      "onBallot": true,
+      "ballotName": "Jeff Smith",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D33-2026",
+      "slug": "chris-kapenga",
+      "onBallot": true,
+      "ballotName": "Chris Kapenga",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D33-2026",
+      "slug": "mike-van-someren",
+      "onBallot": true,
+      "ballotName": "Mike Van Someren",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D1-2026",
+      "slug": "joel-kitchens",
+      "onBallot": true,
+      "ballotName": "Joel Kitchens",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D1-2026",
+      "slug": "renee-a-paplham",
+      "onBallot": true,
+      "ballotName": "Renee A. Paplham",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D2-2026",
+      "slug": "shae-sortwell",
+      "onBallot": true,
+      "ballotName": "Shae Sortwell",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D2-2026",
+      "slug": "alicia-saunders",
+      "onBallot": true,
+      "ballotName": "Alicia Saunders",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D3-2026",
+      "slug": "ron-tusler",
+      "onBallot": true,
+      "ballotName": "Ron Tusler",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D4-2026",
+      "slug": "david-steffen",
+      "onBallot": true,
+      "ballotName": "David Steffen",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D4-2026",
+      "slug": "alexia-unertl",
+      "onBallot": true,
+      "ballotName": "Alexia Unertl",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D5-2026",
+      "slug": "joy-goeben",
+      "onBallot": true,
+      "ballotName": "Joy Goeben",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D5-2026",
+      "slug": "justin-schumacher",
+      "onBallot": true,
+      "ballotName": "Justin Schumacher",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D5-2026",
+      "slug": "david-schupbach",
+      "onBallot": true,
+      "ballotName": "David Schupbach",
+      "party": "Wisconsin Green",
+      "ballotOrder": 3
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D6-2026",
+      "slug": "elijah-behnke",
+      "onBallot": true,
+      "ballotName": "Elijah Behnke",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D6-2026",
+      "slug": "shirley-hinze",
+      "onBallot": true,
+      "ballotName": "Shirley Hinze",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D7-2026",
+      "slug": "lee-whiting",
+      "onBallot": true,
+      "ballotName": "Lee Whiting",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D7-2026",
+      "slug": "karen-kirsch",
+      "onBallot": true,
+      "ballotName": "Karen Kirsch",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D8-2026",
+      "slug": "angel-sanchez",
+      "onBallot": true,
+      "ballotName": "Angel Sanchez",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D8-2026",
+      "slug": "ismael-luna",
+      "onBallot": true,
+      "ballotName": "Ismael Luna",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D8-2026",
+      "slug": "sylvia-ortiz-velez",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D9-2026",
+      "slug": "sam-guerrero",
+      "onBallot": true,
+      "ballotName": "Sam Guerrero",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D9-2026",
+      "slug": "priscilla-a-prado",
+      "onBallot": true,
+      "ballotName": "Priscilla A. Prado",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D9-2026",
+      "slug": "mimi-reza",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D10-2026",
+      "slug": "darrin-madison",
+      "onBallot": true,
+      "ballotName": "Darrin Madison",
+      "party": "Democratic",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D10-2026",
+      "slug": "robert-longwell-grice",
+      "onBallot": true,
+      "ballotName": "Robert Longwell-Grice",
+      "party": "Wisconsin Green",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D11-2026",
+      "slug": "shandowlyon-reaves",
+      "onBallot": true,
+      "ballotName": "Shandowlyon Reaves",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D11-2026",
+      "slug": "sequanna-taylor",
+      "onBallot": true,
+      "ballotName": "Sequanna Taylor",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D12-2026",
+      "slug": "russell-antonio-goodwin-sr",
+      "onBallot": true,
+      "ballotName": "Russell Antonio Goodwin, Sr.",
+      "party": "Democratic",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D12-2026",
+      "slug": "jordan-roman",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D13-2026",
+      "slug": "mike-morgan",
+      "onBallot": true,
+      "ballotName": "Mike Morgan",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D13-2026",
+      "slug": "amy-zimmerman",
+      "onBallot": true,
+      "ballotName": "Amy Zimmerman",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D13-2026",
+      "slug": "david-sanchez",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D14-2026",
+      "slug": "amyrose-murphy",
+      "onBallot": true,
+      "ballotName": "AmyRose Murphy",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D14-2026",
+      "slug": "angelito-tenorio",
+      "onBallot": true,
+      "ballotName": "Angelito Tenorio",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D15-2026",
+      "slug": "adam-neylon",
+      "onBallot": true,
+      "ballotName": "Adam Neylon",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D15-2026",
+      "slug": "stephen-tryon",
+      "onBallot": true,
+      "ballotName": "Stephen Tryon",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D16-2026",
+      "slug": "alciro-deacon",
+      "onBallot": true,
+      "ballotName": "Alciro Deacon",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D16-2026",
+      "slug": "kalan-haywood",
+      "onBallot": true,
+      "ballotName": "Kalan Haywood",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D17-2026",
+      "slug": "charlene-abughrin",
+      "onBallot": true,
+      "ballotName": "Charlene Abughrin",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D17-2026",
+      "slug": "supreme-moore-omokunde",
+      "onBallot": true,
+      "ballotName": "Supreme Moore Omokunde",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D18-2026",
+      "slug": "joel-richmond",
+      "onBallot": true,
+      "ballotName": "Joel Richmond",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D18-2026",
+      "slug": "margaret-arney",
+      "onBallot": true,
+      "ballotName": "Margaret Arney",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D19-2026",
+      "slug": "yasmine-b-outlaw",
+      "onBallot": true,
+      "ballotName": "Yasmine B. Outlaw",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D19-2026",
+      "slug": "ryan-clancy",
+      "onBallot": true,
+      "ballotName": "Ryan Clancy",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D19-2026",
+      "slug": "bridget-maniaci",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D20-2026",
+      "slug": "kyle-cleary",
+      "onBallot": true,
+      "ballotName": "Kyle Cleary",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D20-2026",
+      "slug": "christine-m-sinicki",
+      "onBallot": true,
+      "ballotName": "Christine M. Sinicki",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D21-2026",
+      "slug": "dylan-pfaffenbach",
+      "onBallot": true,
+      "ballotName": "Dylan Pfaffenbach",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D21-2026",
+      "slug": "daniel-j-bukiewicz",
+      "onBallot": true,
+      "ballotName": "Daniel J. Bukiewicz",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D21-2026",
+      "slug": "david-liners",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D22-2026",
+      "slug": "paul-melotik",
+      "onBallot": true,
+      "ballotName": "Paul Melotik",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D22-2026",
+      "slug": "dana-glasstein",
+      "onBallot": true,
+      "ballotName": "Dana Glasstein",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D23-2026",
+      "slug": "aleaner-pabonnie",
+      "onBallot": true,
+      "ballotName": "Aleaner Pabonnie",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D23-2026",
+      "slug": "deb-andraca",
+      "onBallot": true,
+      "ballotName": "Deb Andraca",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D24-2026",
+      "slug": "dan-knodl",
+      "onBallot": true,
+      "ballotName": "Dan Knodl",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D24-2026",
+      "slug": "matt-brown",
+      "onBallot": true,
+      "ballotName": "Matt Brown",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D25-2026",
+      "slug": "paul-tittl",
+      "onBallot": true,
+      "ballotName": "Paul Tittl",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D25-2026",
+      "slug": "christopher-able",
+      "onBallot": true,
+      "ballotName": "Christopher Able",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D26-2026",
+      "slug": "john-belanger",
+      "onBallot": true,
+      "ballotName": "John Belanger",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D26-2026",
+      "slug": "joe-sheehan",
+      "onBallot": true,
+      "ballotName": "Joe Sheehan",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D26-2026",
+      "slug": "tyler-schneekloth",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D26-2026",
+      "slug": "james-brotz",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D27-2026",
+      "slug": "lindee-brill",
+      "onBallot": true,
+      "ballotName": "Lindee Brill",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D28-2026",
+      "slug": "rob-kreibich",
+      "onBallot": true,
+      "ballotName": "Rob Kreibich",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D28-2026",
+      "slug": "robin-lillesve",
+      "onBallot": true,
+      "ballotName": "Robin Lillesve",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D29-2026",
+      "slug": "treig-pronschinske",
+      "onBallot": true,
+      "ballotName": "Treig Pronschinske",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D29-2026",
+      "slug": "chris-danou",
+      "onBallot": true,
+      "ballotName": "Chris Danou",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D30-2026",
+      "slug": "shannon-zimmerman",
+      "onBallot": true,
+      "ballotName": "Shannon Zimmerman",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D30-2026",
+      "slug": "kevin-knoke",
+      "onBallot": true,
+      "ballotName": "Kevin Knoke",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D31-2026",
+      "slug": "tyler-august",
+      "onBallot": true,
+      "ballotName": "Tyler August",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D31-2026",
+      "slug": "john-perryman",
+      "onBallot": true,
+      "ballotName": "John Perryman",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D32-2026",
+      "slug": "amanda-nedweski",
+      "onBallot": true,
+      "ballotName": "Amanda Nedweski",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D32-2026",
+      "slug": "greg-miller",
+      "onBallot": true,
+      "ballotName": "Greg Miller",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D33-2026",
+      "slug": "steve-wicklund",
+      "onBallot": true,
+      "ballotName": "Steve Wicklund",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D33-2026",
+      "slug": "maria-elena-bisabarros",
+      "onBallot": true,
+      "ballotName": "Maria Elena Bisabarros",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D33-2026",
+      "slug": "rick-stacey",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D33-2026",
+      "slug": "rick-bailey",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D34-2026",
+      "slug": "rob-swearingen",
+      "onBallot": true,
+      "ballotName": "Rob Swearingen",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D34-2026",
+      "slug": "merlin-van-buren",
+      "onBallot": true,
+      "ballotName": "Merlin Van Buren",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D35-2026",
+      "slug": "calvin-callahan",
+      "onBallot": true,
+      "ballotName": "Calvin Callahan",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D35-2026",
+      "slug": "elizabeth-mccrank",
+      "onBallot": true,
+      "ballotName": "Elizabeth McCrank",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D36-2026",
+      "slug": "jeffrey-l-mursau",
+      "onBallot": true,
+      "ballotName": "Jeffrey L. Mursau",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D37-2026",
+      "slug": "mark-born",
+      "onBallot": true,
+      "ballotName": "Mark Born",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D37-2026",
+      "slug": "latoya-bates",
+      "onBallot": true,
+      "ballotName": "LaToya Bates",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D37-2026",
+      "slug": "steve-rydzewski",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D38-2026",
+      "slug": "william-penterman",
+      "onBallot": true,
+      "ballotName": "William Penterman",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D38-2026",
+      "slug": "terri-wenkman",
+      "onBallot": true,
+      "ballotName": "Terri Wenkman",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D39-2026",
+      "slug": "alex-dallman",
+      "onBallot": true,
+      "ballotName": "Alex Dallman",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D39-2026",
+      "slug": "michael-skivington",
+      "onBallot": true,
+      "ballotName": "Michael Skivington",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D40-2026",
+      "slug": "julie-helmer",
+      "onBallot": true,
+      "ballotName": "Julie Helmer",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D40-2026",
+      "slug": "karen-desanto",
+      "onBallot": true,
+      "ballotName": "Karen DeSanto",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D41-2026",
+      "slug": "tony-kurtz",
+      "onBallot": true,
+      "ballotName": "Tony Kurtz",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D41-2026",
+      "slug": "zach-commons",
+      "onBallot": true,
+      "ballotName": "Zach Commons",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D42-2026",
+      "slug": "keith-f-miller",
+      "onBallot": true,
+      "ballotName": "Keith F. Miller",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D42-2026",
+      "slug": "maureen-mccarville",
+      "onBallot": true,
+      "ballotName": "Maureen McCarville",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D43-2026",
+      "slug": "paul-mcgraw",
+      "onBallot": true,
+      "ballotName": "Paul McGraw",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D43-2026",
+      "slug": "brienne-brown",
+      "onBallot": true,
+      "ballotName": "Brienne Brown",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D44-2026",
+      "slug": "ron-woodman",
+      "onBallot": true,
+      "ballotName": "Ron Woodman",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D44-2026",
+      "slug": "ann-roe",
+      "onBallot": true,
+      "ballotName": "Ann Roe",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D45-2026",
+      "slug": "jocelyn-jordan",
+      "onBallot": true,
+      "ballotName": "Jocelyn Jordan",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D45-2026",
+      "slug": "clinton-anderson",
+      "onBallot": true,
+      "ballotName": "Clinton Anderson",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D46-2026",
+      "slug": "john-donohue",
+      "onBallot": true,
+      "ballotName": "John Donohue",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D46-2026",
+      "slug": "joan-fitzgerald",
+      "onBallot": true,
+      "ballotName": "Joan Fitzgerald",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D47-2026",
+      "slug": "sandy-bakk",
+      "onBallot": true,
+      "ballotName": "Sandy Bakk",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D47-2026",
+      "slug": "randy-udell",
+      "onBallot": true,
+      "ballotName": "Randy Udell",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D48-2026",
+      "slug": "mark-kjorlie",
+      "onBallot": true,
+      "ballotName": "Mark Kjorlie",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D48-2026",
+      "slug": "andrew-hysell",
+      "onBallot": true,
+      "ballotName": "Andrew Hysell",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D49-2026",
+      "slug": "travis-tranel",
+      "onBallot": true,
+      "ballotName": "Travis Tranel",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D49-2026",
+      "slug": "john-rindy",
+      "onBallot": true,
+      "ballotName": "John Rindy",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D50-2026",
+      "slug": "jon-aleckson",
+      "onBallot": true,
+      "ballotName": "Jon Aleckson",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D50-2026",
+      "slug": "bill-oemichen",
+      "onBallot": true,
+      "ballotName": "Bill Oemichen",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D50-2026",
+      "slug": "josh-mittness",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D50-2026",
+      "slug": "bryna-caves",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D51-2026",
+      "slug": "todd-novak",
+      "onBallot": true,
+      "ballotName": "Todd Novak",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D51-2026",
+      "slug": "ben-gruber",
+      "onBallot": true,
+      "ballotName": "Ben Gruber",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D52-2026",
+      "slug": "reive-pullen",
+      "onBallot": true,
+      "ballotName": "Reive Pullen",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D52-2026",
+      "slug": "lee-snodgrass",
+      "onBallot": true,
+      "ballotName": "Lee Snodgrass",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D53-2026",
+      "slug": "david-daniels",
+      "onBallot": true,
+      "ballotName": "David Daniels",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D53-2026",
+      "slug": "becky-nichols",
+      "onBallot": true,
+      "ballotName": "Becky Nichols",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D54-2026",
+      "slug": "tim-paterson",
+      "onBallot": true,
+      "ballotName": "Tim Paterson",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D54-2026",
+      "slug": "lori-palmeri",
+      "onBallot": true,
+      "ballotName": "Lori Palmeri",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D55-2026",
+      "slug": "nate-gustafson",
+      "onBallot": true,
+      "ballotName": "Nate Gustafson",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D55-2026",
+      "slug": "alex-corrigan",
+      "onBallot": true,
+      "ballotName": "Alex Corrigan",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D56-2026",
+      "slug": "anthony-w-phillips",
+      "onBallot": true,
+      "ballotName": "Anthony W. Phillips",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D56-2026",
+      "slug": "grace-abitz",
+      "onBallot": true,
+      "ballotName": "Grace Abitz",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D56-2026",
+      "slug": "shawna-riley",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D57-2026",
+      "slug": "kevin-krentz",
+      "onBallot": true,
+      "ballotName": "Kevin Krentz",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D57-2026",
+      "slug": "joey-marschall",
+      "onBallot": true,
+      "ballotName": "Joey Marschall",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D57-2026",
+      "slug": "ed-delgado",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D57-2026",
+      "slug": "dylan-testin",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D57-2026",
+      "slug": "bill-lorge",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D58-2026",
+      "slug": "bernie-newman",
+      "onBallot": true,
+      "ballotName": "Bernie Newman",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D58-2026",
+      "slug": "dennis-d-degenhardt",
+      "onBallot": true,
+      "ballotName": "Dennis D. Degenhardt",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D58-2026",
+      "slug": "christopher-d-bossert",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D59-2026",
+      "slug": "bradley-petersen",
+      "onBallot": true,
+      "ballotName": "Bradley Petersen",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D59-2026",
+      "slug": "jack-holzman",
+      "onBallot": true,
+      "ballotName": "Jack Holzman",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D60-2026",
+      "slug": "marty-ryan",
+      "onBallot": true,
+      "ballotName": "Marty Ryan",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D61-2026",
+      "slug": "bob-donovan",
+      "onBallot": true,
+      "ballotName": "Bob Donovan",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D61-2026",
+      "slug": "ben-brist",
+      "onBallot": true,
+      "ballotName": "Ben Brist",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D61-2026",
+      "slug": "lawanda-chambers",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D61-2026",
+      "slug": "brian-bock",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D62-2026",
+      "slug": "mike-bellagio",
+      "onBallot": true,
+      "ballotName": "Mike Bellagio",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D62-2026",
+      "slug": "angelina-m-cruz",
+      "onBallot": true,
+      "ballotName": "Angelina M. Cruz",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D63-2026",
+      "slug": "robert-wittke",
+      "onBallot": true,
+      "ballotName": "Robert Wittke",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D63-2026",
+      "slug": "eddie-phanichkul",
+      "onBallot": true,
+      "ballotName": "Eddie Phanichkul",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D64-2026",
+      "slug": "ed-hibsch",
+      "onBallot": true,
+      "ballotName": "Ed Hibsch",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D64-2026",
+      "slug": "tip-mcguire",
+      "onBallot": true,
+      "ballotName": "Tip McGuire",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D65-2026",
+      "slug": "valerie-kretchmer",
+      "onBallot": true,
+      "ballotName": "Valerie Kretchmer",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D65-2026",
+      "slug": "ben-desmidt",
+      "onBallot": true,
+      "ballotName": "Ben DeSmidt",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D66-2026",
+      "slug": "gina-cefalu-paulick",
+      "onBallot": true,
+      "ballotName": "Gina Cefalu Paulick",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D66-2026",
+      "slug": "greta-neubauer",
+      "onBallot": true,
+      "ballotName": "Greta Neubauer",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D67-2026",
+      "slug": "david-armstrong",
+      "onBallot": true,
+      "ballotName": "David Armstrong",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D67-2026",
+      "slug": "indiana-thompson",
+      "onBallot": true,
+      "ballotName": "Indiana Thompson",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D68-2026",
+      "slug": "rob-summerfield",
+      "onBallot": true,
+      "ballotName": "Rob Summerfield",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D68-2026",
+      "slug": "elisha-king",
+      "onBallot": true,
+      "ballotName": "Elisha King",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D69-2026",
+      "slug": "karen-hurd",
+      "onBallot": true,
+      "ballotName": "Karen Hurd",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D69-2026",
+      "slug": "roger-halls",
+      "onBallot": true,
+      "ballotName": "Roger Halls",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D70-2026",
+      "slug": "nancy-vandermeer",
+      "onBallot": true,
+      "ballotName": "Nancy VanderMeer",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D70-2026",
+      "slug": "stephanie-stuve-bodeen",
+      "onBallot": true,
+      "ballotName": "Stephanie Stuve Bodeen",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D71-2026",
+      "slug": "jeff-disher",
+      "onBallot": true,
+      "ballotName": "Jeff Disher",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D71-2026",
+      "slug": "vinnie-miresse",
+      "onBallot": true,
+      "ballotName": "Vinnie Miresse",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D72-2026",
+      "slug": "scott-krug",
+      "onBallot": true,
+      "ballotName": "Scott Krug",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D72-2026",
+      "slug": "christine-maltese",
+      "onBallot": true,
+      "ballotName": "Christine Maltese",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D73-2026",
+      "slug": "frank-kostka",
+      "onBallot": true,
+      "ballotName": "Frank Kostka",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D73-2026",
+      "slug": "angela-stroud",
+      "onBallot": true,
+      "ballotName": "Angela Stroud",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D74-2026",
+      "slug": "chanz-green",
+      "onBallot": true,
+      "ballotName": "Chanz Green",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D74-2026",
+      "slug": "paul-johnson",
+      "onBallot": true,
+      "ballotName": "Paul Johnson",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D74-2026",
+      "slug": "scott-harbridge",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D75-2026",
+      "slug": "duke-tucker",
+      "onBallot": true,
+      "ballotName": "Duke Tucker",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D75-2026",
+      "slug": "keith-mogel",
+      "onBallot": true,
+      "ballotName": "Keith Mogel",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D76-2026",
+      "slug": "nina-chat",
+      "onBallot": true,
+      "ballotName": "Nina Chat",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D76-2026",
+      "slug": "dina-nina-martinez-rutherford",
+      "onBallot": true,
+      "ballotName": "Dina Nina Martinez-Rutherford",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D76-2026",
+      "slug": "tony-casta-xf1-eda",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D76-2026",
+      "slug": "zoe-sullivan",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D76-2026",
+      "slug": "isaia-ben-ami",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D76-2026",
+      "slug": "juliana-bennett",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D77-2026",
+      "slug": "jane-mccormick",
+      "onBallot": true,
+      "ballotName": "Jane McCormick",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D77-2026",
+      "slug": "renuka-mayadev",
+      "onBallot": true,
+      "ballotName": "Renuka Mayadev",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D78-2026",
+      "slug": "henry-johnson",
+      "onBallot": true,
+      "ballotName": "Henry Johnson",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D78-2026",
+      "slug": "shelia-stubbs",
+      "onBallot": true,
+      "ballotName": "Shelia Stubbs",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D79-2026",
+      "slug": "john-fons",
+      "onBallot": true,
+      "ballotName": "John Fons",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D79-2026",
+      "slug": "lisa-subeck",
+      "onBallot": true,
+      "ballotName": "Lisa Subeck",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D80-2026",
+      "slug": "simran-arora",
+      "onBallot": true,
+      "ballotName": "Simran Arora",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D80-2026",
+      "slug": "mike-bare",
+      "onBallot": true,
+      "ballotName": "Mike Bare",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D81-2026",
+      "slug": "mark-s-maier",
+      "onBallot": true,
+      "ballotName": "Mark S. Maier",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D81-2026",
+      "slug": "alex-joers",
+      "onBallot": true,
+      "ballotName": "Alex Joers",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D82-2026",
+      "slug": "bryson-reyes",
+      "onBallot": true,
+      "ballotName": "Bryson Reyes",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D82-2026",
+      "slug": "rico-camacho",
+      "onBallot": true,
+      "ballotName": "Rico Camacho",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D83-2026",
+      "slug": "dave-maxey",
+      "onBallot": true,
+      "ballotName": "Dave Maxey",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D84-2026",
+      "slug": "chuck-wichgers",
+      "onBallot": true,
+      "ballotName": "Chuck Wichgers",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D85-2026",
+      "slug": "patrick-snyder",
+      "onBallot": true,
+      "ballotName": "Patrick Snyder",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D85-2026",
+      "slug": "john-kroll",
+      "onBallot": true,
+      "ballotName": "John Kroll",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D86-2026",
+      "slug": "john-spiros",
+      "onBallot": true,
+      "ballotName": "John Spiros",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D86-2026",
+      "slug": "andy-wuethrich",
+      "onBallot": true,
+      "ballotName": "Andy Wuethrich",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D87-2026",
+      "slug": "brent-jacobson",
+      "onBallot": true,
+      "ballotName": "Brent Jacobson",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D87-2026",
+      "slug": "bob-look",
+      "onBallot": true,
+      "ballotName": "Bob Look",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D88-2026",
+      "slug": "ben-franklin",
+      "onBallot": true,
+      "ballotName": "Ben Franklin",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D88-2026",
+      "slug": "brandy-tollefson",
+      "onBallot": true,
+      "ballotName": "Brandy Tollefson",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D89-2026",
+      "slug": "bobby-r-lindsey",
+      "onBallot": true,
+      "ballotName": "Bobby R. Lindsey",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D89-2026",
+      "slug": "ryan-spaude",
+      "onBallot": true,
+      "ballotName": "Ryan Spaude",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D90-2026",
+      "slug": "jessica-henderson",
+      "onBallot": true,
+      "ballotName": "Jessica Henderson",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D90-2026",
+      "slug": "amaad-rivera-wagner",
+      "onBallot": true,
+      "ballotName": "Amaad Rivera-Wagner",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D91-2026",
+      "slug": "bruce-stabenow",
+      "onBallot": true,
+      "ballotName": "Bruce Stabenow",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D91-2026",
+      "slug": "jodi-emerson",
+      "onBallot": true,
+      "ballotName": "Jodi Emerson",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D92-2026",
+      "slug": "clint-moses",
+      "onBallot": true,
+      "ballotName": "Clint Moses",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D92-2026",
+      "slug": "jeremiah-fredrickson",
+      "onBallot": true,
+      "ballotName": "Jeremiah Fredrickson",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D92-2026",
+      "slug": "mel-m-marin",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D93-2026",
+      "slug": "michael-ayala",
+      "onBallot": true,
+      "ballotName": "Michael Ayala",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D93-2026",
+      "slug": "christian-phelps",
+      "onBallot": true,
+      "ballotName": "Christian Phelps",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D94-2026",
+      "slug": "keith-purnell",
+      "onBallot": true,
+      "ballotName": "Keith Purnell",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D94-2026",
+      "slug": "steve-doyle",
+      "onBallot": true,
+      "ballotName": "Steve Doyle",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D95-2026",
+      "slug": "cedric-schnitzler",
+      "onBallot": true,
+      "ballotName": "Cedric Schnitzler",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D95-2026",
+      "slug": "jill-billings",
+      "onBallot": true,
+      "ballotName": "Jill Billings",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D96-2026",
+      "slug": "jim-green",
+      "onBallot": true,
+      "ballotName": "Jim Green",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D96-2026",
+      "slug": "tara-johnson",
+      "onBallot": true,
+      "ballotName": "Tara Johnson",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D97-2026",
+      "slug": "cindi-duchow",
+      "onBallot": true,
+      "ballotName": "Cindi Duchow",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D98-2026",
+      "slug": "jim-piwowarczyk",
+      "onBallot": true,
+      "ballotName": "Jim Piwowarczyk",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D98-2026",
+      "slug": "matt-philibert",
+      "onBallot": true,
+      "ballotName": "Matt Philibert",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D99-2026",
+      "slug": "barbara-dittrich",
+      "onBallot": true,
+      "ballotName": "Barbara Dittrich",
+      "party": "Republican",
+      "ballotOrder": 1
+    },
+    {
+      "raceId": "WI-LTGOV-2026",
+      "slug": "sarah-godlewski",
+      "onBallot": true,
+      "ballotName": "David Crowley / Sarah Godlewski",
+      "party": "Democratic",
+      "ballotOrder": 2,
+      "runningMate": "David Crowley"
+    },
+    {
+      "raceId": "WI-LTGOV-2026",
+      "slug": "will-martin",
+      "onBallot": false
+    },
+    {
+      "raceId": "WI-LTGOV-2026",
+      "slug": "david-varnam",
+      "onBallot": true,
+      "ballotName": "Tom Tiffany / David Varnam",
+      "party": "Republican",
+      "ballotOrder": 1,
+      "runningMate": "Tom Tiffany"
+    },
+    {
+      "raceId": "WI-SCOTUS-2026",
+      "slug": "chris-taylor",
+      "onBallot": false
+    }
+  ],
+  "newCandidates": [
+    {
+      "raceId": "WI-US-HOUSE-D3-2026",
+      "slug": "alexander-valiensi-kent",
+      "name": "Alexander Valiensi Kent",
+      "party": "Independent",
+      "ballotOrder": 3
+    },
+    {
+      "raceId": "WI-US-HOUSE-D3-2026",
+      "slug": "rustin-provance",
+      "name": "Rustin Provance",
+      "party": "Independent",
+      "ballotOrder": 4
+    },
+    {
+      "raceId": "WI-US-HOUSE-D4-2026",
+      "slug": "arthur-burks",
+      "name": "Arthur Burks",
+      "party": "Independent",
+      "ballotOrder": 3
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "slug": "elizabeth-anne-fitzgibbon",
+      "name": "Elizabeth Anne Fitzgibbon",
+      "party": "Independent",
+      "ballotOrder": 4
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "slug": "mike-thurow",
+      "name": "Mike Thurow",
+      "party": "Independent",
+      "ballotOrder": 5
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D1-2026",
+      "slug": "mark-becker",
+      "name": "Mark Becker",
+      "party": "Independent",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D9-2026",
+      "slug": "christian-ellis",
+      "name": "Christian Ellis",
+      "party": "Independent",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D15-2026",
+      "slug": "christopher-dean",
+      "name": "Christopher Dean",
+      "party": "Independent",
+      "ballotOrder": 3
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D3-2026",
+      "slug": "michael-j-goodwin",
+      "name": "Michael J. Goodwin",
+      "party": "Democratic",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D36-2026",
+      "slug": "shena-chapman",
+      "name": "Shena Chapman",
+      "party": "Independent",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D51-2026",
+      "slug": "nathan-tataje",
+      "name": "Nathan Tataje",
+      "party": "Independent",
+      "ballotOrder": 3
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D53-2026",
+      "slug": "rachael-dowling",
+      "name": "Rachael Dowling",
+      "party": "Independent",
+      "ballotOrder": 3
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D60-2026",
+      "slug": "tiffany-brault",
+      "name": "Tiffany Brault",
+      "party": "Independent",
+      "ballotOrder": 2
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D69-2026",
+      "slug": "josh-kelley",
+      "name": "Josh Kelley",
+      "party": "Independent",
+      "ballotOrder": 3
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D95-2026",
+      "slug": "paul-michael-weber",
+      "name": "Paul Michael Weber",
+      "party": "Independent",
+      "ballotOrder": 3
+    }
+  ]
+}

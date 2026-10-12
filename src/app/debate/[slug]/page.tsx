@@ -9,6 +9,7 @@ import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { getDebate, getDebateTranscript, listDebateSlugs } from "@/lib/debates";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
 import { raceIdToSlug } from "@/lib/site";
+import { ArchiveBanner } from "@/components/guide/archive-banner";
 
 export const revalidate = 300;
 
@@ -65,6 +66,7 @@ export default async function DebatePage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
+      <ArchiveBanner />
       <JsonLd
         nodes={[
           organizationNode(),

@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { CURRENT_ELECTION } from "@/lib/election";
 
 /**
  * Shared builder for per-page social share cards (candidate + race), so a link
@@ -156,7 +157,7 @@ export function ogCard({ eyebrow, title, subtitle, photo, initialsText }: CardPr
               </div>
 
               <div style={{ display: "flex", marginTop: 24 }}>
-                <div style={badge(CARDINAL, CREAM, true)}>PRIMARY · AUG 11, 2026</div>
+                <div style={badge(CARDINAL, CREAM, true)}>{CURRENT_ELECTION.badge}</div>
                 <div style={badge(BUTTER, INK, false)}>NON-PARTISAN</div>
               </div>
             </div>

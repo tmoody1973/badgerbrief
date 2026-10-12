@@ -3,6 +3,7 @@ import { ForecastExperience } from "@/components/forecast/forecast-experience";
 import { ForecastMethodology } from "@/components/forecast/forecast-methodology";
 import { debateAirtime } from "@/lib/forecast";
 import debate from "@/data/debates/wi-gov-dem-primary-debate.json";
+import { ArchiveBanner } from "@/components/guide/archive-banner";
 
 export const metadata: Metadata = {
   title: "Forecast — Wisconsin Governor Democratic primary",
@@ -16,6 +17,7 @@ export default function ForecastPage() {
   return (
     <>
     <main className="mx-auto w-full max-w-3xl px-4 py-10">
+      <ArchiveBanner />
       <p className="font-mono text-xs font-bold uppercase tracking-widest text-primary">
         Poll aggregation · uncertainty
       </p>

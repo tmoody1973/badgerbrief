@@ -8,7 +8,6 @@ export const chromeEn: ChromeDict = {
     "/match": "What Matters",
     "/ads": "Ad Tracker",
     "/news": "News",
-    "/forecast": "Forecast",
     "/vote": "How to vote",
     "/chat": "Voter Help",
     "/brief": "My Brief",

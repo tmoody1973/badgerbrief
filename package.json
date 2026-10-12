@@ -9,6 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "generate:brief-contract": "tsx scripts/generate-brief-contract.ts",
     "eval:gate": "node scripts/eval-gate.mjs",
     "eval:monitor": "node scripts/eval-monitor.mjs"

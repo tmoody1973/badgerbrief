@@ -19,16 +19,10 @@ export function SourceTrustLabel({ kind }: { kind: string }) {
 
 export function PartyBadge({ party }: { party?: string }) {
   if (!party) return null;
-  const styles =
-    party === "Democratic"
-      ? "bg-accent text-accent-foreground"
-      : party === "Republican"
-        ? "bg-primary text-primary-foreground"
-        : "bg-muted text-foreground";
+  // One style for every party. A nonpartisan guide does not give two parties
+  // a color and everyone else gray.
   return (
-    <span
-      className={`inline-block border-2 border-border px-2 py-0.5 text-xs font-bold ${styles}`}
-    >
+    <span className="inline-block border-2 border-border bg-muted px-2 py-0.5 text-xs font-bold text-foreground">
       {party}
     </span>
   );
