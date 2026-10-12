@@ -4,6 +4,7 @@
  * sort. Kept dependency-free so they're unit-testable without convex-test,
  * mirroring the researchQueries.ts split (db-touching code lives elsewhere).
  */
+import { GENERAL_ELECTION_DATE } from "./ballot";
 
 /**
  * Wisconsin newsrooms the scout is allowed to surface. This list does double
@@ -156,4 +157,13 @@ function stripCodeFence(raw: string): string {
 /** Least-recently-proposed first; never-proposed items (no lastProposedAt) sort first. */
 export function sortByRotation<T extends { lastProposedAt?: number }>(items: T[]): T[] {
   return [...items].sort((a, b) => (a.lastProposedAt ?? 0) - (b.lastProposedAt ?? 0));
+}
+
+/**
+ * The search request for one candidate. It names the office in words (not the
+ * race ID) and the general election; the old text asked for coverage of "the
+ * August 11, 2026 primary" for two months after it was over.
+ */
+export function scoutPrompt(target: { name: string; office: string }, today: string): string {
+  return `Today is ${today}. Find the MOST RECENT news coverage of ${target.name}, candidate for ${target.office} in Wisconsin's ${GENERAL_ELECTION_DATE} general election. Prioritise the last 7 days; do not return anything older than 30 days. List newest first and include each article's publication date. Return article URLs from the allowed outlets only.`;
 }

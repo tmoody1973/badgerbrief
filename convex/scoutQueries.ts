@@ -7,6 +7,7 @@ import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
 import { canonicalOutletName } from "./lib/outlets";
 import { canonicalArticleKey } from "./lib/articleUrl";
+import { inNewsScope } from "./lib/jobScope";
 
 /** Bare hostname for the outlet's `domain` field; undefined if unparseable. */
 const hostOf = (url: string): string | undefined => {
@@ -17,18 +18,9 @@ const hostOf = (url: string): string | undefined => {
   }
 };
 
-/** Races the scout actively hunts coverage for. */
-export const CONTESTED_RACE_IDS = [
-  "WI-GOV-2026",
-  "WI-AG-2026",
-  "WI-SOS-2026",
-  "WI-TREAS-2026",
-  "WI-US-HOUSE-D4-2026",
-];
-
 /**
  * Candidates to scout, with a rotation timestamp for last-touched-first
- * ordering. No args → the contested-race pool. Explicit `slugs` bypass the
+ * ordering. No args → on-ballot candidates for statewide executive offices and the U.S. House (lib/jobScope.ts). Explicit `slugs` bypass the
  * pool filter entirely (spec: caller-picked candidates may be anywhere).
  *
  * `lastProposedAt` is max(last scout_attempts.attemptedAt, last
@@ -40,11 +32,14 @@ export const listScoutCandidates = internalQuery({
   args: { slugs: v.optional(v.array(v.string())) },
   handler: async (ctx, { slugs }) => {
     const candidates = await ctx.db.query("candidates").collect();
+    const races = await ctx.db.query("races").collect();
+    const raceById = new Map(races.map((r) => [r.raceId, r]));
     const targets = slugs
       ? candidates.filter((c) => slugs.includes(c.slug))
-      : candidates.filter((c) => CONTESTED_RACE_IDS.includes(c.raceId));
+      : candidates.filter((c) => inNewsScope(c, raceById.get(c.raceId)?.level));
 
-    const out: { slug: string; name: string; raceId: string; lastProposedAt?: number }[] = [];
+    const out: { slug: string; name: string; raceId: string; office: string; lastProposedAt?: number }[] = [];
+
     for (const c of targets) {
       const rows = await ctx.db
         .query("article_sources")
@@ -63,6 +58,7 @@ export const listScoutCandidates = internalQuery({
         slug: c.slug,
         name: c.name,
         raceId: c.raceId,
+        office: raceById.get(c.raceId)?.office ?? c.raceId,
         ...(lastProposedAt > 0 ? { lastProposedAt } : {}),
       });
     }

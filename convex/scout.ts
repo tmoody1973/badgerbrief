@@ -18,7 +18,7 @@ import {
   OpenInferenceSimpleSpanProcessor,
 } from "@arizeai/openinference-vercel";
 import { SEMRESATTRS_PROJECT_NAME } from "@arizeai/openinference-semantic-conventions";
-import { ALLOWED_DOMAINS, WI_OUTLETS, isAllowedUrl, parseScoutResponse, sortByRotation } from "./lib/scoutParse";
+import { ALLOWED_DOMAINS, WI_OUTLETS, isAllowedUrl, parseScoutResponse, scoutPrompt, sortByRotation } from "./lib/scoutParse";
 import { decorateCoverageRow } from "./lib/outlets";
 
 const AGENT_NAME = "article-scout";
@@ -33,13 +33,12 @@ const AGENT_NAME = "article-scout";
  * A feed that reports on a tenth of the field each day does not look stale
  * because ingestion is broken; it looks stale because nobody searched.
  *
- * 30 covers the whole contested pool every run, so every candidate is checked
- * daily. Rotation still orders the pool (least-recently-touched first), so this
- * degrades sensibly if the pool grows past the limit rather than starving the
- * tail. One LLM call per candidate per day is not a meaningful cost against an
- * August 11 primary.
+ * 40 covers the whole pool every run: about 32 on-ballot candidates for the
+ * statewide executive offices and the U.S. House. Rotation still orders the
+ * pool (least-recently-touched first), so it degrades sensibly if the pool
+ * grows past the limit.
  */
-const DEFAULT_LIMIT = 30;
+const DEFAULT_LIMIT = 40;
 
 // Lazy singleton so deploys succeed with Arize keys absent (env read at call
 // time, never at import time). Returns null when telemetry is unconfigured.
@@ -108,7 +107,7 @@ const SCOUT_JSON_SCHEMA = {
   required: ["articles"],
 };
 
-type ScoutCandidate = { slug: string; name: string; raceId: string; lastProposedAt?: number };
+type ScoutCandidate = { slug: string; name: string; raceId: string; office: string; lastProposedAt?: number };
 
 /** Pure per-row enrichment: outlet key + hub-relevance gate. Exported for
  * testing without the network — called for each article before insert. */
@@ -204,7 +203,7 @@ export const run = internalAction({
               // The window is now days, ordered newest-first, with today's date
               // stated so the model has an anchor rather than inferring "recent"
               // from its own training cutoff.
-              content: `Today is ${new Date().toISOString().slice(0, 10)}. Find the MOST RECENT news coverage of ${target.name}, candidate for ${target.raceId} in Wisconsin's August 11, 2026 primary. Prioritise the last 7 days; do not return anything older than 30 days. List newest first and include each article's publication date. Return article URLs from the allowed outlets only.`,
+              content: scoutPrompt(target, new Date().toISOString().slice(0, 10)),
             },
           ],
           search_domain_filter: ALLOWED_DOMAINS,

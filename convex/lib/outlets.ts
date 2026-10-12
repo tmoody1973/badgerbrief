@@ -33,7 +33,7 @@ export function normalizeOutletKey(name: string): string {
 }
 
 export const HUB_RELEVANCE_MIN = 0.5;
-const WI_ELECTION_TERMS = ["wisconsin", "primary", "ballot", "election", "candidate", "assembly", "u.s. senate", "governor"];
+const WI_ELECTION_TERMS = ["wisconsin", "primary", "general", "november", "ballot", "election", "candidate", "assembly", "u.s. senate", "governor"];
 
 /** Deterministic v1 gate: hub-eligible when the text names a tracked candidate,
  * or matches a race keyword together with a WI-election term. No LLM — cheap,

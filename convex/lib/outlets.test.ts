@@ -111,3 +111,8 @@ describe("decorateCoverageRow reads the url slug, not just the headline", () => 
     expect(r.relevanceScore).toBeLessThan(HUB_RELEVANCE_MIN);
   });
 });
+
+test("general-election words count as Wisconsin election terms", () => {
+  const ctx = { candidateNames: [], raceKeywords: [] };
+  expect(scoreRelevance("What to watch in the November general", ctx).score).toBe(0.3);
+});
