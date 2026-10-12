@@ -1,6 +1,6 @@
 import { getRace } from "@/lib/data";
 import { slugToRaceId } from "@/lib/site";
-import { isOnBallot } from "@/lib/ballot-status";
+import { generalField } from "../../../../convex/lib/ballot";
 import { OG_SIZE, OG_CONTENT_TYPE, ogCard } from "@/lib/og-card";
 
 // Per-race share card: a link to a race previews with THAT office and how many
@@ -19,9 +19,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   }
 
   const office = data.race.office;
-  const count = data.candidates.filter((c) => isOnBallot(c.status)).length;
+  const count = generalField(data.candidates).length;
   const subtitle = count
-    ? `${count} candidate${count === 1 ? "" : "s"} on the ballot · compare where they stand`
+    ? `${count} candidate${count === 1 ? "" : "s"} on the November 3 ballot · compare where they stand`
     : "Candidates, campaign finance, and sourced coverage";
 
   return ogCard({

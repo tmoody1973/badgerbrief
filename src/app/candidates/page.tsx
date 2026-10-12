@@ -2,18 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { listCandidateDirectory, listRaces } from "@/lib/data";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
+import { PRIMARY_ARCHIVE } from "@/lib/election";
 
 export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "All Wisconsin 2026 candidates",
   description:
-    "Every candidate on the Wisconsin 2026 ballot, A–Z by office — Governor, Attorney General, Supreme Court, Congress, and state legislature. Nonpartisan, sourced profiles of who's running.",
+    "Every candidate on Wisconsin's November 3, 2026 ballot, by office — Governor, Attorney General, Congress, and the state legislature. Nonpartisan, sourced profiles.",
   alternates: { canonical: "/candidates" },
   openGraph: {
     title: "All Wisconsin 2026 candidates — BadgerBrief",
     description:
-      "Every candidate on the Wisconsin 2026 ballot, grouped by office. Nonpartisan, sourced profiles.",
+      "Every candidate on Wisconsin's November 3, 2026 ballot, grouped by office. Nonpartisan, sourced profiles.",
     url: "/candidates",
     type: "website",
   },
@@ -40,7 +41,8 @@ export default async function CandidatesIndexPage() {
   // whose race is missing (should not happen) is skipped rather than crashing
   // the whole directory.
   const byRace = new Map<string, typeof candidates>();
-  for (const c of candidates) {
+  const onBallotCount = candidates.filter((c) => c.onGeneralBallot).length;
+  for (const c of candidates.filter((x) => x.onGeneralBallot)) {
     if (!raceById.has(c.raceId)) continue;
     const list = byRace.get(c.raceId) ?? [];
     list.push(c);
@@ -80,12 +82,18 @@ export default async function CandidatesIndexPage() {
         All candidates
       </h1>
       <p className="mt-4 max-w-2xl text-lg">
-        {candidates.length} candidates on the Wisconsin 2026 ballot, grouped by
-        office. Or{" "}
+        {onBallotCount} candidates on Wisconsin&rsquo;s November 3, 2026 ballot, grouped by office. Or{" "}
         <Link href="/races" className="font-bold underline decoration-2 underline-offset-2">
           browse by race
         </Link>
         .
+      </p>
+      <p className="mt-2 max-w-2xl text-sm">
+        Looking for someone from the August primary?{" "}
+        <Link href={PRIMARY_ARCHIVE.path} className="font-bold underline decoration-2 underline-offset-2">
+          See the primary archive
+        </Link>
+        . Every candidate page keeps its address.
       </p>
 
       {levels.map(({ level, raceIds }) => (
@@ -116,9 +124,9 @@ export default async function CandidatesIndexPage() {
                         >
                           {c.name}
                         </Link>
-                        {c.party ? (
+                        {c.generalParty ? (
                           <span className="ml-1 font-mono text-xs text-muted-foreground">
-                            ({c.party[0]})
+                            ({c.generalParty})
                           </span>
                         ) : null}
                       </li>

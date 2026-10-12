@@ -6,13 +6,14 @@ import { listRaces } from "@/lib/data";
 import { splitHomeRaces } from "@/lib/home-races";
 import { raceLevelLabel } from "@/lib/i18n/race-card-dict";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
+import { novemberRaces } from "@/lib/november-races";
 
 export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Wisconsin 2026 races",
   description:
-    "Every race on the Wisconsin 2026 ballot — Governor, Attorney General, Supreme Court, Congress, and all state legislative districts. Nonpartisan candidate guides, side-by-side comparisons, and money in each race.",
+    "Every race on Wisconsin's November 3, 2026 ballot — Governor, Attorney General, Congress, and all state legislative districts. Nonpartisan candidate guides, side-by-side comparisons, and money in each race.",
   alternates: { canonical: "/races" },
   openGraph: {
     title: "Wisconsin 2026 races — BadgerBrief",
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
 
 export default async function RacesIndexPage() {
   const races = await listRaces();
-  const { listed, byLevel } = splitHomeRaces(races);
+  const { listed, byLevel } = splitHomeRaces(novemberRaces(races));
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
@@ -46,7 +47,7 @@ export default async function RacesIndexPage() {
         All races on the ballot
       </h1>
       <p className="mt-4 max-w-2xl text-lg">
-        {listed.length} races across Wisconsin&rsquo;s 2026 ballot — from
+        {listed.length} races on Wisconsin&rsquo;s November 3, 2026 ballot — from
         statewide offices to every legislative district. Open any race for a
         nonpartisan guide to who&rsquo;s running, or{" "}
         <Link href="/candidates" className="font-bold underline decoration-2 underline-offset-2">

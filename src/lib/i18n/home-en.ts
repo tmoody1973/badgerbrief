@@ -61,8 +61,8 @@ export const homeEn: HomeDict = {
     suffix: ", with every deadline linked to its official source.",
   },
   races: {
-    heading: "What races are on the Wisconsin 2026 primary ballot?",
-    countSuffix: " races: statewide offices, all eight U.S. House districts, the state supreme court, and the legislature.",
+    heading: "What races are on Wisconsin's November 3, 2026 ballot?",
+    countSuffix: " races: statewide offices, all eight U.S. House districts, and the legislature.",
     districtRacesSummary: (count) => `Find your district races (${count})`,
   },
   support: {

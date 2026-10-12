@@ -1,6 +1,6 @@
 import { getRace } from "@/lib/data";
 import { slugToRaceId } from "@/lib/site";
-import { isOnBallot } from "@/lib/ballot-status";
+import { generalField } from "../../../../convex/lib/ballot";
 import { OG_SIZE, OG_CONTENT_TYPE, ogCard } from "@/lib/og-card";
 
 // Per-race share card for the side-by-side comparison page. Framed as "compare"
@@ -18,7 +18,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   }
 
   const office = data.race.office;
-  const count = data.candidates.filter((c) => isOnBallot(c.status)).length;
+  const count = generalField(data.candidates).length;
   const subtitle = count
     ? `${count} candidate${count === 1 ? "" : "s"} side by side, issue by issue — every stance sourced`
     : "Where the candidates stand, issue by issue — every stance sourced";

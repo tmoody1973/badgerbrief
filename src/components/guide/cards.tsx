@@ -6,7 +6,6 @@ import {
   candidateCountLabel,
   incumbentPrefix,
   raceLevelLabel,
-  raceRatingLabel,
 } from "@/lib/i18n/race-card-dict";
 import { PartyBadge, StatusBadge } from "./labels";
 import { generalBallotName, generalParty } from "../../../convex/lib/ballot";
@@ -20,7 +19,6 @@ export function RaceCard({
   candidateCount?: number;
   locale?: Locale;
 }) {
-  const rating = race.raceRating?.["Cook_Political_Report"];
   return (
     <Link
       href={`/races/${raceIdToSlug(race.raceId)}`}
@@ -36,11 +34,6 @@ export function RaceCard({
         </p>
       )}
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        {rating && (
-          <span className="border-2 border-border bg-warning px-2 py-0.5 text-xs font-bold">
-            {raceRatingLabel(rating, locale)}
-          </span>
-        )}
         {candidateCount !== undefined && candidateCount > 0 && (
           <span className="font-mono text-xs">
             {candidateCountLabel(candidateCount, locale)}

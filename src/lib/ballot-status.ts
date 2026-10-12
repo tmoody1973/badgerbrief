@@ -18,9 +18,6 @@ export function wasOnPrimaryBallot(status?: string): boolean {
   return !low.includes("not on") && !low.includes("did not file");
 }
 
-/** @deprecated Temporary, so every commit typechecks. Task 7 removes it with its last caller. */
-export const isOnBallot = wasOnPrimaryBallot;
-
 /**
  * Everyone who belongs in the primary archive. A candidate with no primary
  * party who IS on the November ballot was added from the state's November
