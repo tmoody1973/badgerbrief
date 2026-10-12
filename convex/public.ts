@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 import { query } from "./_generated/server";
+import { generalBallotName, generalParty, isOnGeneralBallot } from "./lib/ballot";
 
 /** Read-only queries for the public guide. Published/seeded data only. */
 
@@ -192,16 +193,19 @@ export const getCandidateBySlug = query({
       .query("candidates")
       .withIndex("by_race", (q) => q.eq("raceId", candidate.raceId))
       .collect();
-    const field = await Promise.all(
-      fieldRows.map(async (c) => ({
-        slug: c.slug,
-        name: c.name,
-        party: c.party,
-        incumbent: c.incumbent,
-        status: c.status,
-        hasRecord: Boolean(c.legislatorName || c.bioguideId),
-      })),
-    );
+    const field = fieldRows.map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      party: c.party,
+      incumbent: c.incumbent,
+      status: c.status,
+      hasRecord: Boolean(c.legislatorName || c.bioguideId),
+      // Nov 3 facts from the state's certified list (convex/generalBallot.ts).
+      onGeneralBallot: isOnGeneralBallot(c),
+      ballotName: generalBallotName(c),
+      generalParty: generalParty(c),
+      ballotOrder: c.general?.ballotOrder,
+    }));
 
     return {
       candidate,
@@ -243,6 +247,8 @@ export const listCandidateDirectory = query({
       raceId: c.raceId,
       status: c.status ?? null,
       dataAsOf: c.dataAsOf,
+      onGeneralBallot: isOnGeneralBallot(c),
+      generalParty: generalParty(c) ?? null,
     }));
   },
 });
