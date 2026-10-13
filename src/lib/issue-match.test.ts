@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { buildIssueMatch, type RaceInput } from "./issue-match";
+import { buildIssueMatch, hasCoverage, type RaceInput } from "./issue-match";
 
 const pos = (candidateSlug: string, issueSlug: string) => ({
   candidateSlug, issueSlug, stance: "support", summary: `${candidateSlug}/${issueSlug}`, sources: [],
@@ -32,6 +32,8 @@ describe("buildIssueMatch", () => {
     expect(groups.map((g) => g.issueSlug)).toEqual(["healthcare", "abortion"]);
     expect(groups[0].label).toBe("Healthcare");
     expect(groups[0].races.map((r) => r.raceId)).toEqual(["WI-GOV-2026", "WI-AG-2026"]);
+    // on-record candidates are ordered by last name
+    expect(groups[0].races[0].onRecord.map((r) => r.candidate.slug)).toEqual(["crowley", "tiffany"]);
     expect(groups[0].races[1].onRecord.map((r) => r.candidate.slug)).toEqual(["kaul"]);
     expect(groups[0].races[1].noRecord.map((c) => c.slug)).toEqual(["toney"]);
     expect(totalOnRecord).toBe(4);
@@ -72,5 +74,21 @@ describe("buildIssueMatch", () => {
     const before = JSON.stringify(races);
     expect(buildIssueMatch(races, ["abortion", "abortion"]).groups).toHaveLength(1);
     expect(JSON.stringify(races)).toBe(before);
+  });
+
+  it("preserves selection order regardless of how much coverage each issue has", () => {
+    // abortion has less coverage than healthcare, so this proves order comes from selection.
+    expect(buildIssueMatch(races, ["abortion", "healthcare"]).groups.map((g) => g.issueSlug)).toEqual(["abortion", "healthcare"]);
+  });
+});
+
+describe("hasCoverage", () => {
+  it("is true only when some race has a position on the issue", () => {
+    // Every chosen issue now gets a group, so "a group exists" no longer means "there is coverage".
+    // The chat's match tool reported "some coverage" for every issue until it used this.
+    const { groups } = buildIssueMatch(races, ["healthcare", "immigration"]);
+    expect(hasCoverage(groups[0])).toBe(true);
+    expect(hasCoverage(groups[1])).toBe(false);
+    expect(hasCoverage(undefined)).toBe(false);
   });
 });

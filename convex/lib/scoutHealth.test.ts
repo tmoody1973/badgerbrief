@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { scoutHealthAlert } from "./scoutHealth";
+import { isFullSweep, scoutHealthAlert } from "./scoutHealth";
 
 const run = (over: Partial<Parameters<typeof scoutHealthAlert>[0]>) =>
   scoutHealthAlert({ attempted: 32, errors: 0, proposed: 5, daysSinceLastArticle: 0, ...over });
@@ -36,5 +36,14 @@ describe("scoutHealthAlert", () => {
   test("a quiet day or two is normal", () => {
     expect(run({ proposed: 0, daysSinceLastArticle: 2 })).toBeNull();
     expect(run({ proposed: 0, daysSinceLastArticle: null })).toBeNull();
+  });
+});
+
+describe("isFullSweep", () => {
+  test("only the scheduled run, with no arguments, is judged for health", () => {
+    // A one-candidate test run must not open, or close, the alert for the daily job.
+    expect(isFullSweep({})).toBe(true);
+    expect(isFullSweep({ limit: 1 })).toBe(false);
+    expect(isFullSweep({ candidateSlugs: ["tom-tiffany"] })).toBe(false);
   });
 });

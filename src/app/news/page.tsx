@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { NewsFeed } from "@/components/guide/news-feed";
-import { getHubArticles, listRaces } from "@/lib/data";
+import { getHubArchive, getHubArticles, listRaces } from "@/lib/data";
 import { PRIMARY_ARCHIVE } from "@/lib/election";
 import { JsonLd, newsCollectionNode, organizationNode } from "@/lib/jsonld";
 
@@ -19,10 +19,9 @@ export const metadata: Metadata = {
 const HUB_FETCH_LIMIT = 500;
 
 export default async function NewsPage() {
-  const [all, races] = await Promise.all([getHubArticles(), listRaces()]);
   // General-election coverage only. Primary-season coverage has its own page.
-  const items = all.filter((r) => !r.article.archive);
-  const archivedCount = all.length - items.length;
+  const [items, archived, races] = await Promise.all([getHubArticles(), getHubArchive(), listRaces()]);
+  const archivedCount = archived.length;
   // raceId → office, so the race filter chips read "Governor" not "WI-GOV-2026".
   const raceLabels = Object.fromEntries(races.map((r) => [r.raceId, r.office]));
   // Dateline = the newest VERIFIED publication date we hold. Never "today" —
@@ -75,7 +74,7 @@ export default async function NewsPage() {
       {archivedCount > 0 && (
         <p className="mt-8 text-sm">
           <Link href={`${PRIMARY_ARCHIVE.path}/news`} className="font-bold underline decoration-2 underline-offset-2">
-            Coverage from the {PRIMARY_ARCHIVE.label} season ({archivedCount}) →
+            Coverage from the {PRIMARY_ARCHIVE.label} season ({archivedCount}{archivedCount >= HUB_FETCH_LIMIT ? "+" : ""}) →
           </Link>
         </p>
       )}

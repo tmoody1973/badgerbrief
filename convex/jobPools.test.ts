@@ -71,11 +71,33 @@ describe("scheduled jobs work only on candidates on the November ballot", () => 
   test("the finance report lists on-ballot statewide and House candidates with no finance record", async () => {
     const t = await seeded();
     await t.run(async (ctx) => {
-      await ctx.db.insert("races", { raceId: "WI-GOV-2026", electionSlug: "wi-2026", office: "Governor of Wisconsin", level: "State Executive", sources: [], dataAsOf: "2026-10-12" });
+      const race = (raceId: string, office: string, general: typeof ON) =>
+        ctx.db.insert("races", { raceId, electionSlug: "wi-2026", office, level: "State Executive", sources: [], dataAsOf: "2026-10-12", general });
+      await race("WI-GOV-2026", "Governor of Wisconsin", ON);
+      await race("WI-LTGOV-2026", "Lieutenant Governor of Wisconsin", OFF);
       await ctx.db.insert("candidates", person("on-ballot-no-finance", ON));
+      // A running mate files no committee of their own: the ticket's money is the governor candidate's.
+      await ctx.db.insert("candidates", person("running-mate", ON, { raceId: "WI-LTGOV-2026" }));
     });
     const { count, missing } = await t.query(internal.finance.financeMissing, {});
     expect(count).toBe(1);
     expect(missing).toEqual([{ raceId: "WI-GOV-2026", candidateSlug: "on-ballot-no-finance", name: "on-ballot-no-finance" }]);
+  });
+
+  test("the daily federal finance sync covers only candidates on the ballot", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("candidates", person("house-on", ON, { raceId: "WI-US-HOUSE-D4-2026", fecCandidateId: "H0WI00001" }));
+      await ctx.db.insert("candidates", person("house-off", OFF, { raceId: "WI-US-HOUSE-D4-2026", fecCandidateId: "H0WI00002" }));
+    });
+    const rows = await t.query(internal.finance.listFecCandidates, {});
+    expect(rows.map((r) => r.slug)).toEqual(["house-on"]);
+  });
+
+  test("social tracking does not follow a running mate, who is not in the governor race", async () => {
+    const t = await seeded();
+    await t.run((ctx) => ctx.db.insert("candidates", person("running-mate", ON, { raceId: "WI-LTGOV-2026" })));
+    const tracked = await t.query(internal.social.candidatesToTrack, {});
+    expect(tracked.map((x) => x.slug)).toEqual(["on-ballot"]);
   });
 });

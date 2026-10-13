@@ -102,8 +102,11 @@ const archived = (a: Doc<"article_sources">, slugs: ReadonlySet<string>) =>
   isPrimaryEra({ when: when(a), candidateSlug: a.candidateSlug }, slugs);
 
 export const hubArticles = query({
-  args: { limit: v.optional(v.number()), raceId: v.optional(v.string()) },
-  handler: async (ctx, { limit, raceId }) => {
+  // `archive`: true for primary-season coverage only, false for current
+  // coverage only, omitted for both. The split happens BEFORE the cap, so a
+  // long feed cannot push archive stories off the end of both lists.
+  args: { limit: v.optional(v.number()), raceId: v.optional(v.string()), archive: v.optional(v.boolean()) },
+  handler: async (ctx, { limit, raceId, archive }) => {
     const rows = (await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "auto")).collect())
       // A candidate's own campaign site is not news — the entity queries below
       // exclude it, and the hub must too, or a campaign page appears as
@@ -116,10 +119,11 @@ export const hubArticles = query({
       // candidate who had withdrawn. A rejection that leaves the story visible
       // is worse than no review at all, because the queue reads as handled.
       .filter((r) => r.status !== "rejected");
+    const slugs = await onBallotSlugs(ctx);
     const filtered = (raceId ? rows.filter((r) => r.raceId === raceId) : rows)
+      .filter((r) => archive === undefined || archived(r, slugs) === archive)
       .sort(byRecency)
       .slice(0, limit ?? 60);
-    const slugs = await onBallotSlugs(ctx);
     return Promise.all(filtered.map((a) => withOutletPublic(ctx, a, archived(a, slugs))));
   },
 });

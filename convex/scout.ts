@@ -20,6 +20,7 @@ import {
 import { SEMRESATTRS_PROJECT_NAME } from "@arizeai/openinference-semantic-conventions";
 import { ALLOWED_DOMAINS, WI_OUTLETS, isAllowedUrl, parseScoutResponse, scoutPrompt, sortByRotation } from "./lib/scoutParse";
 import { decorateCoverageRow } from "./lib/outlets";
+import { isFullSweep } from "./lib/scoutHealth";
 
 const AGENT_NAME = "article-scout";
 /**
@@ -323,7 +324,7 @@ export const run = internalAction({
       }
     }
 
-    await reportHealth(ctx, summaries);
+    if (isFullSweep({ candidateSlugs, limit })) await reportHealth(ctx, summaries);
     return summaries;
   },
 });

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ArchiveBanner } from "@/components/guide/archive-banner";
 import { NewsFeed } from "@/components/guide/news-feed";
-import { getHubArticles, listRaces } from "@/lib/data";
+import { getHubArchive, listRaces } from "@/lib/data";
 import { PRIMARY_ARCHIVE } from "@/lib/election";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
 
@@ -14,8 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ArchivedNewsPage() {
-  const [all, races] = await Promise.all([getHubArticles(), listRaces()]);
-  const items = all.filter((r) => r.article.archive);
+  const [items, races] = await Promise.all([getHubArchive(), listRaces()]);
   const raceLabels = Object.fromEntries(races.map((r) => [r.raceId, r.office]));
 
   return (

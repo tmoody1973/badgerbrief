@@ -17,7 +17,16 @@ export function inNewsScope(
   return raceLevel === "State Executive" || candidate.raceId.startsWith("WI-US-HOUSE-");
 }
 
+/**
+ * The ad-matching candidate list knows everyone, so an old ad naming someone
+ * off the ballot is still attributed correctly. A job that SPENDS on a list
+ * built from it (searches, file downloads) starts from this.
+ */
+export function onBallotOnly<C extends { onBallot?: boolean }>(candidates: readonly C[]): C[] {
+  return candidates.filter((c) => c.onBallot === true);
+}
+
 /** One ad-library search per candidate on the ballot. */
 export function metaSearchTerms(candidates: readonly { name: string; onBallot?: boolean }[]): string[] {
-  return candidates.filter((c) => c.onBallot === true).map((c) => c.name);
+  return onBallotOnly(candidates).map((c) => c.name);
 }

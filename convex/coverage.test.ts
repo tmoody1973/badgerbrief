@@ -127,3 +127,24 @@ test("each article says whether it belongs in the primary archive", async () => 
   expect(flags(await c.query(api.coverage.hubArticles, {}))).toEqual(expected);
   expect(flags(await c.query(api.coverage.inTheNewsForRace, { raceId: "WI-GOV-2026" }))).toEqual(expected);
 });
+
+test("a story with a verified date of August 12 stays on /news", async () => {
+  const c = t();
+  const base = { hubStatus: "auto", status: "approved", raceId: "WI-GOV-2026", publishedAtVerified: true, proposedAt: Date.parse("2026-09-01T11:00:00Z") };
+  await seedArticle(c, { ...base, headline: "aug-12", publishedAt: "2026-08-12" });
+  await seedArticle(c, { ...base, headline: "aug-11", publishedAt: "2026-08-11" });
+  const rows = await c.query(api.coverage.hubArticles, {});
+  expect(Object.fromEntries(rows.map((r) => [r.article.headline, r.article.archive]))).toEqual({ "aug-12": false, "aug-11": true });
+});
+
+test("the archive list is chosen before the cap, so a long feed cannot push archive stories off both pages", async () => {
+  const c = t();
+  const base = { hubStatus: "auto", status: "approved", raceId: "WI-GOV-2026" };
+  await seedArticle(c, { ...base, headline: "old", proposedAt: Date.parse("2026-07-01T11:00:00Z") });
+  await seedArticle(c, { ...base, headline: "new-1", proposedAt: Date.parse("2026-10-01T11:00:00Z") });
+  await seedArticle(c, { ...base, headline: "new-2", proposedAt: Date.parse("2026-10-02T11:00:00Z") });
+  const names = (rows: { article: { headline: string } }[]) => rows.map((r) => r.article.headline);
+  // With a cap of 2 and no split, "old" used to fall off the end and appear nowhere.
+  expect(names(await c.query(api.coverage.hubArticles, { limit: 2, archive: true }))).toEqual(["old"]);
+  expect(names(await c.query(api.coverage.hubArticles, { limit: 2, archive: false }))).toEqual(["new-2", "new-1"]);
+});

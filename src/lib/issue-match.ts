@@ -66,3 +66,11 @@ export function buildIssueMatch(
   const totalOnRecord = groups.reduce((n, g) => n + g.races.reduce((m, r) => m + r.onRecord.length, 0), 0);
   return { groups, uncovered, totalOnRecord };
 }
+
+/**
+ * Whether anyone has a published position on this issue. Every chosen issue
+ * gets a group, so the existence of a group is not the answer.
+ */
+export function hasCoverage(group: IssueMatchGroup | undefined): boolean {
+  return Boolean(group && group.races.length > 0);
+}

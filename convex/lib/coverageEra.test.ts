@@ -22,7 +22,14 @@ describe("isPrimaryEra", () => {
     expect(isPrimaryEra({ when: day("2026-09-20") }, onBallot)).toBe(false);
   });
 
-  test("the cutoff is midnight Central after the August 11 primary", () => {
-    expect(new Date(GENERAL_COVERAGE_STARTS).toISOString()).toBe("2026-08-12T05:00:00.000Z");
+  test("a story dated August 12 is current: verified dates carry no time of day", () => {
+    // A verified publication date is a bare day, which parses to midnight UTC.
+    // A cutoff later in that day sent all 25 stories dated August 12 to the archive.
+    expect(isPrimaryEra({ when: Date.parse("2026-08-12"), candidateSlug: "tom-tiffany" }, onBallot)).toBe(false);
+    expect(isPrimaryEra({ when: Date.parse("2026-08-11"), candidateSlug: "tom-tiffany" }, onBallot)).toBe(true);
+  });
+
+  test("the cutoff is the start of August 12, the day after the primary", () => {
+    expect(new Date(GENERAL_COVERAGE_STARTS).toISOString()).toBe("2026-08-12T00:00:00.000Z");
   });
 });

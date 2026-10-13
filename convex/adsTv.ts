@@ -25,6 +25,7 @@ import {
   type NormalizedAd,
 } from "./lib/adsMatch";
 import { toAdWrite, buildDisclosure, type TvAdExtraction } from "./lib/tvExtract";
+import { onBallotOnly } from "./lib/jobScope";
 
 const YEAR = 2026;
 const FCC_BASE = "https://publicfiles.fcc.gov";
@@ -546,7 +547,9 @@ export const syncTvAds = internalAction({
       internal.ads.listCandidatesForMatching,
       {},
     );
-    const trackedSurnames = candidates
+    // Only people on the November ballot: this list decides which files the
+    // paid browser service opens.
+    const trackedSurnames = onBallotOnly(candidates)
       .map((c) => normalizeText(c.name).split(" ").pop() ?? "")
       .filter((s) => s.length >= 4);
 

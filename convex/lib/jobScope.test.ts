@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { inNewsScope, metaSearchTerms } from "./jobScope";
+import { inNewsScope, metaSearchTerms, onBallotOnly } from "./jobScope";
 
 const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
 const ON = { onBallot: true, source: SOURCE };
@@ -33,5 +33,14 @@ describe("metaSearchTerms", () => {
       { name: "No Flag" },
     ]);
     expect(terms).toEqual(["Tom Tiffany"]);
+  });
+});
+
+describe("onBallotOnly", () => {
+  test("keeps the rows flagged as on the ballot, for any job that builds a list from the ad-matching candidates", () => {
+    // The TV-ad sync builds the list of surnames it opens files for from this.
+    const rows = [{ name: "Tom Tiffany", onBallot: true }, { name: "Mandela Barnes", onBallot: false }, { name: "No Flag" }];
+    expect(onBallotOnly(rows).map((r) => r.name)).toEqual(["Tom Tiffany"]);
+    expect(rows).toHaveLength(3);
   });
 });

@@ -15,7 +15,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import type { Id } from "./_generated/dataModel";
 import { ensureTelemetry, tracer } from "./lib/agentTelemetry";
 import { OFFICIAL_LINKS, OFFICIAL_LINK_TOPICS, type OfficialLinkTopic } from "../src/lib/official-links";
-import { buildIssueMatch } from "../src/lib/issue-match";
+import { buildIssueMatch, hasCoverage } from "../src/lib/issue-match";
 import { ISSUE_SLUGS } from "./lib/extraction";
 
 const AGENT_NAME = "voter-help-agent";
@@ -155,7 +155,8 @@ const matchBallotByIssues = createTool({
         const g = groups.find((x) => x.issueSlug === slug);
         return {
           issue: slug,
-          coverage: g ? "some" : "none",
+          // A group exists for every requested issue; coverage means a position does.
+          coverage: hasCoverage(g) ? "some" : "none",
           races: (g?.races ?? []).map((r) => ({
             office: r.office,
             onRecord: r.onRecord.map((o) => ({

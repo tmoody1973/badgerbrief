@@ -44,3 +44,12 @@ export function scoutHealthAlert(run: ScoutRun): HealthAlert | null {
   }
   return null;
 }
+
+/**
+ * Only the scheduled run, called with no arguments, is judged for health. A
+ * one-candidate test run says nothing about the daily job, and must neither
+ * open an alert for it nor close one.
+ */
+export function isFullSweep(args: { candidateSlugs?: readonly string[]; limit?: number }): boolean {
+  return args.candidateSlugs === undefined && args.limit === undefined;
+}
