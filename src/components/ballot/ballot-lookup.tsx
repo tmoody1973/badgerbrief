@@ -13,7 +13,7 @@ import type { Districts, GeocodeResult } from "@/lib/districts";
 type Status = { kind: "idle" } | { kind: "looking" } | { kind: "problem"; message: string };
 
 const FOCUS = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
-const FIELD = `min-h-11 border-2 border-border bg-card px-3 py-2 ${FOCUS}`;
+const FIELD = `min-h-11 border-2 border-border bg-card px-3 py-2 placeholder:text-muted-foreground ${FOCUS}`;
 const LINK = `font-bold underline decoration-2 underline-offset-2 ${FOCUS}`;
 
 const PROBLEM = {

@@ -178,6 +178,20 @@ export function voterBallot(data: BallotData, districts: Districts): VoterBallot
   return { contests: mine.sort(byPosition), senate: senate ? "on-ballot" : "not-up", county };
 }
 
+/**
+ * The places that make up this ballot, each a phrase that must not break
+ * across lines: "House 4", "Senate 7", "Assembly 19", "Milwaukee County".
+ * The state's file already writes a county's name with the word "County".
+ */
+export function ballotPlaces(districts: Districts, county: VoterBallot["county"]): string[] {
+  return [
+    `House ${districts.congressional}`,
+    `Senate ${districts.senate}`,
+    `Assembly ${districts.assembly}`,
+    ...(county.status === "ok" ? [county.name] : []),
+  ];
+}
+
 /** The ballot in two passes: contests with a real choice, then offices with one name. Each keeps the state's order. */
 export function byAttention(contests: readonly BallotContest[]): { decisions: BallotContest[]; oneName: BallotContest[] } {
   return {

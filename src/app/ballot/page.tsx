@@ -32,11 +32,9 @@ export default async function BallotPage() {
   });
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10">
+    <main className="mx-auto w-full max-w-3xl px-4 pb-10 pt-6 sm:pt-10">
       <h1 className="font-display text-4xl leading-none sm:text-5xl">My Ballot</h1>
-      <p className="mt-3 max-w-2xl text-lg">
-        The contests on your {CURRENT_ELECTION.longDate} ballot, as the state prints them. BadgerBrief does not tell you how to vote.
-      </p>
+      <p className="mt-2 max-w-2xl">{CURRENT_ELECTION.longDate}, as the state prints it.</p>
       <MyBallot data={data}>
         <BallotQuestions questions={statewideQuestions()} />
       </MyBallot>

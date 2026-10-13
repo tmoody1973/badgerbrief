@@ -2,7 +2,8 @@
 import { describe, expect, test } from "vitest";
 import type { BallotIndexRace } from "../../convex/public";
 import type { CountyContest } from "../../convex/lib/ballotExtras";
-import { buildBallotData, byAttention, contestPosition, numbered, voterBallot, type BallotContest } from "./my-ballot";
+import countyFile from "../../convex/lib/data/county-contests-2026.json";
+import { ballotPlaces, buildBallotData, byAttention, contestPosition, numbered, voterBallot, type BallotContest } from "./my-ballot";
 
 const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06" };
 const NOTHING = { positions: false, money: false, ads: false };
@@ -23,7 +24,7 @@ function county(key: string, name: string, office: string, ballotPosition: numbe
     county: key,
     countyName: name,
     office,
-    contestAsPrinted: `${name} County ${office}`,
+    contestAsPrinted: `${name} ${office}`,
     ballotPosition,
     candidates: names.map((ballotName) => ({ ballotName, party: "Independent", ballotOrder: 1 })),
   };
@@ -39,9 +40,10 @@ const INDEX: BallotIndexRace[] = [
   race("WI-STATE-ASSEMBLY-D76-2026", "State Assembly District 76", ["Other Assembly", "Second Assembly"]),
 ];
 const COUNTY: CountyContest[] = [
-  county("milwaukee", "Milwaukee", "Sheriff", 24004, ["Sheriff One", "Sheriff Two"]),
-  county("milwaukee", "Milwaukee", "Clerk of Circuit Court", 24005, ["Clerk Only"]),
-  county("dane", "Dane", "Sheriff", 21304, ["Dane Sheriff"]),
+  // The state's file writes the name with the word "County" already in it.
+  county("milwaukee", "Milwaukee County", "Sheriff", 24004, ["Sheriff One", "Sheriff Two"]),
+  county("milwaukee", "Milwaukee County", "Clerk of Circuit Court", 24005, ["Clerk Only"]),
+  county("dane", "Dane County", "Sheriff", 21304, ["Dane Sheriff"]),
 ];
 const data = (countyContests: CountyContest[] | null = COUNTY) => buildBallotData({ index: INDEX, countyContests, answered: () => false });
 
@@ -117,7 +119,7 @@ describe("buildBallotData", () => {
 
   test("a county office has names in the file's order and nothing else", () => {
     const sheriff = data().counties?.milwaukee.contests[0];
-    expect(data().counties?.milwaukee.name).toBe("Milwaukee");
+    expect(data().counties?.milwaukee.name).toBe("Milwaukee County");
     expect(sheriff).toEqual({
       key: "county:milwaukee:24004",
       position: 24004,
@@ -148,7 +150,7 @@ describe("voterBallot", () => {
     const b = voterBallot(data(), milwaukee);
     expect(b.contests.map((c) => c.position)).toEqual([250, 252, 1204, 1307, 1419, 24004, 24005]);
     expect(b.senate).toBe("on-ballot");
-    expect(b.county).toEqual({ status: "ok", name: "Milwaukee" });
+    expect(b.county).toEqual({ status: "ok", name: "Milwaukee County" });
   });
 
   test("an even Senate district has no Senate contest and says so", () => {
@@ -199,5 +201,30 @@ describe("byAttention and numbered", () => {
   test("a contest nobody is on the ballot for is a strip line, not a decision", () => {
     const empty: BallotContest = { key: "x", position: 1, office: "Empty", candidates: [], stamps: [] };
     expect(byAttention([empty])).toEqual({ decisions: [], oneName: [empty] });
+  });
+});
+
+describe("ballotPlaces", () => {
+  const milwaukee = { congressional: 4, senate: 7, assembly: 19, county: "milwaukee" };
+
+  test("names the districts and the county, each as one unbreakable phrase", () => {
+    expect(ballotPlaces(milwaukee, { status: "ok", name: "Milwaukee County" })).toEqual(["House 4", "Senate 7", "Assembly 19", "Milwaukee County"]);
+  });
+
+  test("leaves the county off when it is not known", () => {
+    for (const status of ["missing", "unknown", "not-certified"] as const) {
+      expect(ballotPlaces(milwaukee, { status })).toEqual(["House 4", "Senate 7", "Assembly 19"]);
+    }
+  });
+
+  test("with the state's real county file, no county is named twice over", () => {
+    const real = buildBallotData({ index: INDEX, countyContests: countyFile.contests as CountyContest[], answered: () => false });
+    for (const key of Object.keys(real.counties ?? {})) {
+      const ballot = voterBallot(real, { ...milwaukee, county: key });
+      const place = ballotPlaces(milwaukee, ballot.county).at(-1) ?? "";
+      expect(place).toMatch(/ County$/);
+      expect(place).not.toMatch(/County.*County/);
+    }
+    expect(Object.keys(real.counties ?? {})).toHaveLength(72);
   });
 });

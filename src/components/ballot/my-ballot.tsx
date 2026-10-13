@@ -9,7 +9,7 @@ import { clearStoredDistricts, readStoredOrder, storeDistricts, storeOrder, stor
 import { chooseShown, forgetLinkedBallot, linkedBallotSnapshot, subscribeLinkedBallot } from "@/lib/ballot-view";
 import type { Districts } from "@/lib/districts";
 import { formatIsoDate } from "@/lib/election";
-import { byAttention, numbered, voterBallot, type BallotData } from "@/lib/my-ballot";
+import { ballotPlaces, byAttention, numbered, voterBallot, type BallotData } from "@/lib/my-ballot";
 import { BallotLookup } from "./ballot-lookup";
 import { ContestCard, OneNameStrip } from "./contest";
 import { ShareBallot } from "./share-ballot";
@@ -23,7 +23,6 @@ import { ShareBallot } from "./share-ballot";
 
 const FOCUS = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 const LINK = `font-bold underline decoration-2 underline-offset-2 ${FOCUS}`;
-const QUIET_BUTTON = `press min-h-11 border-2 border-border bg-card px-4 font-bold shadow-[var(--shadow-brutal)] ${FOCUS}`;
 const MYVOTE_BALLOT = "https://myvote.wi.gov/en-us/Whats-On-My-Ballot";
 
 const noLink = () => "";
@@ -102,7 +101,7 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
   );
 
   const certified = data.ballotSource.url ? (
-    <p className="mt-3 font-mono text-xs uppercase tracking-wide">
+    <p className="mt-2 font-mono text-xs uppercase tracking-wide">
       Names and order from{" "}
       <a href={data.ballotSource.url} target="_blank" rel="noopener noreferrer" className={LINK}>
         the state’s certified list, dated {formatIsoDate(data.ballotSource.documentDate)}
@@ -143,12 +142,25 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
   }
 
   const { districts } = shown;
-  const places = [`House ${districts.congressional}`, `Senate ${districts.senate}`, `Assembly ${districts.assembly}`, ...(ballot.county.status === "ok" ? [`${ballot.county.name} County`] : [])];
+  const places = ballotPlaces(districts, ballot.county);
+  const orderToggle = (
+    <button type="button" onClick={() => storeOrder(order === "ballot" ? "attention" : "ballot")} className={`min-h-11 shrink-0 ${LINK}`}>
+      {order === "ballot" ? "Show decisions first" : "Show in ballot order"}
+    </button>
+  );
 
   return (
     <div data-ballot-ready={shown.from}>
-      <section className="mt-6 border-2 border-border bg-secondary p-4 shadow-[var(--shadow-brutal)] sm:p-6">
-        <h2 className="font-display text-2xl leading-tight text-balance sm:text-3xl">{places.join(" · ")}</h2>
+      <section className="mt-4 border-2 border-border bg-secondary p-3 shadow-[var(--shadow-brutal)] sm:mt-6 sm:p-6">
+        <h2 className="font-display flex flex-wrap gap-x-3 gap-y-1 text-lg leading-tight sm:gap-x-5 sm:text-3xl">
+          {places.map((place, i) => (
+            <span key={place} className="whitespace-nowrap">
+              {place}
+              {/* Read aloud as a list; drawn as separate phrases. */}
+              {i < places.length - 1 && <span className="sr-only">, </span>}
+            </span>
+          ))}
+        </h2>
         {certified}
         {shown.from === "link" && (
           <p className="mt-4 border-t-2 border-dashed border-border pt-4">
@@ -194,12 +206,6 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
         </section>
       )}
 
-      <p className="mt-5">
-        <button type="button" aria-pressed={order === "ballot"} onClick={() => storeOrder(order === "ballot" ? "attention" : "ballot")} className={QUIET_BUTTON}>
-          {order === "ballot" ? "Show decisions first" : "Show in ballot order"}
-        </button>
-      </p>
-
       <div className="mt-4">
         <SectionNav sections={sections} />
       </div>
@@ -207,7 +213,8 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
       {order === "ballot" ? (
         <section id="contests" className="mt-6 scroll-mt-16">
           <h2 className="font-display text-2xl">Your ballot, in the state’s order</h2>
-          <div className="mt-4 space-y-5">
+          <p className="mt-1">{orderToggle}</p>
+          <div className="mt-3 space-y-5">
             {ballot.contests.map((contest) => (
               <ContestCard key={contest.key} contest={contest} number={numbers.get(contest.key)} />
             ))}
@@ -216,13 +223,15 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
       ) : (
         <>
           {decisions.length > 0 && (
-            <section id="decisions" className="mt-6 scroll-mt-16">
-              <h2 className="font-display text-2xl">Your decisions</h2>
-              <p className="mt-2 max-w-2xl">
-                {decisions.length === 1 ? "One contest has" : `${decisions.length} contests have`} more than one name on the ballot. The numbers are each contest’s place in the
-                state’s order.
+            <section id="decisions" className="mt-4 scroll-mt-16">
+              <div className="flex flex-wrap items-center justify-between gap-x-4">
+                <h2 className="font-display text-2xl">Your decisions</h2>
+                {orderToggle}
+              </div>
+              <p className="sr-only">
+                {decisions.length === 1 ? "One contest has" : `${decisions.length} contests have`} more than one name on the ballot.
               </p>
-              <div className="mt-4 space-y-5">
+              <div className="mt-2 space-y-5">
                 {decisions.map((contest) => (
                   <ContestCard key={contest.key} contest={contest} number={numbers.get(contest.key)} />
                 ))}
@@ -233,7 +242,7 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
             <section id="one-name" className="mt-10 scroll-mt-16">
               <h2 className="font-display text-2xl">One name on the ballot</h2>
               <p className="mt-2 max-w-2xl">
-                {oneName.length === 1 ? "This office has" : `These ${oneName.length} offices have`} a single candidate. You can still write someone in.
+                {oneName.length === 1 ? "This office has" : `These ${oneName.length} offices have`} a single candidate on the ballot.
               </p>
               <div className="mt-4">
                 <OneNameStrip contests={oneName} numbers={numbers} />
@@ -285,6 +294,7 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
 function LocalAndSpanish() {
   return (
     <div className="mt-10 max-w-2xl space-y-3 border-t-2 border-dashed border-border pt-6">
+      <p>BadgerBrief does not tell you how to vote.</p>
       <p>
         Local questions, and a few local offices that cover part of a county, aren’t listed here. <MyVote>See your full ballot at MyVote Wisconsin</MyVote>, the state’s official
         site.
