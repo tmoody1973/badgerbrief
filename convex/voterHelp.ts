@@ -15,8 +15,15 @@ import { anthropic } from "@ai-sdk/anthropic";
 import type { Id } from "./_generated/dataModel";
 import { ensureTelemetry, tracer } from "./lib/agentTelemetry";
 import { OFFICIAL_LINKS, OFFICIAL_LINK_TOPICS, type OfficialLinkTopic } from "../src/lib/official-links";
-import { buildIssueMatch, hasCoverage } from "../src/lib/issue-match";
+import { buildIssueMatch } from "../src/lib/issue-match";
+import { candidatePayload, matchPayload, racePayload } from "./lib/chatPayloads";
 import { ISSUE_SLUGS } from "./lib/extraction";
+import {
+  LABEL_GLOSSARY,
+  LABEL_GLOSSARY_KEY_DISTINCTION,
+  LABEL_GLOSSARY_STANCE,
+  LABEL_GLOSSARY_PATH,
+} from "../src/lib/label-glossary";
 
 const AGENT_NAME = "voter-help-agent";
 // MOO-313 golden-gate history (2026-07-19, dataset voter-help-golden):
@@ -147,44 +154,13 @@ const matchBallotByIssues = createTool({
         raceIds = await ctx.runQuery(internal.voterHelpQueries.statewideRaceIds, {});
       }
       const data = await ctx.runQuery(api.public.positionsForRaces, { raceIds });
-      const { groups } = buildIssueMatch(data, issueSlugs);
-      // Compact shape — the model narrates. Keep summary + one source per
-      // candidate; drop finance/confidence. Every requested issue is present
-      // (coverage:"none" => no sourced position on the ballot), never omitted.
-      const issues = issueSlugs.map((slug) => {
-        const g = groups.find((x) => x.issueSlug === slug);
-        return {
-          issue: slug,
-          // A group exists for every requested issue; coverage means a position does.
-          coverage: hasCoverage(g) ? "some" : "none",
-          races: (g?.races ?? []).map((r) => ({
-            office: r.office,
-            onRecord: r.onRecord.map((o) => ({
-              name: o.candidate.name,
-              party: o.candidate.party,
-              stance: o.position.stance,
-              summary: o.position.summary,
-              source: o.position.sources[0]?.url,
-            })),
-            noPosition: r.noRecord.map((c) => c.name),
-          })),
-        };
-      });
-      return JSON.stringify({
-        scope,
-        scopeNote:
-          scope === "statewide"
-            ? "No saved address — these results cover the statewide races only. Tell the user they can save their address on the Brief page (/brief) to include their local races too."
-            : "The user's own ballot races (from their saved address).",
-        issues,
-        rule: "Present each issue's candidates neutrally, each with its source link; for anyone under noPosition say 'no position on record'. Never rank, score, or recommend a candidate (rule 6).",
-      });
+      return JSON.stringify(matchPayload(buildIssueMatch(data, issueSlugs), issueSlugs, scope));
     }),
 });
 
 const getRaceInfo = createTool({
   description:
-    'Look up a Wisconsin 2026 race by id (e.g. "WI-GOV-2026"): candidates, published positions, campaign finance totals. Read-only.',
+    'Look up a Wisconsin 2026 race by id (e.g. "WI-GOV-2026"): who is on the November 3, 2026 ballot (from the state\'s certified list), their published positions and campaign finance totals. Read-only.',
   inputSchema: z.object({
     raceId: z.string().describe('Race id such as "WI-GOV-2026"'),
   }),
@@ -192,89 +168,23 @@ const getRaceInfo = createTool({
     withToolSpan("getRaceInfo", ctx.threadId, { raceId }, async () => {
       const data = await ctx.runQuery(api.public.getRace, { raceId });
       if (!data) return `No race found with id "${raceId}" — disclose this and hand off the official link.`;
-      // The governor field is 18 people, most of whom withdrew or never filed.
-      // Handed a flat list, the model summarised "who's running" down to the
-      // active ones and silently dropped the rest — accurate-sounding but
-      // incomplete, and the reader cannot tell anyone is missing. Splitting the
-      // list makes both groups reportable, and makes ballot status the thing
-      // that distinguishes them rather than a status string buried per-row.
-      const onBallot = data.candidates.filter((c) => (c.status ?? "Active") === "Active");
-      const notOnBallot = data.candidates.filter((c) => (c.status ?? "Active") !== "Active");
-      // Compact shape (MOO-410): the raw docs run ~62KB pretty-printed for a
-      // race like WI-GOV-2026 (18 candidates) — mostly Convex system fields
-      // (_id/_creationTime) repeated per row plus display-only v.any() blobs
-      // (race.raceRating/currentComposition/districts/campaignFinanceInfo,
-      // candidate.campaignFinanceInfo — schema comment: "rendered, never
-      // computed on"). Keep identity/bio + one source per candidate and
-      // position, matching the compact shape matchBallotByIssues already
-      // uses; `finance` carries the numbers the raw campaignFinanceInfo blob
-      // duplicates.
-      const compactCandidate = (c: (typeof onBallot)[number]) => ({
-        slug: c.slug,
-        name: c.name,
-        party: c.party,
-        primaryParty: c.primaryParty,
-        status: c.status,
-        incumbent: c.incumbent,
-        background: c.background,
-        currentOccupation: c.currentOccupation,
-        keyPriorities: c.keyPriorities,
-        source: c.sources[0],
-      });
-      return JSON.stringify({
-        race: {
-          raceId: data.race.raceId,
-          office: data.race.office,
-          level: data.race.level,
-          primaryDate: data.race.primaryDate,
-          generalDate: data.race.generalDate,
-          incumbent: data.race.incumbent,
-          officeDescription: data.race.officeDescription,
-          districtDescription: data.race.districtDescription,
-          source: data.race.sources[0],
-        },
-        onBallot: onBallot.map(compactCandidate),
-        notOnBallot: notOnBallot.map(compactCandidate),
-        ballotNote:
-          notOnBallot.length > 0
-            ? `${onBallot.length} candidates are on the primary ballot; ${notOnBallot.length} withdrew or did not file. Name the on-ballot candidates, and say that the others are not on the ballot rather than omitting them.`
-            : undefined,
-        positions: data.positions.map((p) => ({
-          candidateSlug: p.candidateSlug,
-          issueSlug: p.issueSlug,
-          stance: p.stance,
-          summary: p.summary,
-          source: p.sources[0],
-        })),
-        finance: data.finance.map((f) => ({
-          candidateSlug: f.candidateSlug,
-          receipts: f.receipts,
-          disbursements: f.disbursements,
-          cashOnHand: f.cashOnHand,
-          debts: f.debts,
-          coverageEndDate: f.coverageEndDate,
-        })),
-      });
+      // Who is on the ballot, and what the model may say about everyone else,
+      // is decided in lib/chatPayloads.ts from the certified list.
+      return JSON.stringify(racePayload(data));
     }),
 });
 
 const getCandidateInfo = createTool({
   description:
-    'Look up a candidate by slug (e.g. "kelda-roys"): published positions with sources, published quotes, campaign finance. Read-only.',
+    'Look up a candidate by slug (e.g. "david-crowley"): whether they are on the November 3, 2026 ballot, published positions with sources, published quotes, campaign finance. Read-only.',
   inputSchema: z.object({
-    slug: z.string().describe('Candidate slug such as "kelda-roys"'),
+    slug: z.string().describe('Candidate slug such as "david-crowley"'),
   }),
   execute: async (ctx, { slug }): Promise<string> =>
     withToolSpan("getCandidateInfo", ctx.threadId, { slug }, async () => {
       const data = await ctx.runQuery(api.public.getCandidateBySlug, { slug });
       if (!data) return `No candidate found with slug "${slug}" — disclose this and hand off the official link.`;
-      return JSON.stringify({
-        candidate: data.candidate,
-        race: data.race,
-        positions: data.positions,
-        quotes: data.quotes,
-        finance: data.finance,
-      });
+      return JSON.stringify(candidatePayload(data));
     }),
 });
 
@@ -320,6 +230,45 @@ const getVotingRecord = createTool({
         return `No voting record for "${candidateSlug}" matching that. BadgerBrief covers Wisconsin Legislature floor votes (2011-2019, 2023, 2025 sessions) and U.S. House roll calls for the 119th Congress; federal coverage includes only votes tied to a bill or resolution. Say so plainly rather than guessing.`;
       }
       return JSON.stringify(rows.slice(0, 8));
+    }),
+});
+
+/**
+ * Political-label definitions, served from our own sourced copy.
+ *
+ * Without this the model answered "what is democratic socialism" from general
+ * knowledge — plausible, unsourced, and against the rule that every claim on
+ * this site links somewhere a reader can check. It matters in this race
+ * specifically: the leading candidate is a DSA member and the debate's second
+ * question was about the DSA platform.
+ */
+const getLabelGlossary = createTool({
+  description:
+    'BadgerBrief\'s own sourced definitions of the political labels used in this election: socialism, communism, democratic socialism, social democracy. Use whenever a voter asks what one of these words means, how they differ, or whether a candidate "is a socialist". Returns the definitions, the distinction people most often get wrong, and the /ballot-basics page. Always answer from this tool rather than general knowledge, and never apply a label to a candidate yourself.',
+  inputSchema: z.object({
+    term: z
+      .string()
+      .optional()
+      .describe('One label to define, e.g. "democratic socialism". Omit for all four.'),
+  }),
+  execute: async (ctx, { term }): Promise<string> =>
+    withToolSpan("getLabelGlossary", ctx.threadId, { term }, async () => {
+      const q = term?.toLowerCase().trim();
+      const hits = q
+        ? LABEL_GLOSSARY.filter(
+            (t) => t.term.toLowerCase().includes(q) || q.includes(t.term.toLowerCase()),
+          )
+        : LABEL_GLOSSARY;
+      return JSON.stringify({
+        terms: (hits.length > 0 ? hits : LABEL_GLOSSARY).map((t) => ({
+          term: t.term,
+          definition: t.definition,
+          source: t.source ?? null,
+        })),
+        keyDistinction: LABEL_GLOSSARY_KEY_DISTINCTION,
+        howToUseLabels: LABEL_GLOSSARY_STANCE,
+        readMore: LABEL_GLOSSARY_PATH,
+      });
     }),
 });
 
@@ -375,8 +324,9 @@ Rules, in priority order:
 8. If a quote has a clipUrl, follow it with a link whose text is exactly "Watch the clip".
 9. Voting records: state the passage/concurrence/adoption vote's position and tally, name the official bill title, and flag otherVotesOnBill>0.
 
-10. ISSUE MATCHING. ONLY when the voter names specific issues they care about ("I care about healthcare and abortion — who should I look at?"), call matchBallotByIssues and present each issue's candidates FROM ITS RESULT neutrally with their source links, saying "no position on record" for anyone under noPosition — alignment, never a ranking (rule 6). Do not use this tool for "who's running" / "who's on my ballot" questions (use getRaceInfo / getMyBallot). Never enumerate race types or describe ballot contents from memory — say only what a tool result contains; for any address prompt use the tool's own scopeNote wording.
-
+10. DEBATE. getDebate covers ONLY the July 28 debate and only the five who were on stage (Barnes, Brennan, Crowley, Hong, Roys). Call it when the voter asks about the debate; do NOT volunteer debate content in an answer that did not ask for it. Quote with the timestamp and link the page path it returns. Anyone listed under notAsked was not called on by the moderators — never say they dodged or declined. Never say who won or performed better (rule 6).
+11. LABELS. For what socialism, communism, democratic socialism or social democracy mean, answer only from getLabelGlossary and link its readMore path — never from your own knowledge. Never apply a label to a candidate yourself.
+12. ISSUE MATCHING. ONLY when the voter names specific issues they care about ("I care about healthcare and abortion — who should I look at?"), call matchBallotByIssues and present each issue's candidates FROM ITS RESULT neutrally with their source links, saying "no position on record" for anyone under noPosition — alignment, never a ranking (rule 6). Do not use this tool for "who's running" / "who's on my ballot" questions (use getRaceInfo / getMyBallot). Never enumerate race types or describe ballot contents from memory — say only what a tool result contains; for any address prompt use the tool's own scopeNote wording.
 Keep answers short — a few sentences plus links. Use getMyBallot for "my ballot" / "who's on my ballot" questions; if it reports districts: null, tell the user to save their address on the Brief page first.`;
 
 function makeVoterHelpAgent(model: string, instructions: string = INSTRUCTIONS) {
@@ -384,7 +334,7 @@ function makeVoterHelpAgent(model: string, instructions: string = INSTRUCTIONS) 
     name: AGENT_NAME,
     languageModel: anthropic(model),
     instructions,
-    tools: { getVotingInfo, getVoterAccess, getMyBallot, matchBallotByIssues, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, handoffOfficialLink },
+    tools: { getVotingInfo, getVoterAccess, getMyBallot, matchBallotByIssues, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, getLabelGlossary, handoffOfficialLink },
     stopWhen: stepCountIs(8),
     // MOO-410 Task 3: bounds set here (rather than per-callsite) so BOTH the
     // prod streamText path and the evalAnswer generateText path inherit them
