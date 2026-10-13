@@ -14,7 +14,8 @@
  *   node scripts/eval-gate.mjs --name candidate --baseline haiku-baseline
  *   node scripts/eval-gate.mjs --name candidate --judge-passes 1   # single noisy run
  *   Flags: --dev (run agent against dev deployment; default prod), --model,
- *          --instructions-file, --judge-passes N (default 3)
+ *          --instructions-file, --judge-passes N (default 3),
+ *          --dataset NAME (default voter-help-golden-general)
  *
  * The judge is NOT deterministic. Three runs over identical code and identical
  * answers scored golden-expectations 67%, 72% and 94%, with different questions
@@ -28,8 +29,12 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
-const SPACE = "tarikjmoody Space";
-const DATASET = "voter-help-golden";
+// The space's ID, not its name ("tarikjmoody Space"). From 2026-10 the CLI's
+// create commands fail when given the name: resolving it trips on a field
+// (`is_private`) its client model does not know. The ID skips that lookup.
+const SPACE = "U3BhY2U6NDU0NjU6SWVhZA==";
+// The November 2026 set. The primary-era set, "voter-help-golden", is history.
+const DEFAULT_DATASET = "voter-help-golden-general";
 const EVALUATORS = [
   { id: "RXZhbHVhdG9yOjExNTA5OjlvMC8=", name: "citation-faithfulness" },
   { id: "RXZhbHVhdG9yOjExNTEwOlZDRVk=", name: "neutrality" },
@@ -45,6 +50,9 @@ function arg(flag) {
   const i = process.argv.indexOf(flag);
   return i >= 0 ? process.argv[i + 1] : undefined;
 }
+// The question set to run. The November 2026 set is its own dataset
+// (docs/eval-gate.md): the service can append rows but not rewrite them.
+const DATASET = arg("--dataset") ?? DEFAULT_DATASET;
 const name = arg("--name");
 if (!name) {
   console.error("--name <experiment-name> is required");
@@ -60,8 +68,13 @@ const reportOnly = process.argv.includes("--report-only"); // reprint rates for 
 // only for reproducing a single historical run.
 const judgePasses = Math.max(1, Number(arg("--judge-passes") ?? 3));
 
+// Which `ax` to run. The service moves faster than an installed CLI: by 2026-10
+// ax 0.26 could no longer create or list experiments, tasks or datasets
+// ("additional fields … not defined in …"). AX_BIN points the gate at a newer
+// one without changing what is installed (docs/eval-gate.md).
+const AX = process.env.AX_BIN ?? "ax";
 function ax(args, input) {
-  return execFileSync("ax", args, { input, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  return execFileSync(AX, args, { input, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
 }
 /** ax 0.26 sometimes fails client-side deserializing a SUCCESSFUL create/trigger
  * response (new server fields). Run the command, swallow that failure, and let
@@ -154,8 +167,7 @@ async function judgePass(expName) {
       "--no-continuous",
     ]);
   }
-  const tasks = axJson(["tasks", "list", "--space", SPACE, "-o", "json"]);
-  const task = (tasks.tasks ?? tasks).find((t) => t.name === `gate-${expName}`);
+  const task = await findTask(`gate-${expName}`);
   if (!task) {
     console.error(`evaluation task "gate-${expName}" not found after create`);
     process.exit(2);
@@ -177,6 +189,17 @@ const apiKey = (() => {
   if (!match) throw new Error("no api_key in ~/.arize/profiles/default.toml");
   return match[1];
 })();
+/** `ax tasks list` stopped deserializing in 2026-10 (the server returns a
+ * `query_filters` field neither ax version knows), so look the task up over
+ * REST like everything else here. The API returns newest first, and the task
+ * was created moments ago. */
+async function findTask(taskName) {
+  const res = await fetch(`https://api.arize.com/v2/tasks?space_id=${encodeURIComponent(SPACE)}&limit=50`, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+  if (!res.ok) throw new Error(`tasks fetch failed: ${res.status}`);
+  return (await res.json()).tasks.find((t) => t.name === taskName);
+}
 async function fetchTaskRuns(taskId) {
   const res = await fetch(`https://api.arize.com/v2/tasks/${taskId}/runs?limit=5`, {
     headers: { Authorization: `Bearer ${apiKey}` },
@@ -335,6 +358,12 @@ const golden = rates["golden-expectations"];
 if (golden.rate === null) {
   console.error("\nGATE ERROR: no golden-expectations scores landed — check column mappings/task run");
   process.exit(2);
+}
+// A question the judge never scored is not a pass. Without this, a run that
+// scored 18 of 25 at 100% would clear a floor meant for all 25.
+if (golden.n < examples.length) {
+  console.error(`\nGATE FAIL: only ${golden.n} of ${examples.length} questions were scored`);
+  failed = true;
 }
 if (golden.rate < MIN_GOLDEN_RATE) {
   console.error(`\nGATE FAIL: golden-expectations ${Math.round(golden.rate * 100)}% < ${MIN_GOLDEN_RATE * 100}%`);

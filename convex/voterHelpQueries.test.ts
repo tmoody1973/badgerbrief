@@ -11,6 +11,9 @@ const modules = import.meta.glob([
   "!./**/*.test.ts",
   "!./**/*.d.ts",
 ]);
+const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
+const ON = { onBallot: true, source: SOURCE };
+const OFF = { onBallot: false, source: SOURCE };
 const USER = { subject: "clerk_chat_user" };
 const setup = () => {
   const t = convexTest(schema, modules);
@@ -86,7 +89,8 @@ describe("sendMessage guardrails", () => {
 });
 
 describe("ballotForUser", () => {
-  const raceBase = { electionSlug: "wi-2026", sources: [], dataAsOf: "2026-07-01" };
+  // Real November contests: the chat lists nothing else.
+  const raceBase = { electionSlug: "wi-2026", sources: [], dataAsOf: "2026-07-01", general: ON };
 
   async function seedWorld(t: ReturnType<typeof setup>) {
     await t.run(async (ctx) => {
@@ -115,6 +119,7 @@ describe("ballotForUser", () => {
         party: "Democratic",
         sources: [],
         dataAsOf: "2026-07-01",
+        general: ON,
       });
     });
   }
@@ -143,7 +148,7 @@ describe("ballotForUser", () => {
     expect(raceIds).not.toContain("WI-US-HOUSE-D5-2026");
     const gov = ballot.races.find((r) => r.raceId === "WI-GOV-2026")!;
     expect(gov.candidates).toEqual([
-      { slug: "kelda-roys", name: "Kelda Roys", party: "Democratic" },
+      { slug: "kelda-roys", name: "Kelda Roys", party: "Democratic", ballotLine: "Kelda Roys (Democratic)" },
     ]);
   });
 
@@ -153,5 +158,42 @@ describe("ballotForUser", () => {
     await seedWorld(t);
     const ballot = await t.query(internal.voterHelpQueries.ballotForUser, { userId });
     expect(ballot).toEqual({ districts: null, races: [] });
+  });
+});
+
+describe("the chat's ballot queries follow the November ballot", () => {
+  async function seededRaces() {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      const race = (raceId: string, office: string, level: string, general?: typeof ON) =>
+        ctx.db.insert("races", { raceId, electionSlug: "wi-2026", office, level, sources: [], dataAsOf: "2026-10-12", ...(general ? { general } : {}) });
+      await race("WI-GOV-2026", "Governor of Wisconsin", "State Executive", ON);
+      await race("WI-LTGOV-2026", "Lieutenant Governor of Wisconsin", "State Executive", OFF);
+      await race("WI-SCOTUS-2026", "Wisconsin Supreme Court", "State Judicial", OFF);
+      await race("WI-NOT-LOADED-2026", "Not loaded", "State Executive");
+    });
+    return t;
+  }
+
+  test("the statewide fallback is the statewide November contests only", async () => {
+    const t = await seededRaces();
+    expect(await t.query(internal.voterHelpQueries.statewideRaceIds, {})).toEqual(["WI-GOV-2026"]);
+  });
+
+  test("a voter's ballot lists November contests with only the people on the ballot", async () => {
+    const t = await seededRaces();
+    const userId = await t.run(async (ctx) => {
+      await ctx.db.insert("candidates", { slug: "david-crowley", raceId: "WI-GOV-2026", name: "David Crowley", party: "Democratic", status: "Active", sources: [], dataAsOf: "2026-10-12", general: { ...ON, ballotName: "David Crowley / Sarah Godlewski", party: "Democratic", ballotOrder: 2 } });
+      await ctx.db.insert("candidates", { slug: "francesca-hong", raceId: "WI-GOV-2026", name: "Francesca Hong", party: "Democratic", status: "Active", sources: [], dataAsOf: "2026-10-12", general: OFF });
+      const id = await ctx.db.insert("users", { clerkId: "clerk_ballot_test" });
+      await ctx.db.insert("user_preferences", { userId: id, congressionalDistrict: "4", stateSenateDistrict: "7", stateAssemblyDistrict: "19", savedRaceIds: [], savedIssues: [], detailLevel: "standard" });
+      return id;
+    });
+    const ballot = await t.query(internal.voterHelpQueries.ballotForUser, { userId });
+    expect(ballot.races.map((r) => r.raceId)).toEqual(["WI-GOV-2026"]);
+    expect(ballot.races[0].candidates).toEqual([
+      { slug: "david-crowley", name: "David Crowley", party: "Democratic", ballotLine: "David Crowley / Sarah Godlewski (Democratic)" },
+    ]);
+    expect(JSON.stringify(ballot)).not.toMatch(/primaryDate|Francesca Hong/);
   });
 });

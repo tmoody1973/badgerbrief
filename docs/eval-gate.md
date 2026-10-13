@@ -12,6 +12,7 @@ Before deploying ANY change to an agent's instructions, prompt contract, or
 ```bash
 # 1. Run the candidate config against the golden dataset
 node scripts/eval-gate.mjs --name <change>-$(date +%Y%m%d) \
+  --dataset voter-help-golden-general \
   [--model claude-xyz] [--instructions-file candidate.txt] \
   --baseline <last-passing-experiment>
 
@@ -61,7 +62,7 @@ Model-decision history, all decided by this gate on 2026-07-19:
 
 | Piece | Where |
 |---|---|
-| Golden dataset (15 questions + expectations) | Arize dataset `voter-help-golden`; source of truth `scripts/voter-help-golden.json` |
+| Golden dataset (25 questions + expectations, written for the Nov 3, 2026 general election) | Arize dataset `voter-help-golden-general`; source of truth `scripts/voter-help-golden.json`. The primary-era set, `voter-help-golden`, is kept with its results and is no longer the gate. |
 | Gate runner | `scripts/eval-gate.mjs` |
 | Judges (LLM-as-judge, claude-sonnet-5, function calling, temp 0) | Arize evaluators: Citation Faithfulness, Neutrality, Official Source First, Refusal Correctness, Golden Expectations |
 | Continuous production scoring | Arize task `badgerbrief-agent-quality` — continuous, 25% sampling, AGENT spans only (`attributes.openinference.span.kind = 'AGENT'`) |
@@ -71,11 +72,26 @@ Model-decision history, all decided by this gate on 2026-07-19:
 
 ## Updating the golden dataset
 
-Edit `scripts/voter-help-golden.json`, then append the new rows:
+Edit `scripts/voter-help-golden.json`. The service can append rows but cannot
+rewrite them, so:
 
-```bash
-ax datasets append voter-help-golden --space "tarikjmoody Space" --json '[...]'
-```
+- **Adding questions:** append the new rows.
+
+  ```bash
+  ax datasets append voter-help-golden-general --space "tarikjmoody Space" --json '[...]'
+  ```
+
+- **Changing existing questions:** create a new dataset from the file and point
+  the gate at it. Keep the old one; its experiments are the history.
+
+  ```bash
+  ax datasets create --name voter-help-golden-<label> --space U3BhY2U6NDU0NjU6SWVhZA== --file scripts/voter-help-golden.json
+  ax datasets list --space "tarikjmoody Space"        # verify by listing; do not trust the exit code
+  node scripts/eval-gate.mjs --name <experiment> --dataset voter-help-golden-<label>
+  ```
+
+A baseline is only comparable within one dataset. The first passing run on a
+new dataset becomes that dataset's baseline.
 
 Keep questions in the proven-live categories: procedural (official-source
 checks), candidate/race info (citation checks), refusal traps (legal,
@@ -101,6 +117,40 @@ cheap and high-signal), unknown-data (no-invention checks), personalization
 - Judge evaluators must run with function calling (integration-level flag AND
   `--use-function-calling` on the evaluator version) — without it, labels
   occasionally come back `NOT_PARSABLE` or contradict their own explanation.
+- **"judge run FAILED" with `num_errors` equal to every row** means the judges
+  could not call their model. Read the reason:
+  `GET https://api.arize.com/v2/tasks/<task-id>/runs?limit=1` → `failure_reason`.
+  On 2026-10-12 it was `invalid x-api-key (status 401)`: the Anthropic key in
+  the AI integration `anthropic-judge` had stopped working. That key is
+  separate from the chat's own key in Convex, so the chat can answer while the
+  judges cannot score. Fix it in Arize (Settings → AI Integrations →
+  `anthropic-judge`), then re-run the gate.
+- **The installed `ax` (0.26) is too old for the service as of 2026-10.**
+  `experiments create|list`, `tasks list` and `datasets create` all fail with
+  "additional fields (not defined in …) in the input". Version 0.39.0 works.
+  Either upgrade (`ax upgrade`), or leave the install alone and point the gate
+  at a pinned copy:
+
+  ```bash
+  printf '#!/bin/sh\nexec pipx run --quiet --spec arize-ax-cli==0.39.0 ax "$@"\n' > /tmp/ax39 && chmod +x /tmp/ax39
+  AX_BIN=/tmp/ax39 node scripts/eval-gate.mjs --name <experiment>
+  ```
+
+  A run that dies after "Creating experiment" has still uploaded its answers:
+  the experiment exists, unscored. Re-run under a new name.
+- `ax … create` with `--space "tarikjmoody Space"` fails from 2026-10 with
+  "additional fields (not defined in Space) in the input: is_private", and
+  creates nothing. Pass the space ID (`U3BhY2U6NDU0NjU6SWVhZA==`) instead;
+  `scripts/eval-gate.mjs` does.
+- **The gate judges the whole visible answer (from 2026-10-12).** `evalAnswer`
+  used to return `result.text`, which is the model's LAST step only. The chat
+  shows a voter every step's text, so any answer that wrote a sentence, called
+  a tool, then wrote another was judged with its opening cut off. On "Who's
+  running for mayor of Green Bay?" the required "BadgerBrief doesn't cover
+  municipal races" sentence was in the first step and the gate saw only the
+  link. This is the likely cause of the old "lands ~14/15 runs" nit above.
+  Scores from before this date were measured with the shorter text and are not
+  directly comparable.
 - `evalAnswer` deliberately emits NO telemetry spans, so gate runs never
   pollute the continuous production evaluators.
 - `ax tasks list-runs` / `ax tasks trigger-run` (0.25.1 AND 0.26.0): the
