@@ -33,24 +33,31 @@ export function isWatched(address: string): boolean {
   return !UNWATCHED_HOSTS.some((u) => h === u || h.endsWith(`.${u}`));
 }
 
-/** True when both addresses name the same page. http/https, www and a trailing slash do not count as a move. */
+/**
+ * True when both addresses name the same page. http/https, www, a trailing
+ * slash and capital letters in the path do not count as a move. Neither does
+ * a query the site adds on arrival (tracking), unless the cited address named
+ * its page by a query of its own.
+ */
 export function sameAddress(cited: string, landed: string): boolean {
   const a = parse(cited);
   const b = parse(landed);
   if (!a || !b) return false;
-  const path = (url: URL) => url.pathname.replace(/\/+$/, "");
-  return host(a) === host(b) && path(a) === path(b) && a.search === b.search;
+  const path = (url: URL) => url.pathname.replace(/\/+$/, "").toLowerCase();
+  return host(a) === host(b) && path(a) === path(b) && (a.search === "" || a.search === b.search);
 }
 
 /** Text reduced to lowercase words, so markdown, punctuation and curly quotes cannot hide a match. */
 function words(text: string): string {
   return text
+    .replace(/\p{Cf}/gu, "") // soft hyphens and zero-width marks, which sit invisibly inside words
     .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1") // a link or image: keep its words, drop its address
+    .replace(/https?:\/\/[^\s)>\]]+/g, " ") // any address left over: its words are not the page's words
     .replace(/[*_]/g, "") // emphasis markers
+    .replace(/[’‘'´`ʼ]/g, "") // apostrophes of every kind, before normalizing turns ´ into a space
     .normalize("NFKD")
     .replace(/\p{M}/gu, "")
     .toLowerCase()
-    .replace(/[’‘']/g, "")
     .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim();
 }
@@ -88,9 +95,20 @@ export function describeProblem(who: string, url: string, problem: Problem): str
   switch (problem.kind) {
     case "moved":
       return `${who}: the cited page now lands somewhere else. Cited: ${url} Lands on: ${problem.landedUrl}`;
+    // "today's reading", not "the page": a reader can be shown a bot check or
+    // half a page, and this message is about one candidate.
     case "sentence-gone":
-      return `${who}: the sentence this summary rests on is no longer on the cited page. Cited: ${url}`;
+      return `${who}: the sentence this summary rests on was not found in today's reading of the cited page. Cited: ${url}`;
     case "unreadable":
-      return `${who}: the cited page could not be read (${problem.reason}). Cited: ${url}`;
+      return `${who}: the cited page could not be read. Cited: ${url} Reason: ${problem.reason}`;
   }
+}
+
+/**
+ * What a message is about, with the details that can differ from day to day
+ * (where the page lands now, why it could not be read) left off. Two messages
+ * with the same subject are the same problem as far as the editor is concerned.
+ */
+export function problemSubject(message: string): string {
+  return message.split(" Cited: ")[0];
 }

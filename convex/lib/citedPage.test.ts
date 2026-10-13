@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { checkCitation, describeProblem, isWatched, sameAddress, sentenceOnPage } from "./citedPage";
+import { checkCitation, describeProblem, isWatched, problemSubject, sameAddress, sentenceOnPage } from "./citedPage";
 
 // Cases below are taken from real pages read on 2026-10-13
 // (docs/evidence/2026-10-13-position-source-audit/reader-comparison.md).
@@ -36,6 +36,18 @@ describe("sentenceOnPage", () => {
     expect(sentenceOnPage("Prepare Kids For Success", "[Read more](https://example.com/prepare-kids-for-success)")).toBe("missing");
   });
 
+  test("is not thrown by invisible characters inside a word, or by a different kind of apostrophe", () => {
+    expect(sentenceOnPage("affordable housing for all", "afford\u00ADable hous\u200Bing for all")).toBe("present");
+    expect(sentenceOnPage("Crowley's plan for schools", "Crowley\u00B4s plan for schools")).toBe("present");
+    expect(sentenceOnPage("Crowley's plan for schools", "Crowley\u02BCs plan for schools")).toBe("present");
+  });
+
+  test("words that appear only inside a web address are not words on the page", () => {
+    expect(sentenceOnPage("Prepare Kids For Success", "[![icon](https://x/y.png)](https://example.com/prepare-kids-for-success)")).toBe("missing");
+    expect(sentenceOnPage("Prepare Kids For Success", "See https://example.com/prepare-kids-for-success for more.")).toBe("missing");
+    expect(sentenceOnPage("Prepare Kids For Success", "<https://example.com/prepare-kids-for-success>")).toBe("missing");
+  });
+
   test("matches whole words, so a short word is not found inside a longer one", () => {
     expect(sentenceOnPage("Lower costs", "Our followers costs nothing")).toBe("missing");
   });
@@ -51,6 +63,16 @@ describe("sameAddress", () => {
     expect(sameAddress("https://tomtiffany.com/about", "https://tomtiffany.com/about/")).toBe(true);
     expect(sameAddress("https://crowleyforwi.com/Plan", "https://www.crowleyforwi.com/Plan")).toBe(true);
     expect(sameAddress("http://example.com/", "https://example.com")).toBe(true);
+  });
+
+  test("capital letters in the path, or tracking added to the address, are not a move", () => {
+    expect(sameAddress("https://www.crowleyforwi.com/Plan", "https://www.crowleyforwi.com/plan")).toBe(true);
+    expect(sameAddress("https://example.com/plan", "https://example.com/plan?utm_source=x")).toBe(true);
+  });
+
+  test("a cited address that names a page by its query still has to land on that query", () => {
+    expect(sameAddress("https://example.com/page?id=4", "https://example.com/page?id=4")).toBe(true);
+    expect(sameAddress("https://example.com/page?id=4", "https://example.com/page?id=9")).toBe(false);
   });
 
   test("a different path or site is a move", () => {
@@ -111,10 +133,18 @@ describe("describeProblem", () => {
     const moved = describeProblem("david-crowley / abortion", "https://a.com/issues", { kind: "moved", landedUrl: "https://a.com/plan" });
     expect(moved).toBe("david-crowley / abortion: the cited page now lands somewhere else. Cited: https://a.com/issues Lands on: https://a.com/plan");
     expect(describeProblem("john-leiber / education", "https://b.com/", { kind: "sentence-gone" })).toBe(
-      "john-leiber / education: the sentence this summary rests on is no longer on the cited page. Cited: https://b.com/",
+      "john-leiber / education: the sentence this summary rests on was not found in today's reading of the cited page. Cited: https://b.com/",
     );
     expect(describeProblem("a / b", "https://c.com/", { kind: "unreadable", reason: "the page returned nothing" })).toBe(
-      "a / b: the cited page could not be read (the page returned nothing). Cited: https://c.com/",
+      "a / b: the cited page could not be read. Cited: https://c.com/ Reason: the page returned nothing",
     );
+  });
+
+  test("two messages about the same kind of problem share a subject, whatever the details", () => {
+    const first = describeProblem("a / b", "https://a.com/issues", { kind: "moved", landedUrl: "https://a.com/guid-1" });
+    const second = describeProblem("a / b", "https://a.com/issues", { kind: "moved", landedUrl: "https://a.com/guid-2" });
+    const other = describeProblem("a / b", "https://a.com/issues", { kind: "sentence-gone" });
+    expect(problemSubject(first)).toBe(problemSubject(second));
+    expect(problemSubject(first)).not.toBe(problemSubject(other));
   });
 });

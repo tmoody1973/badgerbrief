@@ -10,17 +10,22 @@ export async function emailEditor(subject: string, text: string): Promise<boolea
   if (!apiKey) return false; // email off: the admin page still has it
   const from = process.env.RESEND_FROM ?? "BadgerBrief <onboarding@resend.dev>";
   const to = process.env.FEEDBACK_NOTIFY_TO ?? "tarikjmoody@gmail.com";
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to, subject, text }),
-      signal: AbortSignal.timeout(15_000),
-    });
-    if (!res.ok) console.error(`notify: Resend refused "${subject}" (${res.status}): ${(await res.text()).slice(0, 300)}`);
-    return res.ok;
-  } catch (error) {
-    console.error(`notify: could not send "${subject}": ${String(error)}`);
-    return false;
+  // Two tries: the caller files each warning once, so a notice lost here is
+  // not sent again tomorrow.
+  for (const attempt of [1, 2]) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ from, to, subject, text }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (res.ok) return true;
+      console.error(`notify: Resend refused "${subject}" (${res.status}, try ${attempt}): ${(await res.text()).slice(0, 300)}`);
+      if (res.status < 500) return false; // our request is wrong; sending it again will not help
+    } catch (error) {
+      console.error(`notify: could not send "${subject}" (try ${attempt}): ${String(error)}`);
+    }
   }
+  return false;
 }
