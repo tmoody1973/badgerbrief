@@ -31,12 +31,42 @@ const quotedFields = (question) => [
   ["noVote", question.noVote],
 ];
 
-/** The fields of a question that are NOT word for word in the notice. Empty means all are. */
+const STATEMENT_HEADING = "Explanatory statement regarding Question";
+const SIGNATURE_BLOCK = "Done in the";
+
+/** The notice's whole explanatory statement for one question, as one line. Null if it has none. */
+export function statementFor(number, noticeText) {
+  const notice = normalizeNotice(noticeText);
+  const heading = `${STATEMENT_HEADING} ${number}:`;
+  const start = notice.indexOf(heading);
+  if (start < 0) return null;
+  const rest = notice.slice(start + heading.length);
+  const ends = [rest.indexOf(STATEMENT_HEADING), rest.indexOf(SIGNATURE_BLOCK)].filter((i) => i >= 0);
+  return (ends.length > 0 ? rest.slice(0, Math.min(...ends)) : rest).trim();
+}
+
+/**
+ * What about a question is NOT the state's wording. Empty means all of it is.
+ *
+ * Three checks, because "this sentence appears somewhere in the notice" is not
+ * enough: a dropped paragraph, a sentence cut short, the yes and no sentences
+ * swapped, or another question's statement would all pass it.
+ *   - a field name: that field is not in the notice word for word
+ *   - "statement": the explanation, yes and no sentences, joined in order, are
+ *     not the notice's whole statement for THIS question
+ *   - "yesNo": the yes or no sentence is not this question's
+ */
 export function notVerbatim(question, noticeText) {
   const notice = normalizeNotice(noticeText);
-  return quotedFields(question)
+  const fields = quotedFields(question)
     .filter(([, text]) => !notice.includes(oneLine(text)))
     .map(([field]) => field);
+  const stored = oneLine([...question.explanation, question.yesVote, question.noVote].join(" "));
+  const whole = statementFor(question.number, noticeText) === stored;
+  const sides =
+    question.yesVote.startsWith(`A “yes” vote on Question ${question.number} `) &&
+    question.noVote.startsWith(`A “no” vote on Question ${question.number} `);
+  return [...fields, ...(whole ? [] : ["statement"]), ...(sides ? [] : ["yesNo"])];
 }
 
 const sectionsCited = (text) =>

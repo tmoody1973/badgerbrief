@@ -14,8 +14,8 @@ const question = (over) => ({
   resolution: "2025 Senate Joint Resolution 116",
   ballotText: "Shall section 10 of article V be amended?",
   explanation: ["Under current law, the Governor may veto."],
-  yesVote: "A “yes” vote would amend art. V, § 10.",
-  noVote: "A “no” vote would not amend art. V § 10.",
+  yesVote: "A “yes” vote on Question 1 would amend art. V, § 10.",
+  noVote: "A “no” vote on Question 1 would not amend art. V § 10.",
   ...over,
 });
 
@@ -23,14 +23,21 @@ const NOTICE = [
   "2025 Senate Joint Resolution 116",
   "QUESTION 1: “Partial veto. Shall section 10 of article V",
   "be amended?”",
+  "Explanatory Statements as to the Questions",
+  "Explanatory statement regarding Question 1:",
   "Under current law, the Governor",
   "3",
   "\fNotice of Referendum Election",
   "November 3, 2026",
   "",
   "may veto.",
-  "A “yes” vote would amend art. V, § 10.",
-  "A “no” vote would not amend art. V § 10.",
+  "A “yes” vote on Question 1 would amend art. V, § 10.",
+  "A “no” vote on Question 1 would not amend art. V § 10.",
+  "Explanatory statement regarding Question 2:",
+  "Under current law, Article I protects religious rights.",
+  "A “yes” vote on Question 2 would amend art. I, § 18.",
+  "A “no” vote on Question 2 would not amend art. I, § 18.",
+  "Done in the ______ of ______,",
 ].join("\n");
 
 describe("normalizeNotice", () => {
@@ -45,8 +52,43 @@ describe("notVerbatim", () => {
   });
 
   test("names the field that was reworded, however slightly", () => {
-    expect(notVerbatim(question({ yesVote: "A “yes” vote would amend art. V, § 27." }), NOTICE)).toEqual(["yesVote"]);
-    expect(notVerbatim(question({ explanation: ["Under current law, the governor may veto."] }), NOTICE)).toEqual(["explanation[0]"]);
+    expect(notVerbatim(question({ yesVote: "A “yes” vote on Question 1 would amend art. V, § 27." }), NOTICE)).toEqual(["yesVote", "statement"]);
+    expect(notVerbatim(question({ explanation: ["Under current law, the governor may veto."] }), NOTICE)).toEqual(["explanation[0]", "statement"]);
+  });
+
+  // Every case below is made only of sentences that DO appear in the notice.
+  // "Appears somewhere" is not the same as "is this question's statement".
+  test("catches a dropped paragraph", () => {
+    expect(notVerbatim(question({ explanation: [] }), NOTICE)).toEqual(["statement"]);
+  });
+
+  test("catches a sentence cut short", () => {
+    expect(notVerbatim(question({ explanation: ["Under current law, the Governor"] }), NOTICE)).toEqual(["statement"]);
+  });
+
+  test("catches the yes and no sentences swapped", () => {
+    const q = question();
+    expect(notVerbatim(question({ yesVote: q.noVote, noVote: q.yesVote }), NOTICE)).toEqual(["statement", "yesNo"]);
+  });
+
+  test("catches another question's statement filed under this one", () => {
+    const fromQuestion2 = question({
+      explanation: ["Under current law, Article I protects religious rights."],
+      yesVote: "A “yes” vote on Question 2 would amend art. I, § 18.",
+      noVote: "A “no” vote on Question 2 would not amend art. I, § 18.",
+    });
+    expect(notVerbatim(fromQuestion2, NOTICE)).toEqual(["statement", "yesNo"]);
+  });
+
+  test("checks the last question up to the signature block", () => {
+    const question2 = question({
+      number: 2,
+      title: "Partial veto",
+      explanation: ["Under current law, Article I protects religious rights."],
+      yesVote: "A “yes” vote on Question 2 would amend art. I, § 18.",
+      noVote: "A “no” vote on Question 2 would not amend art. I, § 18.",
+    });
+    expect(notVerbatim(question2, NOTICE)).toEqual([]);
   });
 });
 
@@ -56,7 +98,7 @@ describe("citesAnotherSection", () => {
   });
 
   test("is true when they cite a different section", () => {
-    expect(citesAnotherSection(question({ noVote: "A “no” vote would not add art. I § 18." }))).toBe(true);
+    expect(citesAnotherSection(question({ noVote: "A “no” vote on Question 1 would not add art. I § 18." }))).toBe(true);
   });
 });
 

@@ -33,6 +33,25 @@ export function certify(file, name, date) {
   return { ...file, certifiedBy: name.trim(), certifiedAt: date, certifiedSha256: contentHash(file) };
 }
 
+export const USAGE = 'usage: node scripts/ballot-extras.mjs [--certify "<name>"]';
+
+/** The command line: nothing, or --certify "<name>". Anything else is refused, never guessed at. */
+export function parseArgs(argv) {
+  if (argv.length === 0) return { certifier: undefined };
+  const [flag, name, ...rest] = argv;
+  if (flag !== "--certify" || rest.length > 0 || !name?.trim() || name.startsWith("-")) {
+    throw new Error(USAGE);
+  }
+  return { certifier: name.trim() };
+}
+
+/**
+ * Review sheets on disk that differ from the ones the current files produce.
+ * A signature covers what the certifier read, so signing stops on any.
+ */
+export const staleSheets = (fresh, onDisk) =>
+  Object.keys(fresh).filter((name) => onDisk[name] !== fresh[name]);
+
 export function toCountyFile({ built, source, previous }) {
   if (built.unrecognized.length > 0) {
     throw new Error(`unrecognized contest(s): ${built.unrecognized.join("; ")}`);
