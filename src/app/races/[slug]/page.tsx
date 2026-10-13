@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GeneralCandidateCard } from "@/components/guide/cards";
+import { RaceQuestionnaire, questionnaireRows } from "@/components/guide/questionnaire";
 import { RaceFinanceTable } from "@/components/guide/finance";
 import { InTheNews } from "@/components/guide/in-the-news";
 import { LastUpdated } from "@/components/guide/labels";
@@ -73,6 +74,10 @@ export default async function RacePage({ params }: Props) {
   const ballot = buildRaceBallot(race, candidates);
   const onBallot = ballot.kind === "contest" ? ballot.onBallot : [];
   const slugs = new Set(onBallot.map((c) => c.slug));
+  // Lieutenant governor has no contest of its own, but its running mates
+  // answered the questionnaire too.
+  const questionnaireField = ballot.kind === "no-contest" ? ballot.runningMates : onBallot;
+  const hasQuestionnaire = questionnaireRows(raceId, questionnaireField).length > 0;
   const archiveHref = `${PRIMARY_ARCHIVE.path}/races/${slug}`;
 
   const [adMoneyAll, tvAdsAll, inTheNewsAll, pollsAll] = await Promise.all([
@@ -94,6 +99,7 @@ export default async function RacePage({ params }: Props) {
 
   const navSections: NavSection[] = [
     ...(onBallot.length > 0 ? [{ id: "candidates", label: "On the ballot", count: onBallot.length }] : []),
+    ...(hasQuestionnaire ? [{ id: "questionnaire", label: "In their words" }] : []),
     ...(raceFinance.length > 0 ? [{ id: "money", label: "The money" }] : []),
     ...(adMoney && adMoney.candidates.length > 0 ? [{ id: "ad-money", label: "Ad money" }] : []),
     ...(tvAds.length > 0 ? [{ id: "tv-ads", label: "TV ads" }] : []),
@@ -206,6 +212,8 @@ export default async function RacePage({ params }: Props) {
           </div>
         </section>
       )}
+
+      <RaceQuestionnaire raceId={raceId} candidates={questionnaireField} />
 
       {ballot.hadPrimary && (
         <p className="mt-6 text-sm">

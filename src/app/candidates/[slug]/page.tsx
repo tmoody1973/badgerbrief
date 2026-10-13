@@ -19,6 +19,7 @@ import { BallotContext } from "@/components/guide/ballot-context";
 import { VotingRecord } from "@/components/guide/voting-record";
 import { VotingRecordByIssue } from "@/components/guide/voting-record-by-issue";
 import { WhatThisMeans } from "@/components/guide/what-this-means";
+import { CandidateQuestionnaire, questionnaireRows } from "@/components/guide/questionnaire";
 import { isInterviewQuote } from "@/lib/interview-quote";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
@@ -156,6 +157,9 @@ export default async function CandidatePage({ params }: Props) {
       : []),
     ...(interviewQuotes.length > 0
       ? [{ id: "interview", label: "The interview", count: interviewQuotes.length }]
+      : []),
+    ...(questionnaireRows(candidate.raceId, [candidate]).length > 0
+      ? [{ id: "questionnaire", label: "Questionnaire" }]
       : []),
     ...(otherQuotes.length > 0
       ? [{ id: "quotes", label: "Quotes", count: otherQuotes.length }]
@@ -304,6 +308,8 @@ export default async function CandidatePage({ params }: Props) {
             <VotingRecordByIssue candidateSlug={candidate.slug} raceId={candidate.raceId} />
           </>
         )}
+
+        <CandidateQuestionnaire raceId={candidate.raceId} candidate={candidate} />
 
         {otherQuotes.length > 0 && (
           <section id="quotes" className="mt-6 scroll-mt-16">
