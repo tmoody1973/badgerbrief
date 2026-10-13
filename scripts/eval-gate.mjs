@@ -15,7 +15,7 @@
  *   node scripts/eval-gate.mjs --name candidate --judge-passes 1   # single noisy run
  *   Flags: --dev (run agent against dev deployment; default prod), --model,
  *          --instructions-file, --judge-passes N (default 3),
- *          --dataset NAME (default voter-help-golden-general),
+ *          --dataset NAME (default voter-help-golden-questionnaire),
  *          --questionnaire (register the Wisconsin Watch questionnaire tool)
  *
  * The judge is NOT deterministic. Three runs over identical code and identical
@@ -35,7 +35,9 @@ import { readFileSync } from "node:fs";
 // (`is_private`) its client model does not know. The ID skips that lookup.
 const SPACE = "U3BhY2U6NDU0NjU6SWVhZA==";
 // The November 2026 set. The primary-era set, "voter-help-golden", is history.
-const DEFAULT_DATASET = "voter-help-golden-general";
+// 31 questions: the 25 general-election ones plus six about the Wisconsin
+// Watch questionnaire tool, which is on in production since 2026-10-13.
+const DEFAULT_DATASET = "voter-help-golden-questionnaire";
 const EVALUATORS = [
   { id: "RXZhbHVhdG9yOjExNTA5OjlvMC8=", name: "citation-faithfulness" },
   { id: "RXZhbHVhdG9yOjExNTEwOlZDRVk=", name: "neutrality" },

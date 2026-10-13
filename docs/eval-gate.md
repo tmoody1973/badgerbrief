@@ -12,9 +12,9 @@ Before deploying ANY change to an agent's instructions, prompt contract, or
 ```bash
 # 1. Run the candidate config against the golden dataset
 node scripts/eval-gate.mjs --name <change>-$(date +%Y%m%d) \
-  --dataset voter-help-golden-general \
+  --dataset voter-help-golden-questionnaire \
   [--model claude-xyz] [--instructions-file candidate.txt] \
-  --baseline <last-passing-experiment>
+  --baseline questionnaire-v1b
 
 # 2. Exit 0 → ship. Exit 1 → regression: do not deploy; fix and re-run.
 ```
@@ -102,8 +102,12 @@ exactly the ten-tool agent the baseline above describes.
 - **Never run two gate runs at once on one dataset.** `questionnaire-v1` was
   started alongside `-confirm` and failed at "Creating experiment" with
   `409 Conflict; Experiment name already exists`, losing the run.
-- Once the tool is switched on for voters, gate against this dataset so the
-  questionnaire questions are always asked.
+- **The tool was switched on for voters on 2026-10-13** (Tarik's decision,
+  after both runs passed). This dataset is now the gate's default, so the
+  questionnaire questions are always asked. To switch the tool off without
+  touching the rest of the chat: `npx convex env remove QUESTIONNAIRE_TOOL --prod`.
+  If it is ever switched off, gate with `--dataset voter-help-golden-general`
+  instead: the six questionnaire questions cannot pass without the tool.
 
 ## Pieces
 
