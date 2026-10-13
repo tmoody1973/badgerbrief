@@ -1,6 +1,10 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { parseGeocoderResponse, relevantRaces } from "./districts";
+import {
+  hasStateSenateRace,
+  parseGeocoderResponse,
+  relevantRaces,
+} from "./districts";
 import mke from "./__fixtures__/census-mke.json";
 import madison from "./__fixtures__/census-madison.json";
 import medford from "./__fixtures__/census-medford.json";
@@ -129,5 +133,26 @@ describe("relevantRaces with per-district legislative races", () => {
     );
     expect(ids).toContain("WI-STATE-SENATE-2026");
     expect(ids).toContain("WI-STATE-ASSEMBLY-2026");
+  });
+});
+
+describe("hasStateSenateRace", () => {
+  it("is true when the voter's ballot includes their district's State Senate race", () => {
+    // Live bug until 2026-10-13: the home page looked for the old chamber-wide id
+    // "WI-STATE-SENATE-2026", so a District 7 voter was told the seat "isn't up for
+    // election in 2026" directly above the District 7 race.
+    expect(hasStateSenateRace([{ raceId: "WI-GOV-2026" }, { raceId: "WI-STATE-SENATE-D7-2026" }])).toBe(true);
+  });
+
+  it("is false when no State Senate race is on the ballot (an even-numbered district in 2026)", () => {
+    expect(hasStateSenateRace([{ raceId: "WI-GOV-2026" }, { raceId: "WI-STATE-ASSEMBLY-D19-2026" }])).toBe(false);
+  });
+
+  it("still recognises the old chamber-wide row", () => {
+    expect(hasStateSenateRace([{ raceId: "WI-STATE-SENATE-2026" }])).toBe(true);
+  });
+
+  it("is not fooled by another office with a similar id", () => {
+    expect(hasStateSenateRace([{ raceId: "WI-US-SENATE-2026" }])).toBe(false);
   });
 });
