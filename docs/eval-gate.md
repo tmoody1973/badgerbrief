@@ -62,7 +62,7 @@ Model-decision history, all decided by this gate on 2026-07-19:
 
 | Piece | Where |
 |---|---|
-| Golden dataset (24 questions + expectations, written for the Nov 3, 2026 general election) | Arize dataset `voter-help-golden-general`; source of truth `scripts/voter-help-golden.json`. The primary-era set, `voter-help-golden`, is kept with its results and is no longer the gate. |
+| Golden dataset (25 questions + expectations, written for the Nov 3, 2026 general election) | Arize dataset `voter-help-golden-general`; source of truth `scripts/voter-help-golden.json`. The primary-era set, `voter-help-golden`, is kept with its results and is no longer the gate. |
 | Gate runner | `scripts/eval-gate.mjs` |
 | Judges (LLM-as-judge, claude-sonnet-5, function calling, temp 0) | Arize evaluators: Citation Faithfulness, Neutrality, Official Source First, Refusal Correctness, Golden Expectations |
 | Continuous production scoring | Arize task `badgerbrief-agent-quality` — continuous, 25% sampling, AGENT spans only (`attributes.openinference.span.kind = 'AGENT'`) |

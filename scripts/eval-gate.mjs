@@ -15,7 +15,7 @@
  *   node scripts/eval-gate.mjs --name candidate --judge-passes 1   # single noisy run
  *   Flags: --dev (run agent against dev deployment; default prod), --model,
  *          --instructions-file, --judge-passes N (default 3),
- *          --dataset NAME (default voter-help-golden)
+ *          --dataset NAME (default voter-help-golden-general)
  *
  * The judge is NOT deterministic. Three runs over identical code and identical
  * answers scored golden-expectations 67%, 72% and 94%, with different questions
@@ -30,7 +30,8 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
 const SPACE = "tarikjmoody Space";
-const DEFAULT_DATASET = "voter-help-golden";
+// The November 2026 set. The primary-era set, "voter-help-golden", is history.
+const DEFAULT_DATASET = "voter-help-golden-general";
 const EVALUATORS = [
   { id: "RXZhbHVhdG9yOjExNTA5OjlvMC8=", name: "citation-faithfulness" },
   { id: "RXZhbHVhdG9yOjExNTEwOlZDRVk=", name: "neutrality" },
@@ -339,6 +340,12 @@ const golden = rates["golden-expectations"];
 if (golden.rate === null) {
   console.error("\nGATE ERROR: no golden-expectations scores landed — check column mappings/task run");
   process.exit(2);
+}
+// A question the judge never scored is not a pass. Without this, a run that
+// scored 18 of 25 at 100% would clear a floor meant for all 25.
+if (golden.n < examples.length) {
+  console.error(`\nGATE FAIL: only ${golden.n} of ${examples.length} questions were scored`);
+  failed = true;
 }
 if (golden.rate < MIN_GOLDEN_RATE) {
   console.error(`\nGATE FAIL: golden-expectations ${Math.round(golden.rate * 100)}% < ${MIN_GOLDEN_RATE * 100}%`);

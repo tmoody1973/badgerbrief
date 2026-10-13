@@ -16,7 +16,14 @@ import type { Id } from "./_generated/dataModel";
 import { ensureTelemetry, tracer } from "./lib/agentTelemetry";
 import { OFFICIAL_LINKS, OFFICIAL_LINK_TOPICS, type OfficialLinkTopic } from "../src/lib/official-links";
 import { buildIssueMatch } from "../src/lib/issue-match";
-import { candidatePayload, matchPayload, racePayload } from "./lib/chatPayloads";
+import {
+  candidatePayload,
+  coveragePayload,
+  matchPayload,
+  myBallotPayload,
+  racePayload,
+  votingInfoPayload,
+} from "./lib/chatPayloads";
 import { OUT_OF_COVERAGE_NOTE, VOTER_HELP_INSTRUCTIONS } from "./lib/voterHelpInstructions";
 import { ISSUE_SLUGS } from "./lib/extraction";
 import {
@@ -68,7 +75,7 @@ const getVotingInfo = createTool({
     withToolSpan("getVotingInfo", ctx.threadId, {}, async () => {
       const info = await ctx.runQuery(api.public.getVotingInfo, {});
       if (!info) return "No voting_info published — hand off the official link instead.";
-      return JSON.stringify(info);
+      return JSON.stringify(votingInfoPayload(info));
     }),
 });
 
@@ -124,7 +131,7 @@ const getMyBallot = createTool({
           official: OFFICIAL_LINKS.myBallot,
         });
       }
-      return JSON.stringify(ballot);
+      return JSON.stringify(myBallotPayload(ballot));
     }),
 });
 
@@ -203,16 +210,7 @@ const getCoverage = createTool({
       if (rows.length === 0) {
         return `No tracked coverage for "${candidateSlug}" — say BadgerBrief hasn't tracked reporting on this and hand off.`;
       }
-      // Only what a citation needs. The full docs carry our own internal
-      // relevance notes, which are not for readers and not for the model.
-      return JSON.stringify(
-        rows.slice(0, 12).map((r) => ({
-          headline: r.article.headline,
-          url: r.article.url,
-          publishedAt: r.article.publishedAt ?? null,
-          outlet: r.outlet?.displayName ?? r.article.outlet,
-        })),
-      );
+      return JSON.stringify(coveragePayload(rows));
     }),
 });
 
@@ -241,9 +239,9 @@ const getVotingRecord = createTool({
  *
  * Without this the model answered "what is democratic socialism" from general
  * knowledge — plausible, unsourced, and against the rule that every claim on
- * this site links somewhere a reader can check. It matters in this race
- * specifically: the leading candidate is a DSA member and the debate's second
- * question was about the DSA platform.
+ * this site links somewhere a reader can check. The tool's own description
+ * steers its use; it has no rule in the standing instructions, so the rule
+ * count stays down (docs/eval-gate.md).
  */
 const getLabelGlossary = createTool({
   description:

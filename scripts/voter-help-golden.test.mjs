@@ -22,10 +22,10 @@ describe("the chat's test questions", () => {
 
   test("the November cases the design asks for are present", () => {
     const categories = rows.map((r) => r.category);
-    for (const needed of ["ballot-status", "joint-ticket", "write-in", "results-trap"]) {
+    for (const needed of ["ballot-status", "joint-ticket", "write-in", "results-trap", "label-glossary"]) {
       expect(categories).toContain(needed);
     }
-    expect(rows.length).toBe(24);
+    expect(rows.length).toBe(25);
   });
 
   test("the cases that worked before are still covered", () => {

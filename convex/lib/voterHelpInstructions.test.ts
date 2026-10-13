@@ -13,13 +13,19 @@ describe("the chat's standing instructions", () => {
     expect(VOTER_HELP_INSTRUCTIONS).toMatch(/10\. THE NOVEMBER BALLOT\./);
     expect(VOTER_HELP_INSTRUCTIONS).toMatch(/never say (a candidate|anyone) lost, won/i);
     expect(VOTER_HELP_INSTRUCTIONS).toMatch(/write-in/i);
+    // Rule 9 requires a roll-call tally, so rule 10 must not forbid vote counts in general.
+    expect(VOTER_HELP_INSTRUCTIONS).not.toMatch(/never give vote totals/i);
+    expect(VOTER_HELP_INSTRUCTIONS).toMatch(/election results/i);
     expect(VOTER_HELP_INSTRUCTIONS).not.toMatch(/getDebate|DEBATE\./);
   });
 
-  test("keep the same number of rules: 0 through 12, each once", () => {
-    // docs/eval-gate.md: every added rule costs accuracy. The ballot rule replaces the debate rule.
+  test("add exactly one rule to the eleven in production: 0 through 11, each once", () => {
+    // docs/eval-gate.md: every added rule costs accuracy. Production ran rules 0-10; the ballot
+    // rule is the one addition. The label glossary is steered by its tool description, not a rule.
     const numbers = [...VOTER_HELP_INSTRUCTIONS.matchAll(/^(\d+)\. /gm)].map((m) => Number(m[1]));
-    expect(numbers).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    expect(numbers).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+    expect(VOTER_HELP_INSTRUCTIONS).toMatch(/^11\. ISSUE MATCHING\./m);
+    expect(VOTER_HELP_INSTRUCTIONS).not.toMatch(/LABELS\./);
   });
 
   test("the out-of-coverage note names the general election", () => {
