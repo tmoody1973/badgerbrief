@@ -35,6 +35,15 @@ function clip(answer: string): Pick<Answer, "answer" | "truncated"> {
   return { answer: (cut > 0 ? head.slice(0, cut) : head).trim(), truncated: true };
 }
 
+/**
+ * A question asking a candidate about their opponent. Its answers are never
+ * passed to the chat: a nonpartisan guide does not carry one candidate's
+ * claims about another (Tarik's ruling, 2026-10-13; decision 016). In 2026 only
+ * the attorney general questionnaire has one. The answers stay one click away
+ * on Wisconsin Watch's own page.
+ */
+const ABOUT_AN_OPPONENT = /\bopponents?\b/i;
+
 const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** The questions and answers on one candidate's page. Null when the text has none that are provably theirs. */
@@ -50,7 +59,7 @@ export function parseCandidateAnswers(text: unknown, candidateId: string): Answe
   const answers = `\n${section}`
     .split(/\n### /)
     .slice(1)
-    .filter((block) => attributed.test(block))
+    .filter((block) => attributed.test(block) && !ABOUT_AN_OPPONENT.test(block.split("\n")[0]))
     .map((block) => {
       const [question, ...lines] = block.split("\n");
       const paragraphs = lines.filter((line) => line.startsWith("> ")).map((line) => line.slice(2).trim());

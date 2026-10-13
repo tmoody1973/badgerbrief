@@ -80,6 +80,14 @@ describe("parseCandidateAnswers", () => {
     expect(answer.answer.endsWith("potholes")).toBe(true);
   });
 
+  // Tarik's ruling, 2026-10-13: the chat never carries what one candidate says about another.
+  test("leaves out a question that asks a candidate about their opponent", () => {
+    const page = PAGE.replace("### What is the top issue in your district?", "### Why should voters not elect your opponent?");
+    expect(parseCandidateAnswers(page, "s-sample1")?.map((a) => a.question)).toEqual(["Why should voters elect you?"]);
+    const plural = PAGE.replace("### What is the top issue in your district?", "### What do your opponents get wrong?");
+    expect(parseCandidateAnswers(plural, "s-sample1")).toHaveLength(1);
+  });
+
   test("refuses text with no answers section, and anything that is not text", () => {
     expect(parseCandidateAnswers("# Sam Sample\n\n/candidate/s-sample1/\n\nDid not answer.", "s-sample1")).toBeNull();
     expect(parseCandidateAnswers(undefined, "s-sample1")).toBeNull();
