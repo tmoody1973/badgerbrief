@@ -52,9 +52,10 @@ describe("RaceQuestionnaire", () => {
     expect(html).toContain('href="https://voterguide26.wisconsinwatch.org/candidate/s-ripley1/?utm_source=badgerbrief&amp;utm_medium=referral"');
   });
 
-  test("states plainly that a candidate did not answer, with no comment, and links the page that shows it", () => {
+  test("says what the guide shows for a candidate with no answers, about the guide and not the person, and links the page", () => {
     expect(html).toContain("John Jagler");
-    expect(html).toContain("Did not answer the questionnaire.");
+    expect(html).toContain("Wisconsin Watch’s guide shows no response.");
+    expect(html).not.toMatch(/did not answer/i);
     expect(html).toContain("See John Jagler’s page on Wisconsin Watch");
     expect(html).toContain('href="https://voterguide26.wisconsinwatch.org/candidate/j-jagler1/?utm_source=badgerbrief&amp;utm_medium=referral"');
     expect(html).not.toMatch(/declin|refus|ignor|fail/i);

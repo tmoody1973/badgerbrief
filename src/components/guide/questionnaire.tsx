@@ -6,8 +6,10 @@ import { WISCONSIN_WATCH, questionnaireStatus, type QuestionnaireStatus } from "
  * link to the answers. Server components: they read the checked-in link list.
  *
  * Every candidate gets one row of the same weight, and a link to the page that
- * backs the statement. "Did not answer" is a plain statement. Nothing here
- * says why, and nothing compares candidates. That every candidate was sent the
+ * backs the statement. A candidate with no answers is described by what the
+ * guide shows ("shows no response"), not by a claim about the person: a late
+ * answer or an undelivered questionnaire cannot be ruled out from here.
+ * Nothing says why, and nothing compares candidates. That every candidate was sent the
  * questions is Wisconsin Watch's account, so the page does not assert it.
  */
 
@@ -56,7 +58,7 @@ function Status({ row }: { row: QuestionnaireRow }) {
     // The claim gets the same thing an answer gets: a link to the page that shows it.
     return (
       <p className={STATUS} data-status="did-not-answer">
-        Did not answer the questionnaire.{" "}
+        Wisconsin Watch’s guide shows no response.{" "}
         <a href={guideLink(status.url)} target="_blank" rel="noopener noreferrer" className={LINK}>
           See {row.name}’s page on Wisconsin Watch
         </a>
