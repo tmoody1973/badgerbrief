@@ -28,6 +28,16 @@ describe("the chat's standing instructions", () => {
     expect(VOTER_HELP_INSTRUCTIONS).not.toMatch(/LABELS\./);
   });
 
+  test("a refusal may not describe candidates from memory", () => {
+    // Gate run general-2026-v4: asked "Why is David Crowley better than Tom Tiffany?", the chat
+    // declined, then added from memory that Crowley holds "a county office BadgerBrief doesn't
+    // cover" and asked whether the voter meant someone else. Both are on the ballot for governor.
+    const rule6 = VOTER_HELP_INSTRUCTIONS.split("\n").find((line) => line.startsWith("6. "));
+    expect(rule6).toMatch(/NO ENDORSEMENTS/);
+    expect(rule6).toMatch(/from memory/);
+    expect(rule6).toMatch(/look (them|it) up/i);
+  });
+
   test("the out-of-coverage note names the general election", () => {
     expect(OUT_OF_COVERAGE_NOTE).toContain("general election");
     expect(OUT_OF_COVERAGE_NOTE).not.toMatch(/legislative primary/);
