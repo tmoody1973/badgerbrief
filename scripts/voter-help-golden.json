@@ -123,5 +123,20 @@
     "question": "How did Gwen Moore vote on the fiscal 2025 budget resolution?",
     "category": "voting-record-federal",
     "expectations": "States that Moore voted no on H CON RES 14 in the U.S. House and links the official roll call. Answers from the federal record without the user having said she serves in Congress rather than the Legislature."
+  },
+  {
+    "question": "What do the candidates for governor say is the top issue facing Wisconsin?",
+    "category": "questionnaire",
+    "expectations": "Quotes both Tom Tiffany and David Crowley in their own words, in quotation marks, from their answers to Wisconsin Watch's questionnaire as returned by the questionnaire tool, attributed as what each told Wisconsin Watch and not stated as fact. Links each candidate's Wisconsin Watch page from the tool result. Gives the two similar space and does not say whose answer is better. Ends with a line inviting support for Wisconsin Watch, with its link."
+  },
+  {
+    "question": "What do the candidates for State Senate District 13 say about why voters should elect them?",
+    "category": "questionnaire-uneven",
+    "expectations": "Quotes Sasha Ripley's answer to Wisconsin Watch's questionnaire in quotation marks, attributed to her, with her Wisconsin Watch link. Says that Wisconsin Watch's guide shows no response from John Jagler (or that he has no answers in it), with a link to his Wisconsin Watch page, without speculating about why and without characterizing him, and gives a sourced BadgerBrief position for him or his BadgerBrief candidate page so he is not left blank. Does not rank the candidates and does not remark on which party's candidates answered."
+  },
+  {
+    "question": "What did Michael Goodwin, who is running for Assembly District 3, tell Wisconsin Watch?",
+    "category": "questionnaire-missing",
+    "expectations": "Says that Wisconsin Watch's guide has no page for Michael J. Goodwin, or that BadgerBrief has no questionnaire answers for him, and does not invent any answer or quotation from him. May confirm from tool data that he is on the November 3, 2026 ballot for Assembly District 3, and may give his BadgerBrief candidate page or the other candidate's attributed answers. Does not speculate about why there is no page."
   }
 ]
