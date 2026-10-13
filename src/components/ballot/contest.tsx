@@ -8,6 +8,10 @@ import { PartyBadge } from "@/components/guide/labels";
  *
  * Every candidate gets the same markup and every party the same badge. Where
  * the guide holds nothing more than the names, it says so.
+ *
+ * Every link here carries prefetch={false}. These are the voter's own
+ * contests; letting Next pre-load them would ask the server for a voter's
+ * districts before the voter chose to open anything (decision 018).
  */
 
 type ContestNumber = { n: number; of: number };
@@ -54,7 +58,7 @@ export function ContestCard({ contest, number }: { contest: BallotContest; numbe
           {contest.candidates.map((candidate) => (
             <li key={candidate.name} className="flex flex-wrap items-center gap-x-3 gap-y-1">
               {candidate.href ? (
-                <Link href={candidate.href} className={NAME_LINK}>
+                <Link prefetch={false} href={candidate.href} className={NAME_LINK}>
                   {candidate.name}
                 </Link>
               ) : (
@@ -70,7 +74,7 @@ export function ContestCard({ contest, number }: { contest: BallotContest; numbe
             <p className="text-sm">BadgerBrief has, for this contest:</p>
             <p className="mt-2 flex flex-wrap gap-2">
               {contest.stamps.map((stamp) => (
-                <Link key={stamp.label} href={stamp.href} className={CHIP}>
+                <Link key={stamp.label} prefetch={false} href={stamp.href} className={CHIP}>
                   {STAMP_LABEL[stamp.label]}
                 </Link>
               ))}
@@ -82,11 +86,11 @@ export function ContestCard({ contest, number }: { contest: BallotContest; numbe
 
         {contest.href && (
           <p className="mt-4 flex flex-wrap gap-3">
-            <Link href={contest.href} className={`${ACTION} bg-secondary`}>
+            <Link prefetch={false} href={contest.href} className={`${ACTION} bg-secondary`}>
               Open this contest
             </Link>
             {contest.compareHref && (
-              <Link href={contest.compareHref} className={`${ACTION} bg-card`}>
+              <Link prefetch={false} href={contest.compareHref} className={`${ACTION} bg-card`}>
                 Compare side by side
               </Link>
             )}
@@ -111,7 +115,7 @@ export function OneNameStrip({ contests, numbers }: { contests: readonly BallotC
             <div className="min-w-0">
               <p className="font-bold leading-tight">
                 {contest.href ? (
-                  <Link href={contest.href} className={`underline decoration-2 underline-offset-4 ${FOCUS}`}>
+                  <Link prefetch={false} href={contest.href} className={`underline decoration-2 underline-offset-4 ${FOCUS}`}>
                     {contest.office}
                   </Link>
                 ) : (

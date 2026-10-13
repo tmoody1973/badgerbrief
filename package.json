@@ -11,6 +11,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "test:privacy": "node scripts/privacy-capture.mjs",
     "generate:brief-contract": "tsx scripts/generate-brief-contract.ts",
     "eval:gate": "node scripts/eval-gate.mjs",
     "eval:monitor": "node scripts/eval-monitor.mjs"
