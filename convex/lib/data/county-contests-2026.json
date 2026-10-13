@@ -7,9 +7,9 @@
     "retrievedAt": "2026-10-12T21:32:56Z",
     "sha256": "f26aa3fffacaa5ea80fd9fc53e99f74a4ebba10fe4e96c0c3b96e89870ee213e"
   },
-  "certifiedBy": "",
-  "certifiedAt": "",
-  "certifiedSha256": "",
+  "certifiedBy": "Tarik Moody",
+  "certifiedAt": "2026-10-13",
+  "certifiedSha256": "14b4555d0f9e8ff46978121635819c6e8aa9dd538a822be3d782eedf7690b053",
   "contests": [
     {
       "county": "adams",

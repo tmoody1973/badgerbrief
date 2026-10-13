@@ -1,6 +1,6 @@
 # Statewide questions on the November 3, 2026 ballot: review sheet
 
-NOT SIGNED. Nothing in this file is shown to voters until it is signed.
+Signed by Tarik Moody on 2026-10-13.
 
 Source: Wisconsin Elections Commission, Type C Notice of Referendum, November 3, 2026 (https://elections.wi.gov/sites/default/files/documents/Type%20C%20Notice%20for%20Ref%20for%20November%202026%20General%20Election_Final.pdf), dated 2026-08-17, retrieved 2026-10-13T11:51:38Z. File fingerprint (SHA-256): `7df28a76dc83030c18019adae19c06482e4dcc2ce465e22fbe9d969168158781`.
 
@@ -74,4 +74,4 @@ Everything in a quote block below is the state's wording and has been checked ag
 
 > A “no” vote on Question 3 would vote not to add Wis. Const. art. I § 18 to the Wisconsin Constitution.
 
-**The guide's own note (not the state's words):** The state’s notice says “§ 18” in the two sentences above. The question on the ballot, and the rest of the notice, say the new provision would be Article I, section 27.
+**The guide's own note (not the state's words):** The state’s notice says “§ 18” in its “yes” and “no” sentences for Question 3. The question on the ballot, and the rest of the notice, say the new provision would be Article I, section 27.

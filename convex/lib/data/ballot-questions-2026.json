@@ -8,9 +8,9 @@
     "retrievedAt": "2026-10-13T11:51:38Z",
     "sha256": "7df28a76dc83030c18019adae19c06482e4dcc2ce465e22fbe9d969168158781"
   },
-  "certifiedBy": "",
-  "certifiedAt": "",
-  "certifiedSha256": "",
+  "certifiedBy": "Tarik Moody",
+  "certifiedAt": "2026-10-13",
+  "certifiedSha256": "0484922cf754af7f7c760c3d4e0004eb4ecaaef4eb504c3b486ff59463e6877a",
   "questions": [
     {
       "number": 1,
@@ -52,7 +52,7 @@
       ],
       "yesVote": "A “yes” vote on Question 3 would vote to create a new provision of the Wisconsin Constitution—Wis. Const. art. I, § 18, which would prohibit any governmental entity from discriminating or granting preferential treatment based on race, sex, color, ethnicity, or national origin in public employment, public education, public contracting, or public administration.",
       "noVote": "A “no” vote on Question 3 would vote not to add Wis. Const. art. I § 18 to the Wisconsin Constitution.",
-      "note": "The state’s notice says “§ 18” in the two sentences above. The question on the ballot, and the rest of the notice, say the new provision would be Article I, section 27."
+      "note": "The state’s notice says “§ 18” in its “yes” and “no” sentences for Question 3. The question on the ballot, and the rest of the notice, say the new provision would be Article I, section 27."
     }
   ]
 }
