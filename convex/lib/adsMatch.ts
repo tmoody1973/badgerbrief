@@ -57,6 +57,8 @@ export interface MatchCandidate {
   raceId: string;
   office: string;
   level: string;
+  /** On the November ballot. Search terms use it; matching does not. */
+  onBallot?: boolean;
 }
 
 export interface AdMatch {

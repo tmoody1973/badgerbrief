@@ -15,8 +15,10 @@ export const metadata: Metadata = {
 
 export default async function MatchPage() {
   const races = await listRaces();
-  // Pass only what the client needs (raceId, office, level) — keep the payload small.
-  const raceMeta = races.map((r) => ({ raceId: r.raceId, office: r.office, level: r.level }));
+  // Only real November contests; pass only what the client needs.
+  const raceMeta = races
+    .filter((r) => r.general?.onBallot === true)
+    .map((r) => ({ raceId: r.raceId, office: r.office, level: r.level }));
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">

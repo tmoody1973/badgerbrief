@@ -5,6 +5,8 @@ import {
   internalQuery,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { isOnGeneralBallot } from "./lib/ballot";
+import { inNewsScope } from "./lib/jobScope";
 
 /**
  * Campaign finance sync. Federal: OpenFEC API (daily cron). State: Sunshine
@@ -213,7 +215,12 @@ export const logFetch = internalMutation({
 export const financeGaps = internalQuery({
   args: {},
   handler: async (ctx) => {
-    const rows = await ctx.db.query("finance_totals").collect();
+    const candidates = await ctx.db.query("candidates").collect();
+    const onBallot = new Set(candidates.filter(isOnGeneralBallot).map((c) => `${c.raceId}/${c.slug}`));
+    // A gap for someone who is not on the ballot is not worth an editor's Monday.
+    const rows = (await ctx.db.query("finance_totals").collect()).filter((r) =>
+      onBallot.has(`${r.raceId}/${r.candidateSlug}`),
+    );
     const gaps = rows.flatMap((r) => {
       const missing: string[] = [];
       if (r.receipts === undefined) missing.push("receipts");
@@ -223,6 +230,31 @@ export const financeGaps = internalQuery({
         : [];
     });
     return { count: gaps.length, gaps };
+  },
+});
+
+/**
+ * On-ballot candidates for statewide executive offices and the U.S. House who
+ * have no finance record at all. financeGaps cannot see them: it reads the
+ * finance rows that exist. Read-only.
+ * Run: `npx convex run finance:financeMissing --prod`
+ */
+export const financeMissing = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const [candidates, races, totals] = await Promise.all([
+      ctx.db.query("candidates").collect(),
+      ctx.db.query("races").collect(),
+      ctx.db.query("finance_totals").collect(),
+    ]);
+    const levelByRace = new Map(races.map((r) => [r.raceId, r.level]));
+    // Real contests only: a governor running mate has no committee of their own.
+    const contests = new Set(races.filter((r) => r.general?.onBallot === true).map((r) => r.raceId));
+    const hasFinance = new Set(totals.map((t) => `${t.raceId}/${t.candidateSlug}`));
+    const missing = candidates
+      .filter((c) => contests.has(c.raceId) && inNewsScope(c, levelByRace.get(c.raceId)) && !hasFinance.has(`${c.raceId}/${c.slug}`))
+      .map((c) => ({ raceId: c.raceId, candidateSlug: c.slug, name: c.name }));
+    return { count: missing.length, missing };
   },
 });
 
@@ -276,7 +308,9 @@ export const listFecCandidates = internalQuery({
     // House-committee FEC ID (e.g. Tiffany for governor) — showing that money
     // on a state race would be misleading. State races use Sunshine only.
     return all
-      .filter((c) => c.fecCandidateId && c.raceId.startsWith("WI-US-"))
+      // …and only those on the November ballot: the daily sync is not spent on
+      // candidates who are no longer running.
+      .filter((c) => c.fecCandidateId && c.raceId.startsWith("WI-US-") && isOnGeneralBallot(c))
       .map((c) => ({
         slug: c.slug,
         raceId: c.raceId,

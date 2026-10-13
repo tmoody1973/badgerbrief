@@ -8,17 +8,7 @@ import { internalMutation, internalQuery } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { Extraction } from "./lib/extraction";
 import { isSameSite } from "./lib/campaignMap";
-
-/**
- * A withdrawn/suspended candidate is off the trail — don't scrape or draft
- * positions for someone no longer running. Status is free text seeded from WEC
- * ("Withdrawn (July 17, 2026)", "Suspended campaign (June 22, 2026)", "Active"),
- * so match on the leading word. Missing status ⇒ treat as active.
- */
-const isActiveStatus = (status?: string) => {
-  const s = (status ?? "").trim().toLowerCase();
-  return !s.startsWith("withdrawn") && !s.startsWith("suspended");
-};
+import { isOnGeneralBallot } from "./lib/ballot";
 
 /** Candidates with a registered campaign website — the site mapper's work list. */
 export const listMapTargets = internalQuery({
@@ -33,7 +23,9 @@ export const listMapTargets = internalQuery({
     }[] = [];
     for (const c of candidates) {
       const homepageUrl = c.socialMedia?.campaign_website;
-      if (homepageUrl) {
+      // Only candidates on the November ballot: mapping an eliminated
+      // candidate's site spends the budget on pages nobody will read.
+      if (homepageUrl && isOnGeneralBallot(c)) {
         targets.push({
           slug: c.slug,
           name: c.name,
@@ -171,7 +163,7 @@ export const listResearchTargets = internalQuery({
   handler: async (ctx) => {
     const candidates = await ctx.db.query("candidates").collect();
     const nameBySlug = new Map(candidates.map((c) => [c.slug, c.name]));
-    const statusBySlug = new Map(candidates.map((c) => [c.slug, c.status]));
+    const onBallot = new Set(candidates.filter(isOnGeneralBallot).map((c) => c.slug));
 
     const targets: {
       slug: string;
@@ -184,7 +176,7 @@ export const listResearchTargets = internalQuery({
 
     for (const c of candidates) {
       const url = c.socialMedia?.campaign_website;
-      if (url && isActiveStatus(c.status)) {
+      if (url && onBallot.has(c.slug)) {
         targets.push({ slug: c.slug, name: c.name, raceId: c.raceId, url, sourceKind: "campaign_site" });
       }
     }
@@ -197,7 +189,7 @@ export const listResearchTargets = internalQuery({
       if (!a.candidateSlug || !a.raceId) continue;
       const name = nameBySlug.get(a.candidateSlug);
       if (!name) continue; // orphaned row (candidate removed) — skip rather than emit a bad target
-      if (!isActiveStatus(statusBySlug.get(a.candidateSlug))) continue; // dropped-out candidate — skip
+      if (!onBallot.has(a.candidateSlug)) continue; // not on the November ballot — skip
       // MOO-326: own-site subpages carry the campaign-site prompt + citation
       // label (the candidate, not an outlet). Legacy rows have no sourceKind.
       const kind = a.sourceKind ?? "article";

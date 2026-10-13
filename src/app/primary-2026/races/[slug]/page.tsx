@@ -5,7 +5,8 @@ import { ArchiveBanner } from "@/components/guide/archive-banner";
 import { PrimaryRaceView } from "@/components/guide/primary-race-view";
 import { RacePolls } from "@/components/guide/race-polls";
 import { SourceList } from "@/components/guide/sources";
-import { getPollsForRace, getRace, listRaces } from "@/lib/data";
+import { InTheNews } from "@/components/guide/in-the-news";
+import { getInTheNewsForRace, getPollsForRace, getRace, listRaces } from "@/lib/data";
 import { PRIMARY_ARCHIVE } from "@/lib/election";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
 import { splitPolls } from "@/lib/race-ballot";
@@ -42,6 +43,7 @@ export default async function ArchivedRacePage({ params }: Props) {
   // Everything the November page leaves out, so no published poll disappears.
   const onBallot = new Set(generalField(candidates).map((c) => c.slug));
   const polls = splitPolls(await getPollsForRace(race.raceId), onBallot).archive;
+  const inTheNews = (await getInTheNewsForRace(race.raceId)).filter((r) => r.article.archive);
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
@@ -57,7 +59,8 @@ export default async function ArchivedRacePage({ params }: Props) {
       />
       <ArchiveBanner currentHref={`/races/${slug}`} currentLabel={`See ${race.office} on the November ballot`} />
       <PrimaryRaceView race={race} candidates={candidates} />
-      <RacePolls polls={polls} raceName={race.office} />
+      <RacePolls polls={polls} raceName={race.office} archive />
+      <InTheNews items={inTheNews} heading={`Primary-season news about the ${race.office} race`} />
       <section id="sources" className="mt-10 scroll-mt-16">
         <SourceList sources={race.sources} />
       </section>

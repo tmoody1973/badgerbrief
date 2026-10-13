@@ -7,6 +7,8 @@ import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
 import { canonicalOutletName } from "./lib/outlets";
 import { canonicalArticleKey } from "./lib/articleUrl";
+import { inNewsScope } from "./lib/jobScope";
+import { scoutHealthAlert } from "./lib/scoutHealth";
 
 /** Bare hostname for the outlet's `domain` field; undefined if unparseable. */
 const hostOf = (url: string): string | undefined => {
@@ -17,18 +19,9 @@ const hostOf = (url: string): string | undefined => {
   }
 };
 
-/** Races the scout actively hunts coverage for. */
-export const CONTESTED_RACE_IDS = [
-  "WI-GOV-2026",
-  "WI-AG-2026",
-  "WI-SOS-2026",
-  "WI-TREAS-2026",
-  "WI-US-HOUSE-D4-2026",
-];
-
 /**
  * Candidates to scout, with a rotation timestamp for last-touched-first
- * ordering. No args → the contested-race pool. Explicit `slugs` bypass the
+ * ordering. No args → on-ballot candidates for statewide executive offices and the U.S. House (lib/jobScope.ts). Explicit `slugs` bypass the
  * pool filter entirely (spec: caller-picked candidates may be anywhere).
  *
  * `lastProposedAt` is max(last scout_attempts.attemptedAt, last
@@ -40,11 +33,14 @@ export const listScoutCandidates = internalQuery({
   args: { slugs: v.optional(v.array(v.string())) },
   handler: async (ctx, { slugs }) => {
     const candidates = await ctx.db.query("candidates").collect();
+    const races = await ctx.db.query("races").collect();
+    const raceById = new Map(races.map((r) => [r.raceId, r]));
     const targets = slugs
       ? candidates.filter((c) => slugs.includes(c.slug))
-      : candidates.filter((c) => CONTESTED_RACE_IDS.includes(c.raceId));
+      : candidates.filter((c) => inNewsScope(c, raceById.get(c.raceId)?.level));
 
-    const out: { slug: string; name: string; raceId: string; lastProposedAt?: number }[] = [];
+    const out: { slug: string; name: string; raceId: string; office: string; lastProposedAt?: number }[] = [];
+
     for (const c of targets) {
       const rows = await ctx.db
         .query("article_sources")
@@ -63,6 +59,7 @@ export const listScoutCandidates = internalQuery({
         slug: c.slug,
         name: c.name,
         raceId: c.raceId,
+        office: raceById.get(c.raceId)?.office ?? c.raceId,
         ...(lastProposedAt > 0 ? { lastProposedAt } : {}),
       });
     }
@@ -236,5 +233,50 @@ export const backfillArticleUrlKeys = internalMutation({
       }
     }
     return { keyed, deleted, continueCursor: page.continueCursor, isDone: page.isDone };
+  },
+});
+
+
+/**
+ * Record how a run went. Opens an alert when the run is unhealthy, keeps a
+ * single alert open while the condition lasts, and closes it on the next
+ * healthy run. Returns the message of a NEWLY opened alert so the caller can
+ * email it once.
+ */
+export const recordRunHealth = internalMutation({
+  args: {
+    attempted: v.number(),
+    errors: v.number(),
+    proposed: v.number(),
+    sampleError: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<string | null> => {
+    const newest = await ctx.db.query("article_sources").order("desc").first();
+    const daysSinceLastArticle = newest ? Math.floor((Date.now() - newest.proposedAt) / 86_400_000) : null;
+    const alert = scoutHealthAlert({ ...args, daysSinceLastArticle });
+
+    const unresolved = await ctx.db
+      .query("alerts")
+      .withIndex("by_resolved", (q) => q.eq("resolved", false))
+      .take(5000);
+    const mine = unresolved.filter((a) => a.refTable === "article_sources" && a.refId?.startsWith("article-scout:"));
+
+    // Close every alert of ours that no longer describes the job: all of them
+    // after a healthy run, or the old condition when the problem has changed.
+    for (const a of mine) {
+      if (a.refId !== alert?.refId) await ctx.db.patch("alerts", a._id, { resolved: true });
+    }
+    if (!alert) return null;
+    if (mine.some((a) => a.refId === alert.refId)) return null;
+    await ctx.db.insert("alerts", {
+      kind: alert.kind,
+      severity: alert.severity,
+      refTable: "article_sources",
+      refId: alert.refId,
+      message: alert.message,
+      resolved: false,
+      createdAt: Date.now(),
+    });
+    return alert.message;
   },
 });

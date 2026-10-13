@@ -23,9 +23,17 @@ const rpw = {
   sourceNote: "WI Ethics Commission (Sunshine) filings, campaignfinance.wi.gov",
 };
 
+const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
+/** The finance audit only reports on candidates who are on the November ballot. */
+const onBallot = (ctx: any, ...slugs: string[]) =>
+  Promise.all(slugs.map((slug) => ctx.db.insert("candidates", {
+    slug, raceId: "R", name: slug, sources: [], dataAsOf: "2026-10-12", general: { onBallot: true, source: SOURCE },
+  })));
+
 test("financeGaps flags rows missing receipts or cash-on-hand, skips complete rows", async () => {
   const t = convexTest(schema, modules);
   await t.run(async (ctx) => {
+    await onBallot(ctx, "complete", "no-receipts", "no-coh", "zeros");
     await ctx.db.insert("finance_totals", {
       candidateSlug: "complete", raceId: "R", source: "sunshine", receipts: 100, cashOnHand: 50, fetchedAt: 0,
     });
@@ -85,6 +93,7 @@ test("financeGapAlert: alerted=false when clean, true when a gap exists", async 
   expect(await t.action(internal.finance.financeGapAlert, {})).toEqual({ count: 0, alerted: false });
   // a row missing receipts → alert fires (feedback.notify no-ops without RESEND_API_KEY)
   await t.run(async (ctx) => {
+    await onBallot(ctx, "gapped");
     await ctx.db.insert("finance_totals", {
       candidateSlug: "gapped", raceId: "R", source: "sunshine", cashOnHand: 5, fetchedAt: 0,
     });

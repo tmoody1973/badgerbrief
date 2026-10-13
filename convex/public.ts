@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 import { query } from "./_generated/server";
-import { generalBallotName, generalParty, generalPersonName, isOnGeneralBallot } from "./lib/ballot";
+import { generalBallotName, generalField, generalParty, generalPersonName, isOnGeneralBallot } from "./lib/ballot";
 
 /** Read-only queries for the public guide. Published/seeded data only. */
 
@@ -65,7 +65,9 @@ export const positionsForRaces = query({
         .query("races")
         .withIndex("by_race_id", (q) => q.eq("raceId", raceId))
         .unique();
-      if (!race) continue;
+      // Only a real November contest. A race with no ballot facts, or one that
+      // is not a separate contest (Lieutenant Governor), has nothing to match.
+      if (!race || race.general?.onBallot !== true) continue;
       const [candidates, positions] = await Promise.all([
         ctx.db.query("candidates").withIndex("by_race", (q) => q.eq("raceId", raceId)).collect(),
         ctx.db
@@ -73,14 +75,20 @@ export const positionsForRaces = query({
           .withIndex("by_candidate_issue", (q) => q.eq("raceId", raceId))
           .collect(),
       ]);
+      const field = generalField(candidates);
+      const onBallot = new Set(field.map((c) => c.slug));
       out.push({
         raceId: race.raceId,
         office: race.office,
         level: race.level,
-        candidates: candidates.map((c) => ({ slug: c.slug, name: c.name, party: c.party, incumbent: c.incumbent })),
-        positions: positions.map((p) => ({
-          candidateSlug: p.candidateSlug, issueSlug: p.issueSlug, stance: p.stance, summary: p.summary, sources: p.sources,
-        })),
+        // The person's own name and the state's party label: a position belongs
+        // to a person, not to a ticket.
+        candidates: field.map((c) => ({ slug: c.slug, name: generalPersonName(c), party: generalParty(c), incumbent: c.incumbent })),
+        positions: positions
+          .filter((p) => onBallot.has(p.candidateSlug))
+          .map((p) => ({
+            candidateSlug: p.candidateSlug, issueSlug: p.issueSlug, stance: p.stance, summary: p.summary, sources: p.sources,
+          })),
       });
     }
     return out;

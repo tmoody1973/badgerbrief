@@ -8,6 +8,8 @@ import {
 } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
+import { isOnGeneralBallot } from "./lib/ballot";
+import { metaSearchTerms } from "./lib/jobScope";
 import { normalizeSponsorKey } from "./lib/sponsors";
 import { isMeaningfulRef } from "./lib/tvExtract";
 import {
@@ -80,6 +82,7 @@ export const listCandidatesForMatching = internalQuery({
         raceId: c.raceId,
         office: race?.office ?? "",
         level: race?.level ?? "",
+        onBallot: isOnGeneralBallot(c),
       };
     });
   },
@@ -624,7 +627,10 @@ export const syncMetaAds = internalAction({
       // any curated tracked pages. Deduped by ad id. Term-found ads aren't from
       // a verified page, so downstream scoring routes them to review.
       const limit = args.perQueryLimit ?? 15;
-      const terms = args.searchTerms ?? candidates.map((c) => c.name);
+      // Matching still knows every candidate, so an old ad naming someone who
+      // is off the ballot is attributed correctly. New searches are only for
+      // people on it.
+      const terms = args.searchTerms ?? metaSearchTerms(candidates);
       const queries: AdQuery[] = terms.map((t) => ({ searchTerms: t }));
       if (trackedEntities.length > 0) {
         queries.push({ searchPageIds: trackedEntities.map((t) => t.entityId) });

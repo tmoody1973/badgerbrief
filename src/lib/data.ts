@@ -82,5 +82,10 @@ export const getInTheNewsForRace = cached("getInTheNewsForRace", (raceId: string
 /** `hubArticles` defaults to 60; /news is the complete tracked record, so it
  *  asks for everything. The cap stays as a runaway guard, just far above the
  *  real corpus rather than quietly trimming the tail off the page. */
+/** General-election coverage: what /news shows. */
 export const getHubArticles = cached("getHubArticles", (raceId?: string) =>
-  fetchQuery(api.coverage.hubArticles, { limit: 500, ...(raceId ? { raceId } : {}) }));
+  fetchQuery(api.coverage.hubArticles, { limit: 500, archive: false, ...(raceId ? { raceId } : {}) }));
+/** Primary-season coverage: what /primary-2026/news shows. Its own query and
+ *  its own cap, so neither list can crowd the other out. */
+export const getHubArchive = cached("getHubArchive", () =>
+  fetchQuery(api.coverage.hubArticles, { limit: 500, archive: true }));

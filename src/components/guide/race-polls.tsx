@@ -122,7 +122,9 @@ function Poll({ poll }: { poll: RacePoll }) {
   );
 }
 
-export function RacePolls({ polls, raceName }: { polls: RacePoll[]; raceName: string }) {
+export function RacePolls({ polls, raceName, archive = false }: { polls: RacePoll[]; raceName: string; archive?: boolean }) {
+  // A primary-only aggregator is linked from the archive, not the November page.
+  const aggregators = archive ? AGGREGATORS : AGGREGATORS.filter((a) => !/primary/i.test(a.name));
   if (polls.length === 0) return null;
   const scientific = polls.filter((p) => p.scientific).length;
   return (
@@ -150,7 +152,7 @@ export function RacePolls({ polls, raceName }: { polls: RacePoll[]; raceName: st
       <div className="mt-3 border-2 border-dashed border-border p-3">
         <p className={meta}>Poll trackers &amp; averages</p>
         <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-          {AGGREGATORS.map((a) => (
+          {aggregators.map((a) => (
             <li key={a.url}>
               <a
                 href={a.url}

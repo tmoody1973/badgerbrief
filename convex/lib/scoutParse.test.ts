@@ -4,6 +4,7 @@ import {
   MAX_SEARCH_DOMAINS,
   isAllowedUrl,
   parseScoutResponse,
+  scoutPrompt,
   sortByRotation,
 } from "./scoutParse";
 
@@ -207,4 +208,11 @@ describe("sortByRotation", () => {
     sortByRotation(items);
     expect(items).toEqual(original);
   });
+});
+
+test("the search asks about the general election, by the office's name", () => {
+  const prompt = scoutPrompt({ name: "Tom Tiffany", office: "Governor of Wisconsin" }, "2026-10-13");
+  expect(prompt).toContain("Today is 2026-10-13.");
+  expect(prompt).toContain("Tom Tiffany, candidate for Governor of Wisconsin in Wisconsin's November 3, 2026 general election");
+  expect(prompt).not.toMatch(/primary|August|WI-GOV/);
 });

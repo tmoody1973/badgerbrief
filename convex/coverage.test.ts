@@ -44,7 +44,7 @@ test("the public payload carries no internal editorial fields", async () => {
     raceId: "WI-GOV-2026",
   });
   const [row] = await c.query(api.coverage.hubArticles, {});
-  const allowed = new Set(["_id", "headline", "url", "outlet", "imageUrl", "raceId", "publishedAt"]);
+  const allowed = new Set(["_id", "headline", "url", "outlet", "imageUrl", "raceId", "publishedAt", "archive"]);
   const leaked = Object.keys(row.article).filter((k) => !allowed.has(k));
   expect(leaked).toEqual([]); // nothing beyond the rendered fields
   // The specific offenders that were being shipped.
@@ -105,4 +105,46 @@ test("dated coverage leads the feed; undated still appears, ordered by proposedA
   // Verified-dated coverage leads. Undated rows are NOT dropped — they follow,
   // ordered among themselves by when we found them.
   expect(hub.map((r) => r.article.headline)).toEqual(["dated", "fresh-undated", "stale-undated"]);
+});
+
+test("each article says whether it belongs in the primary archive", async () => {
+  const c = t();
+  const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
+  await c.run(async (ctx: any) => {
+    await ctx.db.insert("candidates", { slug: "tom-tiffany", raceId: "WI-GOV-2026", name: "Tom Tiffany", sources: [], dataAsOf: "2026-10-12", general: { onBallot: true, source: SOURCE } });
+    await ctx.db.insert("candidates", { slug: "francesca-hong", raceId: "WI-GOV-2026", name: "Francesca Hong", sources: [], dataAsOf: "2026-10-12", general: { onBallot: false, source: SOURCE } });
+  });
+  const sept = Date.parse("2026-09-20T17:00:00Z");
+  const july = Date.parse("2026-07-11T17:00:00Z");
+  const base = { hubStatus: "auto", status: "approved", raceId: "WI-GOV-2026" };
+  await seedArticle(c, { ...base, headline: "tiffany-september", candidateSlug: "tom-tiffany", proposedAt: sept });
+  await seedArticle(c, { ...base, headline: "tiffany-july", candidateSlug: "tom-tiffany", proposedAt: july });
+  await seedArticle(c, { ...base, headline: "hong-september", candidateSlug: "francesca-hong", proposedAt: sept });
+
+  const flags = (rows: { article: { headline: string; archive: boolean } }[]) =>
+    Object.fromEntries(rows.map((r) => [r.article.headline, r.article.archive]));
+  const expected = { "tiffany-september": false, "tiffany-july": true, "hong-september": true };
+  expect(flags(await c.query(api.coverage.hubArticles, {}))).toEqual(expected);
+  expect(flags(await c.query(api.coverage.inTheNewsForRace, { raceId: "WI-GOV-2026" }))).toEqual(expected);
+});
+
+test("a story with a verified date of August 12 stays on /news", async () => {
+  const c = t();
+  const base = { hubStatus: "auto", status: "approved", raceId: "WI-GOV-2026", publishedAtVerified: true, proposedAt: Date.parse("2026-09-01T11:00:00Z") };
+  await seedArticle(c, { ...base, headline: "aug-12", publishedAt: "2026-08-12" });
+  await seedArticle(c, { ...base, headline: "aug-11", publishedAt: "2026-08-11" });
+  const rows = await c.query(api.coverage.hubArticles, {});
+  expect(Object.fromEntries(rows.map((r) => [r.article.headline, r.article.archive]))).toEqual({ "aug-12": false, "aug-11": true });
+});
+
+test("the archive list is chosen before the cap, so a long feed cannot push archive stories off both pages", async () => {
+  const c = t();
+  const base = { hubStatus: "auto", status: "approved", raceId: "WI-GOV-2026" };
+  await seedArticle(c, { ...base, headline: "old", proposedAt: Date.parse("2026-07-01T11:00:00Z") });
+  await seedArticle(c, { ...base, headline: "new-1", proposedAt: Date.parse("2026-10-01T11:00:00Z") });
+  await seedArticle(c, { ...base, headline: "new-2", proposedAt: Date.parse("2026-10-02T11:00:00Z") });
+  const names = (rows: { article: { headline: string } }[]) => rows.map((r) => r.article.headline);
+  // With a cap of 2 and no split, "old" used to fall off the end and appear nowhere.
+  expect(names(await c.query(api.coverage.hubArticles, { limit: 2, archive: true }))).toEqual(["old"]);
+  expect(names(await c.query(api.coverage.hubArticles, { limit: 2, archive: false }))).toEqual(["new-2", "new-1"]);
 });

@@ -75,7 +75,7 @@ export default async function RacePage({ params }: Props) {
   const slugs = new Set(onBallot.map((c) => c.slug));
   const archiveHref = `${PRIMARY_ARCHIVE.path}/races/${slug}`;
 
-  const [adMoneyAll, tvAdsAll, inTheNews, pollsAll] = await Promise.all([
+  const [adMoneyAll, tvAdsAll, inTheNewsAll, pollsAll] = await Promise.all([
     getAdMoneyForRace(raceId),
     getTvAdsForRace(raceId),
     getInTheNewsForRace(race.raceId),
@@ -88,6 +88,8 @@ export default async function RacePage({ params }: Props) {
   const adMoney = novemberAdMoney(adMoneyAll, slugs);
   const tvAds = keepOnBallot(tvAdsAll, slugs);
   const notes = novemberNotes(race.notes);
+  // Primary-season headlines live on the archive page for this race.
+  const inTheNews = inTheNewsAll.filter((r) => !r.article.archive);
   const polls = splitPolls(pollsAll, slugs).november;
 
   const navSections: NavSection[] = [

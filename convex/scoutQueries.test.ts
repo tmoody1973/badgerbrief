@@ -10,27 +10,41 @@ const modules = import.meta.glob([
   "!./**/*.test.ts",
   "!./**/*.d.ts",
 ]);
+const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
+const ON = { onBallot: true, source: SOURCE };
+const OFF = { onBallot: false, source: SOURCE };
 
 function setup() {
   return convexTest(schema, modules);
 }
 
+// On the November ballot: the news job only searches for those.
 const baseCandidate = {
   raceId: "WI-GOV-2026",
   sources: [],
   dataAsOf: "2026-07-18",
+  general: ON,
 };
 
+/** The pool is statewide executive offices and the U.S. House, so a candidate's race must say its level. */
+const seedRaces = (t: ReturnType<typeof setup>) =>
+  t.run(async (ctx) => {
+    for (const [raceId, office] of [["WI-GOV-2026", "Governor of Wisconsin"], ["WI-AG-2026", "Attorney General of Wisconsin"]]) {
+      await ctx.db.insert("races", { raceId, electionSlug: "wi-2026", office, level: "State Executive", sources: [], dataAsOf: "2026-10-12" });
+    }
+  });
+
 describe("listScoutCandidates", () => {
-  test("returns only candidates in contested races", async () => {
+  test("returns only candidates in the news scope", async () => {
     const t = setup();
+    await seedRaces(t);
     await t.run((ctx) =>
       ctx.db.insert("candidates", { ...baseCandidate, slug: "joel-brennan", name: "Joel Brennan" }),
     );
     await t.run((ctx) =>
       ctx.db.insert("candidates", {
         ...baseCandidate,
-        raceId: "WI-ASSEMBLY-42-2026", // not in CONTESTED_RACE_IDS
+        raceId: "WI-ASSEMBLY-42-2026", // legislative: outside the news scope
         slug: "someone-else",
         name: "Someone Else",
       }),
@@ -44,6 +58,7 @@ describe("listScoutCandidates", () => {
 
   test("computes lastProposedAt as the max proposedAt across all statuses, and forms a rotation-ready contested pool", async () => {
     const t = setup();
+    await seedRaces(t);
     await t.run((ctx) =>
       ctx.db.insert("candidates", { ...baseCandidate, slug: "joel-brennan", name: "Joel Brennan" }),
     );
@@ -103,7 +118,7 @@ describe("listScoutCandidates", () => {
     await t.run((ctx) =>
       ctx.db.insert("candidates", {
         ...baseCandidate,
-        raceId: "WI-ASSEMBLY-42-2026", // NOT in CONTESTED_RACE_IDS
+        raceId: "WI-ASSEMBLY-42-2026", // legislative: outside the news scope
         slug: "out-of-pool",
         name: "Out Of Pool",
       }),
@@ -120,6 +135,7 @@ describe("listScoutCandidates", () => {
 describe("recordAttempt", () => {
   test("a candidate scouted with zero inserts still advances rotation, sorting to the back on the next call", async () => {
     const t = setup();
+    await seedRaces(t);
     await t.run((ctx) =>
       ctx.db.insert("candidates", { ...baseCandidate, slug: "joel-brennan", name: "Joel Brennan" }),
     );
@@ -302,4 +318,60 @@ describe("insertProposed", () => {
     expect(outlets[0].reviewStatus).toBe("approved");
     expect(outlets[0].type).toBe("public_media");
   });
+});
+
+test("the news job covers on-ballot statewide and U.S. House candidates, with each race's name", async () => {
+  const t = convexTest(schema, modules);
+  await t.run(async (ctx) => {
+    const race = (raceId: string, office: string, level: string) =>
+      ctx.db.insert("races", { raceId, electionSlug: "wi-2026", office, level, sources: [], dataAsOf: "2026-10-12" });
+    const cand = (slug: string, raceId: string, general?: typeof ON) =>
+      ctx.db.insert("candidates", { slug, raceId, name: slug, sources: [], dataAsOf: "2026-10-12", ...(general ? { general } : {}) });
+    await race("WI-GOV-2026", "Governor of Wisconsin", "State Executive");
+    await race("WI-US-HOUSE-D3-2026", "U.S. House — Wisconsin District 3", "Federal");
+    await race("WI-STATE-ASSEMBLY-D3-2026", "Wisconsin State Assembly — District 3", "State Legislative");
+    await cand("gov-on", "WI-GOV-2026", ON);
+    await cand("gov-off", "WI-GOV-2026", OFF);
+    await cand("gov-no-facts", "WI-GOV-2026");
+    await cand("house-on", "WI-US-HOUSE-D3-2026", ON);
+    await cand("assembly-on", "WI-STATE-ASSEMBLY-D3-2026", ON);
+  });
+  const pool = await t.query(internal.scoutQueries.listScoutCandidates, {});
+  expect(pool.map((c) => `${c.slug} | ${c.office}`).sort()).toEqual([
+    "gov-on | Governor of Wisconsin",
+    "house-on | U.S. House — Wisconsin District 3",
+  ]);
+});
+
+test("a failing news job raises one alert, not one a day, and a healthy run closes it", async () => {
+  const t = convexTest(schema, modules);
+  const failing = { attempted: 32, errors: 32, proposed: 0, sampleError: "perplexity request failed (http 401)" };
+  const open = () => t.run(async (ctx) => (await ctx.db.query("alerts").collect()).filter((a) => !a.resolved));
+
+  const first = await t.mutation(internal.scoutQueries.recordRunHealth, failing);
+  expect(first).toContain("32 of 32 searches failed");
+  expect(await t.mutation(internal.scoutQueries.recordRunHealth, failing)).toBeNull();
+  expect(await open()).toHaveLength(1);
+  expect((await open())[0]).toMatchObject({ kind: "sync_failure", severity: "critical", refTable: "article_sources", refId: "article-scout:failing" });
+
+  await t.mutation(internal.scoutQueries.recordRunHealth, { attempted: 32, errors: 0, proposed: 4 });
+  expect(await open()).toHaveLength(0);
+});
+
+test("when the problem changes, the old alert closes and the new one opens", async () => {
+  const t = convexTest(schema, modules);
+  await t.run((ctx) =>
+    ctx.db.insert("article_sources", {
+      url: "https://news.example/old", outlet: "WPR", headline: "H", whyRelevant: "r", status: "proposed",
+      proposedAt: Date.now() - 5 * 86_400_000,
+    }),
+  );
+  const open = () => t.run(async (ctx) => (await ctx.db.query("alerts").collect()).filter((a) => !a.resolved).map((a) => a.refId));
+
+  await t.mutation(internal.scoutQueries.recordRunHealth, { attempted: 32, errors: 32, proposed: 0, sampleError: "http 401" });
+  expect(await open()).toEqual(["article-scout:failing"]);
+  // The key is fixed and searches succeed, but nothing new has been found for five days.
+  const opened = await t.mutation(internal.scoutQueries.recordRunHealth, { attempted: 32, errors: 0, proposed: 0 });
+  expect(opened).toContain("found nothing new for 5 days");
+  expect(await open()).toEqual(["article-scout:quiet"]);
 });

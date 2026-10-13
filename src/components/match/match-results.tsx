@@ -20,9 +20,14 @@ export function MatchResults({
       {groups.map((group) => (
         <section key={group.issueSlug} className="scroll-mt-16">
           <h2 className="font-display text-2xl">{group.label}</h2>
+          {group.silent.length > 0 && (
+            <p className="mt-2 font-mono text-xs text-muted-foreground">
+              No published position on this issue: {group.silent.map((r) => r.office).join(" · ")}
+            </p>
+          )}
           {group.races.length === 0 ? (
             <p className="mt-3 text-sm text-muted-foreground">
-              No candidate on your ballot has a sourced position on this yet.
+              No candidate on your ballot has a published position on this issue yet.
             </p>
           ) : (
           <div className="mt-3 space-y-5">
@@ -58,7 +63,7 @@ export function MatchResults({
                 </div>
                 {race.noRecord.length > 0 && (
                   <p className="mt-2 font-mono text-xs text-muted-foreground">
-                    No position on record: {race.noRecord.map((c) => c.name).join(", ")}
+                    No published position on this issue: {race.noRecord.map((c) => c.name).join(", ")}
                   </p>
                 )}
               </div>

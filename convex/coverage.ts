@@ -3,6 +3,8 @@ import { mutation, query, type QueryCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireAdmin } from "./sponsors";
 import { cleanPublishedAt } from "./lib/outlets";
+import { isOnGeneralBallot } from "./lib/ballot";
+import { isPrimaryEra } from "./lib/coverageEra";
 
 async function loadOutlet(ctx: QueryCtx, article: Doc<"article_sources">) {
   const key = article.outletKey;
@@ -41,7 +43,7 @@ async function withOutlet(ctx: QueryCtx, article: Doc<"article_sources">) {
  * internal editorial notes, and shipping them in the page source publishes
  * them whether or not anything draws them.
  */
-async function withOutletPublic(ctx: QueryCtx, article: Doc<"article_sources">) {
+async function withOutletPublic(ctx: QueryCtx, article: Doc<"article_sources">, archive: boolean) {
   const outlet = await loadOutlet(ctx, article);
   return {
     article: {
@@ -52,6 +54,8 @@ async function withOutletPublic(ctx: QueryCtx, article: Doc<"article_sources">) 
       imageUrl: article.imageUrl,
       raceId: article.raceId,
       publishedAt: displayDate(article),
+      // Primary-season coverage, shown on the archive page instead of /news.
+      archive,
     },
     // The transparency card and stamp read exactly these.
     outlet: outlet
@@ -88,9 +92,21 @@ const dated = (r: Doc<"article_sources">) =>
 const byRecency = (a: Doc<"article_sources">, b: Doc<"article_sources">) =>
   dated(b) - dated(a) || when(b) - when(a);
 
+/** Slugs of every candidate on the November ballot. One read per query. */
+async function onBallotSlugs(ctx: QueryCtx): Promise<Set<string>> {
+  const candidates = await ctx.db.query("candidates").collect();
+  return new Set(candidates.filter(isOnGeneralBallot).map((c) => c.slug));
+}
+
+const archived = (a: Doc<"article_sources">, slugs: ReadonlySet<string>) =>
+  isPrimaryEra({ when: when(a), candidateSlug: a.candidateSlug }, slugs);
+
 export const hubArticles = query({
-  args: { limit: v.optional(v.number()), raceId: v.optional(v.string()) },
-  handler: async (ctx, { limit, raceId }) => {
+  // `archive`: true for primary-season coverage only, false for current
+  // coverage only, omitted for both. The split happens BEFORE the cap, so a
+  // long feed cannot push archive stories off the end of both lists.
+  args: { limit: v.optional(v.number()), raceId: v.optional(v.string()), archive: v.optional(v.boolean()) },
+  handler: async (ctx, { limit, raceId, archive }) => {
     const rows = (await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "auto")).collect())
       // A candidate's own campaign site is not news — the entity queries below
       // exclude it, and the hub must too, or a campaign page appears as
@@ -103,10 +119,12 @@ export const hubArticles = query({
       // candidate who had withdrawn. A rejection that leaves the story visible
       // is worse than no review at all, because the queue reads as handled.
       .filter((r) => r.status !== "rejected");
+    const slugs = await onBallotSlugs(ctx);
     const filtered = (raceId ? rows.filter((r) => r.raceId === raceId) : rows)
+      .filter((r) => archive === undefined || archived(r, slugs) === archive)
       .sort(byRecency)
       .slice(0, limit ?? 60);
-    return Promise.all(filtered.map((a) => withOutletPublic(ctx, a)));
+    return Promise.all(filtered.map((a) => withOutletPublic(ctx, a, archived(a, slugs))));
   },
 });
 
@@ -115,7 +133,8 @@ export const inTheNewsForCandidate = query({
   handler: async (ctx, { candidateSlug }) => {
     const rows = (await ctx.db.query("article_sources").withIndex("by_candidate", (q) => q.eq("candidateSlug", candidateSlug)).collect())
       .filter((r) => r.status === "approved" && r.sourceKind !== "campaign_site");
-    return Promise.all(rows.map((a) => withOutletPublic(ctx, a)));
+    const slugs = await onBallotSlugs(ctx);
+    return Promise.all(rows.map((a) => withOutletPublic(ctx, a, archived(a, slugs))));
   },
 });
 
@@ -124,7 +143,8 @@ export const inTheNewsForRace = query({
   handler: async (ctx, { raceId }) => {
     const rows = (await ctx.db.query("article_sources").withIndex("by_race", (q) => q.eq("raceId", raceId)).collect())
       .filter((r) => r.status === "approved" && r.sourceKind !== "campaign_site");
-    return Promise.all(rows.map((a) => withOutletPublic(ctx, a)));
+    const slugs = await onBallotSlugs(ctx);
+    return Promise.all(rows.map((a) => withOutletPublic(ctx, a, archived(a, slugs))));
   },
 });
 
