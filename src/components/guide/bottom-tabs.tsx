@@ -6,29 +6,30 @@ import { useEffect, useState } from "react";
 import { AuthNav } from "./auth-nav";
 import { NAV_LINKS } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
-import { IconHome, IconRaces, IconVote, IconChat, IconMore } from "./nav-icons";
+import { IconHome, IconBallot, IconVote, IconChat, IconMore } from "./nav-icons";
 import { localeFromPath } from "@/lib/i18n/chrome-dict";
 import { chromeEn } from "@/lib/i18n/chrome-en";
 import { chromeEs } from "@/lib/i18n/chrome-es";
 import { localizeHref } from "@/lib/i18n/locale";
 
-export const PRIMARY_TAB_HREFS = ["/", "/races/wi-gov-2026", "/vote", "/chat"];
+export const TABS = [
+  { href: "/", en: "Home", es: "Inicio", Icon: IconHome },
+  { href: "/ballot", en: "My Ballot", es: "Mi boleta", Icon: IconBallot },
+  { href: "/vote", en: "Vote", es: "Votar", Icon: IconVote },
+  { href: "/chat", en: "Chat", es: "Chat", Icon: IconChat },
+] as const;
+
+/** Derived from the tabs, so the two cannot drift. Everything else in the navigation goes under More. */
+export const PRIMARY_TAB_HREFS: string[] = TABS.map((t) => t.href);
 
 export function moreLinks(links: typeof NAV_LINKS) {
   return links.filter((l) => !PRIMARY_TAB_HREFS.includes(l.href));
 }
 
-const TABS = [
-  { href: "/", en: "Home", es: "Inicio", Icon: IconHome },
-  { href: "/races/wi-gov-2026", en: "Races", es: "Contiendas", Icon: IconRaces },
-  { href: "/vote", en: "Vote", es: "Votar", Icon: IconVote },
-  { href: "/chat", en: "Chat", es: "Chat", Icon: IconChat },
-] as const;
-
-function isActive(pathname: string, href: string) {
+/** A tab is lit on its own page and on pages beneath it. "/ballot" is not lit on "/ballot-basics". */
+export function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
-  if (href === "/races/wi-gov-2026") return pathname.startsWith("/races");
-  return pathname.startsWith(href);
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function BottomTabs() {

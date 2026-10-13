@@ -7,12 +7,14 @@ const buttonClass =
   "press border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)]";
 const linkClass = "text-sm underline decoration-2 underline-offset-2";
 
-type Surface = "race" | "candidate" | "compare" | "brief" | "match";
+type Surface = "race" | "candidate" | "compare" | "brief" | "match" | "ballot";
 type Method = "web_share" | "copy" | "x" | "facebook" | "email" | "bluesky";
 
 // Which decision surface is being shared, inferred from the URL path so callers
 // don't have to pass it. Returns null for pages outside the ones we track.
-function shareSurface(url: string): Surface | null {
+export function shareSurface(url: string): Surface | null {
+  // "/ballot" exactly: "/ballot-basics" is an explainer, not a ballot.
+  if (/\/ballot(?:[?#]|$)/.test(url)) return "ballot";
   if (url.includes("/compare/")) return "compare";
   if (url.includes("/candidates/")) return "candidate";
   if (url.includes("/races/")) return "race";

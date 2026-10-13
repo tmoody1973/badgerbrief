@@ -4,6 +4,7 @@ import type { ChromeDict } from "./chrome-dict";
  * keeps English-route rendering byte-identical after chrome.tsx goes locale-aware. */
 export const chromeEn: ChromeDict = {
   navLabels: {
+    "/ballot": "My Ballot",
     "/races/wi-gov-2026": "Races",
     "/match": "What Matters",
     "/ads": "Ad Tracker",
