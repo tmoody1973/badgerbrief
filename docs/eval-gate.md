@@ -85,7 +85,7 @@ rewrite them, so:
   the gate at it. Keep the old one; its experiments are the history.
 
   ```bash
-  ax datasets create --name voter-help-golden-<label> --space "tarikjmoody Space" --file scripts/voter-help-golden.json
+  ax datasets create --name voter-help-golden-<label> --space U3BhY2U6NDU0NjU6SWVhZA== --file scripts/voter-help-golden.json
   ax datasets list --space "tarikjmoody Space"        # verify by listing; do not trust the exit code
   node scripts/eval-gate.mjs --name <experiment> --dataset voter-help-golden-<label>
   ```
@@ -117,6 +117,31 @@ cheap and high-signal), unknown-data (no-invention checks), personalization
 - Judge evaluators must run with function calling (integration-level flag AND
   `--use-function-calling` on the evaluator version) — without it, labels
   occasionally come back `NOT_PARSABLE` or contradict their own explanation.
+- **"judge run FAILED" with `num_errors` equal to every row** means the judges
+  could not call their model. Read the reason:
+  `GET https://api.arize.com/v2/tasks/<task-id>/runs?limit=1` → `failure_reason`.
+  On 2026-10-12 it was `invalid x-api-key (status 401)`: the Anthropic key in
+  the AI integration `anthropic-judge` had stopped working. That key is
+  separate from the chat's own key in Convex, so the chat can answer while the
+  judges cannot score. Fix it in Arize (Settings → AI Integrations →
+  `anthropic-judge`), then re-run the gate.
+- **The installed `ax` (0.26) is too old for the service as of 2026-10.**
+  `experiments create|list`, `tasks list` and `datasets create` all fail with
+  "additional fields (not defined in …) in the input". Version 0.39.0 works.
+  Either upgrade (`ax upgrade`), or leave the install alone and point the gate
+  at a pinned copy:
+
+  ```bash
+  printf '#!/bin/sh\nexec pipx run --quiet --spec arize-ax-cli==0.39.0 ax "$@"\n' > /tmp/ax39 && chmod +x /tmp/ax39
+  AX_BIN=/tmp/ax39 node scripts/eval-gate.mjs --name <experiment>
+  ```
+
+  A run that dies after "Creating experiment" has still uploaded its answers:
+  the experiment exists, unscored. Re-run under a new name.
+- `ax … create` with `--space "tarikjmoody Space"` fails from 2026-10 with
+  "additional fields (not defined in Space) in the input: is_private", and
+  creates nothing. Pass the space ID (`U3BhY2U6NDU0NjU6SWVhZA==`) instead;
+  `scripts/eval-gate.mjs` does.
 - `evalAnswer` deliberately emits NO telemetry spans, so gate runs never
   pollute the continuous production evaluators.
 - `ax tasks list-runs` / `ax tasks trigger-run` (0.25.1 AND 0.26.0): the
