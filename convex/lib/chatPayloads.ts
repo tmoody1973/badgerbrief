@@ -43,12 +43,23 @@ type Race = {
   general?: { onBallot: boolean; note?: string; source?: BallotSource };
 };
 type Position = { candidateSlug: string; issueSlug: string; stance: string; summary: string; sources: Link[] };
-type Finance = { candidateSlug: string; receipts?: number; disbursements?: number; cashOnHand?: number; debts?: number; coverageEndDate?: string };
+type Finance = { candidateSlug: string; source?: string; receipts?: number; disbursements?: number; cashOnHand?: number; debts?: number; coverageEndDate?: string };
 
 const NOT_ON = "not on the November 3, 2026 ballot";
 // "Election results", not "vote totals": a roll-call tally is a vote count the
 // chat must give (instructions rule 9).
 const NEVER = "Never say anyone lost, won, was defeated or was eliminated, and report no election results or candidates' vote counts: the guide holds the certified ballot, not the results.";
+
+/**
+ * Where campaign finance figures were filed, and so what they are cited to.
+ * The same two links the website's finance tables use. Without one on each row
+ * the model borrowed whatever link was nearby.
+ */
+const FINANCE_SOURCES: Record<string, Link> = {
+  sunshine: { name: "Wisconsin Campaign Finance Information System", url: "https://campaignfinance.wi.gov" },
+  openfec: { name: "Federal Election Commission", url: "https://www.fec.gov/data/" },
+};
+const financeLink = (source: string | undefined) => (source ? FINANCE_SOURCES[source] : undefined);
 
 const STATE_LIST = "Wisconsin Elections Commission — candidates on the November 3, 2026 ballot";
 /** The link a ballot claim cites: the state's certified list. */
@@ -58,11 +69,11 @@ const certified = (source: BallotSource | undefined) =>
 const RACE_RULE =
   `The November 3, 2026 field is exactly the onBallot list. Name those candidates using ballotLine. ` +
   `Anyone under notOnBallot is ${NOT_ON}: say exactly that if the voter asks about them, and do not list or count them otherwise ` +
-  `(you may link primaryArchive for the August primary field). Cite november.source for any statement about who is on the ballot. ${NEVER}`;
+  `(you may link primaryArchive for the August primary field). Cite november.source for any statement about who is on the ballot, and cite finance figures to their own sourceLink. ${NEVER}`;
 
 const CANDIDATE_RULE =
   `Say whether this person is on the November 3, 2026 ballot using november.statement, and cite november.source for it. ${NEVER} ` +
-  `Published positions, quotes and finance below are theirs regardless of ballot status; cite each.`;
+  `Published positions, quotes and finance below are theirs regardless of ballot status; cite each to its own source, and finance figures to their sourceLink.`;
 
 const NOT_LOADED = "The November 3, 2026 ballot for this office has not been loaded into the guide.";
 
@@ -111,7 +122,7 @@ export function racePayload(data: { race: Race; candidates: Candidate[]; positio
       .map((p) => ({ candidateSlug: p.candidateSlug, issueSlug: p.issueSlug, stance: p.stance, summary: p.summary, source: p.sources[0] })),
     finance: data.finance
       .filter((f) => on.has(f.candidateSlug))
-      .map((f) => ({ candidateSlug: f.candidateSlug, receipts: f.receipts, disbursements: f.disbursements, cashOnHand: f.cashOnHand, debts: f.debts, coverageEndDate: f.coverageEndDate })),
+      .map((f) => ({ candidateSlug: f.candidateSlug, receipts: f.receipts, disbursements: f.disbursements, cashOnHand: f.cashOnHand, debts: f.debts, coverageEndDate: f.coverageEndDate, sourceLink: financeLink(f.source) })),
   };
 }
 
@@ -130,7 +141,7 @@ export function candidatePayload(data: {
   field: FieldEntry[];
   positions: unknown[];
   quotes: unknown[];
-  finance: unknown[];
+  finance: { source?: string }[];
 }) {
   const { candidate, race } = data;
   const name = generalPersonName(candidate);
@@ -166,7 +177,7 @@ export function candidatePayload(data: {
     race: race ? { raceId: race.raceId, office: race.office, level: race.level, generalDate: race.generalDate } : null,
     positions: data.positions,
     quotes: data.quotes,
-    finance: data.finance,
+    finance: data.finance.map((f) => ({ ...f, sourceLink: financeLink(f.source) })),
     rule: CANDIDATE_RULE,
   };
 }

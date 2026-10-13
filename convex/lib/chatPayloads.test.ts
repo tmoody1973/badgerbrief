@@ -16,7 +16,7 @@ const crowley = person("david-crowley", "David Crowley", { onBallot: true, ballo
 const tiffany = person("tom-tiffany", "Tom Tiffany", { onBallot: true, ballotName: "Tom Tiffany / David Varnam", party: "Republican", ballotOrder: 1 }, { party: "Republican", primaryParty: "Republican" });
 const hong = person("francesca-hong", "Francesca Hong", { onBallot: false });
 const pos = (candidateSlug: string) => ({ candidateSlug, issueSlug: "healthcare", stance: "support", summary: "…", sources: [link] });
-const fin = (candidateSlug: string) => ({ candidateSlug, receipts: 100, disbursements: 50, cashOnHand: 50, debts: 0, coverageEndDate: "2026-09-30" });
+const fin = (candidateSlug: string, source: "sunshine" | "openfec" = "sunshine") => ({ candidateSlug, source, receipts: 100, disbursements: 50, cashOnHand: 50, debts: 0, coverageEndDate: "2026-09-30" });
 
 describe("racePayload", () => {
   const out = racePayload({ race: governor, candidates: [hong, crowley, tiffany], positions: [pos("francesca-hong"), pos("david-crowley")], finance: [fin("francesca-hong"), fin("tom-tiffany")] });
@@ -223,5 +223,24 @@ describe("visibleAnswer", () => {
   test("falls back to the given text when no step carries any", () => {
     expect(visibleAnswer([{ text: "  " }], "fallback")).toBe("fallback");
     expect(visibleAnswer([], "fallback")).toBe("fallback");
+  });
+});
+
+describe("finance figures carry the link they should be cited to", () => {
+  // Observed in the gate: with no link on the finance rows, the model cited Mandela Barnes's
+  // fundraising to an unrelated newspaper article.
+  const state = { name: "Wisconsin Campaign Finance Information System", url: "https://campaignfinance.wi.gov" };
+  const federal = { name: "Federal Election Commission", url: "https://www.fec.gov/data/" };
+
+  test("on a race", () => {
+    const o = racePayload({ race: governor, candidates: [crowley, tiffany], positions: [], finance: [fin("david-crowley"), fin("tom-tiffany", "openfec")] });
+    expect(o.finance.map((f) => f.sourceLink)).toEqual([state, federal]);
+    expect(o.rule).toMatch(/sourceLink/);
+  });
+
+  test("on a candidate", () => {
+    const o = candidatePayload({ candidate: crowley, race: governor, field: [], positions: [], quotes: [], finance: [fin("david-crowley")] });
+    expect(o.finance).toEqual([{ ...fin("david-crowley"), sourceLink: state }]);
+    expect(o.rule).toMatch(/sourceLink/);
   });
 });
