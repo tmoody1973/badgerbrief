@@ -1,0 +1,1979 @@
+{
+  "source": {
+    "name": "Wisconsin Watch 2026 Voter Guide",
+    "publisher": "Wisconsin Watch",
+    "url": "https://voterguide26.wisconsinwatch.org/",
+    "supportUrl": "https://wisconsinwatch.org/donate/",
+    "via": "Voter Guide Commons",
+    "viaUrl": "https://voterguidecommons.org/",
+    "guideUpdated": "2026-08-20",
+    "retrievedAt": "2026-10-13T14:11:03Z"
+  },
+  "races": [
+    "WI-GOV-2026",
+    "WI-LTGOV-2026",
+    "WI-AG-2026",
+    "WI-SOS-2026",
+    "WI-TREAS-2026",
+    "WI-US-HOUSE-D1-2026",
+    "WI-US-HOUSE-D2-2026",
+    "WI-US-HOUSE-D3-2026",
+    "WI-US-HOUSE-D4-2026",
+    "WI-US-HOUSE-D5-2026",
+    "WI-US-HOUSE-D6-2026",
+    "WI-US-HOUSE-D7-2026",
+    "WI-US-HOUSE-D8-2026",
+    "WI-STATE-SENATE-D1-2026",
+    "WI-STATE-SENATE-D3-2026",
+    "WI-STATE-SENATE-D5-2026",
+    "WI-STATE-SENATE-D7-2026",
+    "WI-STATE-SENATE-D9-2026",
+    "WI-STATE-SENATE-D11-2026",
+    "WI-STATE-SENATE-D13-2026",
+    "WI-STATE-SENATE-D15-2026",
+    "WI-STATE-SENATE-D17-2026",
+    "WI-STATE-SENATE-D19-2026",
+    "WI-STATE-SENATE-D21-2026",
+    "WI-STATE-SENATE-D23-2026",
+    "WI-STATE-SENATE-D25-2026",
+    "WI-STATE-SENATE-D27-2026",
+    "WI-STATE-SENATE-D29-2026",
+    "WI-STATE-SENATE-D31-2026",
+    "WI-STATE-SENATE-D33-2026",
+    "WI-STATE-ASSEMBLY-D1-2026",
+    "WI-STATE-ASSEMBLY-D2-2026",
+    "WI-STATE-ASSEMBLY-D3-2026",
+    "WI-STATE-ASSEMBLY-D4-2026",
+    "WI-STATE-ASSEMBLY-D5-2026",
+    "WI-STATE-ASSEMBLY-D6-2026",
+    "WI-STATE-ASSEMBLY-D7-2026",
+    "WI-STATE-ASSEMBLY-D8-2026",
+    "WI-STATE-ASSEMBLY-D9-2026",
+    "WI-STATE-ASSEMBLY-D10-2026",
+    "WI-STATE-ASSEMBLY-D11-2026",
+    "WI-STATE-ASSEMBLY-D12-2026",
+    "WI-STATE-ASSEMBLY-D13-2026",
+    "WI-STATE-ASSEMBLY-D14-2026",
+    "WI-STATE-ASSEMBLY-D15-2026",
+    "WI-STATE-ASSEMBLY-D16-2026",
+    "WI-STATE-ASSEMBLY-D17-2026",
+    "WI-STATE-ASSEMBLY-D18-2026",
+    "WI-STATE-ASSEMBLY-D19-2026",
+    "WI-STATE-ASSEMBLY-D20-2026",
+    "WI-STATE-ASSEMBLY-D21-2026",
+    "WI-STATE-ASSEMBLY-D22-2026",
+    "WI-STATE-ASSEMBLY-D23-2026",
+    "WI-STATE-ASSEMBLY-D24-2026",
+    "WI-STATE-ASSEMBLY-D25-2026",
+    "WI-STATE-ASSEMBLY-D26-2026",
+    "WI-STATE-ASSEMBLY-D27-2026",
+    "WI-STATE-ASSEMBLY-D28-2026",
+    "WI-STATE-ASSEMBLY-D29-2026",
+    "WI-STATE-ASSEMBLY-D30-2026",
+    "WI-STATE-ASSEMBLY-D31-2026",
+    "WI-STATE-ASSEMBLY-D32-2026",
+    "WI-STATE-ASSEMBLY-D33-2026",
+    "WI-STATE-ASSEMBLY-D34-2026",
+    "WI-STATE-ASSEMBLY-D35-2026",
+    "WI-STATE-ASSEMBLY-D36-2026",
+    "WI-STATE-ASSEMBLY-D37-2026",
+    "WI-STATE-ASSEMBLY-D38-2026",
+    "WI-STATE-ASSEMBLY-D39-2026",
+    "WI-STATE-ASSEMBLY-D40-2026",
+    "WI-STATE-ASSEMBLY-D41-2026",
+    "WI-STATE-ASSEMBLY-D42-2026",
+    "WI-STATE-ASSEMBLY-D43-2026",
+    "WI-STATE-ASSEMBLY-D44-2026",
+    "WI-STATE-ASSEMBLY-D45-2026",
+    "WI-STATE-ASSEMBLY-D46-2026",
+    "WI-STATE-ASSEMBLY-D47-2026",
+    "WI-STATE-ASSEMBLY-D48-2026",
+    "WI-STATE-ASSEMBLY-D49-2026",
+    "WI-STATE-ASSEMBLY-D50-2026",
+    "WI-STATE-ASSEMBLY-D51-2026",
+    "WI-STATE-ASSEMBLY-D52-2026",
+    "WI-STATE-ASSEMBLY-D53-2026",
+    "WI-STATE-ASSEMBLY-D54-2026",
+    "WI-STATE-ASSEMBLY-D55-2026",
+    "WI-STATE-ASSEMBLY-D56-2026",
+    "WI-STATE-ASSEMBLY-D57-2026",
+    "WI-STATE-ASSEMBLY-D58-2026",
+    "WI-STATE-ASSEMBLY-D59-2026",
+    "WI-STATE-ASSEMBLY-D60-2026",
+    "WI-STATE-ASSEMBLY-D61-2026",
+    "WI-STATE-ASSEMBLY-D62-2026",
+    "WI-STATE-ASSEMBLY-D63-2026",
+    "WI-STATE-ASSEMBLY-D64-2026",
+    "WI-STATE-ASSEMBLY-D65-2026",
+    "WI-STATE-ASSEMBLY-D66-2026",
+    "WI-STATE-ASSEMBLY-D67-2026",
+    "WI-STATE-ASSEMBLY-D68-2026",
+    "WI-STATE-ASSEMBLY-D69-2026",
+    "WI-STATE-ASSEMBLY-D70-2026",
+    "WI-STATE-ASSEMBLY-D71-2026",
+    "WI-STATE-ASSEMBLY-D72-2026",
+    "WI-STATE-ASSEMBLY-D73-2026",
+    "WI-STATE-ASSEMBLY-D74-2026",
+    "WI-STATE-ASSEMBLY-D75-2026",
+    "WI-STATE-ASSEMBLY-D76-2026",
+    "WI-STATE-ASSEMBLY-D77-2026",
+    "WI-STATE-ASSEMBLY-D78-2026",
+    "WI-STATE-ASSEMBLY-D79-2026",
+    "WI-STATE-ASSEMBLY-D80-2026",
+    "WI-STATE-ASSEMBLY-D81-2026",
+    "WI-STATE-ASSEMBLY-D82-2026",
+    "WI-STATE-ASSEMBLY-D83-2026",
+    "WI-STATE-ASSEMBLY-D84-2026",
+    "WI-STATE-ASSEMBLY-D85-2026",
+    "WI-STATE-ASSEMBLY-D86-2026",
+    "WI-STATE-ASSEMBLY-D87-2026",
+    "WI-STATE-ASSEMBLY-D88-2026",
+    "WI-STATE-ASSEMBLY-D89-2026",
+    "WI-STATE-ASSEMBLY-D90-2026",
+    "WI-STATE-ASSEMBLY-D91-2026",
+    "WI-STATE-ASSEMBLY-D92-2026",
+    "WI-STATE-ASSEMBLY-D93-2026",
+    "WI-STATE-ASSEMBLY-D94-2026",
+    "WI-STATE-ASSEMBLY-D95-2026",
+    "WI-STATE-ASSEMBLY-D96-2026",
+    "WI-STATE-ASSEMBLY-D97-2026",
+    "WI-STATE-ASSEMBLY-D98-2026",
+    "WI-STATE-ASSEMBLY-D99-2026"
+  ],
+  "candidates": [
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "tom-tiffany",
+      "candidateId": "t-tiffany1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-tiffany1/",
+      "answered": 7
+    },
+    {
+      "raceId": "WI-GOV-2026",
+      "slug": "david-crowley",
+      "candidateId": "d-crowley1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-crowley1/",
+      "answered": 7
+    },
+    {
+      "raceId": "WI-LTGOV-2026",
+      "slug": "sarah-godlewski",
+      "candidateId": "s-godlewski1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-godlewski1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-LTGOV-2026",
+      "slug": "david-varnam",
+      "candidateId": "d-varnam1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-varnam1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-AG-2026",
+      "slug": "eric-toney",
+      "candidateId": "e-toney1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/e-toney1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-AG-2026",
+      "slug": "josh-kaul",
+      "candidateId": "j-kaul1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-kaul1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-SOS-2026",
+      "slug": "jay-schroeder",
+      "candidateId": "j-schroeder1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-schroeder1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-SOS-2026",
+      "slug": "jocasta-zamarripa",
+      "candidateId": "j-zamarripa1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-zamarripa1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-SOS-2026",
+      "slug": "pete-karas",
+      "candidateId": "p-karas1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/p-karas1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-TREAS-2026",
+      "slug": "john-leiber",
+      "candidateId": "j-leiber1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-leiber1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-TREAS-2026",
+      "slug": "yee-leng-xiong",
+      "candidateId": "y-xiong1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/y-xiong1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-US-HOUSE-D1-2026",
+      "slug": "bryan-steil",
+      "candidateId": "b-steil1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-steil1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-US-HOUSE-D1-2026",
+      "slug": "mitchell-berman",
+      "candidateId": "m-berman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-berman1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D2-2026",
+      "slug": "mark-pocan",
+      "candidateId": "m-pocan1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-pocan1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-US-HOUSE-D3-2026",
+      "slug": "derrick-van-orden",
+      "candidateId": "d-orden1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-orden1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D3-2026",
+      "slug": "rebecca-cooke",
+      "candidateId": "r-cooke1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-cooke1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D3-2026",
+      "slug": "alexander-valiensi-kent",
+      "candidateId": "a-kent2",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-kent2/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D3-2026",
+      "slug": "rustin-provance",
+      "candidateId": "r-provance1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-provance1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D4-2026",
+      "slug": "tim-rogers",
+      "candidateId": "t-rogers1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-rogers1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-US-HOUSE-D4-2026",
+      "slug": "gwen-moore",
+      "candidateId": "g-moore1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/g-moore1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D4-2026",
+      "slug": "arthur-burks",
+      "candidateId": "a-burks1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-burks1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-US-HOUSE-D5-2026",
+      "slug": "scott-fitzgerald",
+      "candidateId": "s-fitzgerald1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-fitzgerald1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-US-HOUSE-D5-2026",
+      "slug": "andrew-beck",
+      "candidateId": "a-beck1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-beck1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "slug": "glenn-grothman",
+      "candidateId": "g-grothman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/g-grothman1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "slug": "brad-smith",
+      "candidateId": "b-smith1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-smith1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "slug": "matthew-arndt",
+      "candidateId": "m-arndt1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-arndt1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "slug": "elizabeth-anne-fitzgibbon",
+      "candidateId": "e-fitzgibbon1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/e-fitzgibbon1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D6-2026",
+      "slug": "mike-thurow",
+      "candidateId": "m-thurow1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-thurow1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "slug": "michael-alfonso",
+      "candidateId": "m-alfonso1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-alfonso1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-US-HOUSE-D7-2026",
+      "slug": "fred-clark",
+      "candidateId": "f-clark1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/f-clark1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D8-2026",
+      "slug": "tony-wied",
+      "candidateId": "t-wied1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-wied1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-US-HOUSE-D8-2026",
+      "slug": "rick-crosson",
+      "candidateId": "r-crosson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-crosson1/",
+      "answered": 5
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D1-2026",
+      "slug": "nic-cravillion",
+      "candidateId": "n-cravillion1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/n-cravillion1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D1-2026",
+      "slug": "mark-becker",
+      "candidateId": "m-becker1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-becker1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D3-2026",
+      "slug": "tim-carpenter",
+      "candidateId": "t-carpenter1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-carpenter1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D5-2026",
+      "slug": "mike-roberts",
+      "candidateId": "m-roberts1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-roberts1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D5-2026",
+      "slug": "robyn-vining",
+      "candidateId": "r-vining1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-vining1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D7-2026",
+      "slug": "mike-moeller",
+      "candidateId": "m-moeller1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-moeller1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D7-2026",
+      "slug": "chris-j-larson",
+      "candidateId": "c-larson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-larson1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D9-2026",
+      "slug": "amy-binsfeld",
+      "candidateId": "a-binsfeld1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-binsfeld1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D9-2026",
+      "slug": "christian-ellis",
+      "candidateId": "c-ellis1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-ellis1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D11-2026",
+      "slug": "ellen-schutt",
+      "candidateId": "e-schutt1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/e-schutt1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D11-2026",
+      "slug": "adam-duda",
+      "candidateId": "a-duda1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-duda1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D13-2026",
+      "slug": "john-jagler",
+      "candidateId": "j-jagler1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-jagler1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D13-2026",
+      "slug": "sasha-ripley",
+      "candidateId": "s-ripley1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-ripley1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D15-2026",
+      "slug": "scott-fleming",
+      "candidateId": "s-fleming1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-fleming1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D15-2026",
+      "slug": "mark-spreitzer",
+      "candidateId": "m-spreitzer1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-spreitzer1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D15-2026",
+      "slug": "christopher-dean",
+      "candidateId": "c-dean1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-dean1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D17-2026",
+      "slug": "howard-marklein",
+      "candidateId": "h-marklein1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/h-marklein1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D17-2026",
+      "slug": "jenna-jacobson",
+      "candidateId": "j-jacobson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-jacobson1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D19-2026",
+      "slug": "rachael-ann-cabral-guevara",
+      "candidateId": "r-cabralguevara1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-cabralguevara1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D19-2026",
+      "slug": "emily-daniels-tseffos",
+      "candidateId": "e-tseffos1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/e-tseffos1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D21-2026",
+      "slug": "jim-croft",
+      "candidateId": "j-croft1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-croft1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D21-2026",
+      "slug": "trevor-jung",
+      "candidateId": "t-jung1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-jung1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D23-2026",
+      "slug": "romaine-robert-quinn",
+      "candidateId": "r-quinn1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-quinn1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D23-2026",
+      "slug": "jeff-foster",
+      "candidateId": "j-foster1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-foster1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D25-2026",
+      "slug": "erik-severson",
+      "candidateId": "e-severson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/e-severson1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D25-2026",
+      "slug": "charly-ray",
+      "candidateId": "c-ray1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-ray1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D27-2026",
+      "slug": "dianne-hesselbein",
+      "candidateId": "d-hesselbein1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-hesselbein1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D29-2026",
+      "slug": "cory-tomczyk",
+      "candidateId": "c-tomczyk1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-tomczyk1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D29-2026",
+      "slug": "gillian-battino",
+      "candidateId": "g-battino1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/g-battino1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D31-2026",
+      "slug": "michele-magadance-skinner",
+      "candidateId": "m-skinner1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-skinner1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D31-2026",
+      "slug": "jeff-smith",
+      "candidateId": "j-smith1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-smith1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D33-2026",
+      "slug": "chris-kapenga",
+      "candidateId": "c-kapenga1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-kapenga1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-SENATE-D33-2026",
+      "slug": "mike-van-someren",
+      "candidateId": "m-someren1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-someren1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D1-2026",
+      "slug": "joel-kitchens",
+      "candidateId": "j-kitchens1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-kitchens1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D1-2026",
+      "slug": "renee-a-paplham",
+      "candidateId": "r-paplham1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-paplham1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D2-2026",
+      "slug": "shae-sortwell",
+      "candidateId": "s-sortwell1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-sortwell1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D2-2026",
+      "slug": "alicia-saunders",
+      "candidateId": "a-saunders1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-saunders1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D3-2026",
+      "slug": "ron-tusler",
+      "candidateId": "r-tusler1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-tusler1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D4-2026",
+      "slug": "david-steffen",
+      "candidateId": "d-steffen1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-steffen1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D4-2026",
+      "slug": "alexia-unertl",
+      "candidateId": "a-unertl1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-unertl1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D5-2026",
+      "slug": "joy-goeben",
+      "candidateId": "j-goeben1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-goeben1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D5-2026",
+      "slug": "justin-schumacher",
+      "candidateId": "j-schumacher1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-schumacher1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D5-2026",
+      "slug": "david-schupbach",
+      "candidateId": "d-schupbach1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-schupbach1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D6-2026",
+      "slug": "elijah-behnke",
+      "candidateId": "e-behnke1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/e-behnke1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D6-2026",
+      "slug": "shirley-hinze",
+      "candidateId": "s-hinze1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-hinze1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D7-2026",
+      "slug": "lee-whiting",
+      "candidateId": "l-whiting1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/l-whiting1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D7-2026",
+      "slug": "karen-kirsch",
+      "candidateId": "k-kirsch1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/k-kirsch1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D8-2026",
+      "slug": "angel-sanchez",
+      "candidateId": "a-sanchez1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-sanchez1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D8-2026",
+      "slug": "ismael-luna",
+      "candidateId": "i-luna1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/i-luna1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D9-2026",
+      "slug": "sam-guerrero",
+      "candidateId": "s-guerreo1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-guerreo1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D9-2026",
+      "slug": "priscilla-a-prado",
+      "candidateId": "p-prado1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/p-prado1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D10-2026",
+      "slug": "darrin-madison",
+      "candidateId": "d-madison1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-madison1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D10-2026",
+      "slug": "robert-longwell-grice",
+      "candidateId": "r-longwellgrice1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-longwellgrice1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D11-2026",
+      "slug": "shandowlyon-reaves",
+      "candidateId": "s-reaves1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-reaves1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D11-2026",
+      "slug": "sequanna-taylor",
+      "candidateId": "s-taylor1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-taylor1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D12-2026",
+      "slug": "russell-antonio-goodwin-sr",
+      "candidateId": "s-russellantoniogoodwin1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-russellantoniogoodwin1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D13-2026",
+      "slug": "mike-morgan",
+      "candidateId": "m-morgan1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-morgan1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D13-2026",
+      "slug": "amy-zimmerman",
+      "candidateId": "a-zimmerman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-zimmerman1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D14-2026",
+      "slug": "amyrose-murphy",
+      "candidateId": "a-murphy1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-murphy1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D14-2026",
+      "slug": "angelito-tenorio",
+      "candidateId": "a-tenorio1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-tenorio1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D15-2026",
+      "slug": "adam-neylon",
+      "candidateId": "a-neylon1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-neylon1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D15-2026",
+      "slug": "stephen-tryon",
+      "candidateId": "s-tryon1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-tryon1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D16-2026",
+      "slug": "alciro-deacon",
+      "candidateId": "a-deacon1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-deacon1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D16-2026",
+      "slug": "kalan-haywood",
+      "candidateId": "k-haywood1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/k-haywood1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D17-2026",
+      "slug": "charlene-abughrin",
+      "candidateId": "c-abughrin1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-abughrin1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D17-2026",
+      "slug": "supreme-moore-omokunde",
+      "candidateId": "s-omokunde1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-omokunde1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D18-2026",
+      "slug": "joel-richmond",
+      "candidateId": "j-richmond1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-richmond1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D18-2026",
+      "slug": "margaret-arney",
+      "candidateId": "m-arney1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-arney1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D19-2026",
+      "slug": "yasmine-b-outlaw",
+      "candidateId": "y-outlaw1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/y-outlaw1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D19-2026",
+      "slug": "ryan-clancy",
+      "candidateId": "r-clancy1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-clancy1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D20-2026",
+      "slug": "kyle-cleary",
+      "candidateId": "k-cleary1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/k-cleary1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D20-2026",
+      "slug": "christine-m-sinicki",
+      "candidateId": "c-sinicki1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-sinicki1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D21-2026",
+      "slug": "dylan-pfaffenbach",
+      "candidateId": "d-pfaffenbach1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-pfaffenbach1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D21-2026",
+      "slug": "daniel-j-bukiewicz",
+      "candidateId": "d-bukiewicz1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-bukiewicz1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D22-2026",
+      "slug": "paul-melotik",
+      "candidateId": "p-melotik1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/p-melotik1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D22-2026",
+      "slug": "dana-glasstein",
+      "candidateId": "d-glasstein1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-glasstein1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D23-2026",
+      "slug": "aleaner-pabonnie",
+      "candidateId": "a-pabonnie1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-pabonnie1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D23-2026",
+      "slug": "deb-andraca",
+      "candidateId": "d-andraca1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-andraca1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D24-2026",
+      "slug": "dan-knodl",
+      "candidateId": "d-knodl1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-knodl1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D24-2026",
+      "slug": "matt-brown",
+      "candidateId": "m-brown1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-brown1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D25-2026",
+      "slug": "paul-tittl",
+      "candidateId": "p-tittl1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/p-tittl1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D25-2026",
+      "slug": "christopher-able",
+      "candidateId": "c-able1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-able1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D26-2026",
+      "slug": "john-belanger",
+      "candidateId": "j-belanger1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-belanger1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D26-2026",
+      "slug": "joe-sheehan",
+      "candidateId": "j-sheehan1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-sheehan1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D27-2026",
+      "slug": "lindee-brill",
+      "candidateId": "l-brill1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/l-brill1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D28-2026",
+      "slug": "rob-kreibich",
+      "candidateId": "r-kreibich1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-kreibich1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D28-2026",
+      "slug": "robin-lillesve",
+      "candidateId": "r-lillesve1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-lillesve1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D29-2026",
+      "slug": "treig-pronschinske",
+      "candidateId": "t-pronschinske1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-pronschinske1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D29-2026",
+      "slug": "chris-danou",
+      "candidateId": "c-danou1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-danou1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D30-2026",
+      "slug": "shannon-zimmerman",
+      "candidateId": "s-zimmerman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-zimmerman1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D30-2026",
+      "slug": "kevin-knoke",
+      "candidateId": "k-knoke1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/k-knoke1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D31-2026",
+      "slug": "tyler-august",
+      "candidateId": "t-august1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-august1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D31-2026",
+      "slug": "john-perryman",
+      "candidateId": "j-perryman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-perryman1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D32-2026",
+      "slug": "amanda-nedweski",
+      "candidateId": "a-nedweski1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-nedweski1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D32-2026",
+      "slug": "greg-miller",
+      "candidateId": "g-miller1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/g-miller1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D33-2026",
+      "slug": "steve-wicklund",
+      "candidateId": "s-wicklund1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-wicklund1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D33-2026",
+      "slug": "maria-elena-bisabarros",
+      "candidateId": "m-bisabarros1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-bisabarros1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D34-2026",
+      "slug": "rob-swearingen",
+      "candidateId": "r-swearingen1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-swearingen1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D34-2026",
+      "slug": "merlin-van-buren",
+      "candidateId": "m-buren1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-buren1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D35-2026",
+      "slug": "calvin-callahan",
+      "candidateId": "c-callahan1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-callahan1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D35-2026",
+      "slug": "elizabeth-mccrank",
+      "candidateId": "e-mccrank1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/e-mccrank1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D36-2026",
+      "slug": "jeffrey-l-mursau",
+      "candidateId": "j-mursau1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-mursau1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D36-2026",
+      "slug": "shena-chapman",
+      "candidateId": "s-chapman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-chapman1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D37-2026",
+      "slug": "mark-born",
+      "candidateId": "m-born1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-born1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D37-2026",
+      "slug": "latoya-bates",
+      "candidateId": "l-bates1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/l-bates1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D38-2026",
+      "slug": "william-penterman",
+      "candidateId": "w-penterman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/w-penterman1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D38-2026",
+      "slug": "terri-wenkman",
+      "candidateId": "t-wenkman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-wenkman1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D39-2026",
+      "slug": "alex-dallman",
+      "candidateId": "a-dallman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-dallman1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D39-2026",
+      "slug": "michael-skivington",
+      "candidateId": "m-skivington1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-skivington1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D40-2026",
+      "slug": "julie-helmer",
+      "candidateId": "j-helmer1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-helmer1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D40-2026",
+      "slug": "karen-desanto",
+      "candidateId": "k-desanto1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/k-desanto1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D41-2026",
+      "slug": "tony-kurtz",
+      "candidateId": "t-kurtz1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-kurtz1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D41-2026",
+      "slug": "zach-commons",
+      "candidateId": "z-commons1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/z-commons1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D42-2026",
+      "slug": "keith-f-miller",
+      "candidateId": "k-miller1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/k-miller1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D42-2026",
+      "slug": "maureen-mccarville",
+      "candidateId": "m-mccarville1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-mccarville1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D43-2026",
+      "slug": "paul-mcgraw",
+      "candidateId": "p-mcgraw1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/p-mcgraw1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D43-2026",
+      "slug": "brienne-brown",
+      "candidateId": "b-brown1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-brown1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D44-2026",
+      "slug": "ron-woodman",
+      "candidateId": "r-woodman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-woodman1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D44-2026",
+      "slug": "ann-roe",
+      "candidateId": "a-roe1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-roe1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D45-2026",
+      "slug": "jocelyn-jordan",
+      "candidateId": "j-jordan1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-jordan1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D45-2026",
+      "slug": "clinton-anderson",
+      "candidateId": "c-anderson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-anderson1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D46-2026",
+      "slug": "john-donohue",
+      "candidateId": "j-donohue1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-donohue1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D46-2026",
+      "slug": "joan-fitzgerald",
+      "candidateId": "j-fitzgerald1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-fitzgerald1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D47-2026",
+      "slug": "sandy-bakk",
+      "candidateId": "s-bakk1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-bakk1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D47-2026",
+      "slug": "randy-udell",
+      "candidateId": "r-udell1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-udell1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D48-2026",
+      "slug": "mark-kjorlie",
+      "candidateId": "m-kjorlie1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-kjorlie1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D48-2026",
+      "slug": "andrew-hysell",
+      "candidateId": "a-hysell1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-hysell1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D49-2026",
+      "slug": "travis-tranel",
+      "candidateId": "t-tranel1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-tranel1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D49-2026",
+      "slug": "john-rindy",
+      "candidateId": "j-rindy1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-rindy1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D50-2026",
+      "slug": "jon-aleckson",
+      "candidateId": "j-aleckson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-aleckson1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D50-2026",
+      "slug": "bill-oemichen",
+      "candidateId": "b-oemichen1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-oemichen1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D51-2026",
+      "slug": "todd-novak",
+      "candidateId": "t-novak1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-novak1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D51-2026",
+      "slug": "ben-gruber",
+      "candidateId": "b-gruber1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-gruber1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D51-2026",
+      "slug": "nathan-tataje",
+      "candidateId": "n-tataje1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/n-tataje1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D52-2026",
+      "slug": "reive-pullen",
+      "candidateId": "r-pullen1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-pullen1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D52-2026",
+      "slug": "lee-snodgrass",
+      "candidateId": "l-snodgrass1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/l-snodgrass1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D53-2026",
+      "slug": "david-daniels",
+      "candidateId": "d-daniels1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-daniels1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D53-2026",
+      "slug": "becky-nichols",
+      "candidateId": "b-nichols1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-nichols1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D53-2026",
+      "slug": "rachael-dowling",
+      "candidateId": "r-dowling1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-dowling1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D54-2026",
+      "slug": "tim-paterson",
+      "candidateId": "t-paterson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-paterson1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D54-2026",
+      "slug": "lori-palmeri",
+      "candidateId": "l-palmeri1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/l-palmeri1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D55-2026",
+      "slug": "nate-gustafson",
+      "candidateId": "n-gustafson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/n-gustafson1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D55-2026",
+      "slug": "alex-corrigan",
+      "candidateId": "a-corrigan1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-corrigan1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D56-2026",
+      "slug": "anthony-w-phillips",
+      "candidateId": "a-phillips1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-phillips1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D56-2026",
+      "slug": "grace-abitz",
+      "candidateId": "g-abitz1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/g-abitz1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D57-2026",
+      "slug": "kevin-krentz",
+      "candidateId": "k-krentz1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/k-krentz1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D57-2026",
+      "slug": "joey-marschall",
+      "candidateId": "j-marschall1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-marschall1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D58-2026",
+      "slug": "bernie-newman",
+      "candidateId": "b-newman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-newman1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D58-2026",
+      "slug": "dennis-d-degenhardt",
+      "candidateId": "d-degenhardt1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-degenhardt1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D59-2026",
+      "slug": "bradley-petersen",
+      "candidateId": "b-petersen1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-petersen1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D59-2026",
+      "slug": "jack-holzman",
+      "candidateId": "j-holzman1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-holzman1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D60-2026",
+      "slug": "marty-ryan",
+      "candidateId": "m-ryan1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-ryan1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D60-2026",
+      "slug": "tiffany-brault",
+      "candidateId": "t-brault1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-brault1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D61-2026",
+      "slug": "bob-donovan",
+      "candidateId": "b-donovan1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-donovan1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D61-2026",
+      "slug": "ben-brist",
+      "candidateId": "b-brist1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-brist1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D62-2026",
+      "slug": "mike-bellagio",
+      "candidateId": "m-bellagio1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-bellagio1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D62-2026",
+      "slug": "angelina-m-cruz",
+      "candidateId": "a-cruz1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-cruz1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D63-2026",
+      "slug": "robert-wittke",
+      "candidateId": "r-wittke1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-wittke1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D63-2026",
+      "slug": "eddie-phanichkul",
+      "candidateId": "e-phanichkul1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/e-phanichkul1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D64-2026",
+      "slug": "ed-hibsch",
+      "candidateId": "e-hibsch1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/e-hibsch1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D64-2026",
+      "slug": "tip-mcguire",
+      "candidateId": "t-mcguire1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-mcguire1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D65-2026",
+      "slug": "valerie-kretchmer",
+      "candidateId": "v-kretchmer1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/v-kretchmer1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D65-2026",
+      "slug": "ben-desmidt",
+      "candidateId": "b-desmidt1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-desmidt1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D66-2026",
+      "slug": "gina-cefalu-paulick",
+      "candidateId": "g-paulick1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/g-paulick1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D66-2026",
+      "slug": "greta-neubauer",
+      "candidateId": "g-neubauer1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/g-neubauer1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D67-2026",
+      "slug": "david-armstrong",
+      "candidateId": "d-armstrong1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-armstrong1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D67-2026",
+      "slug": "indiana-thompson",
+      "candidateId": "i-thompson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/i-thompson1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D68-2026",
+      "slug": "rob-summerfield",
+      "candidateId": "r-summerfield1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-summerfield1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D68-2026",
+      "slug": "elisha-king",
+      "candidateId": "e-king1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/e-king1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D69-2026",
+      "slug": "karen-hurd",
+      "candidateId": "k-hurd1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/k-hurd1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D69-2026",
+      "slug": "roger-halls",
+      "candidateId": "r-halls1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-halls1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D69-2026",
+      "slug": "josh-kelley",
+      "candidateId": "j-kelley1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-kelley1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D70-2026",
+      "slug": "nancy-vandermeer",
+      "candidateId": "n-vandermeer1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/n-vandermeer1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D70-2026",
+      "slug": "stephanie-stuve-bodeen",
+      "candidateId": "s-bodeen1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-bodeen1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D71-2026",
+      "slug": "jeff-disher",
+      "candidateId": "j-disher1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-disher1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D71-2026",
+      "slug": "vinnie-miresse",
+      "candidateId": "v-miresse1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/v-miresse1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D72-2026",
+      "slug": "scott-krug",
+      "candidateId": "s-krug1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-krug1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D72-2026",
+      "slug": "christine-maltese",
+      "candidateId": "c-maltese1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-maltese1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D73-2026",
+      "slug": "frank-kostka",
+      "candidateId": "f-kostka1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/f-kostka1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D73-2026",
+      "slug": "angela-stroud",
+      "candidateId": "a-stroud1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-stroud1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D74-2026",
+      "slug": "chanz-green",
+      "candidateId": "c-green1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-green1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D74-2026",
+      "slug": "paul-johnson",
+      "candidateId": "p-johnson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/p-johnson1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D75-2026",
+      "slug": "duke-tucker",
+      "candidateId": "d-tucker1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-tucker1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D75-2026",
+      "slug": "keith-mogel",
+      "candidateId": "k-mogel1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/k-mogel1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D76-2026",
+      "slug": "nina-chat",
+      "candidateId": "n-chat1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/n-chat1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D76-2026",
+      "slug": "dina-nina-martinez-rutherford",
+      "candidateId": "d-martinezrutherford1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-martinezrutherford1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D77-2026",
+      "slug": "jane-mccormick",
+      "candidateId": "j-mccormick1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-mccormick1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D77-2026",
+      "slug": "renuka-mayadev",
+      "candidateId": "r-mayadev1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-mayadev1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D78-2026",
+      "slug": "henry-johnson",
+      "candidateId": "h-johnson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/h-johnson1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D78-2026",
+      "slug": "shelia-stubbs",
+      "candidateId": "s-stubbs1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-stubbs1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D79-2026",
+      "slug": "john-fons",
+      "candidateId": "j-fons1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-fons1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D79-2026",
+      "slug": "lisa-subeck",
+      "candidateId": "l-subeck1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/l-subeck1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D80-2026",
+      "slug": "simran-arora",
+      "candidateId": "s-arora1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-arora1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D80-2026",
+      "slug": "mike-bare",
+      "candidateId": "m-bare1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-bare1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D81-2026",
+      "slug": "mark-s-maier",
+      "candidateId": "m-maier1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-maier1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D81-2026",
+      "slug": "alex-joers",
+      "candidateId": "a-joers1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-joers1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D82-2026",
+      "slug": "bryson-reyes",
+      "candidateId": "b-reyes1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-reyes1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D82-2026",
+      "slug": "rico-camacho",
+      "candidateId": "r-camacho1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-camacho1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D83-2026",
+      "slug": "dave-maxey",
+      "candidateId": "d-maxey1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/d-maxey1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D84-2026",
+      "slug": "chuck-wichgers",
+      "candidateId": "c-wichgers1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-wichgers1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D85-2026",
+      "slug": "patrick-snyder",
+      "candidateId": "p-snyder1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/p-snyder1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D85-2026",
+      "slug": "john-kroll",
+      "candidateId": "j-kroll1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-kroll1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D86-2026",
+      "slug": "john-spiros",
+      "candidateId": "j-spiros1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-spiros1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D86-2026",
+      "slug": "andy-wuethrich",
+      "candidateId": "a-wuethrich1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-wuethrich1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D87-2026",
+      "slug": "brent-jacobson",
+      "candidateId": "b-jacobson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-jacobson1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D87-2026",
+      "slug": "bob-look",
+      "candidateId": "b-look1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-look1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D88-2026",
+      "slug": "ben-franklin",
+      "candidateId": "b-franklin1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-franklin1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D88-2026",
+      "slug": "brandy-tollefson",
+      "candidateId": "b-tollefson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-tollefson1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D89-2026",
+      "slug": "bobby-r-lindsey",
+      "candidateId": "b-lindsey1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-lindsey1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D89-2026",
+      "slug": "ryan-spaude",
+      "candidateId": "r-spaude1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/r-spaude1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D90-2026",
+      "slug": "jessica-henderson",
+      "candidateId": "j-henderson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-henderson1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D90-2026",
+      "slug": "amaad-rivera-wagner",
+      "candidateId": "a-riverawagner1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/a-riverawagner1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D91-2026",
+      "slug": "bruce-stabenow",
+      "candidateId": "b-stabenow2",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-stabenow2/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D91-2026",
+      "slug": "jodi-emerson",
+      "candidateId": "j-emerson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-emerson1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D92-2026",
+      "slug": "clint-moses",
+      "candidateId": "c-moses1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-moses1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D92-2026",
+      "slug": "jeremiah-fredrickson",
+      "candidateId": "j-fredrickson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-fredrickson1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D93-2026",
+      "slug": "michael-ayala",
+      "candidateId": "m-ayala1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-ayala1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D93-2026",
+      "slug": "christian-phelps",
+      "candidateId": "c-phelps1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-phelps1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D94-2026",
+      "slug": "keith-purnell",
+      "candidateId": "k-purnell1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/k-purnell1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D94-2026",
+      "slug": "steve-doyle",
+      "candidateId": "s-doyle1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/s-doyle1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D95-2026",
+      "slug": "cedric-schnitzler",
+      "candidateId": "c-schnitzler1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-schnitzler1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D95-2026",
+      "slug": "jill-billings",
+      "candidateId": "j-billings1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-billings1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D95-2026",
+      "slug": "paul-michael-weber",
+      "candidateId": "p-weber1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/p-weber1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D96-2026",
+      "slug": "jim-green",
+      "candidateId": "j-green1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-green1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D96-2026",
+      "slug": "tara-johnson",
+      "candidateId": "t-johnson1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/t-johnson1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D97-2026",
+      "slug": "cindi-duchow",
+      "candidateId": "c-duchow1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/c-duchow1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D98-2026",
+      "slug": "jim-piwowarczyk",
+      "candidateId": "j-piwowarczyk1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/j-piwowarczyk1/",
+      "answered": 0
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D98-2026",
+      "slug": "matt-philibert",
+      "candidateId": "m-philibert1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/m-philibert1/",
+      "answered": 4
+    },
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D99-2026",
+      "slug": "barbara-dittrich",
+      "candidateId": "b-dittrich1",
+      "url": "https://voterguide26.wisconsinwatch.org/candidate/b-dittrich1/",
+      "answered": 0
+    }
+  ],
+  "notInGuide": [
+    {
+      "raceId": "WI-STATE-ASSEMBLY-D3-2026",
+      "slug": "michael-j-goodwin",
+      "ballotName": "Michael J. Goodwin"
+    }
+  ]
+}
