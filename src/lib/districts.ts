@@ -3,12 +3,16 @@
  * Pure parsing/filtering over Census geocoder responses; no fetching here.
  */
 
+import { countyKey } from "../../convex/lib/countyKey";
+
 const WISCONSIN_FIPS = "55";
 
 export type Districts = {
   congressional: number;
   senate: number;
   assembly: number;
+  /** A county key such as "milwaukee" (see convex/lib/countyKey.ts). Absent when the lookup did not return one. */
+  county?: string;
 };
 
 export type GeocodeResult =
@@ -48,12 +52,15 @@ export function parseGeocoderResponse(payload: unknown): GeocodeResult {
   const assembly = layerNumber(geographies, "State Legislative Districts - Lower");
   if (!congressional || !senate || !assembly) return { ok: false, error: "no_match" };
 
+  const countyName = geographies["Counties"]?.[0]?.BASENAME;
+
   return {
     ok: true,
     matchedAddress: match.matchedAddress ?? "",
     congressional,
     senate,
     assembly,
+    ...(countyName ? { county: countyKey(countyName) } : {}),
   };
 }
 

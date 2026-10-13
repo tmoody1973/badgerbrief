@@ -9,6 +9,7 @@ import mke from "./__fixtures__/census-mke.json";
 import madison from "./__fixtures__/census-madison.json";
 import medford from "./__fixtures__/census-medford.json";
 import nomatch from "./__fixtures__/census-nomatch.json";
+import mkeCounty from "./__fixtures__/census-mke-county.json";
 
 // Fixtures are real Census geocoder responses captured 2026-07-18 (trimmed to
 // the layers we parse). Expected districts verified against the live API.
@@ -50,6 +51,40 @@ describe("parseGeocoderResponse", () => {
 
   it("returns no_match for a malformed payload", () => {
     expect(parseGeocoderResponse({})).toEqual({ ok: false, error: "no_match" });
+  });
+
+  it("reads the voter's county when the response carries one", () => {
+    expect(parseGeocoderResponse(mkeCounty)).toEqual({
+      ok: true,
+      matchedAddress: "200 E WELLS ST, MILWAUKEE, WI, 53202",
+      congressional: 4,
+      senate: 7,
+      assembly: 19,
+      county: "milwaukee",
+    });
+  });
+
+  it("still succeeds when the response has no county layer", () => {
+    const result = parseGeocoderResponse(mke);
+    expect(result).toMatchObject({ ok: true, congressional: 4, senate: 7, assembly: 19 });
+    expect(result).not.toHaveProperty("county");
+  });
+
+  it("makes a link-safe key from a county name with a period and a space", () => {
+    const stCroix = {
+      result: {
+        addressMatches: [
+          {
+            ...mkeCounty.result.addressMatches[0],
+            geographies: {
+              ...mkeCounty.result.addressMatches[0].geographies,
+              Counties: [{ BASENAME: "St. Croix", NAME: "St. Croix County", STATE: "55" }],
+            },
+          },
+        ],
+      },
+    };
+    expect(parseGeocoderResponse(stCroix)).toMatchObject({ ok: true, county: "st-croix" });
   });
 });
 
