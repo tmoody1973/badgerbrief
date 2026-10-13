@@ -99,7 +99,7 @@ export default async function RacePage({ params }: Props) {
 
   const navSections: NavSection[] = [
     ...(onBallot.length > 0 ? [{ id: "candidates", label: "On the ballot", count: onBallot.length }] : []),
-    ...(hasQuestionnaire ? [{ id: "questionnaire", label: "In their words" }] : []),
+    ...(hasQuestionnaire ? [{ id: "questionnaire", label: "Questionnaire" }] : []),
     ...(raceFinance.length > 0 ? [{ id: "money", label: "The money" }] : []),
     ...(adMoney && adMoney.candidates.length > 0 ? [{ id: "ad-money", label: "Ad money" }] : []),
     ...(tvAds.length > 0 ? [{ id: "tv-ads", label: "TV ads" }] : []),

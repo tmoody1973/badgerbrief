@@ -5,8 +5,10 @@ import { WISCONSIN_WATCH, questionnaireStatus, type QuestionnaireStatus } from "
  * Whether each candidate answered Wisconsin Watch's 2026 questionnaire, with a
  * link to the answers. Server components: they read the checked-in link list.
  *
- * Every candidate gets one row of the same weight. "Did not answer" is a plain
- * statement. Nothing here says why, and nothing compares candidates.
+ * Every candidate gets one row of the same weight, and a link to the page that
+ * backs the statement. "Did not answer" is a plain statement. Nothing here
+ * says why, and nothing compares candidates. That every candidate was sent the
+ * questions is Wisconsin Watch's account, so the page does not assert it.
  */
 
 type OnBallot = {
@@ -25,12 +27,10 @@ const STATUS = "mt-1 text-sm";
 /** A link to Wisconsin Watch, tagged so the newsroom can count readers we send. */
 export const guideLink = (url: string) => `${url}?utm_source=badgerbrief&utm_medium=referral`;
 
-const guideUpdated = new Date(`${WISCONSIN_WATCH.guideUpdated}T12:00:00Z`).toLocaleDateString("en-US", {
-  month: "long",
-  day: "numeric",
-  year: "numeric",
-  timeZone: "UTC",
-});
+const longDate = (day: string) =>
+  new Date(`${day.slice(0, 10)}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
+const guideUpdated = longDate(WISCONSIN_WATCH.guideUpdated);
+const checked = longDate(WISCONSIN_WATCH.retrievedAt);
 
 /** One row per candidate, in the order given. Empty when their guide does not cover the race. */
 export function questionnaireRows(raceId: string, candidates: readonly OnBallot[]): QuestionnaireRow[] {
@@ -52,9 +52,20 @@ function Status({ row }: { row: QuestionnaireRow }) {
       </p>
     );
   }
+  if (status.status === "did-not-answer") {
+    // The claim gets the same thing an answer gets: a link to the page that shows it.
+    return (
+      <p className={STATUS} data-status="did-not-answer">
+        Did not answer the questionnaire.{" "}
+        <a href={guideLink(status.url)} target="_blank" rel="noopener noreferrer" className={LINK}>
+          See {row.name}’s page on Wisconsin Watch
+        </a>
+      </p>
+    );
+  }
   return (
-    <p className={STATUS} data-status={status.status}>
-      {status.status === "did-not-answer" ? "Did not answer the questionnaire." : "Not in Wisconsin Watch’s guide."}
+    <p className={STATUS} data-status="not-in-guide">
+      Not in Wisconsin Watch’s guide.
     </p>
   );
 }
@@ -62,7 +73,8 @@ function Status({ row }: { row: QuestionnaireRow }) {
 function Credit() {
   return (
     <p className="mt-3 font-mono text-xs text-muted-foreground">
-      Wisconsin Watch 2026 Voter Guide, last updated {guideUpdated}. Whether a candidate answered is as that guide reports it.
+      Source: Wisconsin Watch 2026 Voter Guide, through Voter Guide Commons. That copy was last updated {guideUpdated};
+      BadgerBrief checked it {checked}. Whether a candidate answered is as the guide reports it.
     </p>
   );
 }
@@ -72,12 +84,12 @@ export function RaceQuestionnaire({ raceId, candidates }: { raceId: string; cand
   if (rows.length === 0) return null;
   return (
     <section id="questionnaire" className="mt-8 scroll-mt-16">
-      <h2 className="font-display text-2xl">In their own words</h2>
+      <h2 className="font-display text-2xl">Wisconsin Watch’s questionnaire</h2>
       <p className="mt-2 max-w-2xl text-sm">
         <a href={guideLink(WISCONSIN_WATCH.url)} target="_blank" rel="noopener noreferrer" className={INLINE_LINK}>
           Wisconsin Watch
         </a>
-        , a nonprofit newsroom, sent every candidate for this office the same questions. The answers are the candidates’
+        , a nonprofit newsroom, asked candidates for this office the same questions. The answers are the candidates’
         own words, published on its site.
       </p>
       <ul className="mt-3 max-w-2xl border-t-2 border-border">
@@ -103,7 +115,7 @@ export function CandidateQuestionnaire({ raceId, candidate }: { raceId: string; 
     <section id="questionnaire" className="mt-6 scroll-mt-16">
       <h2 className="font-display text-xl">Wisconsin Watch’s questionnaire</h2>
       <p className="mt-2 max-w-2xl text-sm">
-        Wisconsin Watch, a nonprofit newsroom, sent every candidate for this office the same questions.
+        Wisconsin Watch, a nonprofit newsroom, asked candidates for this office the same questions.
       </p>
       <Status row={row} />
       <Credit />

@@ -52,17 +52,35 @@ describe("RaceQuestionnaire", () => {
     expect(html).toContain('href="https://voterguide26.wisconsinwatch.org/candidate/s-ripley1/?utm_source=badgerbrief&amp;utm_medium=referral"');
   });
 
-  test("states plainly that a candidate did not answer, with no link and no comment", () => {
+  test("states plainly that a candidate did not answer, with no comment, and links the page that shows it", () => {
     expect(html).toContain("John Jagler");
     expect(html).toContain("Did not answer the questionnaire.");
-    expect(html).not.toContain("j-jagler1");
+    expect(html).toContain("See John Jagler’s page on Wisconsin Watch");
+    expect(html).toContain('href="https://voterguide26.wisconsinwatch.org/candidate/j-jagler1/?utm_source=badgerbrief&amp;utm_medium=referral"');
     expect(html).not.toMatch(/declin|refus|ignor|fail/i);
+  });
+
+  test("gives every row one link of its own, whether or not the candidate answered", () => {
+    const rows = [...html.matchAll(/<li[^>]*>(.*?)<\/li>/g)].map((m) => (m[1].match(/<a /g) ?? []).length);
+    expect(rows).toEqual([1, 1]);
+  });
+
+  test("does not claim, as its own fact, that every candidate was sent the questions", () => {
+    expect(html).not.toMatch(/every candidate/i);
+    expect(html).toContain("asked candidates for this office the same questions");
+  });
+
+  test("is titled for what it is, since in some races nobody answered", () => {
+    expect(html).toContain("Wisconsin Watch’s questionnaire</h2>");
+    expect(html).not.toContain("In their own words");
   });
 
   test("credits Wisconsin Watch and says the words are the candidates' own", () => {
     expect(html).toContain("Wisconsin Watch");
     expect(html).toContain("the candidates’ own words");
+    expect(html).toContain("through Voter Guide Commons");
     expect(html).toContain("last updated August 20, 2026");
+    expect(html).toMatch(/BadgerBrief checked it October \d{1,2}, 2026/);
   });
 
   test("gives both statuses the same text style", () => {

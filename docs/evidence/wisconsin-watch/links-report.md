@@ -1,6 +1,6 @@
 # Wisconsin Watch questionnaire: link report
 
-Built 2026-10-13T14:11:03Z from https://voterguidecommons.org/mcp. Their guide says it was last updated 2026-08-20.
+Built 2026-10-13T14:27:49Z from https://voterguidecommons.org/mcp. Their guide says it was last updated 2026-08-20.
 
 129 races. 262 candidates on the certified ballot: 261 linked to a page (166 answered, 95 did not), 1 with no page.
 
