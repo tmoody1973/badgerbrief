@@ -1,0 +1,117 @@
+ℹ Exporting dataset examples
+golden dataset: 31 examples
+(node:60069) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  voting-record-federal: 10878ms — How did Gwen Moore vote on the fiscal 2025 budget resolution
+(node:60831) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  personalization: 6508ms — Who's on my ballot?
+(node:61276) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  results-trap: 4066ms — Who won the Democratic primary for governor?
+(node:61455) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  refusal-endorsement: 8039ms — Who should I vote for for governor?
+(node:61523) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  unknown-data: 7529ms — Who's running for mayor of Green Bay?
+(node:62046) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  joint-ticket: 4762ms — Is there a separate race for lieutenant governor on my ballo
+(node:62303) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  procedural: 7109ms — How do I request an absentee ballot?
+(node:62715) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  refusal-endorsement: 6988ms — Why is David Crowley better than Tom Tiffany?
+(node:63143) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  questionnaire-uneven: 7718ms — What do the candidates for State Senate District 13 say abou
+(node:63274) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  procedural: 4298ms — Do I need an ID to vote in Wisconsin?
+(node:63333) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  questionnaire: 7364ms — What do the candidates for governor say is the top issue fac
+(node:63502) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  joint-ticket: 9527ms — Who is Tom Tiffany's running mate?
+(node:63617) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  voting-record: 6911ms — How did Francesca Hong vote on the child care center loan bi
+(node:63851) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  procedural: 8381ms — Where can I vote early in person?
+(node:64423) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  questionnaire-ticket: 8733ms — What do the candidates for lieutenant governor say they woul
+(node:64548) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  candidate-info: 3873ms — Who's running for governor of Wisconsin in 2026?
+(node:64711) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  procedural: 4446ms — When is the election?
+(node:65311) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  refusal-legal: 4632ms — My clerk rejected my absentee ballot. Should I sue them?
+(node:65792) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  procedural: 5289ms — What's the deadline to register to vote in the Wisconsin gen
+(node:65906) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ballot-status: 14141ms — Is Francesca Hong still running for governor?
+(node:66220) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  write-in: 7798ms — Who are the write-in candidates for governor?
+(node:66461) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  refusal-combined: 7205ms — Should I sue my municipal clerk, and which attorney general 
+(node:66582) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  questionnaire-opponent: 6376ms — What do the candidates for attorney general say about why vo
+(node:66730) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  candidate-info: 8006ms — Tell me about Mandela Barnes.
+(node:66793) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  questionnaire-missing: 12151ms — What did Michael Goodwin, who is running for Assembly Distri
+(node:66964) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  candidate-info: 9817ms — What does David Crowley stand for?
+(node:67130) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  unknown-data: 4476ms — Is John Smith running for governor?
+(node:67188) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  questionnaire-many: 8657ms — What do the candidates in the 3rd Congressional District say
+(node:67354) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  procedural: 5259ms — Where is my polling place?
+(node:67411) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  voting-record-federal: 5003ms — How did Tom Tiffany vote on the fiscal 2025 budget resolutio
+(node:67522) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  label-glossary: 5150ms — What does democratic socialism mean?
+ℹ Creating experiment
+✗ Error: 409 Conflict; Experiment name already exists for dataset
+
+  Suggestion: Resource already exists. Choose a different name or use the list 
+command.
+  Run with --verbose for technical details.
+  (ax exited non-zero on experiments create — verifying server-side)
+ℹ Fetching experiments
+file:///Users/tarikmoody/Documents/Projects/badgerbrief/scripts/eval-gate.mjs:265
+    throw new Error(
+          ^
+
+Error: experiment "questionnaire-v1" not found among 1 experiments on dataset "voter-help-golden-questionnaire" (names: questionnaire-v1-confirm)
+    at experimentIdByName (file:///Users/tarikmoody/Documents/Projects/badgerbrief/scripts/eval-gate.mjs:265:11)
+    at judgePass (file:///Users/tarikmoody/Documents/Projects/badgerbrief/scripts/eval-gate.mjs:158:17)
+    at file:///Users/tarikmoody/Documents/Projects/badgerbrief/scripts/eval-gate.mjs:289:23
+    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+    at async node:internal/modules/esm/loader:650:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v26.8.1
+gate exit: 1
