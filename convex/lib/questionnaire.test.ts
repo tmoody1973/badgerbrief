@@ -47,6 +47,39 @@ describe("parseCandidateAnswers", () => {
     expect(parseCandidateAnswers(PAGE, "p-example1")).toBeNull();
   });
 
+  // Found by review: each of these used to come back as the candidate's own answer.
+  test("reads nothing from a later section of the page, such as newsroom reporting", () => {
+    const page = PAGE.replace("\n---\n", "\n## Wisconsin Watch's reporting\n\n### Race outlook\n> Sam Sample is favored to win, analysts say.\n\n---\n");
+    expect(parseCandidateAnswers(page, "s-sample1")?.map((a) => a.question)).toEqual(["Why should voters elect you?", "What is the top issue in your district?"]);
+  });
+
+  test("keeps a block only when its own attribution line names the candidate asked for", () => {
+    const unattributed = PAGE.replace("### What is the top issue in your district?\n> Roads.\n— Sam Sample to Wisconsin Watch: https://voterguide26.wisconsinwatch.org/candidate/s-sample1/?utm_source=voterguidecommons&utm_medium=ai", "### Race outlook\n> Sam Sample is favored to win.");
+    expect(parseCandidateAnswers(unattributed, "s-sample1")?.map((a) => a.question)).toEqual(["Why should voters elect you?"]);
+  });
+
+  test("is not fooled by a page that merely mentions another candidate's address", () => {
+    const mentions = PAGE.replace("- Party: Democrat", "- Party: Democrat\n- Opponent: https://voterguide26.wisconsinwatch.org/candidate/p-example1/");
+    expect(parseCandidateAnswers(mentions, "p-example1")).toBeNull();
+    expect(parseCandidateAnswers(`${PAGE}\n${PAGE.replaceAll("s-sample1", "p-example1")}`, "p-example1")).toBeNull();
+  });
+
+  test("keeps at most ten answers and a question of reasonable length", () => {
+    const block = (i: number) => `### ${"Q".repeat(i === 0 ? 400 : 5)} ${i}?\n> Answer ${i}.\n— Sam Sample to Wisconsin Watch: https://voterguide26.wisconsinwatch.org/candidate/s-sample1/`;
+    const page = `## Answers to Wisconsin Watch's questionnaire, verbatim\n\n${Array.from({ length: 14 }, (_, i) => block(i)).join("\n\n")}\n\n---\n`;
+    const answers = parseCandidateAnswers(page, "s-sample1") ?? [];
+    expect(answers).toHaveLength(10);
+    expect(answers[0].question.length).toBeLessThanOrEqual(200);
+  });
+
+  test("cuts a very long answer with no sentence end at a word, never mid-word", () => {
+    const page = PAGE.replace("> Roads.", `> ${"potholes ".repeat(400).trim()}`);
+    const answer = (parseCandidateAnswers(page, "s-sample1") ?? [])[1];
+    expect(answer.truncated).toBe(true);
+    expect(answer.answer.length).toBeLessThanOrEqual(1500);
+    expect(answer.answer.endsWith("potholes")).toBe(true);
+  });
+
   test("refuses text with no answers section, and anything that is not text", () => {
     expect(parseCandidateAnswers("# Sam Sample\n\n/candidate/s-sample1/\n\nDid not answer.", "s-sample1")).toBeNull();
     expect(parseCandidateAnswers(undefined, "s-sample1")).toBeNull();
@@ -88,7 +121,10 @@ describe("fetchCandidateAnswers", () => {
     expect(await fetchCandidateAnswers("s-sample1", respond({ jsonrpc: "2.0", id: 1, error: { code: -32000, message: "rate limited" } }))).toBeNull();
     expect(await fetchCandidateAnswers("s-sample1", respond("not json-rpc"))).toBeNull();
     expect(await fetchCandidateAnswers("s-sample1", vi.fn(async () => { throw new DOMException("timed out", "TimeoutError"); }))).toBeNull();
-    expect(console.error).toHaveBeenCalledTimes(5);
+    // A web page or an event stream where JSON was expected.
+    const html = vi.fn(async () => ({ ok: true, status: 200, headers: new Headers({ "content-type": "text/html" }), json: async () => { throw new SyntaxError("Unexpected token <"); } }) as unknown as Response);
+    expect(await fetchCandidateAnswers("s-sample1", html)).toBeNull();
+    expect(console.error).toHaveBeenCalledTimes(6);
     vi.restoreAllMocks();
   });
 });
@@ -112,8 +148,9 @@ describe("questionnairePayload", () => {
     { candidateSlug: "sam-sample", issueSlug: "education", stance: "supports", summary: "Sam's.", source: { name: "Campaign site", url: "https://sam.example" } },
   ];
   const answers = [{ question: "Why should voters elect you?", answer: "I will listen first." }];
+  const november = { kind: "contest", statement: "Three candidates are on the ballot.", source: { name: "State list", url: "https://elections.wi.gov/x", documentDate: "2026-10-06" } };
   const build = (fetched: Record<string, typeof answers | null>) =>
-    questionnairePayload({ race, field, statusFor: (slug) => statuses[slug as keyof typeof statuses] ?? null, fetched, positions });
+    questionnairePayload({ race, november, field, statusFor: (slug) => statuses[slug as keyof typeof statuses] ?? null, fetched, positions });
 
   test("builds entries only for the certified field, in ballot order", () => {
     expect(build({ "sam-sample": answers }).candidates.map((c) => [c.slug, c.status])).toEqual([
@@ -133,6 +170,7 @@ describe("questionnairePayload", () => {
       status: "answered",
       url: "https://voterguide26.wisconsinwatch.org/candidate/s-sample1/?utm_source=voterguidecommons&utm_medium=ai",
       answers,
+      page: "https://badgerbrief.org/candidates/sam-sample",
     });
   });
 
@@ -175,7 +213,43 @@ describe("questionnairePayload", () => {
       status: "unavailable",
       statement: "Answered Wisconsin Watch's questionnaire, but the answers could not be loaded just now.",
       url: "https://voterguide26.wisconsinwatch.org/candidate/s-sample1/?utm_source=voterguidecommons&utm_medium=ai",
+      page: "https://badgerbrief.org/candidates/sam-sample",
     });
+  });
+
+  // Found by review: a certified candidate missing from the link list used to vanish from the answer.
+  test("never drops a certified candidate the link list does not know", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const payload = questionnairePayload({ race, november, field, statusFor: (slug) => (slug === "new-person" ? null : statuses[slug as keyof typeof statuses]), fetched: { "sam-sample": answers }, positions });
+    expect(payload.candidates).toHaveLength(3);
+    expect(payload.candidates[2]).toEqual({
+      slug: "new-person",
+      name: "New Person",
+      party: "Independent",
+      ballotLine: "New Person (Independent)",
+      status: "no-record",
+      statement: "BadgerBrief has no questionnaire record for this candidate.",
+      page: "https://badgerbrief.org/candidates/new-person",
+    });
+    expect(console.error).toHaveBeenCalledTimes(1);
+    vi.restoreAllMocks();
+  });
+
+  test("asks for support of the newsroom only when it quotes the newsroom's guide", () => {
+    expect(build({ "sam-sample": answers })).toHaveProperty("support");
+    const nobody = questionnairePayload({ race, november, field: field.slice(0, 1), statusFor: () => statuses["pat-example"], fetched: {}, positions });
+    expect(nobody).not.toHaveProperty("support");
+    expect(build({ "sam-sample": null })).not.toHaveProperty("support");
+  });
+
+  test("offers a BadgerBrief position only when it has a source to link", () => {
+    const unsourced = [{ candidateSlug: "pat-example", issueSlug: "education", stance: "supports", summary: "No link.", source: undefined }, positions[1]];
+    const pat = questionnairePayload({ race, november, field, statusFor: (slug) => statuses[slug as keyof typeof statuses] ?? null, fetched: { "sam-sample": answers }, positions: unsourced }).candidates[0];
+    expect(pat).toMatchObject({ onBadgerBrief: [{ issueSlug: "taxes", summary: "Wants lower taxes.", source: { name: "Campaign site", url: "https://pat.example/taxes" } }] });
+  });
+
+  test("carries the certified-ballot statement and its source", () => {
+    expect(build({ "sam-sample": answers }).november).toEqual(november);
   });
 
   test("names the source, carries the support line, and the rule the chat must follow", () => {
@@ -187,7 +261,7 @@ describe("questionnairePayload", () => {
       url: "https://wisconsinwatch.org/donate/?utm_source=voterguidecommons&utm_medium=ai",
     });
     expect(payload.rule).toBe(QUESTIONNAIRE_RULE);
-    for (const phrase of [/in quotation marks/, /told Wisconsin Watch/, /similar space/, /nothing about why/, /never compare who answered/i, /how a party's candidates responded/]) {
+    for (const phrase of [/in quotation marks/, /told Wisconsin Watch/, /similar space/, /nothing about why/, /never compare who answered/i, /how a party's candidates responded/, /the person in name/, /If support is present/, /truncated/, /cite november\.source/i]) {
       expect(QUESTIONNAIRE_RULE).toMatch(phrase);
     }
   });
@@ -196,6 +270,7 @@ describe("questionnairePayload", () => {
     const seven = Array.from({ length: 7 }, (_, i) => ({ question: `Question ${i}?`, answer: "x".repeat(1500) }));
     const two = questionnairePayload({
       race,
+      november,
       field: field.slice(0, 2),
       statusFor: () => statuses["sam-sample"],
       fetched: { "pat-example": seven, "sam-sample": seven },

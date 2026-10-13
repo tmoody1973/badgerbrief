@@ -228,6 +228,7 @@ const getQuestionnaireAnswers = createTool({
       return JSON.stringify(
         questionnairePayload({
           race: { raceId: base.race.raceId, office: base.race.office },
+          november: base.november,
           field: base.onBallot,
           statusFor,
           fetched,
