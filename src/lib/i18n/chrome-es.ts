@@ -34,6 +34,7 @@ export const chromeEs: ChromeDict = {
     methodology: "Metodología",
     reportError: "Reportar un error",
     support: "Apoya este proyecto",
+    kofi: "Apoye en Ko-fi",
     contribute: "Ayuda a mejorar esta guía",
     financeDisclaimer:
       "Los datos de financiamiento de campañas para cargos estatales de Wisconsin provienen " +

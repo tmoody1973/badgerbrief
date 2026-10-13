@@ -53,6 +53,14 @@ export function BottomTabs() {
                 {dict.navLabels[href] ?? label}
               </Link>
             ))}
+            <a
+              href="https://ko-fi.com/tarikmoody"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block border-t-2 border-border px-4 py-3 font-mono text-sm font-bold uppercase tracking-wider hover:bg-secondary"
+            >
+              {dict.footer.kofi}
+            </a>
             <div className="flex items-center justify-between gap-2 border-t-2 border-border px-4 py-3">
               <AuthNav />
               <ThemeToggle />

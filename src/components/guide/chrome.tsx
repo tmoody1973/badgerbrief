@@ -135,6 +135,15 @@ export function SiteFooter() {
             ♥ {footer.support}
           </a>
           {" · "}
+          <a
+            href="https://ko-fi.com/tarikmoody"
+            className="font-bold underline decoration-2 underline-offset-2"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {footer.kofi}
+          </a>
+          {" · "}
           {/* /contribute is EN-only (no /es route yet); link stays unlocalized
               so the ES footer doesn't 404 while still surfacing a translated label. */}
           <Link href="/contribute" className="underline decoration-2 underline-offset-2">

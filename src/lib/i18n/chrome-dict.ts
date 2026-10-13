@@ -13,6 +13,8 @@ export type ChromeDict = {
     methodology: string;
     reportError: string;
     support: string;
+    /** The Ko-fi link. It replaced a floating button that covered the page on a phone. */
+    kofi: string;
     contribute: string;
     financeDisclaimer: string;
   };

@@ -32,6 +32,7 @@ export const chromeEn: ChromeDict = {
     methodology: "Methodology",
     reportError: "Report an error",
     support: "Support this project",
+    kofi: "Support on Ko-fi",
     contribute: "Help improve this guide",
     financeDisclaimer:
       "Campaign finance data for Wisconsin state offices comes from the " +
