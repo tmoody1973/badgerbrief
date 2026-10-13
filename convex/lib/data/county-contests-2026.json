@@ -1,0 +1,2414 @@
+{
+  "election": "2026-11-03",
+  "source": {
+    "name": "Wisconsin Elections Commission, All Contests and Candidates, November 3, 2026 General Election",
+    "url": "https://elections.wi.gov/media/41846/download",
+    "documentDate": "2026-10-06",
+    "retrievedAt": "2026-10-12T21:32:56Z",
+    "sha256": "f26aa3fffacaa5ea80fd9fc53e99f74a4ebba10fe4e96c0c3b96e89870ee213e"
+  },
+  "certifiedBy": "Tarik Moody",
+  "certifiedAt": "2026-10-13",
+  "certifiedSha256": "14b4555d0f9e8ff46978121635819c6e8aa9dd538a822be3d782eedf7690b053",
+  "contests": [
+    {
+      "county": "adams",
+      "countyName": "Adams County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Adams County Sheriff",
+      "ballotPosition": 20104,
+      "candidates": [
+        {
+          "ballotName": "Brent R. York",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "adams",
+      "countyName": "Adams County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Adams County Clerk of Circuit Court",
+      "ballotPosition": 20105,
+      "candidates": [
+        {
+          "ballotName": "Miranda Christensen",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "ashland",
+      "countyName": "Ashland County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Ashland County Sheriff",
+      "ballotPosition": 20204,
+      "candidates": [
+        {
+          "ballotName": "Nate Delegan",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "ashland",
+      "countyName": "Ashland County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Ashland County Clerk of Circuit Court",
+      "ballotPosition": 20206,
+      "candidates": [
+        {
+          "ballotName": "Lexi Pierce",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "barron",
+      "countyName": "Barron County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Barron County Sheriff",
+      "ballotPosition": 20304,
+      "candidates": [
+        {
+          "ballotName": "Jodi Kummet",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "barron",
+      "countyName": "Barron County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Barron County Clerk of Circuit Court",
+      "ballotPosition": 20305,
+      "candidates": [
+        {
+          "ballotName": "Ann Barnes",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "bayfield",
+      "countyName": "Bayfield County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Bayfield County Sheriff",
+      "ballotPosition": 20404,
+      "candidates": [
+        {
+          "ballotName": "Tony Williams",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "bayfield",
+      "countyName": "Bayfield County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Bayfield County Clerk of Circuit Court",
+      "ballotPosition": 20406,
+      "candidates": [
+        {
+          "ballotName": "Emma Grove",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "brown",
+      "countyName": "Brown County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Brown County Sheriff",
+      "ballotPosition": 20504,
+      "candidates": [
+        {
+          "ballotName": "Todd J. Delain",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "brown",
+      "countyName": "Brown County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Brown County Clerk of Circuit Court",
+      "ballotPosition": 20506,
+      "candidates": [
+        {
+          "ballotName": "John A. Vander Leest",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "buffalo",
+      "countyName": "Buffalo County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Buffalo County Sheriff",
+      "ballotPosition": 20604,
+      "candidates": [
+        {
+          "ballotName": "Jake Laehn",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "buffalo",
+      "countyName": "Buffalo County",
+      "office": "Coroner",
+      "contestAsPrinted": "Buffalo County Coroner",
+      "ballotPosition": 20605,
+      "candidates": [
+        {
+          "ballotName": "Cindy Giese",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "buffalo",
+      "countyName": "Buffalo County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Buffalo County Clerk of Circuit Court",
+      "ballotPosition": 20606,
+      "candidates": [
+        {
+          "ballotName": "Julie Vollmer",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "burnett",
+      "countyName": "Burnett County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Burnett County Sheriff",
+      "ballotPosition": 20704,
+      "candidates": [
+        {
+          "ballotName": "Mikal Anton",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "burnett",
+      "countyName": "Burnett County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Burnett County Clerk of Circuit Court",
+      "ballotPosition": 20706,
+      "candidates": [
+        {
+          "ballotName": "Danielle Kolecki",
+          "party": "Independent",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "calumet",
+      "countyName": "Calumet County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Calumet County Sheriff",
+      "ballotPosition": 20804,
+      "candidates": [
+        {
+          "ballotName": "Brett Bowe",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Nick Sablich",
+          "party": "Independent",
+          "ballotOrder": 2
+        }
+      ]
+    },
+    {
+      "county": "calumet",
+      "countyName": "Calumet County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Calumet County Clerk of Circuit Court",
+      "ballotPosition": 20805,
+      "candidates": [
+        {
+          "ballotName": "Kayla Bembenek",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "chippewa",
+      "countyName": "Chippewa County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Chippewa County Sheriff",
+      "ballotPosition": 20904,
+      "candidates": [
+        {
+          "ballotName": "Travis Hakes",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "chippewa",
+      "countyName": "Chippewa County",
+      "office": "Coroner",
+      "contestAsPrinted": "Chippewa County Coroner",
+      "ballotPosition": 20905,
+      "candidates": [
+        {
+          "ballotName": "Ronald Patten",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "chippewa",
+      "countyName": "Chippewa County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Chippewa County Clerk of Circuit Court",
+      "ballotPosition": 20906,
+      "candidates": [
+        {
+          "ballotName": "Nate Liedl",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Jennifer Kragness Lee",
+          "party": "Democratic",
+          "ballotOrder": 2
+        }
+      ]
+    },
+    {
+      "county": "clark",
+      "countyName": "Clark County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Clark County Sheriff",
+      "ballotPosition": 21004,
+      "candidates": [
+        {
+          "ballotName": "Kerry L. Kirn",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Gene R. Roehl",
+          "party": "Independent",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "clark",
+      "countyName": "Clark County",
+      "office": "Coroner",
+      "contestAsPrinted": "Clark County Coroner",
+      "ballotPosition": 21005,
+      "candidates": [
+        {
+          "ballotName": "Clarissa M. Rochester",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "clark",
+      "countyName": "Clark County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Clark County Clerk of Circuit Court",
+      "ballotPosition": 21006,
+      "candidates": [
+        {
+          "ballotName": "Heather Bravener",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "columbia",
+      "countyName": "Columbia County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Columbia County Sheriff",
+      "ballotPosition": 21104,
+      "candidates": [
+        {
+          "ballotName": "Roger L. Brandner",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "columbia",
+      "countyName": "Columbia County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Columbia County Clerk of Circuit Courts",
+      "ballotPosition": 21105,
+      "candidates": [
+        {
+          "ballotName": "Julie Kayartz",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "crawford",
+      "countyName": "Crawford County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Crawford County Sheriff",
+      "ballotPosition": 21204,
+      "candidates": [
+        {
+          "ballotName": "Dale McCullick",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "crawford",
+      "countyName": "Crawford County",
+      "office": "Coroner",
+      "contestAsPrinted": "Crawford County Coroner",
+      "ballotPosition": 21205,
+      "candidates": [
+        {
+          "ballotName": "Joe Morovits",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "crawford",
+      "countyName": "Crawford County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Crawford County Clerk of Circuit Court",
+      "ballotPosition": 21206,
+      "candidates": [
+        {
+          "ballotName": "Holly R. Tanner",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "dane",
+      "countyName": "Dane County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Dane County Sheriff",
+      "ballotPosition": 21304,
+      "candidates": [
+        {
+          "ballotName": "Kalvin D. Barrett",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "dane",
+      "countyName": "Dane County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Dane County Clerk of Circuit Court",
+      "ballotPosition": 21306,
+      "candidates": [
+        {
+          "ballotName": "Jeff Okazaki",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "dodge",
+      "countyName": "Dodge County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Dodge County Sheriff",
+      "ballotPosition": 21404,
+      "candidates": [
+        {
+          "ballotName": "Dale J. Schmidt",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "dodge",
+      "countyName": "Dodge County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Dodge County Clerk of Circuit Court",
+      "ballotPosition": 21405,
+      "candidates": [
+        {
+          "ballotName": "Kelly Enright",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "door",
+      "countyName": "Door County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Door County Sheriff",
+      "ballotPosition": 21504,
+      "candidates": [
+        {
+          "ballotName": "Curt Vandertie",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Tammy Weckler-Sternard",
+          "party": "Democratic",
+          "ballotOrder": 2
+        },
+        {
+          "ballotName": "Randy Wagner",
+          "party": "Independent",
+          "ballotOrder": 3
+        }
+      ]
+    },
+    {
+      "county": "door",
+      "countyName": "Door County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Door County Clerk of Circuit Court",
+      "ballotPosition": 21505,
+      "candidates": [
+        {
+          "ballotName": "Becky Rericha",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Shannon Lauder",
+          "party": "Democratic",
+          "ballotOrder": 2
+        }
+      ]
+    },
+    {
+      "county": "douglas",
+      "countyName": "Douglas County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Douglas County Sheriff",
+      "ballotPosition": 21604,
+      "candidates": [
+        {
+          "ballotName": "Matthew T. Izzard",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "douglas",
+      "countyName": "Douglas County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Douglas County Clerk of Circuit Court",
+      "ballotPosition": 21605,
+      "candidates": [
+        {
+          "ballotName": "Michele Wick",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "dunn",
+      "countyName": "Dunn County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Dunn County Sheriff",
+      "ballotPosition": 21704,
+      "candidates": [
+        {
+          "ballotName": "Kevin Bygd",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "dunn",
+      "countyName": "Dunn County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Dunn County Clerk of Circuit Court",
+      "ballotPosition": 21705,
+      "candidates": [
+        {
+          "ballotName": "Katie M. Schalley",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "eau-claire",
+      "countyName": "Eau Claire County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Eau Claire County Sheriff",
+      "ballotPosition": 21804,
+      "candidates": [
+        {
+          "ballotName": "Dave Riewestahl",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "eau-claire",
+      "countyName": "Eau Claire County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Eau Claire County Clerk of Circuit Court",
+      "ballotPosition": 21805,
+      "candidates": [
+        {
+          "ballotName": "Cherie Norberg",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "florence",
+      "countyName": "Florence County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Florence County Sheriff",
+      "ballotPosition": 21904,
+      "candidates": [
+        {
+          "ballotName": "TERESA CHRISMAN",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "florence",
+      "countyName": "Florence County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Florence County Clerk of Circuit Court",
+      "ballotPosition": 21906,
+      "candidates": [
+        {
+          "ballotName": "JESSICA MCCOY",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "fond-du-lac",
+      "countyName": "Fond du Lac County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Fond du Lac Sheriff",
+      "ballotPosition": 22004,
+      "candidates": [
+        {
+          "ballotName": "Ryan F. Waldschmidt",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "fond-du-lac",
+      "countyName": "Fond du Lac County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Fond du Lac Clerk of Circuit Court",
+      "ballotPosition": 22006,
+      "candidates": [
+        {
+          "ballotName": "Shelly Weber",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "forest",
+      "countyName": "Forest County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Forest County Sheriff",
+      "ballotPosition": 22104,
+      "candidates": [
+        {
+          "ballotName": "Andy Karcz",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "forest",
+      "countyName": "Forest County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Forest County Clerk of Circuit Court",
+      "ballotPosition": 22105,
+      "candidates": [
+        {
+          "ballotName": "Christy Doane",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "grant",
+      "countyName": "Grant County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Grant County Sheriff",
+      "ballotPosition": 22204,
+      "candidates": [
+        {
+          "ballotName": "Craig W. Reukauf",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "grant",
+      "countyName": "Grant County",
+      "office": "Coroner",
+      "contestAsPrinted": "Grant County Coroner",
+      "ballotPosition": 22205,
+      "candidates": [
+        {
+          "ballotName": "Phyllis Fuerstenberg",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "grant",
+      "countyName": "Grant County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Grant County Clerk of Circuit Court",
+      "ballotPosition": 22206,
+      "candidates": [
+        {
+          "ballotName": "Tina McDonald",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "green",
+      "countyName": "Green County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Green County Sheriff",
+      "ballotPosition": 22304,
+      "candidates": [
+        {
+          "ballotName": "Cody Kanable",
+          "party": "Independent",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "green",
+      "countyName": "Green County",
+      "office": "Coroner",
+      "contestAsPrinted": "Green County Coroner",
+      "ballotPosition": 22305,
+      "candidates": [
+        {
+          "ballotName": "Amy Jo Walter",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Monica Hack",
+          "party": "Democratic",
+          "ballotOrder": 2
+        }
+      ]
+    },
+    {
+      "county": "green",
+      "countyName": "Green County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Green County Clerk of Circuit Court",
+      "ballotPosition": 22306,
+      "candidates": [
+        {
+          "ballotName": "Melanie Leutenegger",
+          "party": "Democratic",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Jennifer Prien",
+          "party": "Independent",
+          "ballotOrder": 2
+        }
+      ]
+    },
+    {
+      "county": "green-lake",
+      "countyName": "Green Lake County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Green Lake County Sheriff",
+      "ballotPosition": 22404,
+      "candidates": [
+        {
+          "ballotName": "Jason H Preuss",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "green-lake",
+      "countyName": "Green Lake County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Green Lake County Clerk of Circuit Court",
+      "ballotPosition": 22406,
+      "candidates": [
+        {
+          "ballotName": "Amy S. Thoma",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "iowa",
+      "countyName": "Iowa County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Iowa County Sheriff",
+      "ballotPosition": 22504,
+      "candidates": [
+        {
+          "ballotName": "Michael W. Peterson",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "iowa",
+      "countyName": "Iowa County",
+      "office": "Coroner",
+      "contestAsPrinted": "Iowa County Coroner",
+      "ballotPosition": 22505,
+      "candidates": [
+        {
+          "ballotName": "Wendell F. Hamlin",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "iowa",
+      "countyName": "Iowa County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Iowa County Clerk of Circuit Court",
+      "ballotPosition": 22506,
+      "candidates": [
+        {
+          "ballotName": "Lia N. Leahy",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "iron",
+      "countyName": "Iron County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Iron County Sheriff",
+      "ballotPosition": 22604,
+      "candidates": [
+        {
+          "ballotName": "Mike Randall",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "iron",
+      "countyName": "Iron County",
+      "office": "Coroner",
+      "contestAsPrinted": "Iron County Coroner",
+      "ballotPosition": 22605,
+      "candidates": []
+    },
+    {
+      "county": "iron",
+      "countyName": "Iron County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Iron County Clerk of Circuit Courts",
+      "ballotPosition": 22606,
+      "candidates": [
+        {
+          "ballotName": "Karen L. Ransanici",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "jackson",
+      "countyName": "Jackson County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Jackson County Sheriff",
+      "ballotPosition": 22704,
+      "candidates": [
+        {
+          "ballotName": "Kristin Bills Garcia",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Duane M. Waldera",
+          "party": "Democratic",
+          "ballotOrder": 2
+        }
+      ]
+    },
+    {
+      "county": "jackson",
+      "countyName": "Jackson County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Jackson County Clerk of Circuit Court",
+      "ballotPosition": 22706,
+      "candidates": [
+        {
+          "ballotName": "Jean Sahr",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "jefferson",
+      "countyName": "Jefferson County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Jefferson County Sheriff",
+      "ballotPosition": 22804,
+      "candidates": [
+        {
+          "ballotName": "Travis Maze",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "jefferson",
+      "countyName": "Jefferson County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Jefferson County Clerk of Circuit Court",
+      "ballotPosition": 22805,
+      "candidates": [
+        {
+          "ballotName": "Cindy Hamre-Incha",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "juneau",
+      "countyName": "Juneau County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Juneau County Sheriff",
+      "ballotPosition": 22904,
+      "candidates": [
+        {
+          "ballotName": "Zachary U. Board",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "juneau",
+      "countyName": "Juneau County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Juneau County Clerk of Circuit Court",
+      "ballotPosition": 22906,
+      "candidates": [
+        {
+          "ballotName": "Alecia M. Kast",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "kenosha",
+      "countyName": "Kenosha County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Kenosha County Sheriff",
+      "ballotPosition": 23004,
+      "candidates": [
+        {
+          "ballotName": "David W. Zoerner",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "kenosha",
+      "countyName": "Kenosha County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Kenosha County Clerk of Circuit Court",
+      "ballotPosition": 23006,
+      "candidates": [
+        {
+          "ballotName": "Zach Rodriguez",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Brian M. Sheffler",
+          "party": "Democratic",
+          "ballotOrder": 2
+        }
+      ]
+    },
+    {
+      "county": "kewaunee",
+      "countyName": "Kewaunee County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Kewaunee County Sheriff",
+      "ballotPosition": 23104,
+      "candidates": [
+        {
+          "ballotName": "Eric C. Zellner",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "kewaunee",
+      "countyName": "Kewaunee County",
+      "office": "Coroner",
+      "contestAsPrinted": "Kewaunee County Coroner",
+      "ballotPosition": 23105,
+      "candidates": [
+        {
+          "ballotName": "Rory A. Groessl",
+          "party": "Independent",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "kewaunee",
+      "countyName": "Kewaunee County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Kewaunee County Clerk of Circuit Court",
+      "ballotPosition": 23106,
+      "candidates": [
+        {
+          "ballotName": "Jennie Ledvina",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "la-crosse",
+      "countyName": "La Crosse County",
+      "office": "Sheriff",
+      "contestAsPrinted": "La Crosse County Sheriff",
+      "ballotPosition": 23204,
+      "candidates": [
+        {
+          "ballotName": "John C. Siegel",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "la-crosse",
+      "countyName": "La Crosse County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "La Crosse County Clerk of Circuit Court",
+      "ballotPosition": 23205,
+      "candidates": [
+        {
+          "ballotName": "Tammy Pedretti",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "lafayette",
+      "countyName": "Lafayette County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Lafayette County Sheriff",
+      "ballotPosition": 23304,
+      "candidates": [
+        {
+          "ballotName": "Josh Jerry",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "lafayette",
+      "countyName": "Lafayette County",
+      "office": "Coroner",
+      "contestAsPrinted": "Lafayette County Coroner",
+      "ballotPosition": 23305,
+      "candidates": [
+        {
+          "ballotName": "Linda J. Gebhardt",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "lafayette",
+      "countyName": "Lafayette County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Lafayette County Clerk of Circuit Court",
+      "ballotPosition": 23306,
+      "candidates": [
+        {
+          "ballotName": "Trisha Rowe",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "langlade",
+      "countyName": "Langlade County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Langlade County Sheriff",
+      "ballotPosition": 23404,
+      "candidates": [
+        {
+          "ballotName": "Daniel P. Bauknecht",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "langlade",
+      "countyName": "Langlade County",
+      "office": "Coroner",
+      "contestAsPrinted": "Langlade County Coroner",
+      "ballotPosition": 23405,
+      "candidates": [
+        {
+          "ballotName": "Larry Shadick",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "langlade",
+      "countyName": "Langlade County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Langlade County Clerk of Circuit Court",
+      "ballotPosition": 23406,
+      "candidates": [
+        {
+          "ballotName": "Tina M. Wild",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "lincoln",
+      "countyName": "Lincoln County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Lincoln County Sheriff",
+      "ballotPosition": 23504,
+      "candidates": [
+        {
+          "ballotName": "Andy VanderWyst",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "lincoln",
+      "countyName": "Lincoln County",
+      "office": "Coroner",
+      "contestAsPrinted": "Lincoln County Coroner",
+      "ballotPosition": 23505,
+      "candidates": [
+        {
+          "ballotName": "Valerie Caylor",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "lincoln",
+      "countyName": "Lincoln County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Lincoln County Clerk of Circuit Court",
+      "ballotPosition": 23506,
+      "candidates": [
+        {
+          "ballotName": "Thomas Barker",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "manitowoc",
+      "countyName": "Manitowoc County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Manitowoc County Sheriff",
+      "ballotPosition": 23604,
+      "candidates": [
+        {
+          "ballotName": "Daniel L. Hartwig",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "manitowoc",
+      "countyName": "Manitowoc County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Manitowoc County Clerk of Circuit Court",
+      "ballotPosition": 23607,
+      "candidates": [
+        {
+          "ballotName": "Angela A.P. Linderud",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "marathon",
+      "countyName": "Marathon County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Marathon County Sheriff",
+      "ballotPosition": 23704,
+      "candidates": [
+        {
+          "ballotName": "Chad D. Billeb",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "marathon",
+      "countyName": "Marathon County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Marathon County Clerk of Circuit Court",
+      "ballotPosition": 23705,
+      "candidates": [
+        {
+          "ballotName": "Kelly Schremp",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "marinette",
+      "countyName": "Marinette County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Marinette County Sheriff",
+      "ballotPosition": 23804,
+      "candidates": [
+        {
+          "ballotName": "Randy P. Miller",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "marinette",
+      "countyName": "Marinette County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Marinette County Clerk of Circuit Court",
+      "ballotPosition": 23806,
+      "candidates": [
+        {
+          "ballotName": "Carrie Brazeau",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "marquette",
+      "countyName": "Marquette County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Marquette County Sheriff",
+      "ballotPosition": 23904,
+      "candidates": [
+        {
+          "ballotName": "Joe Konrath",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "marquette",
+      "countyName": "Marquette County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Marquette County Clerk of Circuit Court",
+      "ballotPosition": 23906,
+      "candidates": [
+        {
+          "ballotName": "Shari M. Rudolph",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "menominee",
+      "countyName": "Menominee County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Menominee County Sheriff",
+      "ballotPosition": 24004,
+      "candidates": [
+        {
+          "ballotName": "Rebecca Smith Waupoose",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "menominee",
+      "countyName": "Menominee County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Menominee County Clerk of Circuit Court",
+      "ballotPosition": 24005,
+      "candidates": [
+        {
+          "ballotName": "Delsy Kakwitch",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "milwaukee",
+      "countyName": "Milwaukee County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Milwaukee County Sheriff",
+      "ballotPosition": 24104,
+      "candidates": [
+        {
+          "ballotName": "Denita R. Ball",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "milwaukee",
+      "countyName": "Milwaukee County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Milwaukee County Clerk of Circuit Court",
+      "ballotPosition": 24107,
+      "candidates": [
+        {
+          "ballotName": "Anna Maria Hodges",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "monroe",
+      "countyName": "Monroe County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Monroe County Sheriff",
+      "ballotPosition": 24204,
+      "candidates": [
+        {
+          "ballotName": "Mike Krause",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "monroe",
+      "countyName": "Monroe County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Monroe County Clerk of Circuit Court",
+      "ballotPosition": 24205,
+      "candidates": [
+        {
+          "ballotName": "Laura L. Endres",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "oconto",
+      "countyName": "Oconto County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Oconto County Sheriff",
+      "ballotPosition": 24304,
+      "candidates": [
+        {
+          "ballotName": "Todd Skarban",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "oconto",
+      "countyName": "Oconto County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Oconto County Clerk of Circuit Court",
+      "ballotPosition": 24305,
+      "candidates": [
+        {
+          "ballotName": "Trisha L. LeFebre",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "oneida",
+      "countyName": "Oneida County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Oneida County Sheriff",
+      "ballotPosition": 24404,
+      "candidates": [
+        {
+          "ballotName": "Grady Hartman",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "oneida",
+      "countyName": "Oneida County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Oneida County Clerk of Circuit Court",
+      "ballotPosition": 24405,
+      "candidates": [
+        {
+          "ballotName": "Brenda Behrle",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "outagamie",
+      "countyName": "Outagamie County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Outagamie County Sheriff",
+      "ballotPosition": 24504,
+      "candidates": [
+        {
+          "ballotName": "Clint C. Kriewaldt",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "outagamie",
+      "countyName": "Outagamie County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Outagamie County Clerk of Circuit Court",
+      "ballotPosition": 24507,
+      "candidates": [
+        {
+          "ballotName": "Diane Leith",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "ozaukee",
+      "countyName": "Ozaukee County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Ozaukee County Sheriff",
+      "ballotPosition": 24604,
+      "candidates": [
+        {
+          "ballotName": "Christy Knowles",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "ozaukee",
+      "countyName": "Ozaukee County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Ozaukee County Clerk of Circuit Court",
+      "ballotPosition": 24606,
+      "candidates": [
+        {
+          "ballotName": "Connie Mueller",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "pepin",
+      "countyName": "Pepin County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Pepin County Sheriff",
+      "ballotPosition": 24704,
+      "candidates": [
+        {
+          "ballotName": "Joel D. Wener",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "pepin",
+      "countyName": "Pepin County",
+      "office": "Coroner",
+      "contestAsPrinted": "Pepin County Coroner",
+      "ballotPosition": 24705,
+      "candidates": []
+    },
+    {
+      "county": "pepin",
+      "countyName": "Pepin County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Pepin County Clerk of Circuit Court",
+      "ballotPosition": 24706,
+      "candidates": [
+        {
+          "ballotName": "Audrey Lieffring",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "pierce",
+      "countyName": "Pierce County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Pierce County Sheriff",
+      "ballotPosition": 24804,
+      "candidates": [
+        {
+          "ballotName": "Chad Koranda",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "pierce",
+      "countyName": "Pierce County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Pierce County Clerk of Circuit Court",
+      "ballotPosition": 24805,
+      "candidates": [
+        {
+          "ballotName": "Kerry Feuerhelm",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "polk",
+      "countyName": "Polk County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Polk County Sheriff",
+      "ballotPosition": 24904,
+      "candidates": [
+        {
+          "ballotName": "Rob Rorvick",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "polk",
+      "countyName": "Polk County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Polk County Clerk of Circuit Court",
+      "ballotPosition": 24905,
+      "candidates": [
+        {
+          "ballotName": "Jackie Patterson",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "portage",
+      "countyName": "Portage County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Portage County Sheriff",
+      "ballotPosition": 25004,
+      "candidates": [
+        {
+          "ballotName": "Joshua R. Ostrowski",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "portage",
+      "countyName": "Portage County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Portage County Clerk of Circuit Court",
+      "ballotPosition": 25007,
+      "candidates": [
+        {
+          "ballotName": "Lisa M. Roth",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "price",
+      "countyName": "Price County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Price County Sheriff",
+      "ballotPosition": 25104,
+      "candidates": [
+        {
+          "ballotName": "Robert Hawn",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "price",
+      "countyName": "Price County",
+      "office": "Coroner",
+      "contestAsPrinted": "Price County Coroner",
+      "ballotPosition": 25105,
+      "candidates": [
+        {
+          "ballotName": "Amy Casey",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "price",
+      "countyName": "Price County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Price County Clerk of Circuit Court",
+      "ballotPosition": 25106,
+      "candidates": [
+        {
+          "ballotName": "Amy Walker",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "racine",
+      "countyName": "Racine County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Racine County Sheriff",
+      "ballotPosition": 25204,
+      "candidates": [
+        {
+          "ballotName": "Cary A. Madrigal",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Donald E. Vandervest",
+          "party": "Democratic",
+          "ballotOrder": 2
+        }
+      ]
+    },
+    {
+      "county": "racine",
+      "countyName": "Racine County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Racine County Clerk of Circuit Court",
+      "ballotPosition": 25206,
+      "candidates": [
+        {
+          "ballotName": "Amy Vanderhoef",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "richland",
+      "countyName": "Richland County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Richland County Sheriff",
+      "ballotPosition": 25304,
+      "candidates": [
+        {
+          "ballotName": "Clay J. Porter",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "richland",
+      "countyName": "Richland County",
+      "office": "Coroner",
+      "contestAsPrinted": "Richland County Coroner",
+      "ballotPosition": 25305,
+      "candidates": []
+    },
+    {
+      "county": "richland",
+      "countyName": "Richland County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Richland County Clerk of Circuit Court",
+      "ballotPosition": 25306,
+      "candidates": [
+        {
+          "ballotName": "Stacy S. Kleist",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "rock",
+      "countyName": "Rock County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Rock County Sheriff",
+      "ballotPosition": 25404,
+      "candidates": [
+        {
+          "ballotName": "Curtis Fell",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "rock",
+      "countyName": "Rock County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Rock County Clerk of Circuit Court",
+      "ballotPosition": 25405,
+      "candidates": [
+        {
+          "ballotName": "Amanda Nelson",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "rusk",
+      "countyName": "Rusk County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Rusk County Sheriff",
+      "ballotPosition": 25505,
+      "candidates": [
+        {
+          "ballotName": "Phil Grassmann",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "rusk",
+      "countyName": "Rusk County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Rusk County Clerk of Circuit Court",
+      "ballotPosition": 25506,
+      "candidates": [
+        {
+          "ballotName": "Lisa K. Strop",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "sauk",
+      "countyName": "Sauk County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Sauk County Sheriff",
+      "ballotPosition": 25704,
+      "candidates": [
+        {
+          "ballotName": "Matt Burch",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Ryan P. Jesberger",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "sauk",
+      "countyName": "Sauk County",
+      "office": "Coroner",
+      "contestAsPrinted": "Sauk County Coroner",
+      "ballotPosition": 25705,
+      "candidates": [
+        {
+          "ballotName": "Don Skrabel",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Amber Giddings",
+          "party": "Independent",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "sauk",
+      "countyName": "Sauk County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Sauk County Clerk of Circuit Court",
+      "ballotPosition": 25706,
+      "candidates": [
+        {
+          "ballotName": "Carrie A. Wastlick",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "sawyer",
+      "countyName": "Sawyer County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Sawyer County Sheriff",
+      "ballotPosition": 25804,
+      "candidates": [
+        {
+          "ballotName": "Bryan Deyo",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "sawyer",
+      "countyName": "Sawyer County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Sawyer County Clerk of Circuit Court",
+      "ballotPosition": 25806,
+      "candidates": [
+        {
+          "ballotName": "Marge Kelsey",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "shawano",
+      "countyName": "Shawano County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Shawano County Sheriff",
+      "ballotPosition": 25904,
+      "candidates": [
+        {
+          "ballotName": "George Lenzner",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "shawano",
+      "countyName": "Shawano County",
+      "office": "Coroner",
+      "contestAsPrinted": "Shawano County Coroner",
+      "ballotPosition": 25905,
+      "candidates": [
+        {
+          "ballotName": "Brian Westfahl",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "shawano",
+      "countyName": "Shawano County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Shawano County Clerk of Circuit Court",
+      "ballotPosition": 25906,
+      "candidates": [
+        {
+          "ballotName": "Ethan Schmidt",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "sheboygan",
+      "countyName": "Sheboygan County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Sheboygan County Sheriff",
+      "ballotPosition": 26004,
+      "candidates": [
+        {
+          "ballotName": "Matthew Spence",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "sheboygan",
+      "countyName": "Sheboygan County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Sheboygan County Clerk of Circuit Court",
+      "ballotPosition": 26005,
+      "candidates": [
+        {
+          "ballotName": "Christine M. Koenig",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "st-croix",
+      "countyName": "St. Croix County",
+      "office": "Sheriff",
+      "contestAsPrinted": "St. Croix County Sheriff",
+      "ballotPosition": 25604,
+      "candidates": [
+        {
+          "ballotName": "Scott Knudson",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "st-croix",
+      "countyName": "St. Croix County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "St. Croix County Clerk of Circuit Court",
+      "ballotPosition": 25605,
+      "candidates": [
+        {
+          "ballotName": "Kathy A. Kittel",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "taylor",
+      "countyName": "Taylor County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Taylor County Sheriff",
+      "ballotPosition": 26104,
+      "candidates": [
+        {
+          "ballotName": "Corey J Dassow",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "taylor",
+      "countyName": "Taylor County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Taylor County Clerk of Circuit Court",
+      "ballotPosition": 26105,
+      "candidates": [
+        {
+          "ballotName": "Jill Scheithauer",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "trempealeau",
+      "countyName": "Trempealeau County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Trempealeau County Sheriff",
+      "ballotPosition": 26204,
+      "candidates": [
+        {
+          "ballotName": "Erica Koxlien",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "trempealeau",
+      "countyName": "Trempealeau County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Trempealeau County Clerk of Circuit Court",
+      "ballotPosition": 26205,
+      "candidates": [
+        {
+          "ballotName": "Jessica A. Schue",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Mary Teresa Foss",
+          "party": "Democratic",
+          "ballotOrder": 2
+        }
+      ]
+    },
+    {
+      "county": "vernon",
+      "countyName": "Vernon County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Vernon County Sheriff",
+      "ballotPosition": 26304,
+      "candidates": [
+        {
+          "ballotName": "Roy Torgerson",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "vernon",
+      "countyName": "Vernon County",
+      "office": "Coroner",
+      "contestAsPrinted": "Vernon County Coroner",
+      "ballotPosition": 26305,
+      "candidates": [
+        {
+          "ballotName": "Betty Nigh",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "vernon",
+      "countyName": "Vernon County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Vernon County Clerk of Circuit Court",
+      "ballotPosition": 26306,
+      "candidates": [
+        {
+          "ballotName": "Sheila Olson",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "vilas",
+      "countyName": "Vilas County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Vilas County Sheriff",
+      "ballotPosition": 26404,
+      "candidates": [
+        {
+          "ballotName": "Gerard T. Ritter",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "vilas",
+      "countyName": "Vilas County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Vilas County Clerk of Circuit Court",
+      "ballotPosition": 26406,
+      "candidates": [
+        {
+          "ballotName": "Beth A. Soltow",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "walworth",
+      "countyName": "Walworth County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Walworth County Sheriff",
+      "ballotPosition": 26504,
+      "candidates": [
+        {
+          "ballotName": "Tom Hausner",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Csaba Keller",
+          "party": "Constitution",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "walworth",
+      "countyName": "Walworth County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Walworth County Clerk of Circuit Court",
+      "ballotPosition": 26505,
+      "candidates": [
+        {
+          "ballotName": "Michele Jacobs",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "washburn",
+      "countyName": "Washburn County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Washburn County Sheriff",
+      "ballotPosition": 26604,
+      "candidates": [
+        {
+          "ballotName": "Jason Bart Bartholomew",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "washburn",
+      "countyName": "Washburn County",
+      "office": "Coroner",
+      "contestAsPrinted": "Washburn County Coroner",
+      "ballotPosition": 26605,
+      "candidates": [
+        {
+          "ballotName": "Andrew Curtis",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "washburn",
+      "countyName": "Washburn County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Washburn County Clerk of Circuit Court",
+      "ballotPosition": 26606,
+      "candidates": [
+        {
+          "ballotName": "Shannon Anderson",
+          "party": "Independent",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "washington",
+      "countyName": "Washington County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Washington County Sheriff",
+      "ballotPosition": 26704,
+      "candidates": [
+        {
+          "ballotName": "Martin R. Schulteis",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "washington",
+      "countyName": "Washington County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Washington County Clerk of Circuit Court",
+      "ballotPosition": 26706,
+      "candidates": [
+        {
+          "ballotName": "Sherry Coykendall",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "waukesha",
+      "countyName": "Waukesha County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Waukesha County Sheriff",
+      "ballotPosition": 26804,
+      "candidates": [
+        {
+          "ballotName": "Nick Ollinger",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "waukesha",
+      "countyName": "Waukesha County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Waukesha County Clerk of Circuit Court",
+      "ballotPosition": 26806,
+      "candidates": [
+        {
+          "ballotName": "Monica Paz",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "waupaca",
+      "countyName": "Waupaca County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Waupaca County Sheriff",
+      "ballotPosition": 26904,
+      "candidates": [
+        {
+          "ballotName": "Timothy R. Wilz",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Justin A. Malueg",
+          "party": "Independent",
+          "ballotOrder": 2
+        }
+      ]
+    },
+    {
+      "county": "waupaca",
+      "countyName": "Waupaca County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Waupaca County Clerk of Circuit Court",
+      "ballotPosition": 26906,
+      "candidates": [
+        {
+          "ballotName": "Renee L. Hosket",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "waushara",
+      "countyName": "Waushara County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Waushara County Sheriff",
+      "ballotPosition": 27004,
+      "candidates": [
+        {
+          "ballotName": "Zachary L. Gunderson",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Nina Monacelli",
+          "party": "Democratic",
+          "ballotOrder": 2
+        }
+      ]
+    },
+    {
+      "county": "waushara",
+      "countyName": "Waushara County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Waushara County Clerk of Circuit Court",
+      "ballotPosition": 27006,
+      "candidates": [
+        {
+          "ballotName": "Katrina Rasmussen",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "winnebago",
+      "countyName": "Winnebago County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Winnebago County Sheriff",
+      "ballotPosition": 27104,
+      "candidates": [
+        {
+          "ballotName": "Darin M. Rice",
+          "party": "Republican",
+          "ballotOrder": 1
+        },
+        {
+          "ballotName": "Jason W. Rippl",
+          "party": "Democratic",
+          "ballotOrder": 2
+        },
+        {
+          "ballotName": "Danielle Falesnik",
+          "party": "Independent",
+          "ballotOrder": 3
+        }
+      ]
+    },
+    {
+      "county": "winnebago",
+      "countyName": "Winnebago County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Winnebago County Clerk of Circuit Court",
+      "ballotPosition": 27107,
+      "candidates": [
+        {
+          "ballotName": "Desiree Bongers",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "wood",
+      "countyName": "Wood County",
+      "office": "Sheriff",
+      "contestAsPrinted": "Wood County Sheriff",
+      "ballotPosition": 27204,
+      "candidates": [
+        {
+          "ballotName": "Shawn Becker",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "wood",
+      "countyName": "Wood County",
+      "office": "Coroner",
+      "contestAsPrinted": "Wood County Coroner",
+      "ballotPosition": 27205,
+      "candidates": [
+        {
+          "ballotName": "David A. Patton",
+          "party": "Democratic",
+          "ballotOrder": 1
+        }
+      ]
+    },
+    {
+      "county": "wood",
+      "countyName": "Wood County",
+      "office": "Clerk of Circuit Court",
+      "contestAsPrinted": "Wood County Clerk of Circuit Court",
+      "ballotPosition": 27206,
+      "candidates": [
+        {
+          "ballotName": "Kimberly A. Stimac",
+          "party": "Republican",
+          "ballotOrder": 1
+        }
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "contestAsPrinted": "City of Jefferson Municipal Judge",
+      "jurisdiction": "CITY OF JEFFERSON - JEFFERSON COUNTY",
+      "district": "City of Jefferson",
+      "reason": "Covers part of a county. My Ballot knows a voter's county, not their city, town or supervisory district."
+    },
+    {
+      "contestAsPrinted": "Municipal Judge Marshfield Area Joint Municipal Court",
+      "jurisdiction": "WOOD COUNTY",
+      "district": "MARSHFIELD AREA JOINT MUNICIPAL COURT",
+      "reason": "Covers part of a county. My Ballot knows a voter's county, not their city, town or supervisory district."
+    },
+    {
+      "contestAsPrinted": "Price County Supervisor District 5",
+      "jurisdiction": "PRICE COUNTY",
+      "district": "Price County Supervisory District 5",
+      "reason": "Covers part of a county. My Ballot knows a voter's county, not their city, town or supervisory district."
+    },
+    {
+      "contestAsPrinted": "Verona Municipal Judge",
+      "jurisdiction": "CITY OF VERONA - DANE COUNTY",
+      "district": "City of Verona",
+      "reason": "Covers part of a county. My Ballot knows a voter's county, not their city, town or supervisory district."
+    }
+  ]
+}

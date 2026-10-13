@@ -1,0 +1,123 @@
+{
+  "result": {
+    "addressMatches": [
+      {
+        "matchedAddress": "200 E WELLS ST, MILWAUKEE, WI, 53202",
+        "geographies": {
+          "Counties": [
+            {
+              "GEOID": "55079",
+              "CENTLAT": "+43.0156440",
+              "AREAWATER": 2455452231,
+              "STATE": "55",
+              "BASENAME": "Milwaukee",
+              "OID": "27590453387402",
+              "LSADC": "06",
+              "FUNCSTAT": "A",
+              "INTPTLAT": "+42.9126431",
+              "NAME": "Milwaukee County",
+              "OBJECTID": 1517,
+              "CENTLON": "-087.5805257",
+              "COUNTYCC": "H1",
+              "COUNTYNS": "01581100",
+              "AREALAND": 625371988,
+              "INTPTLON": "-087.8623115",
+              "MTFCC": "G4020",
+              "COUNTY": "079"
+            }
+          ],
+          "States": [
+            {
+              "STATENS": "01779806",
+              "GEOID": "55",
+              "CENTLAT": "+44.6273136",
+              "AREAWATER": 29340521874,
+              "STATE": "55",
+              "BASENAME": "Wisconsin",
+              "STUSAB": "WI",
+              "OID": "2749096104710",
+              "LSADC": "00",
+              "FUNCSTAT": "A",
+              "INTPTLAT": "+44.6309071",
+              "DIVISION": "3",
+              "NAME": "Wisconsin",
+              "REGION": "2",
+              "OBJECTID": 34,
+              "CENTLON": "-089.7097854",
+              "AREALAND": 140295169676,
+              "INTPTLON": "-089.7093916",
+              "MTFCC": "G4000"
+            }
+          ],
+          "2026 State Legislative Districts - Upper": [
+            {
+              "GEOID": "55007",
+              "CENTLAT": "+42.9244004",
+              "AREAWATER": 940207,
+              "STATE": "55",
+              "BASENAME": "7",
+              "OID": "2129042579647668",
+              "SLDU": "007",
+              "LSADC": "LU",
+              "FUNCSTAT": "N",
+              "INTPTLAT": "+42.9228822",
+              "NAME": "State Senate District 7",
+              "OBJECTID": 11,
+              "CENTLON": "-087.8944762",
+              "LSY": "2026",
+              "AREALAND": 148670264,
+              "INTPTLON": "-087.9007728",
+              "MTFCC": "G5210",
+              "LDTYP": "O"
+            }
+          ],
+          "120th Congressional Districts": [
+            {
+              "STGEOMETRY_Area": 2664101589.6422296,
+              "CD120": "04",
+              "GEOID": "5504",
+              "CENTLAT": "+43.1064753",
+              "CDSESSN": "120",
+              "AREAWATER": 1056839433,
+              "STATE": "55",
+              "BASENAME": "4",
+              "OID": "2119042393279580",
+              "LSADC": "C2",
+              "FUNCSTAT": "N",
+              "INTPTLAT": "+43.0725822",
+              "NAME": "Congressional District 4",
+              "OBJECTID": 260,
+              "CENTLON": "-087.6193595",
+              "STGEOMETRY_Length": 338736.5876148635,
+              "AREALAND": 362528466,
+              "INTPTLON": "-087.8653685",
+              "MTFCC": "G5200"
+            }
+          ],
+          "2026 State Legislative Districts - Lower": [
+            {
+              "GEOID": "55019",
+              "CENTLAT": "+43.0422344",
+              "SLDL": "019",
+              "AREAWATER": 870458,
+              "STATE": "55",
+              "BASENAME": "19",
+              "OID": "2139042579647800",
+              "LSADC": "L3",
+              "FUNCSTAT": "N",
+              "INTPTLAT": "+43.0497830",
+              "NAME": "Assembly District 19",
+              "OBJECTID": 844,
+              "CENTLON": "-087.8918262",
+              "LSY": "2026",
+              "AREALAND": 15836081,
+              "INTPTLON": "-087.8927932",
+              "MTFCC": "G5220",
+              "LDTYP": "O"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
