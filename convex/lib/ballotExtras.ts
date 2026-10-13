@@ -76,6 +76,14 @@ export function countyBallotFrom(file: CountyFile, county: string | undefined): 
   };
 }
 
+/** Every countywide contest in the file, in the file's order. Null until the file is signed. */
+export function allCountyContestsFrom(file: CountyFile): CountyContest[] | null {
+  return isSigned(file) ? file.contests : null;
+}
+
+/** Every countywide contest in the state, for a page that lets the browser pick one county's. Null until signed. */
+export const allCountyContests = (): CountyContest[] | null => allCountyContestsFrom(countyData);
+
 /** The countywide contests for a voter's county, from the signed file. */
 export const countyBallot = (county: string | undefined): CountyBallot =>
   countyBallotFrom(countyData, county);

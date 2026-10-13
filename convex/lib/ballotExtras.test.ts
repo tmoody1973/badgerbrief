@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { countyBallotFrom, statewideQuestionsFrom, type CountyFile, type QuestionsFile } from "./ballotExtras";
+import { allCountyContestsFrom, countyBallotFrom, statewideQuestionsFrom, type CountyFile, type QuestionsFile } from "./ballotExtras";
 import { countyKey } from "./countyKey";
 import countyData from "./data/county-contests-2026.json";
 import questionsData from "./data/ballot-questions-2026.json";
@@ -107,5 +107,17 @@ describe("statewideQuestionsFrom", () => {
   test("reads the real file's three questions once signed", () => {
     const result = statewideQuestionsFrom({ ...questionsData, ...SIGNED });
     expect(result.status === "ok" && result.questions.map((q) => q.number)).toEqual([1, 2, 3]);
+  });
+});
+
+describe("allCountyContestsFrom", () => {
+  test("gives every countywide contest once the file is signed", () => {
+    const contests = allCountyContestsFrom(countyData as CountyFile);
+    expect(contests).toHaveLength(164);
+    expect(new Set(contests?.map((c) => c.county)).size).toBe(72);
+  });
+
+  test("gives nothing at all from an unsigned file", () => {
+    expect(allCountyContestsFrom({ ...(countyData as CountyFile), certifiedBy: "", certifiedAt: "" })).toBeNull();
   });
 });
