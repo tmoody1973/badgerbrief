@@ -14,7 +14,8 @@
  *   node scripts/eval-gate.mjs --name candidate --baseline haiku-baseline
  *   node scripts/eval-gate.mjs --name candidate --judge-passes 1   # single noisy run
  *   Flags: --dev (run agent against dev deployment; default prod), --model,
- *          --instructions-file, --judge-passes N (default 3)
+ *          --instructions-file, --judge-passes N (default 3),
+ *          --dataset NAME (default voter-help-golden)
  *
  * The judge is NOT deterministic. Three runs over identical code and identical
  * answers scored golden-expectations 67%, 72% and 94%, with different questions
@@ -29,7 +30,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
 const SPACE = "tarikjmoody Space";
-const DATASET = "voter-help-golden";
+const DEFAULT_DATASET = "voter-help-golden";
 const EVALUATORS = [
   { id: "RXZhbHVhdG9yOjExNTA5OjlvMC8=", name: "citation-faithfulness" },
   { id: "RXZhbHVhdG9yOjExNTEwOlZDRVk=", name: "neutrality" },
@@ -45,6 +46,9 @@ function arg(flag) {
   const i = process.argv.indexOf(flag);
   return i >= 0 ? process.argv[i + 1] : undefined;
 }
+// The question set to run. The November 2026 set is its own dataset
+// (docs/eval-gate.md): the service can append rows but not rewrite them.
+const DATASET = arg("--dataset") ?? DEFAULT_DATASET;
 const name = arg("--name");
 if (!name) {
   console.error("--name <experiment-name> is required");

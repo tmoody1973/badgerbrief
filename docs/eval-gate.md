@@ -12,6 +12,7 @@ Before deploying ANY change to an agent's instructions, prompt contract, or
 ```bash
 # 1. Run the candidate config against the golden dataset
 node scripts/eval-gate.mjs --name <change>-$(date +%Y%m%d) \
+  --dataset voter-help-golden-general \
   [--model claude-xyz] [--instructions-file candidate.txt] \
   --baseline <last-passing-experiment>
 
@@ -61,7 +62,7 @@ Model-decision history, all decided by this gate on 2026-07-19:
 
 | Piece | Where |
 |---|---|
-| Golden dataset (15 questions + expectations) | Arize dataset `voter-help-golden`; source of truth `scripts/voter-help-golden.json` |
+| Golden dataset (24 questions + expectations, written for the Nov 3, 2026 general election) | Arize dataset `voter-help-golden-general`; source of truth `scripts/voter-help-golden.json`. The primary-era set, `voter-help-golden`, is kept with its results and is no longer the gate. |
 | Gate runner | `scripts/eval-gate.mjs` |
 | Judges (LLM-as-judge, claude-sonnet-5, function calling, temp 0) | Arize evaluators: Citation Faithfulness, Neutrality, Official Source First, Refusal Correctness, Golden Expectations |
 | Continuous production scoring | Arize task `badgerbrief-agent-quality` — continuous, 25% sampling, AGENT spans only (`attributes.openinference.span.kind = 'AGENT'`) |
@@ -71,11 +72,26 @@ Model-decision history, all decided by this gate on 2026-07-19:
 
 ## Updating the golden dataset
 
-Edit `scripts/voter-help-golden.json`, then append the new rows:
+Edit `scripts/voter-help-golden.json`. The service can append rows but cannot
+rewrite them, so:
 
-```bash
-ax datasets append voter-help-golden --space "tarikjmoody Space" --json '[...]'
-```
+- **Adding questions:** append the new rows.
+
+  ```bash
+  ax datasets append voter-help-golden-general --space "tarikjmoody Space" --json '[...]'
+  ```
+
+- **Changing existing questions:** create a new dataset from the file and point
+  the gate at it. Keep the old one; its experiments are the history.
+
+  ```bash
+  ax datasets create --name voter-help-golden-<label> --space "tarikjmoody Space" --file scripts/voter-help-golden.json
+  ax datasets list --space "tarikjmoody Space"        # verify by listing; do not trust the exit code
+  node scripts/eval-gate.mjs --name <experiment> --dataset voter-help-golden-<label>
+  ```
+
+A baseline is only comparable within one dataset. The first passing run on a
+new dataset becomes that dataset's baseline.
 
 Keep questions in the proven-live categories: procedural (official-source
 checks), candidate/race info (citation checks), refusal traps (legal,
