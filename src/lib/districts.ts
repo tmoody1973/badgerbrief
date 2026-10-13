@@ -107,3 +107,11 @@ export function relevantRaces<R extends RaceLike>(districts: Districts, races: R
     return false;
   });
 }
+
+/**
+ * Whether a voter's matched races include a State Senate race. Matches the
+ * per-district ids ("WI-STATE-SENATE-D7-2026") and the old chamber-wide row.
+ */
+export function hasStateSenateRace(matches: { raceId: string }[]): boolean {
+  return matches.some((r) => r.raceId.startsWith("WI-STATE-SENATE-"));
+}

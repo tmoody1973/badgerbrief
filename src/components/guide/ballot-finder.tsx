@@ -6,7 +6,7 @@ import { track } from "@/lib/analytics";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Doc } from "../../../convex/_generated/dataModel";
-import { relevantRaces, type Districts } from "@/lib/districts";
+import { relevantRaces, type Districts, hasStateSenateRace } from "@/lib/districts";
 import { localeFromPath } from "@/lib/i18n/chrome-dict";
 import { ballotFinderDict, type BallotFinderDict } from "@/lib/i18n/ballot-finder-dict";
 import { RaceCard } from "./cards";
@@ -112,9 +112,7 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
 
   const matches =
     status.kind === "found" ? relevantRaces(status.districts, races) : [];
-  const senateOnBallot =
-    status.kind === "found" &&
-    matches.some((r) => r.raceId === "WI-STATE-SENATE-2026");
+  const senateOnBallot = status.kind === "found" && hasStateSenateRace(matches);
 
   return (
     <section className="mt-8 border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
