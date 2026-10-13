@@ -271,7 +271,7 @@ describe("questionnairePayload", () => {
     expect(payload.rule).toBe(QUESTIONNAIRE_RULE);
     for (const phrase of [/in quotation marks/, /told Wisconsin Watch/, /similar space/, /nothing about why/, /never compare or contrast who has answers/i, /how a party's candidates responded/, /the person in name/, /If support is present/, /truncated/, /cite november\.source/i,
       // Seen in production smoke tests on 2026-10-13: a candidate with no answers left without a line of their own, "did answer ... for comparison", and a bare support address.
-      /always add one more line/, /otherwise a link to page/, /"did answer"/, /as a markdown link/]) {
+      /always add one more line/, /otherwise a link to page/, /"did answer"/, /as a markdown link/, /if you quoted no answer, leave support out/]) {
       expect(QUESTIONNAIRE_RULE).toMatch(phrase);
     }
   });
