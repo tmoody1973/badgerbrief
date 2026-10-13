@@ -17,7 +17,9 @@ export type Districts = {
 
 export type GeocodeResult =
   | ({ ok: true; matchedAddress: string } & Districts)
-  | { ok: false; error: "no_match" | "not_wisconsin" };
+  | { ok: false; error: "no_match" | "not_wisconsin" }
+  // From the lookup route, never from the parser: the federal service failed, or this visitor has looked up too often.
+  | { ok: false; error: "upstream" | "rate_limited" };
 
 type GeographyEntry = { NAME?: string; BASENAME?: string; STATE?: string };
 type AddressMatch = {
