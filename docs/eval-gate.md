@@ -32,7 +32,15 @@ node scripts/eval-gate.mjs --name <change>-$(date +%Y%m%d) \
 - Experiments live in Arize under dataset `voter-help-golden` → full
   per-question judge explanations for any failure.
 
-Current baseline experiment: **`sonnet-5-tuned`** (2026-07-19).
+Current baseline experiment: **`general-2026-v5-confirm`** on dataset
+`voter-help-golden-general` (2026-10-12): 25/25, 100%, confirming
+`general-2026-v5` at 24/25, 96%. Both on commit `9c792c6`, after which the
+chat was switched back on. Run with `AX_BIN` pointing at ax 0.39.0 (see
+Gotchas).
+
+Earlier baseline, primary-era dataset `voter-help-golden`: `sonnet-5-tuned`
+(2026-07-19), 93%. Not comparable with the above: until 2026-10-12 the gate
+judged only the last step of each answer (see Gotchas).
 Model-decision history, all decided by this gate on 2026-07-19:
 - `haiku-4-5-baseline-v3`: 79% — FAILED (invented "leads polls", under-
   answered questions it had data for, skipped a no-record disclosure).
@@ -46,6 +54,15 @@ Model-decision history, all decided by this gate on 2026-07-19:
   out-of-coverage disclosure for county/municipal races. **Shipped:**
   Voter Help runs `claude-sonnet-5` with the tuned instructions.
   Known nit: the Green Bay-mayor disclosure sentence lands ~14/15 runs.
+- `general-2026-v3` … `v5-confirm` (2026-10-12, general-election rewrite:
+  ballot payloads, rule 10, 25 November questions). `v3` 88% on the old
+  harness (two of its three failures were the last-step artifact; the third,
+  finance figures cited to an unrelated link, was real and fixed). `v4` 92% on
+  the corrected harness, not counted: it exposed a refusal that described the
+  governor nominees from memory, fixed in rule 6. `v5` **96%** and
+  `v5-confirm` **100%** on the final configuration → shipped. Known nit: the
+  Hong AB 388 expectation says "does not characterize the vote", which a judge
+  sometimes reads as forbidding the tally that rule 9 requires.
 - `voting-record-v10` (2026-07-23, Task 8 — `getVotingRecord` tool + rule 9):
   **93%, ties `sonnet-5-tuned`.** Golden-expectations on this ~15-question
   dataset is noisy run-to-run (observed 63%–100% across ~10 gate runs for
