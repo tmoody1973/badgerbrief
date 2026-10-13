@@ -149,14 +149,14 @@ describe("voterBallot", () => {
   test("Milwaukee: statewide, House, Senate, Assembly, then county, in the state's order", () => {
     const b = voterBallot(data(), milwaukee);
     expect(b.contests.map((c) => c.position)).toEqual([250, 252, 1204, 1307, 1419, 24004, 24005]);
-    expect(b.senate).toBe("on-ballot");
+    expect(b.absent).toEqual([]);
     expect(b.county).toEqual({ status: "ok", name: "Milwaukee County" });
   });
 
   test("an even Senate district has no Senate contest and says so", () => {
     const b = voterBallot(data(), { congressional: 2, senate: 26, assembly: 76, county: "dane" });
     expect(b.contests.some((c) => c.position >= 1300 && c.position < 1400)).toBe(false);
-    expect(b.senate).toBe("not-up");
+    expect(b.absent).toEqual([{ office: "State Senate", district: 26 }]);
     expect(b.contests.map((c) => c.position)).toEqual([250, 252, 1202, 1476, 21304]);
   });
 
@@ -179,6 +179,11 @@ describe("voterBallot", () => {
     const b = voterBallot(data(), { ...milwaukee, assembly: 20, congressional: 8 });
     expect(b.contests.some((c) => c.position >= 1400 && c.position < 1500)).toBe(false);
     expect(b.contests.some((c) => c.position >= 1200 && c.position < 1300)).toBe(false);
+    // And the page is told, so it can say so instead of showing a shorter ballot without a word.
+    expect(b.absent).toEqual([
+      { office: "U.S. House", district: 8 },
+      { office: "State Assembly", district: 20 },
+    ]);
   });
 });
 

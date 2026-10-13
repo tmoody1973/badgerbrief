@@ -14,10 +14,13 @@ export function ShareBallot({ districts }: { districts: Districts }) {
   return (
     <>
       <p className="mt-2 max-w-2xl">
-        The link carries your districts{districts.county ? " and county" : ""}, an area of about 60,000 people. It never carries your address.
+        {districts.county
+          ? "The link shows the districts and county you vote in. Together they can point to a small area, especially in a rural county."
+          : "The link shows the districts you vote in."}{" "}
+        It never carries your address.
       </p>
       <div className="mt-3">
-        <ShareButton url={`${SITE_URL}/ballot#${districtsToHash(districts)}`} title="My Wisconsin ballot, November 3, 2026" />
+        <ShareButton url={`${SITE_URL}/ballot#${districtsToHash(districts)}`} title="My Wisconsin ballot, November 3, 2026" channels="private" />
       </div>
     </>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
@@ -37,7 +37,16 @@ function MyVote({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function MyBallot({ data, children }: { data: BallotData; children: React.ReactNode }) {
+export function MyBallot({
+  data,
+  questionCount,
+  children,
+}: {
+  data: BallotData;
+  /** How many statewide questions the page shows; absent when the questions file is not certified. */
+  questionCount?: number;
+  children: React.ReactNode;
+}) {
   const knownCounties = useMemo(() => (data.counties ? new Set(Object.keys(data.counties)) : null), [data.counties]);
   const countyChoices = useMemo(
     () => Object.entries(data.counties ?? {}).map(([key, county]) => ({ key, name: county.name })).sort((a, b) => a.name.localeCompare(b.name)),
@@ -55,22 +64,35 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
     ? `cd=${prefs.congressionalDistrict}&sd=${prefs.stateSenateDistrict ?? ""}&ad=${prefs.stateAssemblyDistrict ?? ""}`
     : "";
 
+  const own = useMemo(() => districtsFromHash(storedText, knownCounties), [storedText, knownCounties]);
   const shown = useMemo(
-    () =>
-      chooseShown({
-        link: districtsFromHash(linkText, knownCounties),
-        device: districtsFromHash(storedText, knownCounties),
-        account: districtsFromHash(accountText, knownCounties),
-      }),
-    [linkText, storedText, accountText, knownCounties],
+    () => chooseShown({ link: districtsFromHash(linkText, knownCounties), device: own, account: districtsFromHash(accountText, knownCounties) }),
+    [linkText, own, accountText, knownCounties],
   );
+
+  // After the ballot on show changes because of something the visitor did,
+  // take them to it: to the top, with the districts read out. Without this a
+  // lookup made at the foot of the page changes a ballot far above it, and a
+  // screen reader hears nothing.
+  const headline = useRef<HTMLHeadingElement>(null);
+  const showNext = useRef(false);
+  useEffect(() => {
+    if (!showNext.current) return;
+    showNext.current = false;
+    window.scrollTo(0, 0);
+    headline.current?.focus({ preventScroll: true });
+  }, [shown]);
+
+  /** Stop showing a shared link, and take it out of the address bar (see ballot-view.ts for why that needs care). */
+  const leaveLink = () => forgetLinkedBallot();
+
+  const [countyPick, setCountyPick] = useState("");
 
   /** The visitor's own districts: kept on this device, and with their account when signed in. */
   const keepDistricts = (districts: Districts, matchedAddress?: string) => {
+    showNext.current = true;
     storeDistricts(districts);
-    // Someone else's districts must not stay in the address bar.
-    window.history.replaceState(null, "", window.location.pathname);
-    forgetLinkedBallot();
+    leaveLink();
     if (isAuthenticated) {
       void save({
         address: matchedAddress ?? "",
@@ -90,14 +112,14 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
       order === "ballot"
         ? [
             { id: "contests", label: "Contests", count: ballot?.contests.length },
-            { id: "questions", label: "Questions", count: 3 },
+            { id: "questions", label: "Questions", count: questionCount },
           ]
         : [
             ...(decisions.length > 0 ? [{ id: "decisions", label: "Decisions", count: decisions.length }] : []),
             ...(oneName.length > 0 ? [{ id: "one-name", label: "One name", count: oneName.length }] : []),
-            { id: "questions", label: "Questions", count: 3 },
+            { id: "questions", label: "Questions", count: questionCount },
           ],
-    [order, ballot, decisions.length, oneName.length],
+    [order, ballot, decisions.length, oneName.length, questionCount],
   );
 
   const certified = data.ballotSource.url ? (
@@ -152,7 +174,7 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
   return (
     <div data-ballot-ready={shown.from}>
       <section className="mt-4 border-2 border-border bg-secondary p-3 shadow-[var(--shadow-brutal)] sm:mt-6 sm:p-6">
-        <h2 className="font-display flex flex-wrap gap-x-3 gap-y-1 text-lg leading-tight sm:gap-x-5 sm:text-3xl">
+        <h2 ref={headline} tabIndex={-1} className="font-display flex flex-wrap gap-x-3 gap-y-1 text-lg leading-tight outline-none sm:gap-x-5 sm:text-3xl">
           {places.map((place, i) => (
             <span key={place} className="whitespace-nowrap">
               {place}
@@ -168,6 +190,21 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
             <a href="#lookup" className={LINK}>
               Enter my address
             </a>
+            {own && (
+              <>
+                {" or "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    showNext.current = true;
+                    leaveLink();
+                  }}
+                  className={`min-h-11 ${LINK}`}
+                >
+                  show my own ballot
+                </button>
+              </>
+            )}
           </p>
         )}
       </section>
@@ -178,26 +215,46 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
             <p>
               County offices aren’t loaded yet. <MyVote>See your full ballot at MyVote</MyVote>.
             </p>
+          ) : shown.from === "link" ? (
+            // Someone else's link: adding a county here would save their districts as the visitor's own.
+            <p>
+              This link doesn’t say which county, so county offices aren’t shown. Enter your own address below to see yours, or{" "}
+              <MyVote>see your full ballot at MyVote</MyVote>.
+            </p>
           ) : (
             <>
               <p className="font-bold">We couldn’t tell which county this is, so county offices aren’t shown.</p>
-              <label className="mt-3 block text-sm font-bold">
-                Your county
-                <select
-                  value=""
-                  onChange={(event) => event.target.value && keepDistricts({ ...districts, county: event.target.value })}
-                  className={`mt-1 block min-h-11 border-2 border-border bg-card px-3 py-2 ${FOCUS}`}
-                >
-                  <option value="" disabled>
-                    Pick your county
-                  </option>
-                  {countyChoices.map((county) => (
-                    <option key={county.key} value={county.key}>
-                      {county.name}
+              <div className="mt-3 flex flex-wrap items-end gap-3">
+                <label className="text-sm font-bold">
+                  Your county
+                  <select
+                    value={countyPick}
+                    onChange={(event) => setCountyPick(event.target.value)}
+                    className={`mt-1 block min-h-11 border-2 border-border bg-card px-3 py-2 ${FOCUS}`}
+                  >
+                    <option value="" disabled>
+                      Pick your county
                     </option>
-                  ))}
-                </select>
-              </label>
+                    {countyChoices.map((county) => (
+                      <option key={county.key} value={county.key}>
+                        {county.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  disabled={!countyPick}
+                  onClick={() => {
+                    // The county alone: kept on this device. A saved account's address is left as it is.
+                    showNext.current = true;
+                    storeDistricts({ ...districts, county: countyPick });
+                  }}
+                  className={`press min-h-11 border-2 border-border bg-secondary px-4 font-bold shadow-[var(--shadow-brutal)] disabled:opacity-60 ${FOCUS}`}
+                >
+                  Show county offices
+                </button>
+              </div>
               <p className="mt-3 text-sm">
                 Or <MyVote>see your full ballot at MyVote</MyVote>.
               </p>
@@ -242,7 +299,11 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
             <section id="one-name" className="mt-10 scroll-mt-16">
               <h2 className="font-display text-2xl">One name on the ballot</h2>
               <p className="mt-2 max-w-2xl">
-                {oneName.length === 1 ? "This office has" : `These ${oneName.length} offices have`} a single candidate on the ballot.
+                {oneName.some((contest) => contest.candidates.length === 0)
+                  ? `These ${oneName.length} offices have one candidate on the ballot, or none.`
+                  : oneName.length === 1
+                    ? "This office has a single candidate on the ballot."
+                    : `These ${oneName.length} offices have a single candidate on the ballot.`}
               </p>
               <div className="mt-4">
                 <OneNameStrip contests={oneName} numbers={numbers} />
@@ -252,13 +313,17 @@ export function MyBallot({ data, children }: { data: BallotData; children: React
         </>
       )}
 
-      {ballot.senate === "not-up" && (
-        <p className="mt-6 max-w-2xl border-2 border-border bg-card p-4">
-          {districts.senate % 2 === 0
-            ? `State Senate District ${districts.senate} is not on the ballot in 2026. Even-numbered districts vote in 2028.`
-            : `We don’t have a State Senate contest for District ${districts.senate}. `}
-          {districts.senate % 2 !== 0 && <MyVote>Check your ballot at MyVote</MyVote>}
-        </p>
+      {ballot.absent.length > 0 && (
+        <div className="mt-6 max-w-2xl border-2 border-border bg-card p-4">
+          {ballot.absent.map((seat) => (
+            <p key={seat.office}>
+              The state’s list has no {seat.office} contest for District {seat.district} in 2026.
+            </p>
+          ))}
+          <p className="mt-2 text-sm">
+            If you picked your districts by hand, <MyVote>check them at MyVote</MyVote>.
+          </p>
+        </div>
       )}
 
       <section id="questions" className="mt-10 scroll-mt-16">

@@ -38,7 +38,14 @@ function taggedUrl(url: string, method: Method): string {
   }
 }
 
-export function ShareButton({ url, title }: { url: string; title: string }) {
+/**
+ * `channels="private"` leaves out the social networks. Their share links put
+ * the page's whole address inside the network's own address, so the network
+ * receives it on the click, before anything is posted. For a ballot, whose
+ * address carries the voter's districts, only the voter's own clipboard,
+ * share sheet and email are offered.
+ */
+export function ShareButton({ url, title, channels = "all" }: { url: string; title: string; channels?: "all" | "private" }) {
   const [hasNativeShare, setHasNativeShare] = useState(false);
   const [copied, setCopied] = useState(false);
   const surface = shareSurface(url);
@@ -96,33 +103,19 @@ export function ShareButton({ url, title }: { url: string; title: string }) {
           Share
         </button>
       )}
-      <a
-        href={xUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={linkClass}
-        onClick={() => trackShare("x")}
-      >
-        Share on X
-      </a>
-      <a
-        href={facebookUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={linkClass}
-        onClick={() => trackShare("facebook")}
-      >
-        Share on Facebook
-      </a>
-      <a
-        href={blueskyUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={linkClass}
-        onClick={() => trackShare("bluesky")}
-      >
-        Share on Bluesky
-      </a>
+      {channels === "all" && (
+        <>
+          <a href={xUrl} target="_blank" rel="noopener noreferrer" className={linkClass} onClick={() => trackShare("x")}>
+            Share on X
+          </a>
+          <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className={linkClass} onClick={() => trackShare("facebook")}>
+            Share on Facebook
+          </a>
+          <a href={blueskyUrl} target="_blank" rel="noopener noreferrer" className={linkClass} onClick={() => trackShare("bluesky")}>
+            Share on Bluesky
+          </a>
+        </>
+      )}
       <a href={emailUrl} className={linkClass} onClick={() => trackShare("email")}>
         Email
       </a>

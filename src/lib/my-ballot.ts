@@ -47,7 +47,12 @@ export type BallotData = {
 export type VoterBallot = {
   /** In the state's order. */
   contests: BallotContest[];
-  senate: "on-ballot" | "not-up";
+  /**
+   * Districts the state's list has no contest for. A State Senate district
+   * that is not up this year lands here; so would a House or Assembly
+   * district missing from the data, which the page must say, not hide.
+   */
+  absent: { office: "U.S. House" | "State Senate" | "State Assembly"; district: number }[];
   county: { status: "ok"; name: string } | { status: "missing" } | { status: "unknown" } | { status: "not-certified" };
 };
 
@@ -159,10 +164,13 @@ const own = <T>(record: Record<string | number, T>, key: string | number): T | u
 
 /** One voter's contests, in the state's order. */
 export function voterBallot(data: BallotData, districts: Districts): VoterBallot {
-  const senate = own(data.senate, districts.senate);
-  const mine = [...data.statewide, own(data.congressional, districts.congressional), senate, own(data.assembly, districts.assembly)].filter(
-    (contest): contest is BallotContest => contest !== undefined,
-  );
+  const seats = [
+    { office: "U.S. House" as const, district: districts.congressional, contest: own(data.congressional, districts.congressional) },
+    { office: "State Senate" as const, district: districts.senate, contest: own(data.senate, districts.senate) },
+    { office: "State Assembly" as const, district: districts.assembly, contest: own(data.assembly, districts.assembly) },
+  ];
+  const mine = [...data.statewide, ...seats.flatMap((seat) => (seat.contest ? [seat.contest] : []))];
+  const absent = seats.filter((seat) => !seat.contest).map(({ office, district }) => ({ office, district }));
 
   let county: VoterBallot["county"];
   if (data.counties === null) county = { status: "not-certified" };
@@ -175,7 +183,7 @@ export function voterBallot(data: BallotData, districts: Districts): VoterBallot
     } else county = { status: "unknown" };
   }
 
-  return { contests: mine.sort(byPosition), senate: senate ? "on-ballot" : "not-up", county };
+  return { contests: mine.sort(byPosition), absent, county };
 }
 
 /**

@@ -31,12 +31,14 @@ export default async function BallotPage() {
       index.find((race) => race.raceId === raceId)?.candidates.some((candidate) => questionnaireStatus(raceId, candidate.slug)?.status === "answered") ?? false,
   });
 
+  const questions = statewideQuestions();
+
   return (
     <main className="mx-auto w-full max-w-3xl px-4 pb-10 pt-6 sm:pt-10">
       <h1 className="font-display text-4xl leading-none sm:text-5xl">My Ballot</h1>
-      <p className="mt-2 max-w-2xl">{CURRENT_ELECTION.longDate}, as the state prints it.</p>
-      <MyBallot data={data}>
-        <BallotQuestions questions={statewideQuestions()} />
+      <p className="mt-2 max-w-2xl">{CURRENT_ELECTION.longDate}. Names as the state prints them, in the state’s order.</p>
+      <MyBallot data={data} questionCount={questions.status === "ok" ? questions.questions.length : undefined}>
+        <BallotQuestions questions={questions} />
       </MyBallot>
     </main>
   );

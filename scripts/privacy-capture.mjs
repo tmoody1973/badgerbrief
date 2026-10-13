@@ -14,6 +14,12 @@
  * Run it against a production build. A development server does not pre-load
  * links, which is one of the ways districts could leak.
  *
+ * Analytics tools ignore automated browsers, so a capture that looks like one
+ * proves nothing about them. This one hides the automation flag, and FAILS
+ * unless it sees Vercel Web Analytics report at least one page view. Away
+ * from Vercel that tool's script is missing, so it is borrowed from the live
+ * site.
+ *
  * The address lookup is not exercised: that would send a real address to the
  * federal service. Its handling is covered by src/app/api/geocode/route.test.ts.
  */
@@ -37,9 +43,24 @@ const TELLS = [
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const context = await browser.newContext(devices["iPhone 13"]);
 await context.grantPermissions(["clipboard-read", "clipboard-write"]).catch(() => {});
+// Vercel Web Analytics, like most analytics tools, stays silent when this flag is set.
+await context.addInitScript(() => Object.defineProperty(Navigator.prototype, "webdriver", { get: () => false }));
 const page = await context.newPage();
 
+const INSIGHTS_SCRIPT = "/_vercel/insights/script.js";
+await page.route(`**${INSIGHTS_SCRIPT}`, async (route) => {
+  const own = await route.fetch().catch(() => null);
+  if (own?.ok()) return route.fulfill({ response: own });
+  const live = await fetch(`https://badgerbrief.org${INSIGHTS_SCRIPT}`);
+  return route.fulfill({ status: 200, contentType: "application/javascript", body: await live.text() });
+});
+
 const requests = [];
+// Convex talks over a websocket, which the request listener never sees.
+page.on("websocket", (socket) => {
+  const host = new URL(socket.url()).hostname;
+  socket.on("framesent", (frame) => requests.push({ url: socket.url(), host, path: "(live connection)", text: String(frame.payload), step }));
+});
 page.on("request", (request) => {
   const url = request.url();
   let text = `${url}\n${request.postData() ?? ""}\n${JSON.stringify(request.headers())}`;
@@ -56,7 +77,7 @@ const failures = [];
 const ready = (mode) => page.waitForFunction((m) => document.querySelector("[data-ballot-ready]")?.getAttribute("data-ballot-ready") === m, mode, { timeout: 30000 });
 
 try {
-  await page.goto(`${base}/ballot${LINK}`, { waitUntil: "networkidle", timeout: 60000 });
+  await page.goto(`${base}/ballot${LINK}`, { waitUntil: "load", timeout: 60000 });
   await ready("link");
   await page.waitForTimeout(2500);
 
@@ -78,19 +99,20 @@ try {
   });
   await page.waitForTimeout(2000);
 
+  // The next three steps happen while the link's "#cd=…" is still in the address bar.
   step = "switching to ballot order and back";
   await page.click('button:has-text("Show in ballot order")');
   await page.waitForTimeout(800);
   await page.click('button:has-text("Show decisions first")');
   await page.waitForTimeout(800);
 
-  step = "jumping to the questions";
-  await page.click('nav[aria-label="Sections on this page"] a[href="#questions"]');
-  await page.waitForTimeout(800);
-
   step = "copying the share link";
   await page.click('button:has-text("Copy link")');
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1500);
+
+  step = "jumping to the questions";
+  await page.click('nav[aria-label="Sections on this page"] a[href="#questions"]');
+  await page.waitForTimeout(1500);
 
   step = "choosing districts by hand";
   await page.click('button:has-text("Pick your districts by hand instead")');
@@ -104,31 +126,46 @@ try {
   await page.waitForTimeout(2000);
 
   step = "coming back later, districts remembered on the device";
-  await page.goto(`${base}/ballot`, { waitUntil: "networkidle", timeout: 60000 });
+  await page.goto(`${base}/ballot`, { waitUntil: "load", timeout: 60000 });
   await ready("device");
   await page.waitForTimeout(2500);
 
+  step = "opening someone else's link, with their own districts stored";
+  await page.goto(`${base}/ballot#cd=7&sd=31&ad=93`, { waitUntil: "load", timeout: 60000 });
+  await ready("link");
+  await page.waitForTimeout(2500);
+
+  const beforeOpening = requests.length;
+  step = "opening a contest on purpose";
+  await page.click("#decisions article a:has-text('Open this contest')");
+  await page.waitForLoadState("load").catch(() => {});
+  await page.waitForTimeout(2000);
+
   const unprompted = new Set(ownContests);
-  for (const request of requests) {
+  requests.forEach((request, i) => {
     for (const tell of TELLS) {
       if (tell.pattern.test(request.text)) {
         const at = request.text.search(tell.pattern);
-        failures.push(`${request.host} was sent ${tell.name} while ${request.step}: …${request.text.slice(Math.max(0, at - 50), at + 50).replace(/\s+/g, " ")}…`);
+        failures.push(`${request.host} ${request.path} was sent ${tell.name} while ${request.step}: …${request.text.slice(Math.max(0, at - 60), at + 60).replace(/\s+/g, " ")}…`);
       }
     }
-    if (unprompted.has(request.path)) failures.push(`${request.host} was asked for ${request.path} while ${request.step}, before the voter opened it`);
-  }
+    // Once the voter opens a contest, the pages it links to are theirs to pre-load.
+    if (i < beforeOpening && unprompted.has(request.path)) failures.push(`${request.host} was asked for ${request.path} while ${request.step}, before the voter opened it`);
+  });
 
-  step = "opening a contest on purpose";
-  const before = requests.length;
-  await page.click("#decisions article a:has-text('Open this contest')");
-  await page.waitForLoadState("networkidle").catch(() => {});
-  const analytics = requests.filter((r) => /google-analytics\.com|analytics\.google\.com/.test(r.host));
+  const count = (pattern) => requests.filter((r) => pattern.test(r.url)).length;
+  const pageViews = count(/\/_vercel\/insights\/view/);
+  const events = count(/\/_vercel\/insights\/event/);
+  const google = count(/google-analytics\.com|analytics\.google\.com/);
+  const live = requests.filter((r) => r.path === "(live connection)").length;
+  if (pageViews === 0) failures.push("Vercel Web Analytics reported no page view, so this run proved nothing about it");
+  if (events === 0) failures.push("Vercel Web Analytics reported no event (copying the link and jumping to a section should each send one)");
 
   const hosts = [...new Set(requests.map((r) => r.host))].filter(Boolean).sort();
-  console.log(`requests recorded: ${before} before the voter opened a contest, ${requests.length} in all, to ${hosts.length} servers`);
-  console.log(`servers: ${hosts.join(", ")}`);
-  console.log(`requests to Google Analytics: ${analytics.length}${analytics.length === 0 ? "  (analytics is off here, so this run says nothing about it)" : ""}`);
+  console.log(`requests recorded: ${requests.length}, to ${hosts.length} servers: ${hosts.join(", ")}`);
+  console.log(`Vercel Web Analytics: ${pageViews} page views, ${events} events`);
+  console.log(`Google Analytics: ${google} requests${google === 0 ? "  (off here, so this run says nothing about it)" : ""}`);
+  console.log(`messages sent over live connections: ${live}`);
   console.log(`the voter's own contest and candidate pages watched: ${unprompted.size}`);
 } catch (error) {
   failures.push(`the capture could not finish (${step}): ${String(error).split("\n")[0]}`);

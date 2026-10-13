@@ -5,7 +5,7 @@
  *
  * Every access is guarded. Private windows and locked-down browsers refuse
  * storage, sometimes by throwing when it is merely looked at; the page then
- * works for the visit and forgets on reload.
+ * keeps the value in memory, works for the visit, and forgets on reload.
  */
 import { districtsFromHash, districtsToHash } from "./ballot-link";
 import type { Districts } from "./districts";
@@ -21,22 +21,33 @@ const emit = () => {
   for (const listener of listeners) listener();
 };
 
+/**
+ * What the browser refused to store, kept for this visit only. Without it, a
+ * voter in a locked-down browser would look up their address and see nothing.
+ * Never used on the server, where it would outlive one visitor's request.
+ */
+const memory = new Map<string, string>();
+
 function read(key: string): string | null {
+  if (typeof window === "undefined") return null;
+  const kept = memory.get(key);
+  if (kept !== undefined) return kept;
   try {
-    return typeof window === "undefined" ? null : window.localStorage.getItem(key);
+    return window.localStorage.getItem(key);
   } catch {
     return null;
   }
 }
 
 function write(key: string, value: string | null) {
-  try {
-    if (typeof window !== "undefined") {
+  memory.delete(key);
+  if (typeof window !== "undefined") {
+    try {
       if (value === null) window.localStorage.removeItem(key);
       else window.localStorage.setItem(key, value);
+    } catch {
+      if (value !== null) memory.set(key, value);
     }
-  } catch {
-    // Nothing to persist to. The emit below still updates this visit.
   }
   emit();
 }
