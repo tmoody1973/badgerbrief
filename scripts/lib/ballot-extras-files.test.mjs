@@ -11,10 +11,11 @@ import {
   signatureHolds,
   toCountyFile,
 } from "./ballot-extras-files.mjs";
+import { REFERENDUM_NOTICE_PDF, STATE_CANDIDATES_XLSX, expectedFingerprint } from "./evidence.mjs";
 import { buildCountyContests } from "./wec-county.mjs";
 import { readWecWorkbook } from "./wec-legislative.mjs";
 
-const SOURCE = { name: "State file", url: "https://example.test/file", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
+const SOURCE = { name: "State file", url: "https://example.test/file", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z", sha256: "abc123" };
 
 const contest = (over) => ({
   county: "door",
@@ -112,6 +113,7 @@ describe("review sheets", () => {
     const sheet = countyReviewMarkdown({ file, notes: ["Iron County Coroner: the state lists no candidate."] });
     expect(sheet).toContain("NOT SIGNED");
     expect(sheet).toContain("2 contests in 2 counties, 1 candidate");
+    expect(sheet).toContain("File fingerprint (SHA-256): `abc123`.");
     expect(sheet).toContain("| Door County | Door County Sheriff | Curt Vandertie (Republican) |");
     expect(sheet).toContain("| Iron County | Iron County Coroner | No candidate listed |");
     expect(sheet).toContain("- Iron County Coroner: the state lists no candidate.");
@@ -154,6 +156,11 @@ describe("the files in the repository", () => {
     for (const file of [county, questions]) {
       if (isSigned(file)) expect(signatureHolds(file)).toBe(true);
     }
+  });
+
+  test("each file records the fingerprint of the exact state document it came from", () => {
+    expect(county.source.sha256).toBe(expectedFingerprint(STATE_CANDIDATES_XLSX));
+    expect(questions.source.sha256).toBe(expectedFingerprint(REFERENDUM_NOTICE_PDF));
   });
 
   test("a file is never half signed", () => {

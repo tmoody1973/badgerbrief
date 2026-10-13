@@ -81,7 +81,9 @@ const signatureLine = (file) =>
     : "NOT SIGNED. Nothing in this file is shown to voters until it is signed.";
 
 const sourceLine = (source) =>
-  `Source: ${source.name} (${source.documentUrl ?? source.url}), dated ${source.documentDate}, retrieved ${source.retrievedAt}.`;
+  `Source: ${source.name} (${source.documentUrl ?? source.url}), dated ${source.documentDate}, retrieved ${source.retrievedAt}.${
+    source.sha256 ? ` File fingerprint (SHA-256): \`${source.sha256}\`.` : ""
+  }`;
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 

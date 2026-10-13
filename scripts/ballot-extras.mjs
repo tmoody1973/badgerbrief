@@ -24,11 +24,17 @@ import {
   toCountyFile,
 } from "./lib/ballot-extras-files.mjs";
 import { citesAnotherSection, notVerbatim } from "./lib/ballot-questions.mjs";
+import {
+  REFERENDUM_NOTICE_TXT,
+  STATE_CANDIDATES_XLSX,
+  alteredEvidence,
+  expectedFingerprint,
+} from "./lib/evidence.mjs";
 import { buildCountyContests } from "./lib/wec-county.mjs";
 import { readWecWorkbook } from "./lib/wec-legislative.mjs";
 
-const STATE_XLSX = "docs/evidence/2026-10-12-wec-general/All-Contests-and-Candidates_November-3-2026.xlsx";
-const NOTICE_TXT = "docs/evidence/2026-10-13-wec-referenda/Type-C-Notice-of-Referendum-2026-11-03.txt";
+const STATE_XLSX = STATE_CANDIDATES_XLSX;
+const NOTICE_TXT = REFERENDUM_NOTICE_TXT;
 const COUNTY_JSON = "convex/lib/data/county-contests-2026.json";
 const QUESTIONS_JSON = "convex/lib/data/ballot-questions-2026.json";
 const REVIEW_DIR = "docs/evidence/ballot-extras";
@@ -37,6 +43,7 @@ const COUNTY_SOURCE = {
   url: "https://elections.wi.gov/media/41846/download",
   documentDate: "2026-10-06",
   retrievedAt: "2026-10-12T21:32:56Z",
+  sha256: expectedFingerprint(STATE_CANDIDATES_XLSX),
 };
 
 let certifier;
@@ -49,6 +56,14 @@ try {
 
 const COUNTY_SHEET = join(REVIEW_DIR, "county-offices-review.md");
 const QUESTIONS_SHEET = join(REVIEW_DIR, "statewide-questions-review.md");
+
+const altered = alteredEvidence([STATE_XLSX, NOTICE_TXT]);
+if (altered.length > 0) {
+  console.error(
+    `${altered.join(" and ")} changed on disk and ${altered.length === 1 ? "is" : "are"} no longer the bytes the state served (an app may have re-saved it). Restore with: git checkout -- <path>. Nothing was written.`,
+  );
+  process.exit(1);
+}
 
 const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
 const writeJson = (path, value) => writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);

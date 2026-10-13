@@ -11,6 +11,7 @@ const NEEDED = [
   "scripts/ballot-extras.mjs",
   "scripts/lib/ballot-extras-files.mjs",
   "scripts/lib/ballot-questions.mjs",
+  "scripts/lib/evidence.mjs",
   "scripts/lib/wec-county.mjs",
   "scripts/lib/wec-general.mjs",
   "scripts/lib/wec-legislative.mjs",
@@ -37,6 +38,22 @@ function sandbox() {
     run: (...args) => spawnSync("node", ["scripts/ballot-extras.mjs", ...args], { cwd: dir, encoding: "utf8" }),
   };
 }
+
+const STATE_XLSX = "docs/evidence/2026-10-12-wec-general/All-Contests-and-Candidates_November-3-2026.xlsx";
+
+describe("node scripts/ballot-extras.mjs", () => {
+  test("refuses to build from a state document whose bytes changed on disk", () => {
+    const box = sandbox();
+    box.write(STATE_XLSX, "re-saved by an app");
+    const before = box.outputs();
+    for (const args of [[], ["--certify", "Test Certifier"]]) {
+      const result = box.run(...args);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toMatch(/All-Contests-and-Candidates_November-3-2026\.xlsx.*changed on disk/s);
+    }
+    expect(box.outputs()).toEqual(before);
+  });
+});
 
 describe("node scripts/ballot-extras.mjs --certify", () => {
   test("refuses to sign when the questions changed after the review sheet was written", () => {

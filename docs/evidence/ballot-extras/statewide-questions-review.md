@@ -2,7 +2,7 @@
 
 NOT SIGNED. Nothing in this file is shown to voters until it is signed.
 
-Source: Wisconsin Elections Commission, Type C Notice of Referendum, November 3, 2026 (https://elections.wi.gov/sites/default/files/documents/Type%20C%20Notice%20for%20Ref%20for%20November%202026%20General%20Election_Final.pdf), dated 2026-08-17, retrieved 2026-10-13T11:51:38Z.
+Source: Wisconsin Elections Commission, Type C Notice of Referendum, November 3, 2026 (https://elections.wi.gov/sites/default/files/documents/Type%20C%20Notice%20for%20Ref%20for%20November%202026%20General%20Election_Final.pdf), dated 2026-08-17, retrieved 2026-10-13T11:51:38Z. File fingerprint (SHA-256): `7df28a76dc83030c18019adae19c06482e4dcc2ce465e22fbe9d969168158781`.
 
 Everything in a quote block below is the state's wording and has been checked against the notice by a test. Compare it with the PDF once yourself before signing.
 

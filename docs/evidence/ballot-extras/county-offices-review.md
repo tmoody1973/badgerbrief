@@ -2,7 +2,7 @@
 
 NOT SIGNED. Nothing in this file is shown to voters until it is signed.
 
-Source: Wisconsin Elections Commission, All Contests and Candidates, November 3, 2026 General Election (https://elections.wi.gov/media/41846/download), dated 2026-10-06, retrieved 2026-10-12T21:32:56Z.
+Source: Wisconsin Elections Commission, All Contests and Candidates, November 3, 2026 General Election (https://elections.wi.gov/media/41846/download), dated 2026-10-06, retrieved 2026-10-12T21:32:56Z. File fingerprint (SHA-256): `f26aa3fffacaa5ea80fd9fc53e99f74a4ebba10fe4e96c0c3b96e89870ee213e`.
 
 164 contests in 72 counties, 180 candidates.
 
