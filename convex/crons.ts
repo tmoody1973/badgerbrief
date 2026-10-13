@@ -85,6 +85,12 @@ crons.daily(
   {},
 );
 
+// 12:20 UTC — re-read the pages published positions cite; warn and email when
+// one has moved or no longer carries the sentence a summary rests on
+// (decision 017). crons.cron, not crons.daily: the Convex guidelines this
+// repo follows no longer allow the daily helper for new jobs.
+crons.cron("cited page sweep", "20 12 * * *", internal.citedPages.sweep, {});
+
 // 12:30 UTC — flag published positions that haven't been reviewed recently.
 // Deviation from plan text: lives at internal.monitorQueries.stalenessSweep,
 // not internal.monitor.stalenessSweep — "use node" modules (convex/monitor.ts)
