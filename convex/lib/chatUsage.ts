@@ -23,3 +23,6 @@ export function isKillSwitchOn(raw: string | undefined): boolean {
   if (v === "" || v === "0" || v === "false" || v === "off" || v === "no") return false;
   return true;
 }
+
+/** A feature flag is ON only for an explicit truthy value; unset means off. Same reading as the kill switch. */
+export const isFlagOn = isKillSwitchOn;

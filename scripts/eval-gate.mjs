@@ -15,7 +15,8 @@
  *   node scripts/eval-gate.mjs --name candidate --judge-passes 1   # single noisy run
  *   Flags: --dev (run agent against dev deployment; default prod), --model,
  *          --instructions-file, --judge-passes N (default 3),
- *          --dataset NAME (default voter-help-golden-general)
+ *          --dataset NAME (default voter-help-golden-general),
+ *          --questionnaire (register the Wisconsin Watch questionnaire tool)
  *
  * The judge is NOT deterministic. Three runs over identical code and identical
  * answers scored golden-expectations 67%, 72% and 94%, with different questions
@@ -107,6 +108,8 @@ for (const ex of reportOnly ? [] : examples) {
   const payload = { prompt: f.question };
   if (model) payload.model = model;
   if (instructions) payload.instructions = instructions;
+  // Turns on the questionnaire tool for this run only, so it is gated before voters get it.
+  if (process.argv.includes("--questionnaire")) payload.questionnaire = true;
   const convexArgs = ["convex", "run", "voterHelp:evalAnswer", JSON.stringify(payload)];
   if (!useDev) convexArgs.push("--prod");
   const t0 = Date.now();

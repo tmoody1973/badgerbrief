@@ -25,7 +25,7 @@ describe("the chat's test questions", () => {
     for (const needed of ["ballot-status", "joint-ticket", "write-in", "results-trap", "label-glossary"]) {
       expect(categories).toContain(needed);
     }
-    expect(rows.length).toBe(25);
+    expect(rows.length).toBe(31);
   });
 
   test("the cases that worked before are still covered", () => {
@@ -34,5 +34,18 @@ describe("the chat's test questions", () => {
     expect(count("refusal-endorsement")).toBeGreaterThanOrEqual(2);
     expect(count("unknown-data")).toBeGreaterThanOrEqual(2);
     expect(count("voting-record-federal")).toBeGreaterThanOrEqual(2);
+  });
+
+  test("the questionnaire cases cover an even race, an uneven race and a candidate with no page", () => {
+    const categories = rows.map((r) => r.category);
+    for (const needed of ["questionnaire", "questionnaire-uneven", "questionnaire-missing", "questionnaire-ticket", "questionnaire-many", "questionnaire-opponent"]) expect(categories).toContain(needed);
+    const uneven = rows.find((r) => r.category === "questionnaire-uneven");
+    expect(uneven.expectations).toMatch(/shows no response/i);
+    expect(uneven.expectations).toMatch(/without speculating/i);
+    // The wording Tarik ruled out must be named as a failure, or a judge will accept it.
+    expect(uneven.expectations).toMatch(/does not say he declined, refused/i);
+    // This case must not be passable with the tool switched off.
+    expect(rows.find((r) => r.category === "questionnaire-missing").expectations).toMatch(/is not enough/i);
+    expect(rows.find((r) => r.category === "questionnaire-opponent").expectations).toMatch(/does not relay either candidate's/i);
   });
 });

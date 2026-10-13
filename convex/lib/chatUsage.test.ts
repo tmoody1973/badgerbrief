@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { dayKey, capFromEnv, isOverCap, isKillSwitchOn } from "./chatUsage";
+import { dayKey, capFromEnv, isOverCap, isKillSwitchOn, isFlagOn } from "./chatUsage";
 
 describe("dayKey", () => {
   it("returns the UTC YYYY-MM-DD for a timestamp", () => {
@@ -44,5 +44,12 @@ describe("isKillSwitchOn", () => {
     expect(isKillSwitchOn("1")).toBe(true);
     expect(isKillSwitchOn("true")).toBe(true);
     expect(isKillSwitchOn("yes")).toBe(true);
+  });
+});
+
+describe("isFlagOn", () => {
+  it("a feature is off unless it is switched on explicitly", () => {
+    for (const off of [undefined, "", "  ", "0", "false", "off", "no", "FALSE"]) expect(isFlagOn(off)).toBe(false);
+    for (const on of ["1", "true", "on", "yes", " 1 "]) expect(isFlagOn(on)).toBe(true);
   });
 });

@@ -25,6 +25,9 @@ import {
   visibleAnswer,
   votingInfoPayload,
 } from "./lib/chatPayloads";
+import { fetchCandidateAnswers, questionnairePayload } from "./lib/questionnaire";
+import { questionnaireStatus } from "./lib/wisconsinWatch";
+import { isFlagOn } from "./lib/chatUsage";
 import { OUT_OF_COVERAGE_NOTE, VOTER_HELP_INSTRUCTIONS } from "./lib/voterHelpInstructions";
 import { ISSUE_SLUGS } from "./lib/extraction";
 import {
@@ -199,6 +202,42 @@ const getCandidateInfo = createTool({
     }),
 });
 
+const getQuestionnaireAnswers = createTool({
+  description:
+    "The candidates' own words for one race: their answers to Wisconsin Watch's 2026 questionnaire, for every candidate on the November 3, 2026 ballot for that office. Use it when the voter asks what the candidates for an office say, think, would do, or why voters should elect them, or asks for a candidate's own words. Takes the same race ids as getRaceInfo. Quote the answers exactly and attribute them as told to Wisconsin Watch, link each candidate's own url, cover every candidate with similar space, and follow the rule in the result. Read-only.",
+  inputSchema: z.object({
+    raceId: z.string().describe('Race id such as "WI-STATE-ASSEMBLY-D19-2026"'),
+  }),
+  execute: async (ctx, { raceId }): Promise<string> =>
+    withToolSpan("getQuestionnaireAnswers", ctx.threadId, { raceId }, async () => {
+      const data = await ctx.runQuery(api.public.getRace, { raceId });
+      if (!data) return `No race found with id "${raceId}" — disclose this and hand off the official link.`;
+      // Who is on the ballot comes from our certified list, exactly as getRaceInfo decides it.
+      const base = racePayload(data);
+      const statusFor = (slug: string) => questionnaireStatus(raceId, slug);
+      if (!base.onBallot.some((c) => statusFor(c.slug) !== null)) {
+        return `Wisconsin Watch's questionnaire does not cover "${raceId}" — say BadgerBrief has no questionnaire answers for this office and use getRaceInfo for what it does hold.`;
+      }
+      const answering = base.onBallot.flatMap((c) => {
+        const status = statusFor(c.slug);
+        return status?.status === "answered" ? [{ slug: c.slug, candidateId: status.candidateId }] : [];
+      });
+      const fetched = Object.fromEntries(
+        await Promise.all(answering.map(async ({ slug, candidateId }) => [slug, await fetchCandidateAnswers(candidateId)] as const)),
+      );
+      return JSON.stringify(
+        questionnairePayload({
+          race: { raceId: base.race.raceId, office: base.race.office },
+          november: base.november,
+          field: base.onBallot,
+          statusFor,
+          fetched,
+          positions: base.positions,
+        }),
+      );
+    }),
+});
+
 const getCoverage = createTool({
   description:
     'News coverage BadgerBrief tracks about a candidate (by slug, e.g. "david-crowley"): headline, outlet, publication date and link. Use for "what has been written/reported about X" and for recent developments. Read-only, reporting only — never a substitute for the candidate\'s own published positions.',
@@ -306,12 +345,22 @@ const handoffOfficialLink = createTool({
     }),
 });
 
-function makeVoterHelpAgent(model: string, instructions: string = VOTER_HELP_INSTRUCTIONS) {
+function makeVoterHelpAgent(
+  model: string,
+  instructions: string = VOTER_HELP_INSTRUCTIONS,
+  // The questionnaire tool calls a third-party server. It is registered only
+  // when switched on (QUESTIONNAIRE_TOOL=1), so "off" means the model never
+  // sees it, and the gate can test it before voters do.
+  options: { questionnaire?: boolean } = {},
+) {
   return new Agent(components.agent, {
     name: AGENT_NAME,
     languageModel: anthropic(model),
     instructions,
-    tools: { getVotingInfo, getVoterAccess, getMyBallot, matchBallotByIssues, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, getLabelGlossary, handoffOfficialLink },
+    tools: {
+      getVotingInfo, getVoterAccess, getMyBallot, matchBallotByIssues, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, getLabelGlossary, handoffOfficialLink,
+      ...(options.questionnaire ? { getQuestionnaireAnswers } : {}),
+    },
     stopWhen: stepCountIs(8),
     // MOO-410 Task 3: bounds set here (rather than per-callsite) so BOTH the
     // prod streamText path and the evalAnswer generateText path inherit them
@@ -337,7 +386,8 @@ function makeVoterHelpAgent(model: string, instructions: string = VOTER_HELP_INS
   });
 }
 
-const voterHelpAgent = makeVoterHelpAgent(MODEL);
+/** Read at each answer, so flipping the switch needs no deploy. */
+const questionnaireOn = () => isFlagOn(process.env.QUESTIONNAIRE_TOOL);
 
 /**
  * MOO-313 golden-dataset harness: one-shot answer with the production agent
@@ -351,23 +401,32 @@ export const evalAnswer = internalAction({
     prompt: v.string(),
     model: v.optional(v.string()),
     instructions: v.optional(v.string()),
+    // The gate turns the questionnaire tool on to test it before voters get it.
+    questionnaire: v.optional(v.boolean()),
   },
   returns: v.object({ text: v.string(), model: v.string(), toolTrace: v.string() }),
-  handler: async (ctx, { prompt, model, instructions }) => {
+  handler: async (ctx, { prompt, model, instructions, questionnaire }) => {
     const useModel = model ?? MODEL;
-    const agent = makeVoterHelpAgent(useModel, instructions);
+    const agent = makeVoterHelpAgent(useModel, instructions, { questionnaire: questionnaire ?? questionnaireOn() });
     // Synthetic userId satisfies the agent's identity requirement; tools treat
     // it as signed-out (ballotForUser normalizes it away). No thread persisted.
     const result = await agent.generateText(ctx, { userId: "eval-gate" }, { prompt });
     // Tool calls + results, so the golden judge can verify grounding instead
     // of flagging correct tool-sourced facts as invented.
     const toolTrace = result.steps.flatMap((step) =>
-      step.toolResults.map((tr) => ({
-        tool: tr.toolName,
-        // 30K/tool: getRaceInfo alone is ~62KB pretty-printed; harsher cuts made
-        // the golden judge read real tool data as "fabricated by the agent".
-        output: String(typeof tr.output === "string" ? tr.output : JSON.stringify(tr.output)).slice(0, 30000),
-      })),
+      // With an optional tool in the set, the SDK types a result as possibly absent.
+      step.toolResults.flatMap((tr) =>
+        tr
+          ? [
+              {
+                tool: tr.toolName,
+                // 30K/tool: getRaceInfo alone is ~62KB pretty-printed; harsher cuts made
+                // the golden judge read real tool data as "fabricated by the agent".
+                output: String(typeof tr.output === "string" ? tr.output : JSON.stringify(tr.output)).slice(0, 30000),
+              },
+            ]
+          : [],
+      ),
     );
     // Judge what a voter sees: all the text the model wrote, not only the part
     // after its last tool call. Until 2026-10 this returned `result.text` (the
@@ -390,7 +449,7 @@ export const streamAnswer = internalAction({
   handler: async (ctx, { threadId, promptMessageId, userId, prompt }) => {
     const telemetry = ensureTelemetry();
     const run = async () => {
-      const result = await voterHelpAgent.streamText(
+      const result = await makeVoterHelpAgent(MODEL, undefined, { questionnaire: questionnaireOn() }).streamText(
         ctx,
         { threadId, userId },
         { promptMessageId },

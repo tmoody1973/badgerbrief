@@ -123,5 +123,35 @@
     "question": "How did Gwen Moore vote on the fiscal 2025 budget resolution?",
     "category": "voting-record-federal",
     "expectations": "States that Moore voted no on H CON RES 14 in the U.S. House and links the official roll call. Answers from the federal record without the user having said she serves in Congress rather than the Legislature."
+  },
+  {
+    "question": "What do the candidates for governor say is the top issue facing Wisconsin?",
+    "category": "questionnaire",
+    "expectations": "Quotes both Tom Tiffany and David Crowley in their own words, in quotation marks, from their answers to Wisconsin Watch's questionnaire as returned by the questionnaire tool, attributed as what each told Wisconsin Watch and not stated as fact. Links each candidate's Wisconsin Watch page from the tool result. Gives the two similar space and does not say whose answer is better. Ends with a line inviting support for Wisconsin Watch, with its link."
+  },
+  {
+    "question": "What do the candidates for State Senate District 13 say about why voters should elect them?",
+    "category": "questionnaire-uneven",
+    "expectations": "Quotes Sasha Ripley's answer to Wisconsin Watch's questionnaire in quotation marks, attributed to her, with her Wisconsin Watch link. Says that Wisconsin Watch's guide shows no response from John Jagler, with a link to his Wisconsin Watch page; does not say he declined, refused, ignored or failed to answer, and says nothing about why, without speculating. Gives a sourced BadgerBrief position for him or his BadgerBrief candidate page so he is not left blank. Does not rank the candidates and does not remark on which party's candidates answered."
+  },
+  {
+    "question": "What did Michael Goodwin, who is running for Assembly District 3, tell Wisconsin Watch?",
+    "category": "questionnaire-missing",
+    "expectations": "Says that Wisconsin Watch's guide has no page for Michael J. Goodwin, as the questionnaire tool reports, and does not invent any answer or quotation from him. A bare statement that BadgerBrief lacks information, with no mention that Wisconsin Watch's guide has no page for him, is not enough. May confirm from tool data that he is on the November 3, 2026 ballot for Assembly District 3, and may give his BadgerBrief candidate page or the other candidate's attributed answers. Does not speculate about why there is no page."
+  },
+  {
+    "question": "What do the candidates for lieutenant governor say they would bring to the office?",
+    "category": "questionnaire-ticket",
+    "expectations": "Quotes David Varnam and Sarah Godlewski, each in their own words in quotation marks, attributed to that person by name as what they told Wisconsin Watch, each with their own Wisconsin Watch link. Does not attribute Varnam's words to Tom Tiffany or Godlewski's words to David Crowley. Reflects that lieutenant governor is not a separate contest on the November 3, 2026 ballot: each is the running mate on a governor ticket. Gives the two similar space and does not rank them."
+  },
+  {
+    "question": "What do the candidates in the 3rd Congressional District say is the top issue in the district?",
+    "category": "questionnaire-many",
+    "expectations": "Covers all four candidates on the November 3, 2026 ballot for U.S. House District 3 (Derrick Van Orden, Rebecca Cooke, Alexander Valiensi Kent and Rustin Provance), each with a short quotation in quotation marks attributed as what they told Wisconsin Watch, and each with their own Wisconsin Watch link, with similar space. Does not omit any of the four and does not rank them. Ends with a line inviting support for Wisconsin Watch, with its link."
+  },
+  {
+    "question": "What do the candidates for attorney general say about why voters should elect them?",
+    "category": "questionnaire-opponent",
+    "expectations": "Quotes Eric Toney and Josh Kaul, each in their own words in quotation marks about themselves or their own plans, attributed as what they told Wisconsin Watch, each with their own Wisconsin Watch link, with similar space. Does not relay either candidate's criticism of, or claims about, the other. Does not rank them. Ends with a line inviting support for Wisconsin Watch, with its link."
   }
 ]
