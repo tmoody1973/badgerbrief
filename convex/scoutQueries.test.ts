@@ -357,3 +357,21 @@ test("a failing news job raises one alert, not one a day, and a healthy run clos
   await t.mutation(internal.scoutQueries.recordRunHealth, { attempted: 32, errors: 0, proposed: 4 });
   expect(await open()).toHaveLength(0);
 });
+
+test("when the problem changes, the old alert closes and the new one opens", async () => {
+  const t = convexTest(schema, modules);
+  await t.run((ctx) =>
+    ctx.db.insert("article_sources", {
+      url: "https://news.example/old", outlet: "WPR", headline: "H", whyRelevant: "r", status: "proposed",
+      proposedAt: Date.now() - 5 * 86_400_000,
+    }),
+  );
+  const open = () => t.run(async (ctx) => (await ctx.db.query("alerts").collect()).filter((a) => !a.resolved).map((a) => a.refId));
+
+  await t.mutation(internal.scoutQueries.recordRunHealth, { attempted: 32, errors: 32, proposed: 0, sampleError: "http 401" });
+  expect(await open()).toEqual(["article-scout:failing"]);
+  // The key is fixed and searches succeed, but nothing new has been found for five days.
+  const opened = await t.mutation(internal.scoutQueries.recordRunHealth, { attempted: 32, errors: 0, proposed: 0 });
+  expect(opened).toContain("found nothing new for 5 days");
+  expect(await open()).toEqual(["article-scout:quiet"]);
+});

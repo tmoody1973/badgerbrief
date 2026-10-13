@@ -47,3 +47,15 @@ describe("isFullSweep", () => {
     expect(isFullSweep({ candidateSlugs: ["tom-tiffany"] })).toBe(false);
   });
 });
+
+describe("a run that searched for nobody", () => {
+  test("is a failure, not a quiet success", () => {
+    // If the pool ever comes back empty, "0 of 0 failed" must not read as healthy.
+    expect(scoutHealthAlert({ attempted: 0, errors: 0, proposed: 0, daysSinceLastArticle: 0 })).toEqual({
+      refId: "article-scout:failing",
+      kind: "sync_failure",
+      severity: "critical",
+      message: "News discovery searched for no one: no candidate is in scope. /news is not receiving new coverage.",
+    });
+  });
+});

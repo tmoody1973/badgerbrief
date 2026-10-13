@@ -261,10 +261,12 @@ export const recordRunHealth = internalMutation({
       .take(5000);
     const mine = unresolved.filter((a) => a.refTable === "article_sources" && a.refId?.startsWith("article-scout:"));
 
-    if (!alert) {
-      for (const a of mine) await ctx.db.patch("alerts", a._id, { resolved: true });
-      return null;
+    // Close every alert of ours that no longer describes the job: all of them
+    // after a healthy run, or the old condition when the problem has changed.
+    for (const a of mine) {
+      if (a.refId !== alert?.refId) await ctx.db.patch("alerts", a._id, { resolved: true });
     }
+    if (!alert) return null;
     if (mine.some((a) => a.refId === alert.refId)) return null;
     await ctx.db.insert("alerts", {
       kind: alert.kind,

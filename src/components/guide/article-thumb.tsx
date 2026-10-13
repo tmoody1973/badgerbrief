@@ -87,11 +87,13 @@ export function ArticleThumb({
 }) {
   // A publisher's image URL can exist and still fail to load. When it does,
   // fall through to the same initials mark used when there is no image.
-  const [failed, setFailed] = useState(false);
-  if (src && !failed) {
+  // Remember WHICH image failed, not just that one did: this component is
+  // reused when the feed is filtered, and the next image deserves its own try.
+  const [failedSrc, setFailedSrc] = useState<string>();
+  if (src && failedSrc !== src) {
     return (
       <div className={`${BOX[size]} overflow-hidden border-2 border-border bg-card`}>
-        <Image src={src} alt="" aria-hidden="true" fill sizes={SIZES[size]} className="object-cover" onError={() => setFailed(true)} />
+        <Image src={src} alt="" aria-hidden="true" fill sizes={SIZES[size]} className="object-cover" onError={() => setFailedSrc(src)} />
       </div>
     );
   }

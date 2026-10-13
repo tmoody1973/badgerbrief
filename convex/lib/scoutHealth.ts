@@ -25,7 +25,17 @@ export type HealthAlert = {
 export const QUIET_DAYS = 3;
 
 export function scoutHealthAlert(run: ScoutRun): HealthAlert | null {
-  if (run.attempted > 0 && run.errors * 2 >= run.attempted) {
+  if (run.attempted === 0) {
+    // Nobody to search for means the candidate pool is empty, which is a
+    // broken job, not a quiet day.
+    return {
+      refId: "article-scout:failing",
+      kind: "sync_failure",
+      severity: "critical",
+      message: "News discovery searched for no one: no candidate is in scope. /news is not receiving new coverage.",
+    };
+  }
+  if (run.errors * 2 >= run.attempted) {
     const why = run.sampleError ? ` (${run.sampleError})` : "";
     return {
       refId: "article-scout:failing",
