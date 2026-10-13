@@ -22,6 +22,7 @@ import {
   matchPayload,
   myBallotPayload,
   racePayload,
+  visibleAnswer,
   votingInfoPayload,
 } from "./lib/chatPayloads";
 import { OUT_OF_COVERAGE_NOTE, VOTER_HELP_INSTRUCTIONS } from "./lib/voterHelpInstructions";
@@ -100,7 +101,7 @@ const getVoterAccess = createTool({
 
 const getMyBallot = createTool({
   description:
-    "The signed-in user's district-relevant races and candidate names, based on their saved address. Returns districts: null when the user hasn't saved an address yet. Read-only.",
+    "The signed-in user's district-relevant races and candidate names, based on their saved address. Returns districts: null when the user hasn't saved an address yet. For a question about ONE named office (\"is there a lieutenant governor race on my ballot?\"), call getRaceInfo for that office as well: the answer about the office must come from that tool, not from memory. Read-only.",
   inputSchema: z.object({}),
   execute: async (ctx): Promise<string> =>
     withToolSpan("getMyBallot", ctx.threadId, {}, async () => {
@@ -170,7 +171,7 @@ const matchBallotByIssues = createTool({
 
 const getRaceInfo = createTool({
   description:
-    'Look up a Wisconsin 2026 race by id (e.g. "WI-GOV-2026"): who is on the November 3, 2026 ballot (from the state\'s certified list), their published positions and campaign finance totals. Read-only.',
+    'Look up a Wisconsin 2026 race by id: who is on the November 3, 2026 ballot (from the state\'s certified list), their published positions and campaign finance totals. Race ids: WI-GOV-2026 (Governor), WI-LTGOV-2026 (Lieutenant Governor), WI-AG-2026 (Attorney General), WI-SOS-2026 (Secretary of State), WI-TREAS-2026 (State Treasurer), WI-US-HOUSE-D<n>-2026 (U.S. House district n), WI-STATE-SENATE-D<n>-2026, WI-STATE-ASSEMBLY-D<n>-2026. Use it for any question about a specific office, including whether that office is on the ballot. Read-only.',
   inputSchema: z.object({
     raceId: z.string().describe('Race id such as "WI-GOV-2026"'),
   }),
@@ -368,7 +369,12 @@ export const evalAnswer = internalAction({
         output: String(typeof tr.output === "string" ? tr.output : JSON.stringify(tr.output)).slice(0, 30000),
       })),
     );
-    return { text: result.text, model: useModel, toolTrace: JSON.stringify(toolTrace) };
+    // Judge what a voter sees: all the text the model wrote, not only the part
+    // after its last tool call. Until 2026-10 this returned `result.text` (the
+    // last step alone), which cut the opening sentences off any answer that
+    // called a tool midway, and failed questions whose required disclosure
+    // came first.
+    return { text: visibleAnswer(result.steps, result.text), model: useModel, toolTrace: JSON.stringify(toolTrace) };
   },
 });
 

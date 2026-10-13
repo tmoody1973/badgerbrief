@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { candidatePayload, coveragePayload, matchPayload, myBallotPayload, racePayload, votingInfoPayload } from "./chatPayloads";
+import { candidatePayload, coveragePayload, matchPayload, myBallotPayload, racePayload, visibleAnswer, votingInfoPayload } from "./chatPayloads";
 
 const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
 const link = { name: "Site", url: "https://example.org" };
@@ -202,5 +202,26 @@ describe("myBallotPayload", () => {
     expect(o.notCovered).toMatch(/county offices/i);
     expect(o.notCovered).toMatch(/referendum/);
     expect(o.official.url).toContain("myvote.wi.gov");
+  });
+});
+
+describe("visibleAnswer", () => {
+  test("is everything the model wrote, not only what came after its last tool call", () => {
+    // Observed on "Who's running for mayor of Green Bay?": the sentence saying the guide does not
+    // cover municipal races came BEFORE the link tool was called. The chat shows a voter both
+    // paragraphs; the gate, reading only the last step, judged a bare link.
+    const steps = [
+      { text: "BadgerBrief doesn't include county or municipal races like mayor of Green Bay." },
+      { text: "" },
+      { text: "You can find local race information at [MyVote Wisconsin](https://myvote.wi.gov)." },
+    ];
+    expect(visibleAnswer(steps, "last step only")).toBe(
+      "BadgerBrief doesn't include county or municipal races like mayor of Green Bay.\n\nYou can find local race information at [MyVote Wisconsin](https://myvote.wi.gov).",
+    );
+  });
+
+  test("falls back to the given text when no step carries any", () => {
+    expect(visibleAnswer([{ text: "  " }], "fallback")).toBe("fallback");
+    expect(visibleAnswer([], "fallback")).toBe("fallback");
   });
 });

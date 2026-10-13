@@ -257,3 +257,14 @@ export function myBallotPayload<B extends { districts: unknown; races: unknown[]
     official: OFFICIAL_LINKS.myBallot,
   };
 }
+
+/**
+ * The answer a voter sees: every step's text, in order. The chat shows text
+ * the model wrote before a tool call as well as after it
+ * (voterHelpQueries.listThreadMessages keeps it on purpose), so a harness that
+ * reads only the last step judges answers with their opening sentences cut off.
+ */
+export function visibleAnswer(steps: readonly { text: string }[], lastStepText: string): string {
+  const all = steps.map((step) => step.text.trim()).filter((text) => text.length > 0);
+  return all.length > 0 ? all.join("\n\n") : lastStepText;
+}

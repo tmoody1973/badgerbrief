@@ -142,6 +142,15 @@ cheap and high-signal), unknown-data (no-invention checks), personalization
   "additional fields (not defined in Space) in the input: is_private", and
   creates nothing. Pass the space ID (`U3BhY2U6NDU0NjU6SWVhZA==`) instead;
   `scripts/eval-gate.mjs` does.
+- **The gate judges the whole visible answer (from 2026-10-12).** `evalAnswer`
+  used to return `result.text`, which is the model's LAST step only. The chat
+  shows a voter every step's text, so any answer that wrote a sentence, called
+  a tool, then wrote another was judged with its opening cut off. On "Who's
+  running for mayor of Green Bay?" the required "BadgerBrief doesn't cover
+  municipal races" sentence was in the first step and the gate saw only the
+  link. This is the likely cause of the old "lands ~14/15 runs" nit above.
+  Scores from before this date were measured with the shorter text and are not
+  directly comparable.
 - `evalAnswer` deliberately emits NO telemetry spans, so gate runs never
   pollute the continuous production evaluators.
 - `ax tasks list-runs` / `ax tasks trigger-run` (0.25.1 AND 0.26.0): the
