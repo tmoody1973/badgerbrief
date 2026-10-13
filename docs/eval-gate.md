@@ -12,9 +12,9 @@ Before deploying ANY change to an agent's instructions, prompt contract, or
 ```bash
 # 1. Run the candidate config against the golden dataset
 node scripts/eval-gate.mjs --name <change>-$(date +%Y%m%d) \
-  --dataset voter-help-golden-general \
+  --dataset voter-help-golden-questionnaire \
   [--model claude-xyz] [--instructions-file candidate.txt] \
-  --baseline <last-passing-experiment>
+  --baseline questionnaire-v1b
 
 # 2. Exit 0 → ship. Exit 1 → regression: do not deploy; fix and re-run.
 ```
@@ -75,11 +75,45 @@ Model-decision history, all decided by this gate on 2026-07-19:
   (if noisy) attention dilution from any 9th rule — kept minimal per the
   no-expansion policy below.
 
+## The Wisconsin Watch questionnaire tool (2026-10-13)
+
+The chat has an eleventh tool, `getQuestionnaireAnswers`, that quotes
+candidates' answers to Wisconsin Watch's questionnaire. It is registered only
+when the production variable `QUESTIONNAIRE_TOOL` is `1`. Unset, the chat is
+exactly the ten-tool agent the baseline above describes.
+
+- Dataset: **`voter-help-golden-questionnaire`**, 31 questions: the 25 above
+  plus six about the questionnaire (an even race, a race where one candidate
+  has no answers, a certified candidate with no page, a governor-ticket race,
+  a four-candidate race, and attorney general, where the question about an
+  opponent must not be relayed). Source of truth is still
+  `scripts/voter-help-golden.json`.
+- `--questionnaire` registers the tool for that gate run only, so it can be
+  tested before voters get it. Without the flag the gate tests the chat as
+  voters have it.
+- Runs with the tool on, commit `f3098d4`: **`questionnaire-v1-confirm`**
+  31/31 (100% in each of three judge passes) and **`questionnaire-v1b`**
+  31/31 (100% in each of three). These are this dataset's baseline.
+- In both runs the advisory judges flagged only original questions, for the
+  known reason (they read real 2026 facts as invented). One neutrality flag,
+  on "What does David Crowley stand for?", quotes a stored position summary
+  that describes his opponent; it comes from `getCandidateInfo`, not from the
+  questionnaire tool.
+- **Never run two gate runs at once on one dataset.** `questionnaire-v1` was
+  started alongside `-confirm` and failed at "Creating experiment" with
+  `409 Conflict; Experiment name already exists`, losing the run.
+- **The tool was switched on for voters on 2026-10-13** (Tarik's decision,
+  after both runs passed). This dataset is now the gate's default, so the
+  questionnaire questions are always asked. To switch the tool off without
+  touching the rest of the chat: `npx convex env remove QUESTIONNAIRE_TOOL --prod`.
+  If it is ever switched off, gate with `--dataset voter-help-golden-general`
+  instead: the six questionnaire questions cannot pass without the tool.
+
 ## Pieces
 
 | Piece | Where |
 |---|---|
-| Golden dataset (25 questions + expectations, written for the Nov 3, 2026 general election) | Arize dataset `voter-help-golden-general`; source of truth `scripts/voter-help-golden.json`. The primary-era set, `voter-help-golden`, is kept with its results and is no longer the gate. |
+| Golden dataset (25 questions + expectations, written for the Nov 3, 2026 general election; 31 with the questionnaire questions, see above) | Arize dataset `voter-help-golden-general`; source of truth `scripts/voter-help-golden.json`. The primary-era set, `voter-help-golden`, is kept with its results and is no longer the gate. |
 | Gate runner | `scripts/eval-gate.mjs` |
 | Judges (LLM-as-judge, claude-sonnet-5, function calling, temp 0) | Arize evaluators: Citation Faithfulness, Neutrality, Official Source First, Refusal Correctness, Golden Expectations |
 | Continuous production scoring | Arize task `badgerbrief-agent-quality` — continuous, 25% sampling, AGENT spans only (`attributes.openinference.span.kind = 'AGENT'`) |
