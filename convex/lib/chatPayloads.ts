@@ -65,10 +65,10 @@ export function racePayload(data: { race: Race; candidates: Candidate[]; positio
   const on = new Set(field.map((c) => c.slug));
   const november =
     ballot.kind === "contest"
-      ? { status: "contest" as const, statement: countSentence(field.length) }
+      ? { kind: "contest" as const, statement: countSentence(field.length) }
       : ballot.kind === "no-contest"
-        ? { status: "not-a-separate-contest" as const, statement: ballot.note }
-        : { status: "not-loaded" as const, statement: NOT_LOADED };
+        ? { kind: "not-a-separate-contest" as const, statement: ballot.note }
+        : { kind: "not-loaded" as const, statement: NOT_LOADED };
 
   return {
     race: {
@@ -121,20 +121,28 @@ export function candidatePayload(data: {
   const name = generalPersonName(candidate);
   const onBallot = isOnGeneralBallot(candidate);
   const trimmed = Object.fromEntries(Object.entries(candidate).filter(([key]) => !HIDDEN.has(key)));
+  const office = race?.office ?? "this office";
+  // The web page's sentence ends "This page is kept as a record…". A chat
+  // answer is not a page, so an off-ballot statement is built here: the plain
+  // fact, plus the race's own reason when it never had an August primary.
+  const reason = race && !hadAugustPrimary(race) && race.general?.note ? ` ${race.general.note}` : "";
+  const statement = onBallot
+    ? ballotSummary({
+        candidateName: name,
+        office,
+        me: data.field.find((f) => f.slug === candidate.slug),
+        others: data.field.filter((f) => f.slug !== candidate.slug && f.onGeneralBallot),
+        raceOnBallot: race?.general?.onBallot,
+        raceNote: race?.general?.note,
+        hadPrimary: true,
+      })
+    : `${name} is ${NOT_ON} for ${office}.${reason}`;
   return {
     candidate: { ...trimmed, name, party: generalParty(candidate) },
     november: {
       onBallot,
       ballotLine: onBallot ? ballotLine(candidate) : undefined,
-      statement: ballotSummary({
-        candidateName: name,
-        office: race?.office ?? "this office",
-        me: data.field.find((f) => f.slug === candidate.slug),
-        others: data.field.filter((f) => f.slug !== candidate.slug && f.onGeneralBallot),
-        raceOnBallot: race?.general?.onBallot,
-        raceNote: race?.general?.note,
-        hadPrimary: race ? hadAugustPrimary(race) : true,
-      }),
+      statement,
     },
     race: race ? { raceId: race.raceId, office: race.office, level: race.level, generalDate: race.generalDate } : null,
     positions: data.positions,

@@ -22,7 +22,7 @@ describe("racePayload", () => {
   const out = racePayload({ race: governor, candidates: [hong, crowley, tiffany], positions: [pos("francesca-hong"), pos("david-crowley")], finance: [fin("francesca-hong"), fin("tom-tiffany")] });
 
   test("the November field is the certified ballot, in the state's order, as printed", () => {
-    expect(out.november).toEqual({ status: "contest", statement: "2 candidates are on the November 3, 2026 ballot." });
+    expect(out.november).toEqual({ kind: "contest", statement: "2 candidates are on the November 3, 2026 ballot." });
     expect(out.onBallot.map((c) => c.ballotLine)).toEqual([
       "Tom Tiffany / David Varnam (Republican)",
       "David Crowley / Sarah Godlewski (Democratic)",
@@ -43,7 +43,8 @@ describe("racePayload", () => {
   test("the old status field and the primary date never reach the model", () => {
     // An eliminated candidate still reads status "Active" in the database.
     const text = JSON.stringify(out);
-    expect(text).not.toMatch(/"status":"Active"/);
+    // Not the value, and not the word: nothing named "status" is in the payload at all.
+    expect(text).not.toMatch(/"status"/);
     expect(text).not.toMatch(/primaryDate|August 11/);
     expect(out.rule).toMatch(/never say .*lost/i);
   });
@@ -52,13 +53,13 @@ describe("racePayload", () => {
     const ltgov = { ...governor, raceId: "WI-LTGOV-2026", office: "Lieutenant Governor of Wisconsin", general: { onBallot: false, note: "Not a separate November contest. Each party's nominee is the running mate on a governor ticket.", source: SOURCE } };
     const godlewski = person("sarah-godlewski", "Sarah Godlewski", { onBallot: true, ballotName: "David Crowley / Sarah Godlewski", party: "Democratic" }, { raceId: "WI-LTGOV-2026" });
     const o = racePayload({ race: ltgov, candidates: [godlewski], positions: [], finance: [] });
-    expect(o.november).toEqual({ status: "not-a-separate-contest", statement: "Not a separate November contest. Each party's nominee is the running mate on a governor ticket." });
+    expect(o.november).toEqual({ kind: "not-a-separate-contest", statement: "Not a separate November contest. Each party's nominee is the running mate on a governor ticket." });
     expect(o.onBallot.map((c) => c.ballotLine)).toEqual(["David Crowley / Sarah Godlewski (Democratic)"]);
   });
 
   test("a race with no ballot facts says so and lists nobody as on the ballot", () => {
     const o = racePayload({ race: { ...governor, general: undefined }, candidates: [crowley, tiffany], positions: [pos("david-crowley")], finance: [] });
-    expect(o.november.status).toBe("not-loaded");
+    expect(o.november.kind).toBe("not-loaded");
     expect(o.onBallot).toEqual([]);
     expect(o.positions).toEqual([]);
   });
@@ -84,7 +85,8 @@ describe("candidatePayload", () => {
   test("someone off the ballot: a plain statement, and no claim about winning or losing", () => {
     const o = candidatePayload({ ...base, candidate: hong });
     expect(o.november.onBallot).toBe(false);
-    expect(o.november.statement).toBe("Francesca Hong is not on the November 3, 2026 ballot for Governor of Wisconsin. This page is kept as a record of the August 11, 2026 primary.");
+    // A chat answer is not a page: the web page's "This page is kept as a record…" sentence stays out.
+    expect(o.november.statement).toBe("Francesca Hong is not on the November 3, 2026 ballot for Governor of Wisconsin.");
     // The statement itself makes no claim about results; the rule tells the model not to either.
     expect(o.november.statement).not.toMatch(/lost|won|defeated|eliminated/i);
     expect(JSON.stringify(o)).not.toMatch(/"status"/);
@@ -126,5 +128,14 @@ describe("matchPayload", () => {
   test("with no saved address it says so", () => {
     expect(o.scope).toBe("statewide");
     expect(o.scopeNote).toContain("/brief");
+  });
+});
+
+describe("candidatePayload for a race that had no August primary", () => {
+  test("gives the race's own reason", () => {
+    const court = { raceId: "WI-SCOTUS-2026", office: "Wisconsin Supreme Court", level: "State Judicial", sources: [link], primaryDate: "February 17, 2026 (if needed)", general: { onBallot: false, note: "Decided in the April 7, 2026 spring election.", source: SOURCE } };
+    const taylor = person("chris-taylor", "Chris Taylor", { onBallot: false }, { raceId: "WI-SCOTUS-2026" });
+    const o = candidatePayload({ candidate: taylor, race: court, field: [{ slug: "chris-taylor", name: "Chris Taylor", onGeneralBallot: false, ballotName: "Chris Taylor" }], positions: [], quotes: [], finance: [] });
+    expect(o.november.statement).toBe("Chris Taylor is not on the November 3, 2026 ballot for Wisconsin Supreme Court. Decided in the April 7, 2026 spring election.");
   });
 });
