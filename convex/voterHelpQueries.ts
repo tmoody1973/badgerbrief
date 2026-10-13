@@ -23,6 +23,8 @@ import {
 } from "./_generated/server";
 import { relevantRaces, type Districts } from "../src/lib/districts";
 import { capFromEnv, dayKey, isKillSwitchOn, isOverCap } from "./lib/chatUsage";
+import { generalField, generalParty, generalPersonName } from "./lib/ballot";
+import { ballotLine } from "../src/lib/race-ballot";
 
 const MAX_PROMPT_CHARS = 2000;
 
@@ -166,7 +168,7 @@ export const listThreadMessages = query({
  * candidate names. `districts: null` means the user hasn't saved an address.
  */
 /**
- * Statewide races (State Executive / State Judicial) — on every WI ballot.
+ * Statewide November contests — on every WI ballot.
  * The issue-matching tool's fallback when the user has no saved address,
  * mirroring /match's statewide-first behavior.
  */
@@ -174,8 +176,10 @@ export const statewideRaceIds = internalQuery({
   args: {},
   handler: async (ctx) => {
     const races = await ctx.db.query("races").collect();
+    // Statewide offices that are real November contests. Lieutenant Governor
+    // rides on the governor ticket and the Supreme Court race was in April.
     return races
-      .filter((r) => r.level === "State Executive" || r.level === "State Judicial")
+      .filter((r) => (r.level === "State Executive" || r.level === "State Judicial") && r.general?.onBallot === true)
       .map((r) => r.raceId);
   },
 });
@@ -200,7 +204,8 @@ export const ballotForUser = internalQuery({
       assembly: Number(prefs.stateAssemblyDistrict),
     };
     const allRaces = await ctx.db.query("races").collect();
-    const ballot = relevantRaces(districts, allRaces);
+    // Only real November contests, and only the people on the ballot.
+    const ballot = relevantRaces(districts, allRaces).filter((r) => r.general?.onBallot === true);
     const races = [];
     for (const race of ballot) {
       const candidates = await ctx.db
@@ -211,11 +216,11 @@ export const ballotForUser = internalQuery({
         raceId: race.raceId,
         office: race.office,
         level: race.level,
-        primaryDate: race.primaryDate,
-        candidates: candidates.map((c) => ({
+        candidates: generalField(candidates).map((c) => ({
           slug: c.slug,
-          name: c.name,
-          party: c.party ?? c.primaryParty,
+          name: generalPersonName(c),
+          party: generalParty(c),
+          ballotLine: ballotLine(c),
         })),
       });
     }
