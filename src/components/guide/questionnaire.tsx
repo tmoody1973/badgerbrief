@@ -88,7 +88,11 @@ const anyAnswered = (rows: QuestionnaireRow[]) => rows.some((r) => r.status.stat
 function Credit() {
   return (
     <p className="mt-3 font-mono text-xs text-muted-foreground">
-      Source: Wisconsin Watch 2026 Voter Guide, through Voter Guide Commons. That copy was last updated {guideUpdated};
+      Source: Wisconsin Watch 2026 Voter Guide, through{" "}
+      <a href={WISCONSIN_WATCH.viaUrl} target="_blank" rel="noopener noreferrer" className="underline">
+        {WISCONSIN_WATCH.via}
+      </a>
+      . That copy was last updated {guideUpdated};
       BadgerBrief checked it {checked}. Whether a candidate answered is as the guide reports it.
     </p>
   );

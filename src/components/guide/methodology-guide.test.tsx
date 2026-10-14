@@ -13,5 +13,6 @@ describe("Methodology: where candidates' questionnaire answers come from", () =>
     expect(html).toContain("Wisconsin Watch");
     expect(html).toContain("Voter Guide Commons");
     expect(html).toContain('href="https://voterguide26.wisconsinwatch.org/');
+    expect(html).toMatch(/href="https:\/\/voterguidecommons\.org\/[^"]*"[^>]*>Voter Guide Commons</);
   });
 });

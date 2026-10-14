@@ -47,7 +47,11 @@ export function MethodologyGuide({ dict, lang }: { dict: MethodologyDict; lang: 
                 >
                   {sections.dataSources.questionnaire.linkText}
                 </a>
-                {sections.dataSources.questionnaire.after}
+                {sections.dataSources.questionnaire.after}{" "}
+                <a href="https://voterguidecommons.org/" className="underline" rel="noopener noreferrer" target="_blank">
+                  {sections.dataSources.questionnaire.viaLinkText}
+                </a>
+                {sections.dataSources.questionnaire.afterVia}
               </li>
             </ul>
           </div>

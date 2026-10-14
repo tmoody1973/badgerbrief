@@ -45,7 +45,11 @@ function WhatItChecks() {
         >
           Wisconsin Watch’s 2026 Voter Guide
         </a>
-        , through Voter Guide Commons.
+        , through{" "}
+        <a href="https://voterguidecommons.org/" target="_blank" rel="noopener noreferrer" className="underline">
+          Voter Guide Commons
+        </a>
+        .
       </p>
       <p className="mt-2">
         Each answer starts with a “Checked” line naming the sources it looked at. Those sources are:

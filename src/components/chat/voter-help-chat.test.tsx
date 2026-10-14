@@ -167,5 +167,6 @@ describe("VoterHelpChat — guiding voters to candidates' own answers", () => {
     const { html } = await render();
     expect(html).toContain("What Voter Help can check");
     expect(html).toContain("Wisconsin Watch questionnaire");
+    expect(html).toMatch(/href="https:\/\/voterguidecommons\.org\/[^"]*"[^>]*>Voter Guide Commons</);
   });
 });

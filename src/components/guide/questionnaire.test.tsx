@@ -79,7 +79,7 @@ describe("RaceQuestionnaire", () => {
   test("credits Wisconsin Watch and says the words are the candidates' own", () => {
     expect(html).toContain("Wisconsin Watch");
     expect(html).toContain("the candidates’ own words");
-    expect(html).toContain("through Voter Guide Commons");
+    expect(html).toMatch(/through <a [^>]*>Voter Guide Commons<\/a>/);
     expect(html).toContain("last updated August 20, 2026");
     expect(html).toMatch(/BadgerBrief checked it October \d{1,2}, 2026/);
   });
@@ -136,5 +136,14 @@ describe("asking Voter Help about the answers", () => {
     expect(askedQuestion(answered)).toBe("What did Sasha Ripley tell Wisconsin Watch?");
     const didNot = renderToStaticMarkup(<CandidateQuestionnaire raceId={SD13} candidate={jagler} />);
     expect(askedQuestion(didNot)).toBeNull();
+  });
+});
+
+describe("credit to Voter Guide Commons", () => {
+  test("the source line links back to Voter Guide Commons, which supplies the answers", () => {
+    const html = renderToStaticMarkup(
+      <RaceQuestionnaire raceId={SD13} office="State Senate District 13" candidates={[jagler, ripley]} />,
+    );
+    expect(html).toMatch(/href="https:\/\/voterguidecommons\.org\/[^"]*"[^>]*>Voter Guide Commons</);
   });
 });
