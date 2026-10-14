@@ -38,6 +38,8 @@ const COMMITTEES: { searchTerm: string; registrantId: string; candidateSlug: str
   { searchTerm: "Missy For Governor", registrantId: "01072544", candidateSlug: "missy-hughes", raceId: "WI-GOV-2026" },
   { searchTerm: "Mandela for Wisconsin", registrantId: "0105266", candidateSlug: "mandela-barnes", raceId: "WI-GOV-2026" },
   { searchTerm: "Friends of Francesca Hong", registrantId: "0106285", candidateSlug: "francesca-hong", raceId: "WI-GOV-2026" },
+  { searchTerm: "Toney for Attorney General", registrantId: "0106408", candidateSlug: "eric-toney", raceId: "WI-AG-2026" },
+  { searchTerm: "JoCasta for WI", registrantId: "0104989", candidateSlug: "jocasta-zamarripa", raceId: "WI-SOS-2026" },
 ];
 
 async function fetchReports(searchTerm: string): Promise<unknown[]> {
