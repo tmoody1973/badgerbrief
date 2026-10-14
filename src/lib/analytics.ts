@@ -37,6 +37,7 @@ type Events = {
 
   // — agent features
   voter_help_ask: Record<string, never>; // NEVER the question text
+  voter_help_new_conversation: Record<string, never>;
   voter_help_answered: { ok: boolean };
   brief_generate: { detail: "short" | "standard" | "deep" };
 

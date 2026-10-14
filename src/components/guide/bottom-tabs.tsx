@@ -77,14 +77,14 @@ export function BottomTabs() {
           const active = isActive(pathname, t.href);
           return (
             <Link key={t.href} href={localizeHref(t.href, locale)} aria-current={active ? "page" : undefined}
-              className={`flex min-h-14 flex-col items-center justify-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wide ${active ? "text-primary" : "text-foreground"}`}>
+              className={`flex min-h-14 flex-col items-center justify-center gap-1 font-mono text-xs font-bold uppercase tracking-normal ${active ? "text-primary" : "text-foreground"}`}>
               <t.Icon className="h-6 w-6" />
               {t[locale]}
             </Link>
           );
         })}
         <button type="button" onClick={() => setMoreOpen((v) => !v)} aria-expanded={moreOpen}
-          className={`flex min-h-14 flex-col items-center justify-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wide ${moreOpen ? "text-primary" : "text-foreground"}`}>
+          className={`flex min-h-14 flex-col items-center justify-center gap-1 font-mono text-xs font-bold uppercase tracking-normal ${moreOpen ? "text-primary" : "text-foreground"}`}>
           <IconMore className="h-6 w-6" />
           {locale === "es" ? "Más" : "More"}
         </button>

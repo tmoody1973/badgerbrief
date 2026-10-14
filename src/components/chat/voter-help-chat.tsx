@@ -16,6 +16,7 @@ import remarkGfm from "remark-gfm";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/retroui/Button";
 import { SOURCES, ToolActivity, isShown } from "./tool-activity";
+import { answerStamp, awaitingAnswer, farFromLatest } from "./chat-state";
 
 /** MOO-310 Voter Help chat — one persistent thread per signed-in user. */
 
@@ -189,8 +190,8 @@ function AssistantBubble({ message }: { message: UIMessage }) {
   });
   return (
     <div className="max-w-[85%] border-2 border-border bg-card p-3 text-sm shadow-[var(--shadow-brutal)]">
-      <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-        Voter Help
+      <p className="mb-1 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        Voter Help · {answerStamp(message._creationTime)}
       </p>
       <ToolActivity message={message} />
       <MdText text={visibleText} />
@@ -198,9 +199,20 @@ function AssistantBubble({ message }: { message: UIMessage }) {
   );
 }
 
+/** Shown the moment the voter sends, until the first part of the answer arrives. */
+function PendingCard() {
+  return (
+    <div className="max-w-[85%] border-2 border-dashed border-border bg-card p-3 text-sm">
+      <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground motion-safe:animate-pulse">
+        Voter Help · Looking this up…
+      </p>
+    </div>
+  );
+}
+
 function UserBubble({ text }: { text: string }) {
   return (
-    <div className="ml-auto max-w-[85%] border-2 border-border bg-secondary p-3 text-sm">
+    <div data-role="user" className="ml-auto max-w-[85%] border-2 border-border bg-secondary p-3 text-sm">
       <span className="whitespace-pre-wrap">{text}</span>
     </div>
   );
@@ -230,6 +242,7 @@ export function VoterHelpChat() {
     { initialNumItems: 50, stream: true },
   );
   const sendMessage = useMutation(api.voterHelpQueries.sendMessage);
+  const startNewConversation = useMutation(api.voterHelpQueries.startNewConversation);
 
   // A link can carry a question (e.g. from a race page). It waits in the box;
   // only the voter sends it.
@@ -237,7 +250,9 @@ export function VoterHelpChat() {
   const [draft, setDraft] = useState(() => (params?.get("q") ?? "").slice(0, 300));
   const [pendingEcho, setPendingEcho] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [showLatest, setShowLatest] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
 
   const ui = toUIMessages(messages.results ?? []).filter(isShown);
 
@@ -248,9 +263,58 @@ export function VoterHelpChat() {
     }
   }, [ui, pendingEcho]);
 
+  const busy = awaitingAnswer(ui, pendingEcho) || ui.at(-1)?.status === "streaming";
+  const userCount = ui.filter((m) => m.role === "user").length + (pendingEcho ? 1 : 0);
+
+  // Open at the newest message.
+  const opened = useRef(false);
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [ui.length, pendingEcho]);
+    const el = scrollerRef.current;
+    if (opened.current || !el || ui.length === 0) return;
+    opened.current = true;
+    el.scrollTop = el.scrollHeight;
+  }, [ui.length]);
+
+  // On each new question, bring it to the top so the answer reads downward
+  // beneath it, rather than chasing the bottom while it streams.
+  const lastUserCount = useRef(userCount);
+  useEffect(() => {
+    if (userCount <= lastUserCount.current) {
+      lastUserCount.current = userCount;
+      return;
+    }
+    lastUserCount.current = userCount;
+    const el = scrollerRef.current;
+    const question = el?.querySelectorAll<HTMLElement>("[data-role=user]");
+    const latest = question?.[question.length - 1];
+    if (el && latest) el.scrollTo({ top: latest.offsetTop - 12, behavior: "smooth" });
+  }, [userCount]);
+
+  // The answer grows below the fold while it streams: offer a way down.
+  useEffect(() => {
+    if (scrollerRef.current) setShowLatest(farFromLatest(scrollerRef.current));
+  }, [ui]);
+
+  // Screen readers hear the two moments that matter, not the streamed text.
+  const wasBusy = useRef(false);
+  useEffect(() => {
+    if (busy && !wasBusy.current) setAnnouncement("Looking this up.");
+    if (!busy && wasBusy.current) setAnnouncement("Answer ready.");
+    wasBusy.current = busy;
+  }, [busy]);
+
+  const newConversation = async () => {
+    try {
+      const { threadId: tid } = await startNewConversation(isAuthenticated ? {} : { guestId: guestId! });
+      track("voter_help_new_conversation");
+      setLocalThreadId(tid);
+      setPendingEcho(null);
+      setError(null);
+      setAnnouncement("New conversation started.");
+    } catch (err) {
+      setError(asMessage(err));
+    }
+  };
 
   const send = async (prompt: string) => {
     const trimmed = prompt.trim();
@@ -286,68 +350,108 @@ export function VoterHelpChat() {
   const canSend = isAuthenticated || guestId !== null;
 
   return (
-    <div className="flex min-h-[60vh] flex-col">
-      <h1 className="font-display text-3xl">Voter Help</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Practical voting questions, and what candidates say in their own words —
-        answered from published data, official sources and candidates’ answers to
-        Wisconsin Watch, with citations, no endorsements, no legal advice.
-      </p>
-      <WhatItChecks />
-
-      <div className="mt-6 flex flex-1 flex-col gap-3">
-        {ui.length === 0 && !pendingEcho && (
-          <div className="border-2 border-dashed border-border p-4 text-sm">
-            <p className="font-bold">Try asking:</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {EXAMPLES.map((q) => (
-                <button
-                  key={q}
-                  type="button"
-                  onClick={() => void send(q)}
-                  className="border-2 border-border bg-card px-2 py-1 hover:bg-secondary"
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
-          </div>
+    <div data-chat-screen className="flex min-h-0 flex-1 flex-col">
+      <div className="flex items-center justify-between gap-3 border-b-2 border-border py-3">
+        <h1 className="font-display text-2xl">Voter Help</h1>
+        {ui.length > 0 && (
+          <button
+            type="button"
+            onClick={() => void newConversation()}
+            disabled={busy}
+            className="press border-2 border-border bg-card px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider shadow-[var(--shadow-brutal)] hover:bg-secondary disabled:opacity-60"
+          >
+            New conversation
+          </button>
         )}
-
-        {ui.map((m) =>
-          m.role === "user" ? (
-            <UserBubble key={m.key} text={m.text} />
-          ) : (
-            <AssistantBubble key={m.key} message={m} />
-          ),
-        )}
-        {pendingEcho && <UserBubble text={pendingEcho} />}
-        <div ref={bottomRef} />
       </div>
 
-      {error && (
-        <p role="alert" className="mt-3 border-2 border-border bg-warning p-2 text-sm font-bold">
-          {error}
-        </p>
-      )}
+      <div className="relative min-h-0 flex-1">
+        <div
+          ref={scrollerRef}
+          onScroll={(e) => setShowLatest(farFromLatest(e.currentTarget))}
+          role="log"
+          aria-label="Conversation with Voter Help"
+          className="relative h-full overflow-y-auto overscroll-contain py-4"
+        >
+          <p className="text-sm text-muted-foreground">
+            Practical voting questions, and what candidates say in their own words —
+            answered from published data, official sources and candidates’ answers to
+            Wisconsin Watch, with citations, no endorsements, no legal advice.
+          </p>
+          <WhatItChecks />
 
-      <form onSubmit={onSubmit} className="mt-4 flex gap-2">
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Ask a voting question…"
-          aria-label="Ask a voting question"
-          className="min-w-0 flex-1 border-2 border-border bg-background p-2"
-          maxLength={2000}
-        />
-        <Button type="submit" variant="primary" disabled={!draft.trim() || !canSend}>
-          Send
-        </Button>
-      </form>
-      <p className="mt-2 text-xs text-muted-foreground">
-        For official actions (registering, absentee, polling place), MyVote
-        Wisconsin is always the authoritative source.
-        {!isAuthenticated && " Sign in to save this conversation across devices."}
+          <div className="mt-6 flex flex-col gap-3">
+            {ui.length === 0 && !pendingEcho && (
+              <div className="border-2 border-dashed border-border p-4 text-sm">
+                <p className="font-bold">Try asking:</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {EXAMPLES.map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => void send(q)}
+                      className="min-h-11 border-2 border-border bg-card px-3 py-2 text-left hover:bg-secondary"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {ui.map((m) =>
+              m.role === "user" ? (
+                <UserBubble key={m.key} text={m.text} />
+              ) : (
+                <AssistantBubble key={m.key} message={m} />
+              ),
+            )}
+            {pendingEcho && <UserBubble text={pendingEcho} />}
+            {awaitingAnswer(ui, pendingEcho) && <PendingCard />}
+          </div>
+        </div>
+
+        {showLatest && (
+          <button
+            type="button"
+            onClick={() => scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight, behavior: "smooth" })}
+            className="press absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider shadow-[var(--shadow-brutal)] hover:bg-secondary"
+          >
+            <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M8 3v10M3.5 8.5 8 13l4.5-4.5" />
+            </svg>
+            Latest
+          </button>
+        )}
+      </div>
+
+      <div className="border-t-2 border-border bg-background pt-3 pb-[calc(4.375rem+env(safe-area-inset-bottom))] sm:pb-4">
+        {error && (
+          <p role="alert" className="mb-3 border-2 border-border bg-warning p-2 text-sm font-bold">
+            {error}
+          </p>
+        )}
+        <form onSubmit={onSubmit} className="flex gap-2">
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Ask a voting question…"
+            aria-label="Ask a voting question"
+            className="min-w-0 flex-1 border-2 border-border bg-background p-2"
+            maxLength={2000}
+          />
+          <Button type="submit" variant="primary" disabled={!draft.trim() || !canSend || busy}>
+            Send
+          </Button>
+        </form>
+        <p className="mt-2 text-xs text-muted-foreground">
+          For official actions (registering, absentee, polling place), MyVote
+          Wisconsin is always the authoritative source.
+          {!isAuthenticated && " Sign in to save this conversation across devices."}
+        </p>
+      </div>
+      <p className="sr-only" aria-live="polite">
+        {announcement}
       </p>
     </div>
   );
