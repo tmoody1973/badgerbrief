@@ -340,3 +340,31 @@ export const run = internalAction({
     return summaries;
   },
 });
+
+/**
+ * One-time: give /news stories that have no picture the one their own outlet
+ * chose, read through context.dev (1 credit each). Most are Journal Sentinel
+ * and WisPolitics stories from before October 2026, when only our plain fetch
+ * looked for images and both outlets block it. Stops before Convex's time
+ * limit; run again until `remaining` is 0.
+ */
+export const backfillImages = internalAction({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit }): Promise<{ scanned: number; found: number; remaining: number }> => {
+    if (!process.env.CONTEXT_DEV_API_KEY) throw new Error("CONTEXT_DEV_API_KEY not set");
+    const targets = await ctx.runQuery(internal.newsCleanup.storiesWithoutImage, { limit: limit ?? 60 });
+    const deadline = Date.now() + SWEEP_BUDGET_MS;
+    let scanned = 0;
+    let found = 0;
+    for (const t of targets) {
+      if (Date.now() > deadline) break;
+      scanned++;
+      const { image } = await readPage(t.url);
+      if (!image || !/^https?:\/\//.test(image)) continue;
+      await ctx.runMutation(internal.newsCleanup.setImage, { id: t.id, imageUrl: image });
+      found++;
+    }
+    const left = await ctx.runQuery(internal.newsCleanup.storiesWithoutImage, { limit: 10_000 });
+    return { scanned, found, remaining: left.length };
+  },
+});

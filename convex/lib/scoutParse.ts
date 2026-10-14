@@ -117,6 +117,23 @@ function isPressRelease(url: URL, title: string): boolean {
   return url.hostname.endsWith("wispolitics.com") && /^[^:]{2,60}:\s/.test(title);
 }
 
+/**
+ * An opinion piece: a column, guest essay, editorial or reader letter. /news
+ * is a nonpartisan news feed, and the relevance check cannot tell a letter
+ * endorsing a candidate from reporting about them (on 2026-10-14 a letter
+ * backing one candidate led /news). Most outlets put opinion under /opinion/;
+ * Wisconsin Watch labels it in the headline instead.
+ */
+export function isOpinion(url: string, title: string): boolean {
+  let path = "";
+  try {
+    path = new URL(url).pathname;
+  } catch {
+    return false;
+  }
+  return /\/opinion\//i.test(path) || /^(guest opinion|opinion|letter)\b\s*[:|]/i.test(title.trim());
+}
+
 function outletFor(host: string): string | undefined {
   const domain = ALLOWED_DOMAINS.find((d) => host === d || host.endsWith(`.${d}`));
   return domain ? WI_OUTLETS[domain] : undefined;
@@ -145,7 +162,7 @@ export function articlesFromSearch(response: unknown): { articles: ScoutArticle[
     // A section front ("/news", "/") is never an article: every article
     // address on these outlets has at least two path segments.
     const isSectionFront = url.pathname.split("/").filter(Boolean).length < 2;
-    if (isSectionFront || NOT_AN_ARTICLE.test(url.pathname) || isPressRelease(url, title)) continue;
+    if (isSectionFront || NOT_AN_ARTICLE.test(url.pathname) || isPressRelease(url, title) || isOpinion(r.url, title)) continue;
     const clean = url.toString();
     if (seen.has(clean)) continue;
     seen.add(clean);
@@ -173,7 +190,7 @@ export function articlesFromSearch(response: unknown): { articles: ScoutArticle[
 export function withPageDetails(article: ScoutArticle, page: { title?: string; image?: string }): ScoutArticle | null {
   const title = page.title?.trim();
   if (!title) return { ...article, unread: true };
-  if (isPressRelease(new URL(article.url), title)) return null;
+  if (isPressRelease(new URL(article.url), title) || isOpinion(article.url, title)) return null;
   const image = page.image && /^https?:\/\//.test(page.image) ? page.image : undefined;
   return { ...article, headline: title, ...(image ? { imageUrl: image } : {}) };
 }
