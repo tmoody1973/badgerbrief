@@ -134,6 +134,15 @@ crons.daily(
   {},
 );
 
+// 14:10 UTC — published Wisconsin polls from VoteHub's API (CC BY 4.0).
+// Verbatim figures only, never averaged; see convex/lib/votehub.ts.
+crons.daily(
+  "sync VoteHub polls",
+  { hourUTC: 14, minuteUTC: 10 },
+  internal.votehub.syncVotehub,
+  {},
+);
+
 // Monthly, 8:00 UTC on the 1st — batch-enrich the highest-spend outside
 // groups that are stale or unenriched (MOO-318 follow-up).
 crons.monthly(
