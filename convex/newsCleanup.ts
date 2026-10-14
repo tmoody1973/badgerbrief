@@ -5,16 +5,16 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
-import { isOpinion } from "./lib/scoutParse";
+import { isNotAnArticle, isOpinion } from "./lib/scoutParse";
 
-/** Take opinion pieces off /news. Hidden, not deleted: they stay in admin. */
-export const hideOpinionFromHub = internalMutation({
+/** Take opinion pieces and pages that are not articles off /news. Hidden, not deleted: they stay in admin. */
+export const hideNonNewsFromHub = internalMutation({
   args: {},
   handler: async (ctx) => {
     const onHub = await ctx.db.query("article_sources").withIndex("by_hubStatus", (q) => q.eq("hubStatus", "auto")).collect();
     let hidden = 0;
     for (const row of onHub) {
-      if (!isOpinion(row.url, row.headline)) continue;
+      if (!isOpinion(row.url, row.headline) && !isNotAnArticle(row.url)) continue;
       await ctx.db.patch(row._id, { hubStatus: "hidden" });
       hidden++;
     }

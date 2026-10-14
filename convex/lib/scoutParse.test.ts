@@ -4,6 +4,7 @@ import {
   MAX_SEARCH_DOMAINS,
   isAllowedUrl,
   articlesFromSearch,
+  isNotAnArticle,
   isOpinion,
   withPageDetails,
   scoutQuery,
@@ -254,5 +255,27 @@ describe("isOpinion", () => {
   test("an opinion label that only shows on the page's real title is caught too", () => {
     const article = { url: "https://wisconsinwatch.org/2026/09/primary-reveals/", outlet: "Wisconsin Watch", headline: "What Wisconsin's Democratic primary reveals ...", whyRelevant: "" };
     expect(withPageDetails(article, { title: "Opinion: What Wisconsin's Democratic primary reveals about data centers" })).toBeNull();
+  });
+});
+
+describe("isNotAnArticle", () => {
+  test.each([
+    "https://urbanmilwaukee.com/people/josh-kaul/",
+    "https://urbanmilwaukee.com/author/rich-kremer/",
+    "https://www.wpr.org/topic/politics/governor",
+    "https://www.wpr.org/topics/elections",
+    "https://www.wpr.org/news",
+    "https://www.wispolitics.com/category/news/",
+    "https://madison.com/news/local/collection_225982d4.html",
+  ])("%s is not an article", (url) => {
+    expect(isNotAnArticle(url)).toBe(true);
+  });
+
+  test.each([
+    "https://www.wpr.org/news/tom-tiffany-conservative-record",
+    "https://www.cbs58.com/news/joel-brennan-focuses-on-affordability",
+    "https://www.wbay.com/video/2026/10/13/one-on-one-with-republican-nominee/",
+  ])("%s is an article", (url) => {
+    expect(isNotAnArticle(url)).toBe(false);
   });
 });

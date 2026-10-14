@@ -18,18 +18,18 @@ const row = (url: string, headline: string, extra: Record<string, unknown> = {})
   ...extra,
 });
 
-test("opinion pieces come off /news (hidden, not deleted); news and campaign pages are untouched", async () => {
+test("opinion pieces and pages that are not articles come off /news (hidden, not deleted); news is untouched", async () => {
   const t = convexTest(schema, modules);
-  const [opinion, news] = await t.run(async (ctx) => [
+  const [opinion, profile, news] = await t.run(async (ctx) => [
     await ctx.db.insert("article_sources", row("https://madison.com/opinion/letters/article_1.html", "Rebecca Cooke is best | Bob Gates")),
+    await ctx.db.insert("article_sources", row("https://urbanmilwaukee.com/people/josh-kaul/", "Josh Kaul")),
     await ctx.db.insert("article_sources", row("https://www.wpr.org/news/cooke-tariffs", "Cooke calls for reversing tariffs")),
   ]);
 
-  expect(await t.mutation(internal.newsCleanup.hideOpinionFromHub, {})).toEqual({ hidden: 1 });
+  expect(await t.mutation(internal.newsCleanup.hideNonNewsFromHub, {})).toEqual({ hidden: 2 });
 
-  const after = await t.run(async (ctx) => [await ctx.db.get(opinion), await ctx.db.get(news)]);
-  expect(after[0]?.hubStatus).toBe("hidden");
-  expect(after[1]?.hubStatus).toBe("auto");
+  const after = await t.run(async (ctx) => [await ctx.db.get(opinion), await ctx.db.get(profile), await ctx.db.get(news)]);
+  expect(after.map((r) => r?.hubStatus)).toEqual(["hidden", "hidden", "auto"]);
 });
 
 test("lists /news stories with no picture, leaving out rejected rows and campaign sites", async () => {
