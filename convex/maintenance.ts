@@ -63,7 +63,10 @@ export const setQuoteSourceUrl = internalMutation({
     sourceUrl: v.string(),
   },
   handler: async (ctx, { quoteId, sourceUrl }) => {
-    if (!/^https?:\/\//.test(sourceUrl)) throw new Error(`sourceUrl must start with http(s)://, got "${sourceUrl}"`);
+    const parsed = URL.canParse(sourceUrl) ? new URL(sourceUrl) : null;
+    if (!parsed || !["http:", "https:"].includes(parsed.protocol) || !parsed.hostname) {
+      throw new Error(`sourceUrl must be a full http(s) address, got "${sourceUrl}"`);
+    }
     const quote = await ctx.db.get(quoteId);
     if (!quote) throw new Error(`published quote not found: ${quoteId}`);
     const before = quote.sourceUrl;

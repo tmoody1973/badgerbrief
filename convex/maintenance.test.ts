@@ -49,7 +49,9 @@ test("refuses an address that is not a web page", async () => {
   const t = setup();
   const quoteId = await addQuote(t);
 
-  await expect(t.mutation(internal.maintenance.setQuoteSourceUrl, { quoteId, sourceUrl: "crowleyforwi.com/" })).rejects.toThrow(/http/);
+  for (const sourceUrl of ["crowleyforwi.com/", "https://", "https://not a host/", "javascript:alert(1)"]) {
+    await expect(t.mutation(internal.maintenance.setQuoteSourceUrl, { quoteId, sourceUrl })).rejects.toThrow(/http/);
+  }
   const after = await t.run((ctx) => ctx.db.get(quoteId));
   expect(after?.sourceUrl).toBe("https://www.crowleyforwi.com/issues");
 });
