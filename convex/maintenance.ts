@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { logAudit } from "./audit";
 import { internalMutation } from "./_generated/server";
 
 /**
@@ -46,5 +47,28 @@ export const setCandidateBackground = internalMutation({
     const before = c.background;
     await ctx.db.patch(c._id, { background });
     return { candidate: `${raceId}/${slug}`, from: before, to: background };
+  },
+});
+
+/**
+ * Point a published quote at the page it appears on now. Campaign sites move
+ * pages (crowleyforwi.com/issues began redirecting in October 2026), and a
+ * published quote has no other edit path: re-publishing its draft returns the
+ * existing row unchanged. Check the quote's exact words are on the new page
+ * before running this; the old address goes to the audit log.
+ */
+export const setQuoteSourceUrl = internalMutation({
+  args: {
+    quoteId: v.id("quote_published"),
+    sourceUrl: v.string(),
+  },
+  handler: async (ctx, { quoteId, sourceUrl }) => {
+    if (!/^https?:\/\//.test(sourceUrl)) throw new Error(`sourceUrl must start with http(s)://, got "${sourceUrl}"`);
+    const quote = await ctx.db.get(quoteId);
+    if (!quote) throw new Error(`published quote not found: ${quoteId}`);
+    const before = quote.sourceUrl;
+    await ctx.db.patch(quoteId, { sourceUrl });
+    await logAudit(ctx, { action: "edit", refTable: "quote_published", refId: quoteId, detail: `sourceUrl: ${before} -> ${sourceUrl}` });
+    return { from: before, to: sourceUrl };
   },
 });
