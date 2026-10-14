@@ -21,7 +21,11 @@ export function BallotControl({
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`);
+      const res = await fetch("/api/geocode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address }),
+      });
       const data: GeocodeResult = await res.json();
       if (data.ok) {
         onFound(

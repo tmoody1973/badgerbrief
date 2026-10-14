@@ -1,8 +1,12 @@
 // @vitest-environment node
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import mke from "@/lib/__fixtures__/census-mke-county.json";
-import { GET, POST } from "./route";
+import * as route from "./route";
+
+const { POST } = route;
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -87,13 +91,15 @@ describe("POST /api/geocode", () => {
   });
 });
 
-describe("GET /api/geocode (kept until the older forms are replaced)", () => {
-  test("still answers, under the same limit as POST", async () => {
-    const asked = stubCensus();
-    const get = () => GET(new NextRequest("http://localhost/api/geocode?address=200%20E%20Wells%20St%2C%20Milwaukee", { headers: { "x-forwarded-for": "203.0.113.30" } }));
-    expect((await get()).status).toBe(200);
-    for (let i = 0; i < 11; i++) await ask("200 E Wells St, Milwaukee", "203.0.113.30");
-    expect((await get()).status).toBe(429);
-    expect(asked).toHaveLength(12);
+describe("an address never travels in the web address", () => {
+  test("the route accepts no GET, so an address cannot arrive as ?address=", () => {
+    expect("GET" in route).toBe(false);
+  });
+
+  test("no page sends an address to the lookup in the web address", () => {
+    const files = readdirSync("src", { recursive: true, encoding: "utf8" })
+      .filter((f) => /\.tsx?$/.test(f) && !f.includes(".test."));
+    const offenders = files.filter((f) => readFileSync(join("src", f), "utf8").includes("/api/geocode?"));
+    expect(offenders).toEqual([]);
   });
 });

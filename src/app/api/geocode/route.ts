@@ -6,9 +6,8 @@ import { createLimiter } from "@/lib/rate-limit";
  * Server proxy for the Census geocoder (it sends no CORS headers, so the
  * browser can't call it directly). Free, no key. MOO-307.
  *
- * POST carries the address in the request body, where it stays out of the
- * web address and so out of server logs and browser history. GET is kept
- * only until the older address forms are replaced.
+ * POST only: the address travels in the request body, where it stays out of
+ * the web address and so out of server logs and browser history.
  */
 
 const CENSUS_URL =
@@ -58,8 +57,4 @@ export async function POST(req: NextRequest) {
   }
   const address = typeof body === "object" && body !== null ? (body as { address?: unknown }).address : undefined;
   return lookup(typeof address === "string" ? address : "", visitor(req));
-}
-
-export async function GET(req: NextRequest) {
-  return lookup(req.nextUrl.searchParams.get("address") ?? "", visitor(req));
 }
