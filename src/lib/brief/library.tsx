@@ -83,7 +83,7 @@ export const SourceTrustLabel = defineComponent({
 export const BriefHeader = defineComponent({
   name: "BriefHeader",
   description:
-    "Brief masthead with primary date and days-to-election countdown. Always place first. Takes no arguments.",
+    "Brief masthead naming the November 3, 2026 general election. Always place first. Takes no arguments.",
   props: z.object({}),
   component: () => <BriefHeaderView />,
 });
@@ -113,7 +113,7 @@ export const VotingChecklist = defineComponent({
 export const RaceCard = defineComponent({
   name: "RaceCard",
   description:
-    "Summary card for one race: office, level, incumbent, candidate names. raceId is a natural key like \"WI-GOV-2026\".",
+    "Summary card for one race: office, level, and the names on the November ballot. raceId is a natural key like \"WI-GOV-2026\".",
   props: z.object({ raceId: z.string().describe("race natural key") }),
   component: ({ props }) => <BriefRaceCardView raceId={props.raceId} />,
 });
@@ -121,7 +121,7 @@ export const RaceCard = defineComponent({
 export const CandidateCompareCard = defineComponent({
   name: "CandidateCompareCard",
   description:
-    "Side-by-side matrix comparing up to 4 candidates in one race (party, status, priorities, cash on hand) with a link to the full race.",
+    "Side-by-side matrix comparing up to 4 candidates on the November ballot in one race (party, priorities, cash on hand) with a link to the full race.",
   props: z.object({
     raceId: z.string().describe("race natural key"),
     candidateSlugs: z

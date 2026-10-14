@@ -4,7 +4,7 @@ import { PreferencesPanel } from "@/components/brief/preferences-panel";
 import { BriefValueProp } from "@/components/brief/value-prop";
 
 export const metadata: Metadata = {
-  title: "Your primary brief",
+  title: "Your ballot brief",
   robots: { index: false }, // personal, Clerk-gated
 };
 

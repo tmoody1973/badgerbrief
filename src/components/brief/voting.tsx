@@ -2,6 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { CURRENT_ELECTION } from "@/lib/election";
 import { BriefSkeleton, NotFoundCard } from "./chrome";
 
 export type DeadlineKind =
@@ -17,35 +18,25 @@ const KIND_LABEL: Record<DeadlineKind, string> = {
   early_voting: "Early voting",
 };
 
+// A flag such as earlyVoting.available is not a fact to print ("Available: true").
 const rows = (map: unknown): [string, string][] =>
   map && typeof map === "object"
-    ? Object.entries(map as Record<string, string>).map(([k, v]) => [
-        k.replaceAll("_", " "),
-        String(v),
-      ])
+    ? Object.entries(map as Record<string, unknown>)
+        .filter(([, v]) => typeof v !== "boolean")
+        .map(([k, v]) => [k.replaceAll("_", " "), String(v)])
     : [];
 
+// No countdown: the Phase 1b design rules out countdown clocks and other
+// urgency devices. The date comes from src/lib/election.ts, the one place it lives.
 export function BriefHeaderView() {
-  const election = useQuery(api.public.getElection, {});
-  if (election === undefined) return <BriefSkeleton lines={2} />;
-  if (election === null) return <NotFoundCard entity="the election" />;
-  const days = Math.ceil(
-    (new Date(`${election.primaryDate}T00:00:00-05:00`).getTime() - Date.now()) /
-      86_400_000,
-  );
   return (
     <header className="border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-        Your Wisconsin primary brief
+      <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        Your Wisconsin ballot brief
       </p>
       <h1 className="font-display mt-1 text-3xl">
-        Primary day: {election.primaryDate}
+        Election day: {CURRENT_ELECTION.longDate}
       </h1>
-      {days >= 0 && (
-        <p className="mt-2 inline-block border-2 border-border bg-warning px-2 py-0.5 text-sm font-bold">
-          {days === 0 ? "Election day is today" : `${days} days to go`}
-        </p>
-      )}
     </header>
   );
 }
@@ -116,7 +107,7 @@ export function VotingChecklistView() {
           ))}
         <li>
           <p className="font-bold">
-            ☐ Vote on {info.primaryDate}
+            ☐ Vote on {CURRENT_ELECTION.longDate}
             {info.pollsOpen && info.pollsClose && (
               <span className="font-normal text-muted-foreground">
                 {" "}

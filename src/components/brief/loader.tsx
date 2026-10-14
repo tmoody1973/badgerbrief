@@ -6,6 +6,7 @@ import { api } from "../../../convex/_generated/api";
 import { fixtureBrief } from "@/lib/brief/fixture";
 import { BriefSkeleton } from "./chrome";
 import { BriefRenderer } from "./renderer";
+import { briefStartError } from "@/lib/brief/start-error";
 
 /** Loads the signed-in user's brief, status-aware (generating/ready/failed); fixture demo when signed out or never generated (MOO-311). */
 export function BriefLoader() {
@@ -76,8 +77,8 @@ export function BriefLoader() {
           type="button"
           onClick={() => {
             setGenerateError(null);
-            void generate({}).catch(() =>
-              setGenerateError("Couldn't start your brief — try again."),
+            void generate({}).catch((err: unknown) =>
+              setGenerateError(briefStartError(err)),
             );
           }}
           className="mt-3 border-2 border-border bg-primary px-3 py-1.5 font-bold text-primary-foreground shadow-[var(--shadow-brutal)] press"

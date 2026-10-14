@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { RaceCard as GuideRaceCard } from "@/components/guide/cards";
-import { PartyBadge, StatusBadge } from "@/components/guide/labels";
+import { PartyBadge } from "@/components/guide/labels";
+import { generalBallotName, generalField, generalParty, generalPersonName } from "../../../convex/lib/ballot";
 import { raceIdToSlug } from "@/lib/site";
 import { BriefSkeleton, NotFoundCard } from "./chrome";
 
@@ -12,12 +13,14 @@ export function BriefRaceCardView({ raceId }: { raceId: string }) {
   const data = useQuery(api.public.getRace, { raceId });
   if (data === undefined) return <BriefSkeleton lines={4} />;
   if (data === null) return <NotFoundCard entity={`race ${raceId}`} />;
+  // The November field only, as the state prints it: never the primary field.
+  const onBallot = generalField(data.candidates);
   return (
     <div>
-      <GuideRaceCard race={data.race} candidateCount={data.candidates.length} />
-      {data.candidates.length > 0 && (
+      <GuideRaceCard race={data.race} candidateCount={onBallot.length} />
+      {onBallot.length > 0 && (
         <p className="mt-2 text-sm text-muted-foreground">
-          {data.candidates.map((c) => c.name).join(" · ")}
+          {onBallot.map((c) => generalBallotName(c)).join(" · ")}
         </p>
       )}
     </div>
@@ -34,9 +37,11 @@ export function CandidateCompareCardView({
   const data = useQuery(api.public.getRace, { raceId });
   if (data === undefined) return <BriefSkeleton lines={6} />;
   if (data === null) return <NotFoundCard entity={`race ${raceId}`} />;
+  // Only people on the November ballot, whatever slugs the brief names.
+  const onBallot = generalField(data.candidates);
   const picked = candidateSlugs
     .slice(0, 4)
-    .map((slug) => data.candidates.find((c) => c.slug === slug))
+    .map((slug) => onBallot.find((c) => c.slug === slug))
     .filter((c) => c !== undefined);
   if (picked.length === 0)
     return <NotFoundCard entity={`candidates in ${raceId}`} />;
@@ -57,17 +62,19 @@ export function CandidateCompareCardView({
       <h3 className="font-display text-lg">{data.race.office} — compare</h3>
       <div className="mt-3 overflow-x-auto">
         <div
-          className="grid min-w-[36rem] gap-3"
+          // Two names fit a phone side by side; a fixed minimum width pushed the
+          // second one off screen, so a reader saw one candidate in full and
+          // the other cut off. Sideways scrolling is kept for 3-4 names only.
+          className={`grid gap-3 ${picked.length > 2 ? "min-w-[36rem]" : ""}`}
           style={{ gridTemplateColumns: `repeat(${picked.length}, minmax(0, 1fr))` }}
         >
           {picked.map((c) => (
             <div key={c.slug} className="border-2 border-border p-3">
               <Link href={`/candidates/${c.slug}`} className="font-display text-base underline">
-                {c.name}
+                {generalPersonName(c)}
               </Link>
               <div className="mt-2 flex flex-wrap gap-1">
-                <PartyBadge party={c.party} />
-                <StatusBadge status={c.status} />
+                <PartyBadge party={generalParty(c)} />
               </div>
               {c.currentOccupation && c.currentOccupation !== "Unknown" && (
                 <p className="mt-2 text-xs text-muted-foreground">{c.currentOccupation}</p>
@@ -87,12 +94,12 @@ export function CandidateCompareCardView({
           ))}
         </div>
       </div>
-      {data.candidates.length > picked.length && (
+      {onBallot.length > picked.length && (
         <Link
           href={`/races/${raceIdToSlug(raceId)}`}
           className="mt-3 inline-block border-2 border-border bg-secondary px-2 py-1 text-sm font-bold"
         >
-          See full race ({data.candidates.length} candidates) →
+          See full race ({onBallot.length} on the ballot) →
         </Link>
       )}
     </section>

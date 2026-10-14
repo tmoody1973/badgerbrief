@@ -1,4 +1,5 @@
 import { convexTest } from "convex-test";
+import { ConvexError } from "convex/values";
 import { describe, expect, test } from "vitest";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
@@ -20,20 +21,26 @@ async function seedUser(t: ReturnType<typeof setup>) {
 }
 
 const raceBase = { electionSlug: "wi-2026", sources: [], dataAsOf: "2026-07-01" };
+const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
+const ON = { onBallot: true, source: SOURCE };
+// Every brief the November code writes carries this marker; anything without it was written for the primary.
+const NOV = { ballot: "general" as const };
 async function seedBallotWorld(t: ReturnType<typeof setup>, userId: Id<"users">) {
   await t.run(async (ctx) => {
-    await ctx.db.insert("races", { ...raceBase, raceId: "WI-GOV-2026", office: "Governor", level: "State Executive" });
-    await ctx.db.insert("races", { ...raceBase, raceId: "WI-US-HOUSE-D4-2026", office: "U.S. House WI-4", level: "Federal" });
-    await ctx.db.insert("races", { ...raceBase, raceId: "WI-US-HOUSE-D5-2026", office: "U.S. House WI-5", level: "Federal" });
-    await ctx.db.insert("races", { ...raceBase, raceId: "WI-STATE-SENATE-2026", office: "State Senate", level: "State Legislative", districts: [{ district: 3 }, { district: 5 }] });
-    await ctx.db.insert("races", { ...raceBase, raceId: "WI-STATE-ASSEMBLY-2026", office: "State Assembly", level: "State Legislative", districts: [{ district: 8 }] });
-    await ctx.db.insert("candidates", {
-      sources: raceBase.sources,
-      dataAsOf: raceBase.dataAsOf,
-      slug: "kelda-roys",
-      raceId: "WI-GOV-2026",
-      name: "Kelda Roys",
-    });
+    await ctx.db.insert("races", { ...raceBase, raceId: "WI-GOV-2026", office: "Governor", level: "State Executive", general: ON });
+    // On the state's list, but not a separate contest: elected on the governor ticket.
+    await ctx.db.insert("races", { ...raceBase, raceId: "WI-LTGOV-2026", office: "Lieutenant Governor", level: "State Executive", general: { onBallot: false, source: SOURCE } });
+    // Never loaded from the state's list.
+    await ctx.db.insert("races", { ...raceBase, raceId: "WI-SCOTUS-2026", office: "Supreme Court", level: "State Judicial" });
+    await ctx.db.insert("races", { ...raceBase, raceId: "WI-US-HOUSE-D4-2026", office: "U.S. House WI-4", level: "Federal", general: ON });
+    await ctx.db.insert("races", { ...raceBase, raceId: "WI-US-HOUSE-D5-2026", office: "U.S. House WI-5", level: "Federal", general: ON });
+    await ctx.db.insert("races", { ...raceBase, raceId: "WI-STATE-SENATE-2026", office: "State Senate", level: "State Legislative", districts: [{ district: 3 }, { district: 5 }], general: ON });
+    await ctx.db.insert("races", { ...raceBase, raceId: "WI-STATE-ASSEMBLY-2026", office: "State Assembly", level: "State Legislative", districts: [{ district: 8 }], general: ON });
+    const person = { sources: raceBase.sources, dataAsOf: raceBase.dataAsOf, raceId: "WI-GOV-2026" };
+    // Lost the August primary: not on the November ballot.
+    await ctx.db.insert("candidates", { ...person, slug: "kelda-roys", name: "Kelda Roys", party: "Democratic" });
+    await ctx.db.insert("candidates", { ...person, slug: "david-crowley", name: "David Crowley", party: "Democrat", general: { onBallot: true, ballotName: "David Crowley / Sarah Godlewski", party: "Democratic", ballotOrder: 2, source: SOURCE } });
+    await ctx.db.insert("candidates", { ...person, slug: "tom-tiffany", name: "Thomas Tiffany", party: "Republican", general: { onBallot: true, ballotName: "Tom Tiffany / David Varnam", party: "Republican", ballotOrder: 1, source: SOURCE } });
     await ctx.db.insert("voting_info", { electionSlug: "wi-2026", primaryDate: "2026-08-11", officialVoterInfoUrl: "https://myvote.wi.gov", sources: [], lastCheckedAt: Date.now() });
     await ctx.db.insert("user_preferences", {
       userId,
@@ -58,6 +65,7 @@ describe("briefs lifecycle", () => {
     const userId = await seedUser(t);
     await seedBallotWorld(t, userId);
     const ctxBlock = await t.query(internal.briefs.assembleContext, { userId });
+    // Lieutenant Governor (not a separate contest) and a race never loaded from the state's list are left out.
     expect(ctxBlock.races.map((r) => r.raceId).sort()).toEqual([
       "WI-GOV-2026",
       "WI-STATE-ASSEMBLY-2026",
@@ -65,7 +73,12 @@ describe("briefs lifecycle", () => {
       "WI-US-HOUSE-D4-2026", // D5 excluded
     ]);
     expect(ctxBlock.preferences.detailLevel).toBe("standard");
-    expect(ctxBlock.races.find((r) => r.raceId === "WI-GOV-2026")!.candidates[0].slug).toBe("kelda-roys");
+    // Only people on the November ballot, in the state's order, named and labeled as the state prints them.
+    expect(ctxBlock.races.find((r) => r.raceId === "WI-GOV-2026")!.candidates.map(({ slug, name, party }) => ({ slug, name, party }))).toEqual([
+      { slug: "tom-tiffany", name: "Tom Tiffany", party: "Republican" },
+      { slug: "david-crowley", name: "David Crowley", party: "Democratic" },
+    ]);
+    expect(ctxBlock.votingInfo).toEqual({ electionDate: "November 3, 2026", available: true });
   });
 
   test("assembleContext rejects when senate/assembly districts are missing", async () => {
@@ -93,7 +106,7 @@ describe("briefs lifecycle", () => {
     const t = setup();
     const userId = await seedUser(t);
     const briefId = await t.run((ctx) =>
-      ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "old", generatedAt: 1, status: "generating", attempt: 1 }),
+      ctx.db.insert("voter_briefs", { ...NOV, userId, electionSlug: "wi-2026", openuiSource: "old", generatedAt: 1, status: "generating", attempt: 1 }),
     );
     await t.mutation(internal.briefs.beginAttempt, { briefId, attempt: 2 });
     await t.mutation(internal.briefs.setSource, { briefId, source: "root = Stack([])" });
@@ -115,7 +128,7 @@ describe("briefs lifecycle", () => {
     });
 
     // legacy row without status reads as ready
-    await t.run((ctx) => ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "x", generatedAt: 2 }));
+    await t.run((ctx) => ctx.db.insert("voter_briefs", { ...NOV, userId, electionSlug: "wi-2026", openuiSource: "x", generatedAt: Date.now() + 1 }));
     const latest = await t.withIdentity(USER).query(api.briefs.getLatest, {});
     expect(latest!.status).toBe("ready");
   });
@@ -124,9 +137,9 @@ describe("briefs lifecycle", () => {
     const t = setup();
     const userId = await seedUser(t);
     await t.run(async (ctx) => {
-      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "a", generatedAt: 1, status: "ready" });
-      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "b", generatedAt: 2, status: "failed" });
-      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "c", generatedAt: 3, status: "ready" });
+      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "a", generatedAt: 1, ...NOV, status: "ready" });
+      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "b", generatedAt: 2, ...NOV, status: "failed" });
+      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "c", generatedAt: 3, ...NOV, status: "ready" });
     });
     const list = await t.withIdentity(USER).query(api.briefs.listMine, {});
     expect(list.map((b) => b.openuiSource)).toEqual(["c", "a"]);
@@ -139,20 +152,47 @@ describe("briefs lifecycle", () => {
 
     const clean = await t.query(internal.briefs.checkEntityRefs, {
       raceIds: ["WI-GOV-2026"],
-      candidateSlugs: ["kelda-roys"],
+      candidateSlugs: ["tom-tiffany"],
       issueSlugs: ["housing"],
     });
     expect(clean).toEqual([]);
 
     const missing = await t.query(internal.briefs.checkEntityRefs, {
       raceIds: ["WI-GOV-2026", "WI-FAKE-RACE"],
-      candidateSlugs: ["kelda-roys", "made-up-person"],
+      candidateSlugs: ["tom-tiffany", "made-up-person", "kelda-roys"],
       issueSlugs: ["housing", "not-an-issue"],
     });
     expect(missing).toEqual([
       'raceId "WI-FAKE-RACE"',
       'candidateSlug "made-up-person"',
+      'candidateSlug "kelda-roys" (not on the November 3, 2026 ballot)',
       'issueSlug "not-an-issue"',
     ]);
+  });
+
+  test("a brief written by the primary code is not shown, even one made today, so the voter makes a November one", async () => {
+    const t = setup();
+    const userId = await seedUser(t);
+    await t.run((ctx) =>
+      ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "intro = AssistantNote(\"the August 11 primary\")", generatedAt: Date.now(), status: "ready" }),
+    );
+    expect(await t.withIdentity(USER).query(api.briefs.getLatest, {})).toBeNull();
+    expect(await t.withIdentity(USER).query(api.briefs.listMine, {})).toEqual([]);
+  });
+
+  test("the off switch stops new briefs and says so", async () => {
+    const t = setup();
+    const userId = await seedUser(t);
+    await seedBallotWorld(t, userId);
+    process.env.BRIEF_DISABLED = "1";
+    try {
+      const err = await t.withIdentity(USER).mutation(api.briefs.generate, {}).catch((e: unknown) => e);
+      // A ConvexError: its message reaches the page in production; a plain Error's is hidden.
+      expect(err).toBeInstanceOf(ConvexError);
+      expect((err as ConvexError<string>).data).toMatch(/paused/i);
+    } finally {
+      delete process.env.BRIEF_DISABLED;
+    }
+    expect(await t.run((ctx) => ctx.db.query("voter_briefs").collect())).toEqual([]);
   });
 });
