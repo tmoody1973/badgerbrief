@@ -4,6 +4,7 @@ import type { ChromeDict } from "./chrome-dict";
  * keeps English-route rendering byte-identical after chrome.tsx goes locale-aware. */
 export const chromeEn: ChromeDict = {
   navLabels: {
+    "/ballot": "My Ballot",
     "/races/wi-gov-2026": "Races",
     "/match": "What Matters",
     "/ads": "Ad Tracker",
@@ -31,6 +32,7 @@ export const chromeEn: ChromeDict = {
     methodology: "Methodology",
     reportError: "Report an error",
     support: "Support this project",
+    kofi: "Support on Ko-fi",
     contribute: "Help improve this guide",
     financeDisclaimer:
       "Campaign finance data for Wisconsin state offices comes from the " +

@@ -31,6 +31,22 @@ export function IconRaces({ className }: IconProps) {
   );
 }
 
+/** A ballot: a sheet with two marked lines. Drawn here, in the same single-colour style. */
+export function IconBallot({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden focusable="false">
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM8.5 8h2v2h-2zM13.5 9h2.5M8.5 14h2v2h-2zM13.5 15h2.5"
+      />
+    </svg>
+  );
+}
+
 export function IconVote({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden focusable="false">

@@ -45,3 +45,11 @@ describe("ES dict parity", () => {
     expect(keyPaths(methodologyEs)).toEqual(keyPaths(methodologyEn));
   });
 });
+
+test("home: the support copy no longer points at a floating button in the corner", () => {
+  expect(homeEn.support.body).not.toMatch(/corner|Support me button/i);
+  expect(homeEs.support.body).not.toMatch(/esquina|Support me/i);
+  // It points at the button directly beneath it instead.
+  expect(homeEn.support.body).toMatch(/below/i);
+  expect(homeEs.support.body).toMatch(/abajo/i);
+});

@@ -10,7 +10,6 @@ import { GuidedRail } from "@/components/guide/guided-rail";
 import { PostHogProvider } from "@/components/posthog-provider";
 import { AnalyticsEvents } from "@/components/guide/analytics-events";
 import { SwRegister } from "@/components/guide/sw-register";
-import { KofiWidget } from "@/components/kofi-widget";
 import { AnnouncementBar } from "@/components/guide/announcement-bar";
 import { SiteFooter, SiteHeader } from "@/components/guide/chrome";
 import { GoogleAnalytics } from "@next/third-parties/google";
@@ -92,7 +91,6 @@ export default function RootLayout({
         <AnalyticsEvents />
         {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
         <SwRegister />
-        <KofiWidget />
       </body>
     </html>
   );

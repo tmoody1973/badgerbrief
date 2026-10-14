@@ -68,7 +68,7 @@ export const homeEn: HomeDict = {
   support: {
     heading: "One person builds this guide",
     body:
-      "I build and host BadgerBrief myself — no ads, no paywall, no campaign or party money. Keeping it online and updated through the election comes out of my own pocket. If it helped you make sense of your ballot, tap the ☕ Support me button in the corner — any amount keeps it going.",
+      "I build and host BadgerBrief myself — no ads, no paywall, no campaign or party money. Keeping it online and updated through the election comes out of my own pocket. If it helped you make sense of your ballot, you can chip in with the button below — any amount keeps it going.",
     wipPrefix: "This is a work in progress. Spot an error? ",
     wipLinkText: "Tell me on the feedback form",
     wipSuffix: ".",

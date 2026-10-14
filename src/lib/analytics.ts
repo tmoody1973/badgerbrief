@@ -46,7 +46,7 @@ type Events = {
   match_start: Record<string, never>;
   match_complete: { answered: number };
   share: {
-    surface: "race" | "candidate" | "compare" | "brief" | "match";
+    surface: "race" | "candidate" | "compare" | "brief" | "match" | "ballot";
     method: "web_share" | "copy" | "x" | "facebook" | "email" | "bluesky";
   };
   guided_path: { step: string };

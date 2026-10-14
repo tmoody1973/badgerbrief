@@ -1,4 +1,5 @@
 import posthog from "posthog-js";
+import { pathOnlyUrl } from "./analytics-url";
 
 /**
  * PostHog, in the most privacy-defensive configuration the library allows.
@@ -45,15 +46,8 @@ export function initPostHog(): void {
       if (!event?.properties) return event;
       for (const k of ["$current_url", "$referrer", "$referring_domain"]) {
         const val = event.properties[k];
-        if (typeof val === "string" && val.includes("?")) {
-          try {
-            const u = new URL(val);
-            u.search = "";
-            event.properties[k] = u.toString();
-          } catch {
-            // not a URL — leave it, the wrapper already vets custom props
-          }
-        }
+        // "?" and "#" both: a shared ballot carries districts after the "#".
+        if (typeof val === "string") event.properties[k] = pathOnlyUrl(val);
       }
       return event;
     },

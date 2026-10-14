@@ -18,3 +18,8 @@ describe("chrome dict parity + locale detection", () => {
     expect(localeFromPath("/")).toBe("en");
   });
 });
+
+test("both languages label the Ko-fi link that replaced the floating button", () => {
+  expect(chromeEn.footer.kofi).toBe("Support on Ko-fi");
+  expect(chromeEs.footer.kofi).toBe("Apoye en Ko-fi");
+});

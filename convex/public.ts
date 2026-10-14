@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { api } from "./_generated/api";
-import { query } from "./_generated/server";
+import { query, type QueryCtx } from "./_generated/server";
 import { generalBallotName, generalField, generalParty, generalPersonName, isOnGeneralBallot } from "./lib/ballot";
 
 /** Read-only queries for the public guide. Published/seeded data only. */
@@ -89,6 +89,78 @@ export const positionsForRaces = query({
           .map((p) => ({
             candidateSlug: p.candidateSlug, issueSlug: p.issueSlug, stance: p.stance, summary: p.summary, sources: p.sources,
           })),
+      });
+    }
+    return out;
+  },
+});
+
+/** One contest on the November ballot, in slim form, for My Ballot. */
+export type BallotIndexRace = {
+  raceId: string;
+  office: string;
+  level: string;
+  /** The state file this contest's ballot facts came from. */
+  source: { url: string; documentDate: string };
+  /** On the ballot, in the state's order. `ballotName` is the state's printing; a governor ticket names two people. */
+  candidates: { slug: string; ballotName: string; party?: string }[];
+  /** Whether the guide holds anything of each kind for someone on the ballot in this contest. */
+  holds: { positions: boolean; money: boolean; ads: boolean };
+};
+
+const hasPosition = async (ctx: QueryCtx, raceId: string, slug: string) =>
+  (await ctx.db
+    .query("candidate_positions_published")
+    .withIndex("by_candidate_issue", (q) => q.eq("raceId", raceId).eq("candidateSlug", slug))
+    .first()) !== null;
+
+const hasFinance = async (ctx: QueryCtx, raceId: string, slug: string) =>
+  (await ctx.db
+    .query("finance_totals")
+    .withIndex("by_candidate", (q) => q.eq("raceId", raceId).eq("candidateSlug", slug))
+    .first()) !== null;
+
+const hasAd = async (ctx: QueryCtx, raceId: string, slug: string) =>
+  (await ctx.db
+    .query("ads")
+    .withIndex("by_candidate", (q) => q.eq("raceId", raceId).eq("candidateSlug", slug))
+    .first()) !== null;
+
+async function anyOf(slugs: readonly string[], check: (slug: string) => Promise<boolean>): Promise<boolean> {
+  for (const slug of slugs) if (await check(slug)) return true;
+  return false;
+}
+
+/**
+ * Every November contest in slim form, for My Ballot. What the guide holds is
+ * answered with one indexed existence check per candidate and kind of record,
+ * never a full read: the governor's race alone has thousands of ad rows. About
+ * 130 contests come to roughly 900 lookups, under Convex's limit per function.
+ */
+export const ballotIndex = query({
+  args: {},
+  handler: async (ctx): Promise<BallotIndexRace[]> => {
+    const out: BallotIndexRace[] = [];
+    for (const race of await ctx.db.query("races").collect()) {
+      const general = race.general;
+      if (general?.onBallot !== true) continue;
+      const candidates = await ctx.db
+        .query("candidates")
+        .withIndex("by_race", (q) => q.eq("raceId", race.raceId))
+        .collect();
+      const field = generalField(candidates);
+      const slugs = field.map((c) => c.slug);
+      out.push({
+        raceId: race.raceId,
+        office: race.office,
+        level: race.level,
+        source: { url: general.source.url, documentDate: general.source.documentDate },
+        candidates: field.map((c) => ({ slug: c.slug, ballotName: generalBallotName(c), party: generalParty(c) })),
+        holds: {
+          positions: await anyOf(slugs, (slug) => hasPosition(ctx, race.raceId, slug)),
+          money: await anyOf(slugs, (slug) => hasFinance(ctx, race.raceId, slug)),
+          ads: await anyOf(slugs, (slug) => hasAd(ctx, race.raceId, slug)),
+        },
       });
     }
     return out;

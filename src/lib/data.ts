@@ -45,6 +45,8 @@ function cached<Args extends (string | undefined)[], T>(
 
 export const getElection = cached("getElection", () => fetchQuery(api.public.getElection, {}));
 export const listRaces = cached("listRaces", () => fetchQuery(api.public.listRaces, {}));
+/** Every November contest in slim form, for My Ballot. */
+export const getBallotIndex = cached("getBallotIndex", () => fetchQuery(api.public.ballotIndex, {}));
 export const getRace = cached("getRace", (raceId: string) =>
   fetchQuery(api.public.getRace, { raceId }));
 export const getCandidateBySlug = cached("getCandidateBySlug", (slug: string) =>

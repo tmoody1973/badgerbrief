@@ -16,7 +16,9 @@ import { localizeHref } from "@/lib/i18n/locale";
 // question a reader should never have to hunt for, and burying it reads as
 // evasion. Methodology stays in the footer + mobile menu — About links to it,
 // so the row keeps one entry rather than two.
-const DESKTOP_LINKS = NAV_LINKS.filter((l) => l.href !== "/methodology");
+// About left the row when My Ballot joined it: the row was already wider than
+// the page, and About is in the footer of every page.
+const DESKTOP_LINKS = NAV_LINKS.filter((l) => l.href !== "/methodology" && l.href !== "/about");
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -36,7 +38,7 @@ export function SiteHeader() {
           Badger<span className="text-primary">Brief</span>
         </Link>
         <div className="flex items-center gap-3">
-          <nav className="hidden items-center gap-3 font-mono text-sm font-bold uppercase tracking-wider sm:flex">
+          <nav className="hidden items-center gap-2 font-mono text-sm font-bold uppercase tracking-wider sm:flex">
             {DESKTOP_LINKS.map(({ href, label }) => (
               <Link key={href} href={localizeHref(href, locale)} className="whitespace-nowrap px-2 py-1 hover:bg-secondary">
                 {dict.navLabels[href] ?? label}
@@ -133,6 +135,15 @@ export function SiteFooter() {
             target="_blank"
           >
             ♥ {footer.support}
+          </a>
+          {" · "}
+          <a
+            href="https://ko-fi.com/tarikmoody"
+            className="font-bold underline decoration-2 underline-offset-2"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {footer.kofi}
           </a>
           {" · "}
           {/* /contribute is EN-only (no /es route yet); link stays unlocalized

@@ -1,6 +1,7 @@
 "use client";
 
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
 import { track } from "@/lib/analytics";
 
 /**
@@ -13,6 +14,11 @@ import { track } from "@/lib/analytics";
  */
 export function AuthNav() {
   const { isLoaded, isSignedIn } = useUser();
+  // Left to itself, Clerk returns a visitor to the full address they were on,
+  // including the part after the "#". A shared ballot carries districts there,
+  // and a sign-in through Google sends the return address to Clerk. Name the
+  // page alone.
+  const pathname = usePathname();
 
   // Render nothing until Clerk resolves, so the button doesn't flash the
   // wrong state on first paint.
@@ -27,7 +33,7 @@ export function AuthNav() {
   }
 
   return (
-    <SignInButton mode="modal">
+    <SignInButton mode="modal" fallbackRedirectUrl={pathname} signUpFallbackRedirectUrl={pathname}>
       <button
         type="button"
         onClick={() => track("auth_start", { intent: "sign_in", from: "nav" })}
