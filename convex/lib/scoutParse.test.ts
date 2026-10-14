@@ -4,6 +4,7 @@ import {
   MAX_SEARCH_DOMAINS,
   isAllowedUrl,
   articlesFromSearch,
+  isOpinion,
   withPageDetails,
   scoutQuery,
   sortByRotation,
@@ -217,5 +218,41 @@ describe("withPageDetails", () => {
 
   test("an image address that is not a web address is ignored", () => {
     expect(withPageDetails(article, { title: article.headline, image: "data:image/png;base64,AAAA" })).toEqual(article);
+  });
+});
+
+describe("isOpinion", () => {
+  test.each([
+    ["https://madison.com/opinion/letters/article_973b3036.html", "Rebecca Cooke is best candidate to rein in Donald Trump | Bob Gates"],
+    ["https://captimes.com/opinion/dave-zweifel/opinion-if-you-like-trump/article_4a8e.html", "Opinion | If you like Trump, Tiffany's your guy"],
+    ["https://www.jsonline.com/story/opinion/contributors/2026/08/23/tom-tiffany-david-crowley/1/", "Let's have a spirited yet professional campaign for governor"],
+    ["https://wisconsinwatch.org/2026/09/guest-opinion-employee-owned/", "Guest opinion: Why Wisconsin needs more employee-owned companies"],
+    ["https://wisconsinwatch.org/2026/09/wisconsin-democratic-primary/", "Opinion: What Wisconsin's Democratic primary reveals"],
+    ["https://captimes.com/news/letter-ranked-choice/", "Letter | Ranked choice voting offers a better way"],
+  ])("%s is opinion", (url, title) => {
+    expect(isOpinion(url, title)).toBe(true);
+  });
+
+  test.each([
+    ["https://www.wpr.org/news/tom-tiffany-conservative-record", "Tom Tiffany's conservative record dates back years"],
+    ["https://urbanmilwaukee.com/2026/08/25/amid-data-center-attack-ads/", "Amid Data Center Attack Ads, Crowley Balances Union Support"],
+    ["https://www.wisn.com/article/ag-debate-opinions-differ/1", "AG debate: Kaul and Toney differ on crime lab"],
+  ])("%s is news", (url, title) => {
+    expect(isOpinion(url, title)).toBe(false);
+  });
+
+  test("the scout leaves opinion pieces out of what it proposes", () => {
+    const out = articlesFromSearch({
+      results: [
+        { url: "https://madison.com/opinion/letters/article_973b3036.html", title: "Rebecca Cooke is best candidate | Bob Gates" },
+        { url: "https://www.wpr.org/news/real-story", title: "Real story" },
+      ],
+    });
+    expect("articles" in out && out.articles.map((a) => a.url)).toEqual(["https://www.wpr.org/news/real-story"]);
+  });
+
+  test("an opinion label that only shows on the page's real title is caught too", () => {
+    const article = { url: "https://wisconsinwatch.org/2026/09/primary-reveals/", outlet: "Wisconsin Watch", headline: "What Wisconsin's Democratic primary reveals ...", whyRelevant: "" };
+    expect(withPageDetails(article, { title: "Opinion: What Wisconsin's Democratic primary reveals about data centers" })).toBeNull();
   });
 });

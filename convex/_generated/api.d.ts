@@ -80,6 +80,7 @@ import type * as lib_wisconsinWatch from "../lib/wisconsinWatch.js";
 import type * as maintenance from "../maintenance.js";
 import type * as monitor from "../monitor.js";
 import type * as monitorQueries from "../monitorQueries.js";
+import type * as newsCleanup from "../newsCleanup.js";
 import type * as newsTone from "../newsTone.js";
 import type * as newsToneClassify from "../newsToneClassify.js";
 import type * as outletEnrich from "../outletEnrich.js";
@@ -188,6 +189,7 @@ declare const fullApi: ApiFromModules<{
   maintenance: typeof maintenance;
   monitor: typeof monitor;
   monitorQueries: typeof monitorQueries;
+  newsCleanup: typeof newsCleanup;
   newsTone: typeof newsTone;
   newsToneClassify: typeof newsToneClassify;
   outletEnrich: typeof outletEnrich;
