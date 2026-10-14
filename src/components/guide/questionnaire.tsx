@@ -72,6 +72,19 @@ function Status({ row }: { row: QuestionnaireRow }) {
   );
 }
 
+/** Opens Voter Help with the question typed in; the voter still presses Send. */
+function AskVoterHelp({ question }: { question: string }) {
+  return (
+    <p className="mt-3 text-sm">
+      <a href={`/chat?${new URLSearchParams({ q: question })}`} className={INLINE_LINK}>
+        Ask Voter Help: “{question}” →
+      </a>
+    </p>
+  );
+}
+
+const anyAnswered = (rows: QuestionnaireRow[]) => rows.some((r) => r.status.status === "answered");
+
 function Credit() {
   return (
     <p className="mt-3 font-mono text-xs text-muted-foreground">
@@ -81,7 +94,15 @@ function Credit() {
   );
 }
 
-export function RaceQuestionnaire({ raceId, candidates }: { raceId: string; candidates: readonly OnBallot[] }) {
+export function RaceQuestionnaire({
+  raceId,
+  office,
+  candidates,
+}: {
+  raceId: string;
+  office: string;
+  candidates: readonly OnBallot[];
+}) {
   const rows = questionnaireRows(raceId, candidates);
   if (rows.length === 0) return null;
   return (
@@ -105,6 +126,7 @@ export function RaceQuestionnaire({ raceId, candidates }: { raceId: string; cand
           </li>
         ))}
       </ul>
+      {anyAnswered(rows) && <AskVoterHelp question={`What did the candidates for ${office} tell Wisconsin Watch?`} />}
       <Credit />
     </section>
   );
@@ -120,6 +142,7 @@ export function CandidateQuestionnaire({ raceId, candidate }: { raceId: string; 
         Wisconsin Watch, a nonprofit newsroom, asked candidates for this office the same questions.
       </p>
       <Status row={row} />
+      {anyAnswered([row]) && <AskVoterHelp question={`What did ${row.name} tell Wisconsin Watch?`} />}
       <Credit />
     </section>
   );

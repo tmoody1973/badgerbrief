@@ -36,6 +36,19 @@ export function MethodologyGuide({ dict, lang }: { dict: MethodologyDict; lang: 
                 <strong>{sections.dataSources.politicalAds.label}</strong>
                 {sections.dataSources.politicalAds.body}
               </li>
+              <li>
+                <strong>{sections.dataSources.questionnaire.label}</strong>
+                {sections.dataSources.questionnaire.before}{" "}
+                <a
+                  href="https://voterguide26.wisconsinwatch.org/?utm_source=badgerbrief&utm_medium=referral"
+                  className="underline"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  {sections.dataSources.questionnaire.linkText}
+                </a>
+                {sections.dataSources.questionnaire.after}
+              </li>
             </ul>
           </div>
         </section>

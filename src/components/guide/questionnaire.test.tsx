@@ -44,7 +44,7 @@ describe("questionnaireRows", () => {
 });
 
 describe("RaceQuestionnaire", () => {
-  const html = renderToStaticMarkup(<RaceQuestionnaire raceId={SD13} candidates={[jagler, ripley]} />);
+  const html = renderToStaticMarkup(<RaceQuestionnaire office="State Senate District 13" raceId={SD13} candidates={[jagler, ripley]} />);
 
   test("links to the answers of a candidate who answered", () => {
     expect(html).toContain("Sasha Ripley");
@@ -91,7 +91,7 @@ describe("RaceQuestionnaire", () => {
   });
 
   test("renders nothing for a race their guide does not cover", () => {
-    expect(renderToStaticMarkup(<RaceQuestionnaire raceId="WI-COUNTY-MILWAUKEE-SHERIFF" candidates={[jagler]} />)).toBe("");
+    expect(renderToStaticMarkup(<RaceQuestionnaire office="State Senate District 13" raceId="WI-COUNTY-MILWAUKEE-SHERIFF" candidates={[jagler]} />)).toBe("");
   });
 });
 
@@ -105,5 +105,36 @@ describe("CandidateQuestionnaire", () => {
   test("renders nothing for someone who is not on the certified ballot", () => {
     const off = { slug: "someone-else", name: "Someone Else" };
     expect(renderToStaticMarkup(<CandidateQuestionnaire raceId={SD13} candidate={off} />)).toBe("");
+  });
+});
+
+/** The question a "Ask Voter Help" link would type into the chat, or null when there is no link. */
+function askedQuestion(html: string): string | null {
+  const href = html.match(/href="(\/chat\?[^"]+)"/)?.[1];
+  return href ? new URLSearchParams(href.split("?")[1].replace(/&amp;/g, "&")).get("q") : null;
+}
+
+describe("asking Voter Help about the answers", () => {
+  test("a race page offers to ask Voter Help what this office's candidates told Wisconsin Watch", () => {
+    const html = renderToStaticMarkup(
+      <RaceQuestionnaire raceId={SD13} office="State Senate District 13" candidates={[jagler, ripley]} />,
+    );
+    expect(askedQuestion(html)).toBe("What did the candidates for State Senate District 13 tell Wisconsin Watch?");
+  });
+
+  test("no Voter Help link when nobody in the race answered: there is nothing to ask about", () => {
+    const kitchens = candidate("joel-kitchens", "Joel Kitchens", "Republican", 1);
+    const paplham = candidate("renee-a-paplham", "Renee A. Paplham", "Democratic", 2);
+    const html = renderToStaticMarkup(
+      <RaceQuestionnaire raceId="WI-STATE-ASSEMBLY-D1-2026" office="Assembly District 1" candidates={[kitchens, paplham]} />,
+    );
+    expect(askedQuestion(html)).toBeNull();
+  });
+
+  test("a candidate page offers it only for a candidate who answered", () => {
+    const answered = renderToStaticMarkup(<CandidateQuestionnaire raceId={SD13} candidate={ripley} />);
+    expect(askedQuestion(answered)).toBe("What did Sasha Ripley tell Wisconsin Watch?");
+    const didNot = renderToStaticMarkup(<CandidateQuestionnaire raceId={SD13} candidate={jagler} />);
+    expect(askedQuestion(didNot)).toBeNull();
   });
 });
