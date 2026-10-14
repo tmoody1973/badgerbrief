@@ -87,7 +87,11 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
     e.preventDefault();
     setStatus({ kind: "loading" });
     try {
-      const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`);
+      const res = await fetch("/api/geocode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address }),
+      });
       const data = await res.json();
       if (data.ok) {
         track("ballot_lookup", { status: "ok" }); // status only — never the address

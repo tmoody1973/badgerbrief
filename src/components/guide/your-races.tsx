@@ -47,7 +47,11 @@ export function YourRaces({ races }: { races: RaceCard[] }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`);
+      const res = await fetch("/api/geocode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address }),
+      });
       const data = await res.json();
       if (data.ok) {
         setEntered({ congressional: data.congressional, senate: data.senate, assembly: data.assembly });
