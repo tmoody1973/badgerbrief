@@ -103,8 +103,24 @@ export function scoutQuery(target: { name: string; office: string }): string {
   return `"${target.name}" ${target.office}`;
 }
 
-/** Listing, tag, author, collection and file pages that come back from a search but are not articles. */
-const NOT_AN_ARTICLE = /\/(category|tag|tags|author|authors|archives?)\/|\/collection_|\.(jpe?g|png|gif|webp|pdf)$/i;
+/** Listing, tag, author, people, topic, collection and file pages that come back from a search but are not articles. */
+const NOT_AN_ARTICLE = /\/(category|tag|tags|author|authors|archives?|people|person|topics?)\/|\/topics?$|\/collection_|\.(jpe?g|png|gif|webp|pdf)$/i;
+
+/**
+ * A page that is not an article: a section front ("/news", "/" — every
+ * article address on these outlets has at least two path segments), or a
+ * listing, profile, topic or file page. Urban Milwaukee /people/ profiles and
+ * WPR /topic/ pages reached /news under the old scout.
+ */
+export function isNotAnArticle(url: string): boolean {
+  let path: string;
+  try {
+    path = new URL(url).pathname;
+  } catch {
+    return true;
+  }
+  return path.split("/").filter(Boolean).length < 2 || NOT_AN_ARTICLE.test(path);
+}
 
 /**
  * A campaign's own press release, reposted by an outlet. Urban Milwaukee files
@@ -159,10 +175,7 @@ export function articlesFromSearch(response: unknown): { articles: ScoutArticle[
     url.search = "";
     url.hash = "";
     const title = r.title.trim();
-    // A section front ("/news", "/") is never an article: every article
-    // address on these outlets has at least two path segments.
-    const isSectionFront = url.pathname.split("/").filter(Boolean).length < 2;
-    if (isSectionFront || NOT_AN_ARTICLE.test(url.pathname) || isPressRelease(url, title) || isOpinion(r.url, title)) continue;
+    if (isNotAnArticle(url.toString()) || isPressRelease(url, title) || isOpinion(r.url, title)) continue;
     const clean = url.toString();
     if (seen.has(clean)) continue;
     seen.add(clean);
