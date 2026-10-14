@@ -101,19 +101,19 @@ export const counts = query({
       .withIndex("by_status", (q) => q.eq("status", "open"))
       .collect();
     const adMatchTasks = open.filter((t) => t.kind === "ad_match");
+    // One read of the ads table, not one lookup per task. Convex allows 4,096
+    // reads per query, and by October 2026 there were ~6,000 open ad_match
+    // tasks: looking each ad up separately failed the query and with it the
+    // whole admin panel. (~7,000 ads is about 8.5 MB, under the 16 MB a
+    // query may read.)
+    const ads = await ctx.db.query("ads").collect();
+    const tvAds = new Set<string>(ads.filter((a) => a.platform === "tv").map((a) => a._id));
     // How many of those ad_match tasks are TV orders.
-    let tv = 0;
-    for (const t of adMatchTasks) {
-      const id = ctx.db.normalizeId("ads", t.refId);
-      const ad = id ? await ctx.db.get(id) : null;
-      if (ad?.platform === "tv") tv++;
-    }
+    const tv = adMatchTasks.filter((t) => tvAds.has(t.refId)).length;
     const editorial = open.filter(
       (t) => t.kind === "position" || t.kind === "quote",
     ).length;
-    const unattributed = (await ctx.db.query("ads").collect()).filter(
-      (a) => a.candidateSlug === undefined,
-    ).length;
+    const unattributed = ads.filter((a) => a.candidateSlug === undefined).length;
     const sources = (
       await ctx.db
         .query("article_sources")
@@ -427,11 +427,20 @@ export const adQueue = query({
     // Join EVERY ad_match task, then sort by spend, then cap. Slicing before the
     // sort (the old bug) truncated in insertion order, so the biggest spenders —
     // notably the ~dozens of TV orders — fell outside the cap and vanished.
+    // The join reads the ads table once: one lookup per task passed Convex's
+    // 4,096-read limit at ~6,000 open tasks (October 2026) and broke /admin.
+    const adsById = new Map((await ctx.db.query("ads").collect()).map((ad) => [ad._id as string, ad]));
+    const joined = adTasks.flatMap((task) => {
+      const ad = adsById.get(task.refId);
+      return ad ? [{ task, ad }] : [];
+    });
+    // Biggest spenders first — the highest-impact ads to triage. The client
+    // adds search + platform + a likely-attacks filter over this set.
+    joined.sort((a, b) => (b.ad.spendUpper ?? 0) - (a.ad.spendUpper ?? 0));
+
+    // The per-ad work (a stored PDF's link can cost a read) only for the rows shown.
     const rows = [];
-    for (const task of adTasks) {
-      const id = ctx.db.normalizeId("ads", task.refId);
-      const ad = id ? await ctx.db.get(id) : null;
-      if (!ad) continue;
+    for (const { task, ad } of joined.slice(0, 300)) {
       // Prefer the ad's own FCC disclosure (who it says it's about) over the
       // sponsor-name surname guess — that's the one-click race attribution.
       const suggestedSlug =
@@ -440,12 +449,9 @@ export const adQueue = query({
       const pdfUrl = await tvPdfUrl(ctx, ad);
       rows.push({ task, ad, suggestedSlug, pdfUrl });
     }
-    // Biggest spenders first — the highest-impact ads to triage. The client
-    // adds search + platform + a likely-attacks filter over this set.
-    rows.sort((a, b) => (b.ad.spendUpper ?? 0) - (a.ad.spendUpper ?? 0));
 
     return {
-      rows: rows.slice(0, 300),
+      rows,
       candidates: roster,
       openCount: adTasks.length,
     };
