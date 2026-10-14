@@ -14,6 +14,7 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/retroui/Button";
+import { ToolActivity, isShown } from "./tool-activity";
 
 /** MOO-310 Voter Help chat — one persistent thread per signed-in user. */
 
@@ -150,6 +151,7 @@ function AssistantBubble({ message }: { message: UIMessage }) {
       <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         Voter Help
       </p>
+      <ToolActivity message={message} />
       <MdText text={visibleText} />
     </div>
   );
@@ -193,9 +195,7 @@ export function VoterHelpChat() {
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const ui = toUIMessages(messages.results ?? []).filter(
-    (m) => m.role === "user" || m.text.trim().length > 0,
-  );
+  const ui = toUIMessages(messages.results ?? []).filter(isShown);
 
   // Drop the local echo once the server row for it exists.
   useEffect(() => {
