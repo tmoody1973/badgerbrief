@@ -82,7 +82,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <GuidedRail />
           </Suspense>
-          <div className="flex-1">{children}</div>
+          <div className="site-content flex-1">{children}</div>
           <SiteFooter />
           <BottomTabs />
         </Providers>

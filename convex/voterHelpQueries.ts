@@ -84,6 +84,28 @@ export const getMyThread = query({
   },
 });
 
+/**
+ * Start a fresh conversation: it becomes the user's newest thread, which is
+ * the one the chat shows. The old thread is kept, not deleted. An empty newest
+ * thread is reused, so pressing the button twice does not pile up threads.
+ */
+export const startNewConversation = mutation({
+  args: { guestId: v.optional(v.string()) },
+  handler: async (ctx, { guestId }) => {
+    const { subject } = await resolveSubject(ctx, guestId);
+    const current = await threadIdForUser(ctx, subject);
+    if (current) {
+      const latest = await listMessages(ctx, components.agent, {
+        threadId: current,
+        paginationOpts: { numItems: 1, cursor: null },
+      });
+      if (latest.page.length === 0) return { threadId: current };
+    }
+    const threadId = await createThread(ctx, components.agent, { userId: subject, title: "Voter Help" });
+    return { threadId };
+  },
+});
+
 /** Save the user's message and schedule the streamed answer. */
 export const sendMessage = mutation({
   args: { prompt: v.string(), guestId: v.optional(v.string()) },

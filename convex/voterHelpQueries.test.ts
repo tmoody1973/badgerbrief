@@ -197,3 +197,27 @@ describe("the chat's ballot queries follow the November ballot", () => {
     expect(JSON.stringify(ballot)).not.toMatch(/primaryDate|Francesca Hong/);
   });
 });
+
+describe("startNewConversation", () => {
+  const guest = { guestId: "guest-new-conv" };
+
+  test("a new conversation becomes the one the chat shows, leaving the old one behind", async () => {
+    const t = setup();
+    const { threadId: first } = await t.mutation(api.voterHelpQueries.sendMessage, { prompt: "When is the deadline?", ...guest });
+    const { threadId: fresh } = await t.mutation(api.voterHelpQueries.startNewConversation, guest);
+    expect(fresh).not.toBe(first);
+    expect(await t.query(api.voterHelpQueries.getMyThread, guest)).toBe(fresh);
+  }, 20_000);
+
+  test("pressing it again before asking anything reuses the empty conversation", async () => {
+    const t = setup();
+    const { threadId: a } = await t.mutation(api.voterHelpQueries.startNewConversation, guest);
+    const { threadId: b } = await t.mutation(api.voterHelpQueries.startNewConversation, guest);
+    expect(b).toBe(a);
+  });
+
+  test("refuses a signed-out visitor with no guest id", async () => {
+    const t = setup();
+    await expect(t.mutation(api.voterHelpQueries.startNewConversation, {})).rejects.toThrow(/reload/i);
+  });
+});

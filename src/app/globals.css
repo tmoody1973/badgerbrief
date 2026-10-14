@@ -142,3 +142,21 @@ body {
   }
 }
 
+
+/* /chat is a full-screen tool: the conversation scrolls inside its own panel
+   and the typing box stays put, so the page itself must not scroll. Scoped
+   with :has() to the page that renders the chat; every other page keeps its
+   normal document flow. */
+body:has([data-chat-screen]) {
+  height: 100dvh;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+body:has([data-chat-screen]) > .site-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+body:has([data-chat-screen]) > footer {
+  display: none;
+}
