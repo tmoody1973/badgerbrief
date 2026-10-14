@@ -26,7 +26,7 @@ export function BriefValueProp() {
         Your ballot, not everyone&apos;s.
       </h1>
       <p className="mt-2 max-w-[54ch]">
-        Wisconsin&apos;s Aug 11 primary ballot is different on every block. A
+        Wisconsin&apos;s November 3 ballot is different on every block. A
         free BadgerBrief account turns this guide into just the part that
         applies to you.
       </p>

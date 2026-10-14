@@ -7,7 +7,7 @@ import contract from "./briefContract.json";
 const context: BriefContext = {
   electionSlug: "wi-2026",
   districts: { congressional: 4, senate: 3, assembly: 8 },
-  votingInfo: { primaryDate: "2026-08-11", available: true },
+  votingInfo: { electionDate: "November 3, 2026", available: true },
   races: [
     {
       raceId: "WI-GOV-2026",

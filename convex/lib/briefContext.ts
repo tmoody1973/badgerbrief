@@ -2,7 +2,7 @@
 export type BriefContext = {
   electionSlug: string;
   districts: { congressional: number; senate: number; assembly: number };
-  votingInfo: { primaryDate: string; available: boolean };
+  votingInfo: { electionDate: string; available: boolean };
   races: Array<{
     raceId: string;
     office: string;

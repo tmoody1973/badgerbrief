@@ -82,3 +82,17 @@ describe("brief agent prompt artifact", () => {
     expect(briefPrompt.length).toBeGreaterThan(500);
   });
 });
+
+describe("the brief is about the November ballot", () => {
+  it("the compose instructions name the general election and never the primary", () => {
+    expect(briefPrompt).toContain("November 3, 2026 general election");
+    expect(briefPrompt).not.toMatch(/primary/i);
+  });
+
+  it("the sample brief signed-out visitors see uses November candidates only", () => {
+    expect(fixtureBrief).not.toMatch(/August|primary/i);
+    // Primary candidates who are not on the November ballot.
+    expect(fixtureBrief).not.toMatch(/joel-brennan|francesca-hong|tim-jacobson|kelda-roys/);
+    expect(fixtureBrief).toContain(`CandidateCompareCard("WI-GOV-2026", ["tom-tiffany", "david-crowley"])`);
+  });
+});
