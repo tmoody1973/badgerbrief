@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { VoterHelpChat } from "@/components/chat/voter-help-chat";
 
 export const metadata: Metadata = {
@@ -9,7 +10,10 @@ export const metadata: Metadata = {
 export default function ChatPage() {
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-8">
-      <VoterHelpChat />
+      {/* The chat reads ?q= from the link; Suspense keeps the page itself static. */}
+      <Suspense>
+        <VoterHelpChat />
+      </Suspense>
     </main>
   );
 }

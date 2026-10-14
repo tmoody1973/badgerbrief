@@ -129,3 +129,44 @@ describe("VoterHelpChat — signed-out rendering (MOO-410)", () => {
     expect(html).toContain("Try asking");
   });
 });
+
+describe("VoterHelpChat — guiding voters to candidates' own answers", () => {
+  afterEach(() => vi.resetModules());
+
+  async function render(search = "") {
+    vi.resetModules();
+    const sendMessage = vi.fn();
+    vi.doMock("convex/react", () => ({
+      useConvexAuth: () => ({ isAuthenticated: false, isLoading: false }),
+      useQuery: () => undefined,
+      useMutation: () => sendMessage,
+    }));
+    vi.doMock("@convex-dev/agent/react", () => ({
+      useThreadMessages: () => ({ results: [] }),
+      toUIMessages: () => [],
+      useSmoothText: (text: string) => [text],
+    }));
+    vi.doMock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search) }));
+    const { VoterHelpChat } = await import("./voter-help-chat");
+    return { html: renderToStaticMarkup(<VoterHelpChat />), sendMessage };
+  }
+
+  test("a question carried in the link waits in the box for the voter to send", async () => {
+    const { html, sendMessage } = await render("q=What+did+Sasha+Ripley+tell+Wisconsin+Watch%3F");
+    expect(html).toContain('value="What did Sasha Ripley tell Wisconsin Watch?"');
+    expect(sendMessage).not.toHaveBeenCalled();
+  });
+
+  test("says it can quote candidates' answers to Wisconsin Watch, and offers a question that uses them", async () => {
+    const { html } = await render();
+    expect(html).toContain("Wisconsin Watch");
+    expect(html).toContain("Compare what the candidates for governor said about child care");
+  });
+
+  test("explains what each source on the Checked line means", async () => {
+    const { html } = await render();
+    expect(html).toContain("What Voter Help can check");
+    expect(html).toContain("Wisconsin Watch questionnaire");
+    expect(html).toMatch(/href="https:\/\/voterguidecommons\.org\/[^"]*"[^>]*>Voter Guide Commons</);
+  });
+});

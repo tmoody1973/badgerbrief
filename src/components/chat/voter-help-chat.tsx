@@ -2,6 +2,7 @@
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useSearchParams } from "next/navigation";
 import { track } from "@/lib/analytics";
 import { ConvexError } from "convex/values";
 import {
@@ -14,7 +15,7 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/retroui/Button";
-import { ToolActivity, isShown } from "./tool-activity";
+import { SOURCES, ToolActivity, isShown } from "./tool-activity";
 
 /** MOO-310 Voter Help chat — one persistent thread per signed-in user. */
 
@@ -22,7 +23,47 @@ const EXAMPLES = [
   "When's the deadline to register?",
   "Who's on my ballot?",
   "How do I vote absentee?",
+  "What did the candidates for governor tell Wisconsin Watch?",
+  "Compare what the candidates for governor said about child care.",
 ];
+
+/** What the chat can look up, and how to ask about candidates' own answers. */
+function WhatItChecks() {
+  return (
+    <details className="mt-3 border-2 border-border bg-card p-3 text-sm">
+      <summary className="cursor-pointer font-bold">What Voter Help can check</summary>
+      <p className="mt-2">
+        <strong>Candidates in their own words.</strong> Wisconsin Watch asked candidates for state and federal offices
+        the same questions. Ask about one candidate, one office or one topic, for example “What did the candidates for
+        attorney general tell Wisconsin Watch?” or “What did the candidates for governor say about taxes?” Voter Help quotes the
+        answers word for word and links each one. The answers come from{" "}
+        <a
+          href="https://voterguide26.wisconsinwatch.org/?utm_source=badgerbrief&utm_medium=referral"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+        >
+          Wisconsin Watch’s 2026 Voter Guide
+        </a>
+        , through{" "}
+        <a href="https://voterguidecommons.org/" target="_blank" rel="noopener noreferrer" className="underline">
+          Voter Guide Commons
+        </a>
+        .
+      </p>
+      <p className="mt-2">
+        Each answer starts with a “Checked” line naming the sources it looked at. Those sources are:
+      </p>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        {Object.values(SOURCES).map(({ label, about }) => (
+          <li key={label}>
+            <strong>{label}</strong>: {about}.
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
 
 function asMessage(err: unknown): string {
   // ConvexError data survives to prod clients; plain Error messages are redacted there.
@@ -190,7 +231,10 @@ export function VoterHelpChat() {
   );
   const sendMessage = useMutation(api.voterHelpQueries.sendMessage);
 
-  const [draft, setDraft] = useState("");
+  // A link can carry a question (e.g. from a race page). It waits in the box;
+  // only the voter sends it.
+  const params = useSearchParams();
+  const [draft, setDraft] = useState(() => (params?.get("q") ?? "").slice(0, 300));
   const [pendingEcho, setPendingEcho] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -245,9 +289,11 @@ export function VoterHelpChat() {
     <div className="flex min-h-[60vh] flex-col">
       <h1 className="font-display text-3xl">Voter Help</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Practical voting questions, answered from published data and official
-        sources — with citations, no endorsements, no legal advice.
+        Practical voting questions, and what candidates say in their own words —
+        answered from published data, official sources and candidates’ answers to
+        Wisconsin Watch, with citations, no endorsements, no legal advice.
       </p>
+      <WhatItChecks />
 
       <div className="mt-6 flex flex-1 flex-col gap-3">
         {ui.length === 0 && !pendingEcho && (

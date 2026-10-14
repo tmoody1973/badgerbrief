@@ -213,7 +213,7 @@ export default async function RacePage({ params }: Props) {
         </section>
       )}
 
-      <RaceQuestionnaire raceId={raceId} candidates={questionnaireField} />
+      <RaceQuestionnaire raceId={raceId} office={race.office} candidates={questionnaireField} />
 
       {ballot.hadPrimary && (
         <p className="mt-6 text-sm">

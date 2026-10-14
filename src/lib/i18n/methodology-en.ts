@@ -11,6 +11,7 @@ export type MethodologyDict = {
       racesCandidates: { label: string; body: string };
       campaignFinance: { label: string; body: string };
       politicalAds: { label: string; body: string };
+      questionnaire: { label: string; before: string; linkText: string; after: string; viaLinkText: string; afterVia: string };
     };
     publishing: { heading: string; before: string; emText: string; after: string };
     qualityChecks: { heading: string; body: string };
@@ -68,6 +69,16 @@ export const methodologyEn: MethodologyDict = {
       politicalAds: {
         label: "Political advertising",
         body: ": public ad archives and FCC public inspection files, with the source document linked on every record.",
+      },
+      questionnaire: {
+        label: "Candidates’ questionnaire answers",
+        before: ": the candidates’ own answers to the same questions from",
+        linkText: "Wisconsin Watch’s 2026 Voter Guide",
+        after:
+          ", a nonprofit newsroom, read through",
+        viaLinkText: "Voter Guide Commons",
+        afterVia:
+          " (a Hacks/Hackers project). Race and candidate pages link to each candidate’s answers, and Voter Help quotes them word for word with a link when you ask what a candidate said. Whether a candidate answered is as Wisconsin Watch’s guide reports it, and we never count or compare who answered.",
       },
     },
     publishing: {

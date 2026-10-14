@@ -37,6 +37,16 @@ export const methodologyEs: MethodologyDict = {
         label: "Publicidad política",
         body: ": archivos públicos de anuncios y expedientes de inspección pública de la FCC, con el documento fuente enlazado en cada registro.",
       },
+      questionnaire: {
+        label: "Respuestas de los candidatos al cuestionario",
+        before: ": las propias respuestas de los candidatos a las mismas preguntas de la",
+        linkText: "Guía del Votante 2026 de Wisconsin Watch",
+        after:
+          ", una redacción periodística sin fines de lucro, consultada a través de",
+        viaLinkText: "Voter Guide Commons",
+        afterVia:
+          " (un proyecto de Hacks/Hackers). Las páginas de contiendas y candidatos enlazan a las respuestas de cada candidato, y Voter Help las cita textualmente, con un enlace, cuando usted pregunta qué dijo un candidato. Si un candidato respondió o no es según lo informa la guía de Wisconsin Watch, y nunca contamos ni comparamos quién respondió.",
+      },
     },
     publishing: {
       heading: "Cómo se publican las posiciones y citas de los candidatos",
