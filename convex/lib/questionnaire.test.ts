@@ -190,7 +190,10 @@ describe("questionnairePayload", () => {
       party: "Republican",
       ballotLine: "Pat Example (Republican)",
       status: "did-not-answer",
-      statement: "Wisconsin Watch's guide shows no response from this candidate.",
+      // The link travels inside the sentence: on 2026-10-14 the chat twice said
+      // the sentence but dropped the separate url (gate run topic-questions-20261014-b).
+      statement:
+        "[Wisconsin Watch's guide shows no response from this candidate](https://voterguide26.wisconsinwatch.org/candidate/p-example1/?utm_source=voterguidecommons&utm_medium=ai).",
       url: "https://voterguide26.wisconsinwatch.org/candidate/p-example1/?utm_source=voterguidecommons&utm_medium=ai",
       onBadgerBrief: [
         { issueSlug: "education", summary: "Wants more school funding.", source: { name: "Campaign site", url: "https://pat.example/issues" } },
@@ -241,6 +244,18 @@ describe("questionnairePayload", () => {
     });
     expect(console.error).toHaveBeenCalledTimes(1);
     vi.restoreAllMocks();
+  });
+
+  test("credits the guide and links back to Voter Guide Commons only when it quotes the guide", () => {
+    expect(build({ "sam-sample": answers }).credit).toBe(
+      "Answers from Wisconsin Watch’s 2026 Voter Guide, through [Voter Guide Commons](https://voterguidecommons.org/).",
+    );
+    expect(build({ "sam-sample": null })).not.toHaveProperty("credit");
+  });
+
+  test("tells the chat to say each prepared line exactly as given", () => {
+    expect(QUESTIONNAIRE_RULE).toMatch(/did-not-answer, say the statement exactly as given/);
+    expect(QUESTIONNAIRE_RULE).toMatch(/If credit is present, end the answer with credit exactly as given/);
   });
 
   test("asks for support of the newsroom only when it quotes the newsroom's guide", () => {
