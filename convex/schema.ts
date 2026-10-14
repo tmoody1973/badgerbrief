@@ -92,6 +92,9 @@ export default defineSchema({
     ),
     attempt: v.optional(v.number()),
     error: v.optional(v.string()), // user-safe terminal failure reason
+    // "general": written for the Nov 3 ballot. Absent on every brief the
+    // primary-era code wrote; /brief shows only marked ones (convex/briefs.ts).
+    ballot: v.optional(v.literal("general")),
   }).index("by_user", ["userId"]),
 
   // ---------- civic core (seeded from docs/wisconsin_2026_primary_elections.json) ----------

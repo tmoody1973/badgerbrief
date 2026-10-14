@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { start } from "@convex-dev/workflow";
 import { internalMutation, internalQuery, mutation, query, type QueryCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
@@ -9,14 +9,13 @@ import { ISSUE_SLUGS } from "./lib/extraction";
 import { GENERAL_ELECTION_DATE, generalField, generalParty, generalPersonName, isOnGeneralBallot } from "./lib/ballot";
 
 /**
- * Briefs written before the November ballot was loaded (Oct 12, 2026, midnight
- * Central) were composed for the August primary: their own text says "the
- * August 11 primary" and they lay out primary fields. They are not shown; the
- * voter generates a November one. The rows are kept, not deleted.
+ * Only briefs this code wrote are shown. Earlier ones were composed for the
+ * August primary (their text says "the August 11 primary", and they can carry
+ * cards for primary losers), including some written after the November ballot
+ * was loaded, because the primary code ran until this shipped: so a marker,
+ * not a date. The rows are kept; the voter generates a November brief.
  */
-export const NOVEMBER_BRIEFS_SINCE = Date.parse("2026-10-12T05:00:00Z");
-
-const isNovemberBrief = (b: Doc<"voter_briefs">) => b.generatedAt >= NOVEMBER_BRIEFS_SINCE;
+const isNovemberBrief = (b: Doc<"voter_briefs">) => b.ballot === "general";
 
 const STALE_GENERATING_MS = 10 * 60_000; // ponytail: crashed-workflow escape hatch; onComplete handler if it ever matters
 
@@ -67,7 +66,8 @@ export const generate = mutation({
   handler: async (ctx): Promise<Id<"voter_briefs">> => {
     // Off switch, like the chat's VOTER_HELP_DISABLED: each brief is up to
     // nine model calls. Pause: npx convex env set BRIEF_DISABLED 1 --prod
-    if (process.env.BRIEF_DISABLED) throw new Error("New briefs are paused for now. The rest of the guide still works.");
+    // ConvexError: a plain Error's message is hidden from the page in production.
+    if (process.env.BRIEF_DISABLED) throw new ConvexError("New briefs are paused for now. The rest of the guide still works.");
     const user = await currentUser(ctx);
     if (!user) throw new Error("Sign in to generate a brief.");
     const prefs = await ctx.db
@@ -86,6 +86,7 @@ export const generate = mutation({
       return latest._id;
     }
     const briefId = await ctx.db.insert("voter_briefs", {
+      ballot: "general",
       userId: user._id,
       electionSlug: "wi-2026",
       openuiSource: "",

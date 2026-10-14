@@ -5,6 +5,7 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { relevantRaces, type Districts } from "@/lib/districts";
 import { BallotFinder } from "@/components/guide/ballot-finder";
+import { briefStartError } from "@/lib/brief/start-error";
 
 const DETAIL_LEVELS = [
   ["short", "Short — the essentials"],
@@ -105,8 +106,8 @@ export function PreferencesPanel() {
             type="button"
             onClick={() => {
               setGenerateError(null);
-              void generate({}).catch(() =>
-                setGenerateError("Couldn't start your brief — try again."),
+              void generate({}).catch((err: unknown) =>
+                setGenerateError(briefStartError(err)),
               );
             }}
             className="mt-5 border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)] press"

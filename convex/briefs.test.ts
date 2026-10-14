@@ -1,7 +1,7 @@
 import { convexTest } from "convex-test";
+import { ConvexError } from "convex/values";
 import { describe, expect, test } from "vitest";
 import { api, internal } from "./_generated/api";
-import { NOVEMBER_BRIEFS_SINCE } from "./briefs";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
@@ -23,7 +23,8 @@ async function seedUser(t: ReturnType<typeof setup>) {
 const raceBase = { electionSlug: "wi-2026", sources: [], dataAsOf: "2026-07-01" };
 const SOURCE = { url: "https://elections.wi.gov/media/41846/download", documentDate: "2026-10-06", retrievedAt: "2026-10-12T21:32:56Z" };
 const ON = { onBallot: true, source: SOURCE };
-const AFTER = NOVEMBER_BRIEFS_SINCE + 1;
+// Every brief the November code writes carries this marker; anything without it was written for the primary.
+const NOV = { ballot: "general" as const };
 async function seedBallotWorld(t: ReturnType<typeof setup>, userId: Id<"users">) {
   await t.run(async (ctx) => {
     await ctx.db.insert("races", { ...raceBase, raceId: "WI-GOV-2026", office: "Governor", level: "State Executive", general: ON });
@@ -105,7 +106,7 @@ describe("briefs lifecycle", () => {
     const t = setup();
     const userId = await seedUser(t);
     const briefId = await t.run((ctx) =>
-      ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "old", generatedAt: 1, status: "generating", attempt: 1 }),
+      ctx.db.insert("voter_briefs", { ...NOV, userId, electionSlug: "wi-2026", openuiSource: "old", generatedAt: 1, status: "generating", attempt: 1 }),
     );
     await t.mutation(internal.briefs.beginAttempt, { briefId, attempt: 2 });
     await t.mutation(internal.briefs.setSource, { briefId, source: "root = Stack([])" });
@@ -127,7 +128,7 @@ describe("briefs lifecycle", () => {
     });
 
     // legacy row without status reads as ready
-    await t.run((ctx) => ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "x", generatedAt: Date.now() + 1 }));
+    await t.run((ctx) => ctx.db.insert("voter_briefs", { ...NOV, userId, electionSlug: "wi-2026", openuiSource: "x", generatedAt: Date.now() + 1 }));
     const latest = await t.withIdentity(USER).query(api.briefs.getLatest, {});
     expect(latest!.status).toBe("ready");
   });
@@ -136,9 +137,9 @@ describe("briefs lifecycle", () => {
     const t = setup();
     const userId = await seedUser(t);
     await t.run(async (ctx) => {
-      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "a", generatedAt: AFTER + 1, status: "ready" });
-      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "b", generatedAt: AFTER + 2, status: "failed" });
-      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "c", generatedAt: AFTER + 3, status: "ready" });
+      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "a", generatedAt: 1, ...NOV, status: "ready" });
+      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "b", generatedAt: 2, ...NOV, status: "failed" });
+      await ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "c", generatedAt: 3, ...NOV, status: "ready" });
     });
     const list = await t.withIdentity(USER).query(api.briefs.listMine, {});
     expect(list.map((b) => b.openuiSource)).toEqual(["c", "a"]);
@@ -169,11 +170,11 @@ describe("briefs lifecycle", () => {
     ]);
   });
 
-  test("a brief written for the primary is not shown, so the voter makes a November one", async () => {
+  test("a brief written by the primary code is not shown, even one made today, so the voter makes a November one", async () => {
     const t = setup();
     const userId = await seedUser(t);
     await t.run((ctx) =>
-      ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "intro = AssistantNote(\"the August 11 primary\")", generatedAt: NOVEMBER_BRIEFS_SINCE - 1, status: "ready" }),
+      ctx.db.insert("voter_briefs", { userId, electionSlug: "wi-2026", openuiSource: "intro = AssistantNote(\"the August 11 primary\")", generatedAt: Date.now(), status: "ready" }),
     );
     expect(await t.withIdentity(USER).query(api.briefs.getLatest, {})).toBeNull();
     expect(await t.withIdentity(USER).query(api.briefs.listMine, {})).toEqual([]);
@@ -185,7 +186,10 @@ describe("briefs lifecycle", () => {
     await seedBallotWorld(t, userId);
     process.env.BRIEF_DISABLED = "1";
     try {
-      await expect(t.withIdentity(USER).mutation(api.briefs.generate, {})).rejects.toThrow(/paused/i);
+      const err = await t.withIdentity(USER).mutation(api.briefs.generate, {}).catch((e: unknown) => e);
+      // A ConvexError: its message reaches the page in production; a plain Error's is hidden.
+      expect(err).toBeInstanceOf(ConvexError);
+      expect((err as ConvexError<string>).data).toMatch(/paused/i);
     } finally {
       delete process.env.BRIEF_DISABLED;
     }
