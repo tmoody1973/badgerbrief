@@ -204,7 +204,7 @@ const getCandidateInfo = createTool({
 
 const getQuestionnaireAnswers = createTool({
   description:
-    "The candidates' own words for one race: their answers to Wisconsin Watch's 2026 questionnaire, for every candidate on the November 3, 2026 ballot for that office. Use it when the voter asks what the candidates for an office say, think, would do, or why voters should elect them, or asks for a candidate's own words. Takes the same race ids as getRaceInfo. Quote the answers exactly and attribute them as told to Wisconsin Watch, link each candidate's own url, cover every candidate with similar space, and follow the rule in the result. Read-only.",
+    "The candidates' own words for one race: their answers to Wisconsin Watch's 2026 questionnaire, for every candidate on the November 3, 2026 ballot for that office. Use it when the voter asks what the candidates for an office say, think, would do, or why voters should elect them, or asks for a candidate's own words. Also use it, together with getCandidateInfo, when the voter asks what a candidate said about a particular topic (child care, taxes, schools and so on): candidates often raise topics in these answers that have no separate published position, so check here before saying a candidate has said nothing on it. Takes the same race ids as getRaceInfo. Quote the answers exactly and attribute them as told to Wisconsin Watch, link each candidate's own url, cover every candidate with similar space, and follow the rule in the result. Read-only.",
   inputSchema: z.object({
     raceId: z.string().describe('Race id such as "WI-STATE-ASSEMBLY-D19-2026"'),
   }),
