@@ -206,11 +206,16 @@ describe("withPageDetails", () => {
     expect(withPageDetails(wispolitics, { title: "Crowley campaign: David Crowley announces artificial intelligence policy plan" })).toBeNull();
   });
 
-  test("when the page could not be read, the article is kept as the search found it", () => {
-    expect(withPageDetails(article, {})).toEqual(article);
+  test("when the page could not be read, the article is kept as the search found it but marked unread, so it waits for a person", () => {
+    expect(withPageDetails(article, {})).toEqual({ ...article, unread: true });
+  });
+
+  test("an unread WisPolitics item is held too: its press-release prefix may only be on the page", () => {
+    const wispolitics = { ...article, url: "https://www.wispolitics.com/2026/crowley-campaign-ai-plan/", headline: "David Crowley announces artificial intelligence policy plan ..." };
+    expect(withPageDetails(wispolitics, {})).toMatchObject({ unread: true });
   });
 
   test("an image address that is not a web address is ignored", () => {
-    expect(withPageDetails(article, { image: "data:image/png;base64,AAAA" })).toEqual(article);
+    expect(withPageDetails(article, { title: article.headline, image: "data:image/png;base64,AAAA" })).toEqual(article);
   });
 });

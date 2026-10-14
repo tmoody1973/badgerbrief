@@ -42,6 +42,16 @@ const AGENT_NAME = "article-scout";
  */
 const DEFAULT_LIMIT = 40;
 
+/**
+ * Convex stops an action at 10 minutes, and a stopped run never reaches
+ * reportHealth, so an overrun would be silent. The sweep stops starting new
+ * candidates after 8 minutes; rotation puts the skipped ones first tomorrow.
+ * Reads are capped per candidate for the same reason (the first run after
+ * the October outage had up to 10 new articles each).
+ */
+const SWEEP_BUDGET_MS = 8 * 60_000;
+const MAX_READS_PER_CANDIDATE = 5;
+
 // Lazy singleton so deploys succeed with Arize keys absent (env read at call
 // time, never at import time). Returns null when telemetry is unconfigured.
 // FIFTH copy of this block (helloAgent.ts, research.ts, qa.ts, briefAgent.ts,
@@ -133,7 +143,7 @@ async function readPage(url: string): Promise<{ title?: string; image?: string }
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.CONTEXT_DEV_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({ url, formats: { parse: true }, parseParams: { rules: { title: META("og:title"), image: META("og:image") } } }),
-      signal: AbortSignal.timeout(60_000),
+      signal: AbortSignal.timeout(15_000),
     });
     if (!res.ok) return {};
     const data = ((await res.json()) as { parsed?: { data?: { title?: unknown; image?: unknown } } }).parsed?.data;
@@ -203,7 +213,12 @@ export const run = internalAction({
 
     const summaries: CandidateSummary[] = [];
 
+    const deadline = Date.now() + SWEEP_BUDGET_MS;
     for (const target of targets) {
+      if (Date.now() > deadline) {
+        console.warn(`article-scout: stopped before ${target.slug}; time budget spent`);
+        break;
+      }
       try {
         const body = {
           query: scoutQuery(target),
@@ -271,9 +286,11 @@ export const run = internalAction({
         // credit per new article, not per search result. One at a time: read
         // in parallel, 5 of 6 came back 429 RATE_LIMITED (tested 2026-10-14).
         const read = [];
-        for (const a of unseen) read.push(withPageDetails(a, await readPage(a.url)));
+        for (const a of unseen.slice(0, MAX_READS_PER_CANDIDATE)) read.push(withPageDetails(a, await readPage(a.url)));
         const fresh = read.filter((a) => a !== null);
-        const pressReleases = unseen.length - fresh.length;
+        const pressReleases = read.length - fresh.length;
+        const unread = fresh.filter((a) => a.unread).length;
+        if (unread) console.warn(`article-scout: ${unread} article page(s) unread for ${target.slug}; held for review`);
 
         if (fresh.length === 0) {
           summaries.push({ slug: target.slug, status: "empty", proposed: 0, dropped: dropped + pressReleases });
@@ -293,6 +310,9 @@ export const run = internalAction({
             { outlet: a.outlet, headline: a.headline, url: a.url },
             { candidateNames, raceKeywords },
           ),
+          // An unread page may carry a cut-off headline or a press release
+          // the search title hides: it waits in the review queue, off /news.
+          ...(a.unread ? { hubStatus: undefined } : {}),
         }));
 
         const inserted: number = await ctx.runMutation(internal.scoutQueries.insertProposed, {

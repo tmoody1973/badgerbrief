@@ -84,6 +84,8 @@ export type ScoutArticle = {
   publishedAt?: string;
   whyRelevant: string;
   imageUrl?: string;
+  /** The article page could not be read: keep it off /news until a person reviews it. */
+  unread?: true;
 };
 
 /** Least-recently-proposed first; never-proposed items (no lastProposedAt) sort first. */
@@ -164,11 +166,14 @@ export function articlesFromSearch(response: unknown): { articles: ScoutArticle[
  * characters — and the share image. The page's real title is also where a
  * WisPolitics press release shows itself ("Crowley campaign: …"), so the
  * press-release check runs again on it; null means leave the article out.
- * With no page details the article is kept as the search found it.
+ * With no page title the article is kept as the search found it but marked
+ * `unread`: its headline may be cut off and a WisPolitics press release may
+ * only show itself on the page, so it must wait for a person, not go public.
  */
 export function withPageDetails(article: ScoutArticle, page: { title?: string; image?: string }): ScoutArticle | null {
   const title = page.title?.trim();
-  if (title && isPressRelease(new URL(article.url), title)) return null;
+  if (!title) return { ...article, unread: true };
+  if (isPressRelease(new URL(article.url), title)) return null;
   const image = page.image && /^https?:\/\//.test(page.image) ? page.image : undefined;
-  return { ...article, ...(title ? { headline: title } : {}), ...(image ? { imageUrl: image } : {}) };
+  return { ...article, headline: title, ...(image ? { imageUrl: image } : {}) };
 }
