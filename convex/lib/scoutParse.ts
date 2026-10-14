@@ -107,10 +107,14 @@ export function scoutQuery(target: { name: string; office: string }): string {
 const NOT_AN_ARTICLE = /\/(category|tag|tags|author|authors|archives?|people|person|topics?)\/|\/topics?$|\/collection_|\.(jpe?g|png|gif|webp|pdf)$/i;
 
 /**
- * A page that is not an article: a section front ("/news", "/" — every
- * article address on these outlets has at least two path segments), or a
- * listing, profile, topic or file page. Urban Milwaukee /people/ profiles and
- * WPR /topic/ pages reached /news under the old scout.
+ * A page that is not an article: a section front, or a listing, profile,
+ * topic or file page. Urban Milwaukee /people/ profiles and WPR /topic/ pages
+ * reached /news under the old scout.
+ *
+ * A section front is the home page or a short one-segment address ("/news",
+ * "/elections", "/america-votes", "/campaign-2026/"). One segment alone is not
+ * enough: WUWM publishes most articles at one long hyphenated segment, and the
+ * State Journal at "/article_<id>.html".
  */
 export function isNotAnArticle(url: string): boolean {
   let path: string;
@@ -119,7 +123,9 @@ export function isNotAnArticle(url: string): boolean {
   } catch {
     return true;
   }
-  return path.split("/").filter(Boolean).length < 2 || NOT_AN_ARTICLE.test(path);
+  const segments = path.split("/").filter(Boolean);
+  const isSectionFront = segments.length === 0 || (segments.length === 1 && !segments[0].startsWith("article_") && segments[0].split("-").length <= 3);
+  return isSectionFront || NOT_AN_ARTICLE.test(path);
 }
 
 /**

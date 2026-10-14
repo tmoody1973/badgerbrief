@@ -265,6 +265,9 @@ describe("isNotAnArticle", () => {
     "https://www.wpr.org/topic/politics/governor",
     "https://www.wpr.org/topics/elections",
     "https://www.wpr.org/news",
+    "https://www.wpr.org/",
+    "https://www.tmj4.com/america-votes",
+    "https://wiseye.org/campaign-2026/",
     "https://www.wispolitics.com/category/news/",
     "https://madison.com/news/local/collection_225982d4.html",
   ])("%s is not an article", (url) => {
@@ -275,6 +278,10 @@ describe("isNotAnArticle", () => {
     "https://www.wpr.org/news/tom-tiffany-conservative-record",
     "https://www.cbs58.com/news/joel-brennan-focuses-on-affordability",
     "https://www.wbay.com/video/2026/10/13/one-on-one-with-republican-nominee/",
+    // WUWM and the State Journal publish articles at one-segment addresses.
+    "https://www.wuwm.com/how-the-wi-governors-race-can-shape-school-funding-vouchers",
+    "https://www.wuwm.com/2026-wisconsin-governor-race-candidates-november-election",
+    "https://madison.com/article_d014abc0-07be-5b69-b58a-3526adc3d3d1.html",
   ])("%s is an article", (url) => {
     expect(isNotAnArticle(url)).toBe(false);
   });
