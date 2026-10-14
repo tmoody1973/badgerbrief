@@ -77,5 +77,15 @@
     "candidateSlug": "francesca-hong",
     "raceId": "WI-GOV-2026",
     "registrantId": "0106285"
+  },
+  "Toney for Attorney General": {
+    "candidateSlug": "eric-toney",
+    "raceId": "WI-AG-2026",
+    "registrantId": "0106408"
+  },
+  "JoCasta for WI": {
+    "candidateSlug": "jocasta-zamarripa",
+    "raceId": "WI-SOS-2026",
+    "registrantId": "0104989"
   }
 }
