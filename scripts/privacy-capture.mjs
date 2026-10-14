@@ -154,8 +154,10 @@ try {
   });
 
   const count = (pattern) => requests.filter((r) => pattern.test(r.url)).length;
-  const pageViews = count(/\/_vercel\/insights\/view/);
-  const events = count(/\/_vercel\/insights\/event/);
+  // On Vercel the tool reports to a disguised address ("/5d9004475107fe8a/view")
+  // so ad blockers miss it; away from Vercel, to "/_vercel/insights/view".
+  const pageViews = count(/\/(?:_vercel\/insights|[0-9a-f]{12,})\/view(?:[?#]|$)/);
+  const events = count(/\/(?:_vercel\/insights|[0-9a-f]{12,})\/event(?:[?#]|$)/);
   const google = count(/google-analytics\.com|analytics\.google\.com/);
   const live = requests.filter((r) => r.path === "(live connection)").length;
   if (pageViews === 0) failures.push("Vercel Web Analytics reported no page view, so this run proved nothing about it");
