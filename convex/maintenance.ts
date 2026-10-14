@@ -75,3 +75,36 @@ export const setQuoteSourceUrl = internalMutation({
     return { from: before, to: sourceUrl };
   },
 });
+
+/**
+ * Set FEC candidate IDs, which the daily FEC sync (finance.syncOpenFec) needs
+ * to find a U.S. House candidate. In October 2026, 10 on-ballot House
+ * candidates had none, and Bryan Steil's stored ID (H8WI01088) did not exist at
+ * the FEC, so all 11 showed no money. Look each ID up at api.open.fec.gov
+ * (state, district, cycle, name, party) before running. Every entry is checked
+ * before anything is written; a bad one changes nothing.
+ */
+export const setFecCandidateIds = internalMutation({
+  args: {
+    ids: v.array(v.object({ raceId: v.string(), slug: v.string(), fecCandidateId: v.string() })),
+  },
+  handler: async (ctx, { ids }) => {
+    const found = [];
+    for (const { raceId, slug, fecCandidateId } of ids) {
+      // A House candidate ID: "H", election-year digit, state, five digits.
+      if (!/^H\d[A-Z]{2}\d{5}$/.test(fecCandidateId)) throw new Error(`not an FEC House candidate ID: "${fecCandidateId}"`);
+      const c = await ctx.db
+        .query("candidates")
+        .withIndex("by_slug", (q) => q.eq("raceId", raceId).eq("slug", slug))
+        .unique();
+      if (!c) throw new Error(`candidate not found: ${raceId}/${slug}`);
+      found.push({ c, fecCandidateId });
+    }
+    const changed = [];
+    for (const { c, fecCandidateId } of found) {
+      await ctx.db.patch(c._id, { fecCandidateId });
+      changed.push({ candidate: `${c.raceId}/${c.slug}`, from: c.fecCandidateId, to: fecCandidateId });
+    }
+    return changed;
+  },
+});

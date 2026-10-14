@@ -55,3 +55,51 @@ test("refuses an address that is not a web page", async () => {
   const after = await t.run((ctx) => ctx.db.get(quoteId));
   expect(after?.sourceUrl).toBe("https://www.crowleyforwi.com/issues");
 });
+
+async function addHouseCandidate(t: ReturnType<typeof setup>, slug: string, fecCandidateId?: string) {
+  return t.run((ctx) =>
+    ctx.db.insert("candidates", {
+      slug,
+      raceId: "WI-US-HOUSE-D1-2026",
+      name: slug,
+      sources: [],
+      dataAsOf: "2026-10-14",
+      ...(fecCandidateId ? { fecCandidateId } : {}),
+    }),
+  );
+}
+
+test("sets FEC candidate IDs so the daily FEC sync can find these candidates, and reports what changed", async () => {
+  const t = setup();
+  const steil = await addHouseCandidate(t, "bryan-steil", "H8WI01088"); // a stored ID the FEC does not have
+  const berman = await addHouseCandidate(t, "mitchell-berman");
+
+  const out = await t.mutation(internal.maintenance.setFecCandidateIds, {
+    ids: [
+      { raceId: "WI-US-HOUSE-D1-2026", slug: "bryan-steil", fecCandidateId: "H8WI01156" },
+      { raceId: "WI-US-HOUSE-D1-2026", slug: "mitchell-berman", fecCandidateId: "H6WI01283" },
+    ],
+  });
+
+  expect(out).toEqual([
+    { candidate: "WI-US-HOUSE-D1-2026/bryan-steil", from: "H8WI01088", to: "H8WI01156" },
+    { candidate: "WI-US-HOUSE-D1-2026/mitchell-berman", from: undefined, to: "H6WI01283" },
+  ]);
+  const rows = await t.run(async (ctx) => [await ctx.db.get(steil), await ctx.db.get(berman)]);
+  expect(rows.map((r) => r?.fecCandidateId)).toEqual(["H8WI01156", "H6WI01283"]);
+});
+
+test("refuses a malformed FEC ID or an unknown candidate, and changes nothing", async () => {
+  const t = setup();
+  const berman = await addHouseCandidate(t, "mitchell-berman");
+  for (const ids of [
+    [{ raceId: "WI-US-HOUSE-D1-2026", slug: "mitchell-berman", fecCandidateId: "C00123456" }],
+    [
+      { raceId: "WI-US-HOUSE-D1-2026", slug: "mitchell-berman", fecCandidateId: "H6WI01283" },
+      { raceId: "WI-US-HOUSE-D1-2026", slug: "nobody", fecCandidateId: "H6WI01999" },
+    ],
+  ]) {
+    await expect(t.mutation(internal.maintenance.setFecCandidateIds, { ids })).rejects.toThrow();
+  }
+  expect((await t.run((ctx) => ctx.db.get(berman)))?.fecCandidateId).toBeUndefined();
+});
