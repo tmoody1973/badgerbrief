@@ -1,7 +1,8 @@
 "use node";
 /**
- * MOO-322 Task 2: Article Scout — asks Perplexity for recent news coverage
- * of each contested-race candidate from an allowlisted set of outlets, and
+ * MOO-322 Task 2: Article Scout — searches the last week of news (context.dev
+ * web search) for each contested-race candidate across an allowlisted set of
+ * outlets, and
  * proposes new article_sources rows for human review. Writes ONLY to
  * article_sources via convex/scoutQueries.ts, always status "proposed" —
  * never auto-publishes (Global Constraints: agents never publish).
@@ -18,7 +19,7 @@ import {
   OpenInferenceSimpleSpanProcessor,
 } from "@arizeai/openinference-vercel";
 import { SEMRESATTRS_PROJECT_NAME } from "@arizeai/openinference-semantic-conventions";
-import { ALLOWED_DOMAINS, WI_OUTLETS, isAllowedUrl, parseScoutResponse, scoutPrompt, sortByRotation } from "./lib/scoutParse";
+import { ALLOWED_DOMAINS, articlesFromSearch, isAllowedUrl, scoutQuery, sortByRotation, withPageDetails } from "./lib/scoutParse";
 import { decorateCoverageRow } from "./lib/outlets";
 import { isFullSweep } from "./lib/scoutHealth";
 
@@ -40,6 +41,16 @@ const AGENT_NAME = "article-scout";
  * grows past the limit.
  */
 const DEFAULT_LIMIT = 40;
+
+/**
+ * Convex stops an action at 10 minutes, and a stopped run never reaches
+ * reportHealth, so an overrun would be silent. The sweep stops starting new
+ * candidates after 8 minutes; rotation puts the skipped ones first tomorrow.
+ * Reads are capped per candidate for the same reason (the first run after
+ * the October outage had up to 10 new articles each).
+ */
+const SWEEP_BUDGET_MS = 8 * 60_000;
+const MAX_READS_PER_CANDIDATE = 5;
 
 // Lazy singleton so deploys succeed with Arize keys absent (env read at call
 // time, never at import time). Returns null when telemetry is unconfigured.
@@ -79,35 +90,6 @@ function ensureTelemetry(): NodeTracerProvider | null {
 
 const tracer = () => trace.getTracer("badgerbrief-agents");
 
-// Derived from WI_OUTLETS so the prompt can never drift from the domain filter.
-// It used to name four outlets in prose; when the allowlist widened, a stale
-// hardcoded sentence would have told the model to ignore every new newsroom.
-const SCOUT_SYSTEM =
-  "You find news articles for a non-partisan Wisconsin voter guide. Return ONLY articles from these outlets: " +
-  Object.entries(WI_OUTLETS).map(([domain, name]) => `${name} (${domain})`).join(", ") +
-  ". Each article must substantively cover the named candidate. You return article METADATA only — never summarize positions or facts.";
-
-const SCOUT_JSON_SCHEMA = {
-  type: "object",
-  properties: {
-    articles: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          url: { type: "string" },
-          outlet: { type: "string" },
-          headline: { type: "string" },
-          publishedAt: { type: "string" },
-          whyRelevant: { type: "string" },
-        },
-        required: ["url", "outlet", "headline", "whyRelevant"],
-      },
-    },
-  },
-  required: ["articles"],
-};
-
 type ScoutCandidate = { slug: string; name: string; raceId: string; office: string; lastProposedAt?: number };
 
 /** Pure per-row enrichment: outlet key + hub-relevance gate. Exported for
@@ -124,26 +106,54 @@ type CandidateSummary = {
   error?: string;
 };
 
-/** Raw Perplexity chat-completions call for one candidate's message content. */
-async function fetchScoutContent(body: unknown): Promise<string> {
-  const res = await fetch("https://api.perplexity.ai/chat/completions", {
+/**
+ * One context.dev web search for one candidate. Until October 2026 this was a
+ * Perplexity call; its key went dead around Sep 28 and /news stopped updating
+ * for 16 days. The search returns the outlets' own headlines and snippets, so
+ * nothing in a proposed row is written by a model.
+ */
+async function searchNews(body: unknown): Promise<unknown> {
+  const res = await fetch("https://api.context.dev/v1/web/search", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+      Authorization: `Bearer ${process.env.CONTEXT_DEV_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(60_000),
   });
   if (!res.ok) {
-    throw new Error(`perplexity request failed (http ${res.status})`);
+    const detail = ((await res.json().catch(() => null)) as { error_code?: string } | null)?.error_code;
+    throw new Error(`news search failed (http ${res.status}${detail ? " " + detail : ""})`);
   }
-  const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-  const content = json.choices?.[0]?.message?.content;
-  if (typeof content !== "string") {
-    throw new Error("perplexity response missing message content");
+  return res.json();
+}
+
+const META = (property: string) => ({ selector: `meta[property="${property}"]`, type: "item", output: "@content" });
+
+/**
+ * Read one article page's share title and image through context.dev (1
+ * credit). A plain fetch is blocked by the Journal Sentinel (402) and
+ * WisPolitics (403); this is not. Any failure returns {} and the article keeps
+ * what the search gave it.
+ */
+async function readPage(url: string): Promise<{ title?: string; image?: string }> {
+  try {
+    const res = await fetch("https://api.context.dev/v1/web/scrape", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.CONTEXT_DEV_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ url, formats: { parse: true }, parseParams: { rules: { title: META("og:title"), image: META("og:image") } } }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) return {};
+    const data = ((await res.json()) as { parsed?: { data?: { title?: unknown; image?: unknown } } }).parsed?.data;
+    return {
+      ...(typeof data?.title === "string" ? { title: data.title } : {}),
+      ...(typeof data?.image === "string" ? { image: data.image } : {}),
+    };
+  } catch {
+    return {};
   }
-  return content;
 }
 
 /** Record the run's health; email the editor once when a new alert opens. */
@@ -162,7 +172,7 @@ async function reportHealth(
   if (opened) await ctx.runAction(internal.feedback.notify, { kind: "data_gap", message: opened });
 }
 
-/** The daily sweep: pick candidates, ask Perplexity, filter, propose. */
+/** The daily sweep: pick candidates, search the news, filter, propose. */
 export const run = internalAction({
   args: {
     candidateSlugs: v.optional(v.array(v.string())),
@@ -171,9 +181,9 @@ export const run = internalAction({
   handler: async (ctx, { candidateSlugs, limit }): Promise<CandidateSummary[]> => {
     // Throw at call time (never import time) so `convex dev --once` pushes
     // cleanly before the key is provisioned.
-    if (!process.env.PERPLEXITY_API_KEY) {
-      await reportHealth(ctx, [], "PERPLEXITY_API_KEY not set");
-      throw new Error("PERPLEXITY_API_KEY not set");
+    if (!process.env.CONTEXT_DEV_API_KEY) {
+      await reportHealth(ctx, [], "CONTEXT_DEV_API_KEY not set");
+      throw new Error("CONTEXT_DEV_API_KEY not set");
     }
 
     const telemetry = ensureTelemetry();
@@ -203,40 +213,29 @@ export const run = internalAction({
 
     const summaries: CandidateSummary[] = [];
 
+    const deadline = Date.now() + SWEEP_BUDGET_MS;
     for (const target of targets) {
+      if (Date.now() > deadline) {
+        console.warn(`article-scout: stopped before ${target.slug}; time budget spent`);
+        break;
+      }
       try {
         const body = {
-          model: "sonar",
-          messages: [
-            { role: "system", content: SCOUT_SYSTEM },
-            {
-              role: "user",
-              // "Last 90 days preferred" was the reason /news read as stale.
-              // A three-month window with no ordering returns whatever is best
-              // indexed, which skews old; and because already-known urls are
-              // dropped as duplicates, each run surfaced yet another OLDER
-              // unseen article instead of today's. The feed filled with June
-              // while the July 22 Marquette poll wave went unfound.
-              //
-              // The window is now days, ordered newest-first, with today's date
-              // stated so the model has an anchor rather than inferring "recent"
-              // from its own training cutoff.
-              content: scoutPrompt(target, new Date().toISOString().slice(0, 10)),
-            },
-          ],
-          search_domain_filter: ALLOWED_DOMAINS,
-          // The provider-side recency filter, which the prompt alone cannot
-          // enforce — without it the search itself still ranks by relevance
-          // over freshness and the model can only pick from what it is given.
-          search_recency_filter: "week",
-          response_format: { type: "json_schema", json_schema: { schema: SCOUT_JSON_SCHEMA } },
+          query: scoutQuery(target),
+          numResults: 10,
+          includeDomains: ALLOWED_DOMAINS,
+          // Without a date window the search ranks by relevance and skews old.
+          // The window is loose (a few older pages slip through); the nightly
+          // date check reads each article's real date before it sorts on /news.
+          freshness: "last_week",
+          country: "us",
         };
 
-        let content: string;
+        let response: unknown;
         let traceId: string | undefined;
 
         // Isolate this candidate's failures per-candidate (like research.ts):
-        // one bad Perplexity call must not abort the whole sweep.
+        // one bad search must not abort the whole sweep.
         if (telemetry) {
           const spanResult = await tracer().startActiveSpan(`${AGENT_NAME}.run`, async (span) => {
             span.setAttribute("openinference.span.kind", "AGENT");
@@ -246,15 +245,15 @@ export const run = internalAction({
               JSON.stringify({ candidate: target.slug, raceId: target.raceId }),
             );
             try {
-              const llmSpan = tracer().startSpan("perplexity.chat.completions");
-              llmSpan.setAttribute("openinference.span.kind", "LLM");
-              llmSpan.setAttribute("llm.model_name", "sonar");
-              llmSpan.setAttribute("input.value", JSON.stringify(body));
-              const result = await fetchScoutContent(body);
-              llmSpan.setAttribute("output.value", result.slice(0, 4000));
-              llmSpan.end();
-              span.setAttribute("output.value", result.slice(0, 4000));
-              return { content: result, traceId: span.spanContext().traceId };
+              const searchSpan = tracer().startSpan("contextdev.web.search");
+              searchSpan.setAttribute("openinference.span.kind", "RETRIEVER");
+              searchSpan.setAttribute("input.value", JSON.stringify(body));
+              const result = await searchNews(body);
+              const text = JSON.stringify(result).slice(0, 4000);
+              searchSpan.setAttribute("output.value", text);
+              searchSpan.end();
+              span.setAttribute("output.value", text);
+              return { response: result, traceId: span.spanContext().traceId };
             } catch (err) {
               span.setAttribute("error", true);
               throw err;
@@ -263,13 +262,13 @@ export const run = internalAction({
             }
           });
           await telemetry.forceFlush();
-          content = spanResult.content;
+          response = spanResult.response;
           traceId = spanResult.traceId;
         } else {
-          content = await fetchScoutContent(body);
+          response = await searchNews(body);
         }
 
-        const parsed = parseScoutResponse(content);
+        const parsed = articlesFromSearch(response);
         if ("error" in parsed) {
           summaries.push({ slug: target.slug, status: "error", error: parsed.error });
           continue;
@@ -282,10 +281,19 @@ export const run = internalAction({
           urls: allowed.map((a) => a.url),
         });
         const knownSet = new Set(known);
-        const fresh = allowed.filter((a) => !knownSet.has(a.url));
+        const unseen = allowed.filter((a) => !knownSet.has(a.url));
+        // Only articles we are about to save are read, so the cost is one
+        // credit per new article, not per search result. One at a time: read
+        // in parallel, 5 of 6 came back 429 RATE_LIMITED (tested 2026-10-14).
+        const read = [];
+        for (const a of unseen.slice(0, MAX_READS_PER_CANDIDATE)) read.push(withPageDetails(a, await readPage(a.url)));
+        const fresh = read.filter((a) => a !== null);
+        const pressReleases = read.length - fresh.length;
+        const unread = fresh.filter((a) => a.unread).length;
+        if (unread) console.warn(`article-scout: ${unread} article page(s) unread for ${target.slug}; held for review`);
 
         if (fresh.length === 0) {
-          summaries.push({ slug: target.slug, status: "empty", proposed: 0, dropped });
+          summaries.push({ slug: target.slug, status: "empty", proposed: 0, dropped: dropped + pressReleases });
           continue;
         }
 
@@ -297,10 +305,14 @@ export const run = internalAction({
           headline: a.headline,
           publishedAt: a.publishedAt,
           whyRelevant: a.whyRelevant,
+          ...(a.imageUrl ? { imageUrl: a.imageUrl } : {}),
           ...decorateCoverageRow(
             { outlet: a.outlet, headline: a.headline, url: a.url },
             { candidateNames, raceKeywords },
           ),
+          // An unread page may carry a cut-off headline or a press release
+          // the search title hides: it waits in the review queue, off /news.
+          ...(a.unread ? { hubStatus: undefined } : {}),
         }));
 
         const inserted: number = await ctx.runMutation(internal.scoutQueries.insertProposed, {
@@ -308,7 +320,7 @@ export const run = internalAction({
           traceId,
         });
 
-        summaries.push({ slug: target.slug, status: "proposed", proposed: inserted, dropped });
+        summaries.push({ slug: target.slug, status: "proposed", proposed: inserted, dropped: dropped + pressReleases });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         console.error(`article-scout: failed for ${target.slug}: ${message}`);

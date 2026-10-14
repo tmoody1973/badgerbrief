@@ -251,6 +251,15 @@ describe("insertProposed", () => {
     }
   });
 
+  test("keeps the image the scout read from the article page", async () => {
+    const t = setup();
+    await t.mutation(internal.scoutQueries.insertProposed, {
+      rows: [{ candidateSlug: "tom-tiffany", raceId: "WI-GOV-2026", url: "https://wpr.org/img", outlet: "WPR", headline: "H", whyRelevant: "r", imageUrl: "https://wpr.org/img.jpg" }],
+    });
+    const [row] = await t.run((ctx) => ctx.db.query("article_sources").collect());
+    expect(row.imageUrl).toBe("https://wpr.org/img.jpg");
+  });
+
   test("creates one draft outlet per distinct outletKey, and never a duplicate", async () => {
     const t = setup();
     const row = {

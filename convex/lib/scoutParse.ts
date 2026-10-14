@@ -1,27 +1,25 @@
 /**
  * MOO-322 Task 2: pure (no Convex ctx, no network) helpers for the article
- * scout — allowlist enforcement, Perplexity response parsing, and rotation
+ * scout — allowlist enforcement, search-result conversion, and rotation
  * sort. Kept dependency-free so they're unit-testable without convex-test,
  * mirroring the researchQueries.ts split (db-touching code lives elsewhere).
  */
-import { GENERAL_ELECTION_DATE } from "./ballot";
-
 /**
  * Wisconsin newsrooms the scout is allowed to surface. This list does double
  * duty and BOTH uses matter:
  *
- *  1. `search_domain_filter` on the Perplexity call — it bounds what the model
- *     is even allowed to search, so an outlet absent here is undiscoverable.
+ *  1. `includeDomains` on the context.dev search — it bounds what the search
+ *     can return, so an outlet absent here is undiscoverable.
  *     A four-domain list was the real reason a major development (Crowley
  *     re-entering the governor's race) landed with a single source: three
  *     quarters of the state's political press could not be seen.
  *  2. `isAllowedUrl` — the post-hoc gate on every URL we store.
  *
- * Perplexity caps `search_domain_filter` at 20 entries (docs.perplexity.ai,
- * search-domain-filters, checked 2026-07-23) and SILENTLY truncates past that,
- * which would drop outlets off the end of this array with no error. That is
- * why the list is capped and asserted below rather than left to grow freely —
- * adding a 21st outlet must be a deliberate swap, not an invisible no-op.
+ * context.dev caps `includeDomains` at 100 entries (docs.context.dev,
+ * /web/search, checked 2026-10-14). The list is asserted against that cap
+ * below so an outlet past it fails loudly instead of never being searched.
+ * (Until October 2026 the scout used Perplexity, which capped at 20 and
+ * truncated silently.)
  *
  * Use the domain articles actually live on, which is not always the brand's
  * vanity domain: NBC15 Madison publishes on wmtv15news.com, and WisconsinEye
@@ -56,15 +54,13 @@ export const WI_OUTLETS: Record<string, string> = {
 
 export const ALLOWED_DOMAINS = Object.keys(WI_OUTLETS);
 
-/** Perplexity's hard cap on `search_domain_filter`. Past this it truncates
- *  without erroring, so we fail loudly at import instead. */
-export const MAX_SEARCH_DOMAINS = 20;
+/** context.dev's cap on `includeDomains`; we fail loudly at import past it. */
+export const MAX_SEARCH_DOMAINS = 100;
 
 if (ALLOWED_DOMAINS.length > MAX_SEARCH_DOMAINS) {
   throw new Error(
-    `ALLOWED_DOMAINS has ${ALLOWED_DOMAINS.length} entries; Perplexity's ` +
-      `search_domain_filter caps at ${MAX_SEARCH_DOMAINS} and truncates the rest ` +
-      `silently. Swap an outlet out rather than appending.`,
+    `ALLOWED_DOMAINS has ${ALLOWED_DOMAINS.length} entries; the search's ` +
+      `includeDomains caps at ${MAX_SEARCH_DOMAINS}.`,
   );
 }
 
@@ -87,72 +83,10 @@ export type ScoutArticle = {
   headline: string;
   publishedAt?: string;
   whyRelevant: string;
+  imageUrl?: string;
+  /** The article page could not be read: keep it off /news until a person reviews it. */
+  unread?: true;
 };
-
-/**
- * Parse a Perplexity chat-completions message.content string into scout
- * articles.
- *
- * Response shape confirmed against docs.perplexity.ai (chat-completions-post
- * reference + structured-outputs guide, checked 2026-07-18): with
- * `response_format: { type: "json_schema", ... }`, `choices[0].message.content`
- * is still a STRING containing the JSON payload — never a pre-parsed object —
- * so this always starts from JSON.parse of the raw string. Tolerant of
- * Perplexity wrapping the JSON in a markdown code fence. Never throws:
- * malformed input always returns `{error}` instead.
- */
-export function parseScoutResponse(
-  raw: string,
-): { articles: ScoutArticle[] } | { error: string } {
-  let data: unknown;
-  try {
-    data = JSON.parse(stripCodeFence(raw));
-  } catch {
-    return { error: "malformed JSON in scout response" };
-  }
-
-  if (typeof data !== "object" || data === null || !("articles" in data)) {
-    return { error: "scout response missing 'articles' array" };
-  }
-  const rawArticles = (data as { articles: unknown }).articles;
-  if (!Array.isArray(rawArticles)) {
-    return { error: "scout response 'articles' is not an array" };
-  }
-
-  const articles: ScoutArticle[] = [];
-  const seenUrls = new Set<string>(); // intra-batch dedup: same URL twice in one response → one article
-  for (const item of rawArticles) {
-    if (typeof item !== "object" || item === null) continue;
-    const a = item as Record<string, unknown>;
-    if (
-      typeof a.url !== "string" ||
-      typeof a.outlet !== "string" ||
-      typeof a.headline !== "string" ||
-      typeof a.whyRelevant !== "string"
-    ) {
-      // Drop the individual malformed entry rather than failing the whole
-      // batch — one bad article from the LLM shouldn't sink every other
-      // valid one.
-      continue;
-    }
-    if (seenUrls.has(a.url)) continue;
-    seenUrls.add(a.url);
-    articles.push({
-      url: a.url,
-      outlet: a.outlet,
-      headline: a.headline,
-      whyRelevant: a.whyRelevant,
-      ...(typeof a.publishedAt === "string" ? { publishedAt: a.publishedAt } : {}),
-    });
-  }
-  return { articles };
-}
-
-function stripCodeFence(raw: string): string {
-  const trimmed = raw.trim();
-  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
-  return fenced ? fenced[1] : trimmed;
-}
 
 /** Least-recently-proposed first; never-proposed items (no lastProposedAt) sort first. */
 export function sortByRotation<T extends { lastProposedAt?: number }>(items: T[]): T[] {
@@ -164,6 +98,82 @@ export function sortByRotation<T extends { lastProposedAt?: number }>(items: T[]
  * race ID) and the general election; the old text asked for coverage of "the
  * August 11, 2026 primary" for two months after it was over.
  */
-export function scoutPrompt(target: { name: string; office: string }, today: string): string {
-  return `Today is ${today}. Find the MOST RECENT news coverage of ${target.name}, candidate for ${target.office} in Wisconsin's ${GENERAL_ELECTION_DATE} general election. Prioritise the last 7 days; do not return anything older than 30 days. List newest first and include each article's publication date. Return article URLs from the allowed outlets only.`;
+/** The search text for one candidate: the exact name, then the office. */
+export function scoutQuery(target: { name: string; office: string }): string {
+  return `"${target.name}" ${target.office}`;
+}
+
+/** Listing, tag, author, collection and file pages that come back from a search but are not articles. */
+const NOT_AN_ARTICLE = /\/(category|tag|tags|author|authors|archives?)\/|\/collection_|\.(jpe?g|png|gif|webp|pdf)$/i;
+
+/**
+ * A campaign's own press release, reposted by an outlet. Urban Milwaukee files
+ * them under /pressrelease/; WisPolitics titles them "Sender: Headline"
+ * ("DCCC: DCCC Releases New TV Ad…", "Crowley campaign: …"). /news is for
+ * newsroom coverage, so these are left out (Tarik's call, 2026-10-14).
+ */
+function isPressRelease(url: URL, title: string): boolean {
+  if (url.hostname.endsWith("urbanmilwaukee.com") && url.pathname.startsWith("/pressrelease/")) return true;
+  return url.hostname.endsWith("wispolitics.com") && /^[^:]{2,60}:\s/.test(title);
+}
+
+function outletFor(host: string): string | undefined {
+  const domain = ALLOWED_DOMAINS.find((d) => host === d || host.endsWith(`.${d}`));
+  return domain ? WI_OUTLETS[domain] : undefined;
+}
+
+/**
+ * Turn a context.dev /web/search response into scout articles. The headline
+ * and snippet are the outlet's own words; no publication date is set here,
+ * because the search does not give one — the nightly date check reads it from
+ * the article itself. Never throws: a malformed response returns `{error}`.
+ */
+export function articlesFromSearch(response: unknown): { articles: ScoutArticle[] } | { error: string } {
+  const results = (response as { results?: unknown } | null)?.results;
+  if (!Array.isArray(results)) return { error: "search response missing 'results' array" };
+
+  const articles: ScoutArticle[] = [];
+  const seen = new Set<string>();
+  for (const item of results) {
+    const r = (item ?? {}) as { url?: unknown; title?: unknown; description?: unknown };
+    if (typeof r.url !== "string" || typeof r.title !== "string" || !r.title.trim()) continue;
+    if (!isAllowedUrl(r.url)) continue;
+    const url = new URL(r.url);
+    url.search = "";
+    url.hash = "";
+    const title = r.title.trim();
+    // A section front ("/news", "/") is never an article: every article
+    // address on these outlets has at least two path segments.
+    const isSectionFront = url.pathname.split("/").filter(Boolean).length < 2;
+    if (isSectionFront || NOT_AN_ARTICLE.test(url.pathname) || isPressRelease(url, title)) continue;
+    const clean = url.toString();
+    if (seen.has(clean)) continue;
+    seen.add(clean);
+    articles.push({
+      url: clean,
+      outlet: outletFor(url.hostname.toLowerCase()) ?? url.hostname,
+      headline: title,
+      whyRelevant: typeof r.description === "string" ? r.description.trim() : "",
+    });
+  }
+  return { articles };
+}
+
+/**
+ * Fill in what the search leaves out, from the article page itself (read by
+ * the scout through context.dev, which gets past the outlets that block plain
+ * fetches): the full headline — search titles are cut off at about 60
+ * characters — and the share image. The page's real title is also where a
+ * WisPolitics press release shows itself ("Crowley campaign: …"), so the
+ * press-release check runs again on it; null means leave the article out.
+ * With no page title the article is kept as the search found it but marked
+ * `unread`: its headline may be cut off and a WisPolitics press release may
+ * only show itself on the page, so it must wait for a person, not go public.
+ */
+export function withPageDetails(article: ScoutArticle, page: { title?: string; image?: string }): ScoutArticle | null {
+  const title = page.title?.trim();
+  if (!title) return { ...article, unread: true };
+  if (isPressRelease(new URL(article.url), title)) return null;
+  const image = page.image && /^https?:\/\//.test(page.image) ? page.image : undefined;
+  return { ...article, headline: title, ...(image ? { imageUrl: image } : {}) };
 }

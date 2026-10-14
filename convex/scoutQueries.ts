@@ -139,6 +139,7 @@ export const insertProposed = internalMutation({
         headline: v.string(),
         publishedAt: v.optional(v.string()),
         whyRelevant: v.string(),
+        imageUrl: v.optional(v.string()),
         outletKey: v.optional(v.string()),
         relevanceScore: v.optional(v.number()),
         relevanceReason: v.optional(v.string()),
