@@ -31,7 +31,10 @@ export const recordPublishedDate = internalMutation({
   },
   handler: async (ctx, { id, publishedAt, verified, imageUrl }): Promise<null> => {
     await ctx.db.patch(id, {
-      imageUrl,
+      // Only replace an image, never erase one: a page this fetch could not
+      // open (the Journal Sentinel and WisPolitics block it) may already have
+      // an image the scout read through context.dev.
+      ...(imageUrl ? { imageUrl } : {}),
       // A verified read replaces the LLM's guess. A miss clears the guess
       // rather than leaving an unverifiable date in place.
       publishedAt: verified ? publishedAt : undefined,
