@@ -345,6 +345,14 @@ const handoffOfficialLink = createTool({
     }),
 });
 
+/**
+ * How much of a conversation the model sees with each new question: the last
+ * three exchanges, enough for a follow-up ("and her opponent?"). The library
+ * default is 100, which let a primary-season thread answer the November
+ * registration deadline with July's date on 2026-10-14 without looking it up.
+ */
+export const RECENT_MESSAGES = 6;
+
 function makeVoterHelpAgent(
   model: string,
   instructions: string = VOTER_HELP_INSTRUCTIONS,
@@ -362,6 +370,7 @@ function makeVoterHelpAgent(
       ...(options.questionnaire ? { getQuestionnaireAnswers } : {}),
     },
     stopWhen: stepCountIs(8),
+    contextOptions: { recentMessages: RECENT_MESSAGES },
     // MOO-410 Task 3: bounds set here (rather than per-callsite) so BOTH the
     // prod streamText path and the evalAnswer generateText path inherit them
     // — the gate stays representative of prod.
