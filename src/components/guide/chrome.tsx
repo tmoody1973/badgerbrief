@@ -16,9 +16,7 @@ import { localizeHref } from "@/lib/i18n/locale";
 // question a reader should never have to hunt for, and burying it reads as
 // evasion. Methodology stays in the footer + mobile menu — About links to it,
 // so the row keeps one entry rather than two.
-// About left the row when My Ballot joined it: the row was already wider than
-// the page, and About is in the footer of every page.
-const DESKTOP_LINKS = NAV_LINKS.filter((l) => l.href !== "/methodology" && l.href !== "/about");
+const DESKTOP_LINKS = NAV_LINKS.filter((l) => l.href !== "/methodology");
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -33,30 +31,39 @@ export function SiteHeader() {
 
   return (
     <header className="border-b-2 border-border bg-card">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-3">
-        <Link href={localizeHref("/", locale)} className="font-display text-2xl tracking-tight">
-          Badger<span className="text-primary">Brief</span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <nav className="hidden items-center gap-2 font-mono text-sm font-bold uppercase tracking-wider sm:flex">
-            {DESKTOP_LINKS.map(({ href, label }) => (
-              <Link key={href} href={localizeHref(href, locale)} className="whitespace-nowrap px-2 py-1 hover:bg-secondary">
-                {dict.navLabels[href] ?? label}
+      <div className="mx-auto w-full max-w-5xl px-4 py-3">
+        <div className="flex items-center justify-between gap-4">
+          <Link href={localizeHref("/", locale)} className="font-display text-2xl tracking-tight">
+            Badger<span className="text-primary">Brief</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2 font-mono text-sm font-bold uppercase tracking-wider sm:flex">
+              <Link
+                href={localizeHref("/vote", locale)}
+                className="whitespace-nowrap border-2 border-border bg-primary px-2 py-1 text-primary-foreground shadow-[var(--shadow-brutal)]"
+              >
+                {dict.ctaElectionDay}
               </Link>
-            ))}
-            <Link
-              href={localizeHref("/vote", locale)}
-              className="whitespace-nowrap border-2 border-border bg-primary px-2 py-1 text-primary-foreground shadow-[var(--shadow-brutal)]"
-            >
-              {dict.ctaElectionDay}
-            </Link>
-            <AuthNav />
-            <ThemeToggle />
-          </nav>
-          {/* Always visible (mobile + desktop) so the language switch lives in
-              the menu bar, not just inside the /vote page content. */}
-          <LangToggle />
+              <AuthNav />
+              <ThemeToggle />
+            </div>
+            {/* Always visible (mobile + desktop) so the language switch lives in
+                the menu bar, not just inside the /vote page content. */}
+            <LangToggle />
+          </div>
         </div>
+        {/* Links get their own row and wrap rather than run off the page: one
+            row held ~1,100px of controls inside a 1,024px header. */}
+        <nav
+          aria-label="Main"
+          className="-ml-2 mt-2 hidden flex-wrap gap-x-1 gap-y-1 font-mono text-sm font-bold uppercase tracking-wider sm:flex"
+        >
+          {DESKTOP_LINKS.map(({ href, label }) => (
+            <Link key={href} href={localizeHref(href, locale)} className="whitespace-nowrap px-2 py-1 hover:bg-secondary">
+              {dict.navLabels[href] ?? label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </header>
   );
