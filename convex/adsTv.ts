@@ -8,7 +8,8 @@
  * Finding orders (2026-10-15): by default from the station's Atom feed, which
  * is not Akamai-blocked (see lib/tvFeed.ts). The feed holds only the 10 newest
  * uploads, so the cron polls every 2 hours. `source: "browser"` still walks the
- * full folder tree through Browserbase, for a one-time backfill. Either way
+ * full folder tree in a real browser (Browserbase, or a TinyFish session via
+ * `cdpUrl`), for a one-time backfill. Either way
  * the PDFs come from files.fcc.gov/download by plain fetch.
  *
  * Trust posture (inviolable): TV name matches cap below the public threshold, so
@@ -134,31 +135,29 @@ export const ingestTvDoc = internalAction({
   },
 });
 
-// ---------- Browserbase enumeration + download (network) ----------
+// ---------- browser enumeration + download (network) ----------
 
 type BbPage = any; // playwright Page — typed `any` to keep the import dynamic.
 
-/** session create → connectOverCDP → download behavior → fn(page, sessionId) → close. */
-async function withBrowserbase<T>(
-  fn: (page: BbPage, sessionId: string) => Promise<T>,
-): Promise<T> {
-  const { Browserbase } = await import("@browserbasehq/sdk");
+/**
+ * A real browser page for walking the folder tree (downloads no longer need
+ * one). `cdpUrl` connects to a session opened elsewhere, e.g. TinyFish
+ * (`tinyfish browser session create --browser-profile stealth`), which passed
+ * the FCC block on 2026-10-15; without it, a Browserbase session is opened.
+ */
+async function withBrowser<T>(fn: (page: BbPage) => Promise<T>, cdpUrl?: string): Promise<T> {
   const { chromium } = await import("playwright-core");
-  const bb = new Browserbase({ apiKey: process.env.BROWSERBASE_API_KEY! });
-  const session = await bb.sessions.create({
-    projectId: process.env.BROWSERBASE_PROJECT_ID!,
-  });
-  const browser = await chromium.connectOverCDP(session.connectUrl);
+  let connectUrl = cdpUrl;
+  if (!connectUrl) {
+    const { Browserbase } = await import("@browserbasehq/sdk");
+    const bb = new Browserbase({ apiKey: process.env.BROWSERBASE_API_KEY! });
+    connectUrl = (await bb.sessions.create({ projectId: process.env.BROWSERBASE_PROJECT_ID! })).connectUrl;
+  }
+  const browser = await chromium.connectOverCDP(connectUrl);
   try {
-    const ctx = browser.contexts()[0];
+    const ctx = browser.contexts()[0] ?? (await browser.newContext());
     const page = ctx.pages()[0] ?? (await ctx.newPage());
-    const cdp = await ctx.newCDPSession(page);
-    await cdp.send("Browser.setDownloadBehavior", {
-      behavior: "allow",
-      downloadPath: "downloads",
-      eventsEnabled: true,
-    });
-    return await fn(page, session.id);
+    return await fn(page);
   } finally {
     await browser.close();
   }
@@ -482,12 +481,14 @@ export const syncTvAds = internalAction({
     callSigns: v.optional(v.array(v.string())),
     stationLimit: v.optional(v.number()),
     docLimit: v.optional(v.number()),
-    /** "feed" (default, free, newest 10 uploads) or "browser" (Browserbase, full history). */
+    /** "feed" (default, free, newest 10 uploads) or "browser" (full history). */
     source: v.optional(v.union(v.literal("feed"), v.literal("browser"))),
+    /** With source "browser": an already-open remote browser (TinyFish) instead of Browserbase. */
+    cdpUrl: v.optional(v.string()),
   },
   handler: async (
     ctx,
-    { callSigns, stationLimit, docLimit, source = "feed" },
+    { callSigns, stationLimit, docLimit, source = "feed", cdpUrl },
   ): Promise<{
     stations: number;
     enumerated: number;
@@ -534,7 +535,7 @@ export const syncTvAds = internalAction({
       try {
         let docs: EnumeratedDoc[];
         if (source === "browser") {
-          docs = await withBrowserbase((page) => enumerateStation(page, station, trackedSurnames));
+          docs = await withBrowser((page) => enumerateStation(page, station, trackedSurnames), cdpUrl);
         } else {
           const res = await fetch(`${FCC_BASE}/tv-profile/${station.callSign}/rss`);
           if (!res.ok) throw new Error(`feed HTTP ${res.status}`);
