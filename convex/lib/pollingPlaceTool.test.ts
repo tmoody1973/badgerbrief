@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { pollingPlacePayload } from "./pollingPlaceTool";
+import { handoffExtras, pollingPlacePayload } from "./pollingPlaceTool";
 
 const found = { ok: true as const, matchedAddress: "200 E WELLS ST, MILWAUKEE, WI, 53202", congressional: 4, senate: 7, assembly: 19, county: "milwaukee" };
 const zeidler = {
@@ -43,5 +43,15 @@ describe("pollingPlacePayload", () => {
   test("never carries the address's map point", () => {
     const withPoint = { ...found, point: { lat: 43.04112, lon: -87.90967 } };
     expect(JSON.stringify(pollingPlacePayload(withPoint, zeidler))).not.toMatch(/43\.04|-87\.9|point/);
+  });
+});
+
+describe("handoffExtras", () => {
+  test("the polling-place handoff carries the offer to look up a Milwaukee address, so the offer comes from a tool", () => {
+    expect(handoffExtras("pollingPlace").alsoOffer).toMatch(/City of Milwaukee/);
+  });
+
+  test("other handoffs carry nothing extra", () => {
+    expect(handoffExtras("register")).toEqual({});
   });
 });

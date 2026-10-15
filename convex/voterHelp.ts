@@ -17,7 +17,7 @@ import { ensureTelemetry, tracer } from "./lib/agentTelemetry";
 import { OFFICIAL_LINKS, OFFICIAL_LINK_TOPICS, type OfficialLinkTopic } from "../src/lib/official-links";
 import { buildIssueMatch } from "../src/lib/issue-match";
 import { parseGeocoderResponse } from "../src/lib/districts";
-import { pollingPlacePayload } from "./lib/pollingPlaceTool";
+import { handoffExtras, pollingPlacePayload } from "./lib/pollingPlaceTool";
 import {
   candidatePayload,
   coveragePayload,
@@ -108,7 +108,7 @@ const CENSUS_URL = "https://geocoding.geo.census.gov/geocoder/geographies/onelin
 
 const findPollingPlace = createTool({
   description:
-    "Look up an address the voter typed in this conversation: their U.S. House, State Senate and Assembly districts, and for an address in the City of Milwaukee their Election Day polling place (building, address, ward, entrances, parking). Use it whenever the voter gives an address, or asks where they vote or what is on their ballot after giving one. For what is on their ballot, then call getRaceInfo for the raceIds it returns. Follow mustTellUser. Read-only; the address is used for this lookup only.",
+    "Look up an address the voter typed in this conversation: their U.S. House, State Senate and Assembly districts, and for an address in the City of Milwaukee their Election Day polling place (building, address, ward, entrances, parking). Use it when the voter has given an address. If they ask where they vote WITHOUT giving one, do not just ask for it: call handoffOfficialLink with topic pollingPlace, give that MyVote link first, then make its alsoOffer. For what is on their ballot, then call getRaceInfo for the raceIds it returns. Follow mustTellUser. Read-only; the address is used for this lookup only.",
   inputSchema: z.object({ address: z.string().min(5).max(200) }),
   execute: async (ctx, { address }): Promise<string> =>
     // The span records that a lookup happened, never the address.
@@ -366,6 +366,7 @@ const handoffOfficialLink = createTool({
       // Harmless on a procedural handoff, where the "if" simply is not met.
       return JSON.stringify({
         ...OFFICIAL_LINKS[topic],
+        ...handoffExtras(topic),
         ifYouLackTheData: OUT_OF_COVERAGE_NOTE,
       });
     }),
