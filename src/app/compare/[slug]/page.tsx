@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LastUpdated, PartyBadge } from "@/components/guide/labels";
+import { PartyBadge } from "@/components/guide/labels";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
+import { TrustBlock } from "@/components/guide/trust-block";
+import { pageUpdated } from "@/lib/candidate-sources";
 import { WhatThisMeans } from "@/components/guide/what-this-means";
 import { ShareButton } from "@/components/contribute/share-button";
 import { buildIssueComparison } from "@/lib/compare";
@@ -152,12 +154,13 @@ export default async function ComparePage({ params }: Props) {
         </div>
       )}
 
-      <div className="mt-10 flex flex-col gap-4">
+      <TrustBlock sources={[]} updated={pageUpdated(race.general, race.dataAsOf)} />
+
+      <div className="mt-6 flex flex-col gap-4">
         <ShareButton
           url={`${SITE_URL}/compare/${slug}`}
           title={`Compare the ${race.office} candidates — BadgerBrief`}
         />
-        <LastUpdated date={race.dataAsOf} />
       </div>
     </main>
   );

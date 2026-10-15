@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { candidateSources } from "./candidate-sources";
+import { candidateSources, pageUpdated } from "./candidate-sources";
 
 const primary = { name: "Wisconsin Elections Commission — 2026 Partisan Primary candidate list", url: "https://elections.wi.gov/media/40146/download" };
 const general = { onBallot: true, source: { url: "https://elections.wi.gov/certified.xlsx", documentDate: "2026-10-06", retrievedAt: "2026-10-07T00:00:00Z" } };
@@ -19,5 +19,15 @@ describe("candidateSources", () => {
   test("does not list the certified file twice", () => {
     const already = { name: "WEC certified list", url: general.source.url };
     expect(candidateSources([already], general).filter((s) => s.url === general.source.url)).toHaveLength(1);
+  });
+});
+
+describe("pageUpdated", () => {
+  test("dates the page by the certified November list when there is one", () => {
+    expect(pageUpdated(general, "July 17, 2026")).toBe("October 6, 2026");
+  });
+
+  test("falls back to the page's own date without a November record", () => {
+    expect(pageUpdated(undefined, "July 17, 2026")).toBe("July 17, 2026");
   });
 });

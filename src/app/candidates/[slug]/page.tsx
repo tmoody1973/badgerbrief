@@ -9,7 +9,6 @@ import { FinanceDetail, FinanceSummary } from "@/components/guide/finance";
 import { FinanceBreakdownSection } from "@/components/guide/financeBreakdown";
 import { DonorRosterSection } from "@/components/guide/donorRoster";
 import {
-  LastUpdated,
   PartyBadge,
   StatusBadge,
 } from "@/components/guide/labels";
@@ -23,7 +22,8 @@ import { CandidateQuestionnaire, questionnaireRows } from "@/components/guide/qu
 import { isInterviewQuote } from "@/lib/interview-quote";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
-import { candidateSources } from "@/lib/candidate-sources";
+import { TrustBlock } from "@/components/guide/trust-block";
+import { candidateSources, pageUpdated } from "@/lib/candidate-sources";
 import { ShareButton } from "@/components/contribute/share-button";
 import {
   getCandidateBySlug,
@@ -425,10 +425,7 @@ export default async function CandidatePage({ params }: Props) {
 
           <InTheNews items={inTheNews} heading={`In the news about ${candidate.name}`} />
 
-          <section id="sources" className="mt-10 scroll-mt-16 space-y-3">
-            <SourceList sources={candidateSources(candidate.sources, candidate.general)} />
-            <LastUpdated date={candidate.dataAsOf} />
-          </section>
+          <TrustBlock sources={candidateSources(candidate.sources, candidate.general)} updated={pageUpdated(candidate.general, candidate.dataAsOf)} />
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t-2 border-border pt-4">
             <p className="font-mono text-xs text-muted-foreground">

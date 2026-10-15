@@ -28,7 +28,7 @@ function classify(url: string): string {
   }
 }
 
-function SourceItems({ sources }: { sources: { name: string; url: string }[] }) {
+export function SourceItems({ sources }: { sources: { name: string; url: string }[] }) {
   return (
     <ul className="mt-2 space-y-1">
       {sources.map((s) => (
