@@ -160,3 +160,13 @@ body:has([data-chat-screen]) > .site-content {
 body:has([data-chat-screen]) > footer {
   display: none;
 }
+
+/* WCAG 2.2 AA (Phase 1b brief §7): every element reachable by keyboard shows
+   where focus is, in the ring colour (cardinal; brightened in dark mode).
+   :where() keeps this at zero specificity, so a component's own focus style
+   still wins. tabindex="-1" targets (the skip link's #main) are left out:
+   they receive focus by script, not by tabbing. */
+:where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}

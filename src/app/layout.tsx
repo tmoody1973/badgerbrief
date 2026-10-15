@@ -11,6 +11,7 @@ import { PostHogProvider } from "@/components/posthog-provider";
 import { AnalyticsEvents } from "@/components/guide/analytics-events";
 import { SwRegister } from "@/components/guide/sw-register";
 import { AnnouncementBar } from "@/components/guide/announcement-bar";
+import { SkipLink } from "@/components/guide/skip-link";
 import { SiteFooter, SiteHeader } from "@/components/guide/chrome";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
@@ -72,6 +73,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col pb-16 sm:pb-0">
         <Providers>
           <StoreUser />
+          <SkipLink />
           {/* Above the masthead so it is the first thing on every page. This
               message names Oct 20; replace it once early voting is under way. */}
           <AnnouncementBar id="general-2026-early-voting-oct-20" href="/vote">
@@ -82,7 +84,9 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <GuidedRail />
           </Suspense>
-          <div className="site-content flex-1">{children}</div>
+          <div id="main" tabIndex={-1} className="site-content flex-1 outline-none">
+            {children}
+          </div>
           <SiteFooter />
           <BottomTabs />
         </Providers>
