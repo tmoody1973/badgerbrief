@@ -64,6 +64,7 @@ import type * as lib_metaAdsFixture from "../lib/metaAdsFixture.js";
 import type * as lib_notify from "../lib/notify.js";
 import type * as lib_openfecEnrich from "../lib/openfecEnrich.js";
 import type * as lib_outlets from "../lib/outlets.js";
+import type * as lib_pollingPlaceTool from "../lib/pollingPlaceTool.js";
 import type * as lib_polls from "../lib/polls.js";
 import type * as lib_publishedDate from "../lib/publishedDate.js";
 import type * as lib_qa from "../lib/qa.js";
@@ -177,6 +178,7 @@ declare const fullApi: ApiFromModules<{
   "lib/notify": typeof lib_notify;
   "lib/openfecEnrich": typeof lib_openfecEnrich;
   "lib/outlets": typeof lib_outlets;
+  "lib/pollingPlaceTool": typeof lib_pollingPlaceTool;
   "lib/polls": typeof lib_polls;
   "lib/publishedDate": typeof lib_publishedDate;
   "lib/qa": typeof lib_qa;

@@ -16,6 +16,8 @@ import type { Id } from "./_generated/dataModel";
 import { ensureTelemetry, tracer } from "./lib/agentTelemetry";
 import { OFFICIAL_LINKS, OFFICIAL_LINK_TOPICS, type OfficialLinkTopic } from "../src/lib/official-links";
 import { buildIssueMatch } from "../src/lib/issue-match";
+import { parseGeocoderResponse } from "../src/lib/districts";
+import { pollingPlacePayload } from "./lib/pollingPlaceTool";
 import {
   candidatePayload,
   coveragePayload,
@@ -102,6 +104,29 @@ const getVoterAccess = createTool({
     }),
 });
 
+const CENSUS_URL = "https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress";
+
+const findPollingPlace = createTool({
+  description:
+    "Look up an address the voter typed in this conversation: their U.S. House, State Senate and Assembly districts, and for an address in the City of Milwaukee their Election Day polling place (building, address, ward, entrances, parking). Use it whenever the voter gives an address, or asks where they vote or what is on their ballot after giving one. For what is on their ballot, then call getRaceInfo for the raceIds it returns. Follow mustTellUser. Read-only; the address is used for this lookup only.",
+  inputSchema: z.object({ address: z.string().min(5).max(200) }),
+  execute: async (ctx, { address }): Promise<string> =>
+    // The span records that a lookup happened, never the address.
+    withToolSpan("findPollingPlace", ctx.threadId, {}, async () => {
+      const url = `${CENSUS_URL}?${new URLSearchParams({ address, benchmark: "Public_AR_Current", vintage: "Current_Current", layers: "all", format: "json" })}`;
+      let result;
+      try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        result = parseGeocoderResponse(await res.json());
+      } catch {
+        return JSON.stringify({ found: false, mustTellUser: "The address lookup is not answering right now. Give the official link below.", official: OFFICIAL_LINKS.pollingPlace });
+      }
+      const place = result.ok && result.point ? await ctx.runQuery(api.mkeWards.pollingPlaceAt, result.point) : null;
+      return JSON.stringify(pollingPlacePayload(result, place));
+    }),
+});
+
 const getMyBallot = createTool({
   description:
     "The signed-in user's district-relevant races and candidate names, based on their saved address. Returns districts: null when the user hasn't saved an address yet. For a question about ONE named office (\"is there a lieutenant governor race on my ballot?\"), call getRaceInfo for that office as well: the answer about the office must come from that tool, not from memory. Read-only.",
@@ -128,8 +153,9 @@ const getMyBallot = createTool({
           districts: null,
           mustTellUser:
             "No saved address for this user, so no personalized ballot exists yet. " +
-            "Say plainly that they need to save their address on the Brief page " +
-            "(/brief) to see their own races, THEN offer the official link below. " +
+            "If they have typed an address in this conversation, call findPollingPlace with it instead. " +
+            "Otherwise say they can type their address here, or save it on the Brief page (/brief), " +
+            "to see their own races, THEN offer the official link below. " +
             "Do not answer with the link alone — the reason is the useful part.",
           brief: { label: "Save your address on the Brief page", url: "/brief" },
           official: OFFICIAL_LINKS.myBallot,
@@ -366,7 +392,7 @@ function makeVoterHelpAgent(
     languageModel: anthropic(model),
     instructions,
     tools: {
-      getVotingInfo, getVoterAccess, getMyBallot, matchBallotByIssues, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, getLabelGlossary, handoffOfficialLink,
+      getVotingInfo, getVoterAccess, getMyBallot, findPollingPlace, matchBallotByIssues, getRaceInfo, getCandidateInfo, getCoverage, getVotingRecord, getLabelGlossary, handoffOfficialLink,
       ...(options.questionnaire ? { getQuestionnaireAnswers } : {}),
     },
     stopWhen: stepCountIs(8),
