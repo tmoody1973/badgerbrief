@@ -5,12 +5,12 @@ import { BallotContest, type Holds } from "@/components/guide/ballot-contest";
 import { RaceQuestionnaire, questionnaireRows } from "@/components/guide/questionnaire";
 import { RaceFinanceTable } from "@/components/guide/finance";
 import { InTheNews } from "@/components/guide/in-the-news";
-import { LastUpdated } from "@/components/guide/labels";
 import { RaceAdMoney } from "@/components/guide/race-ad-money";
 import { RacePolls } from "@/components/guide/race-polls";
 import { RaceTvAds } from "@/components/guide/race-tv-ads";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
-import { SourceList } from "@/components/guide/sources";
+import { TrustBlock } from "@/components/guide/trust-block";
+import { pageUpdated } from "@/lib/candidate-sources";
 import { WhatThisMeans } from "@/components/guide/what-this-means";
 import { ShareButton } from "@/components/contribute/share-button";
 import {
@@ -21,7 +21,7 @@ import {
   getTvAdsForRace,
   listRaces,
 } from "@/lib/data";
-import { CURRENT_ELECTION, PRIMARY_ARCHIVE, formatIsoDate } from "@/lib/election";
+import { CURRENT_ELECTION, PRIMARY_ARCHIVE } from "@/lib/election";
 import { JsonLd, breadcrumbNode, faqNode, organizationNode, personNode } from "@/lib/jsonld";
 import {
   buildRaceBallot,
@@ -249,10 +249,7 @@ export default async function RacePage({ params }: Props) {
       <InTheNews items={inTheNews} heading={`In the news about the ${race.office} race`} />
 
 
-      <section id="sources" className="mt-10 scroll-mt-16 space-y-3">
-        <SourceList sources={sources} />
-        <LastUpdated date={race.general ? formatIsoDate(race.general.source.documentDate) : race.dataAsOf} />
-      </section>
+      <TrustBlock sources={sources} updated={pageUpdated(race.general, race.dataAsOf)} />
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t-2 border-border pt-4">
         <p className="font-mono text-xs text-muted-foreground">

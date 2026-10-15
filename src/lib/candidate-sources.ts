@@ -16,3 +16,10 @@ export function candidateSources(sources: readonly Source[], general: General): 
   };
   return [certified, ...sources.filter((s) => s.url !== certified.url)];
 }
+
+/** The page's "last updated" date: the certified list's own date when the
+ * page carries the November ballot, else the page's hand-set date (which was
+ * last touched for the primary and reads as stale in October). */
+export function pageUpdated(general: General, dataAsOf: string): string {
+  return general ? formatIsoDate(general.source.documentDate) : dataAsOf;
+}
