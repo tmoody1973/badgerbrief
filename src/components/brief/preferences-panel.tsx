@@ -62,6 +62,10 @@ export function PreferencesPanel() {
           <p className="mt-1 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
             CD {districts.congressional} · Senate {districts.senate} · Assembly {districts.assembly}
             {prefs?.address ? ` · ${prefs.address}` : ""}
+            {" · "}
+            <Link href="/ballot#lookup" className="tap text-foreground underline decoration-2 underline-offset-2">
+              Change address
+            </Link>
           </p>
           {pollingPlace && <PollingPlaceCard place={pollingPlace} />}
           <fieldset className="mt-4">
