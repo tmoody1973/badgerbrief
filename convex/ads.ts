@@ -1,4 +1,6 @@
 import { v } from "convex/values";
+import { TRACKED_META_PAGES } from "./lib/trackedMetaPages";
+import { logAudit } from "./audit";
 import {
   ActionCtx,
   internalAction,
@@ -183,6 +185,59 @@ export const existingTvIds = internalQuery({
       .collect();
     const skipped = await ctx.db.query("tv_skipped_docs").collect();
     return [...rows.map((r) => r.platformAdId), ...skipped.map((s) => s.fileManagerId)];
+  },
+});
+
+/**
+ * Attach every unattributed Meta ad from one certified candidate page (see
+ * lib/trackedMetaPages.ts) to that candidate, and close its open review tasks.
+ * Stored ads keep the page *name*, not its id, so this matches by exact name;
+ * new ads attach by page id inside the sync. Never overwrites an existing
+ * attribution: a human's call stands.
+ */
+export const attributeTrackedPage = internalMutation({
+  args: { pageName: v.string(), candidateSlug: v.string(), raceId: v.string() },
+  handler: async (ctx, { pageName, candidateSlug, raceId }) => {
+    const ads = await ctx.db
+      .query("ads")
+      .withIndex("by_platform_and_pageOrCommittee", (q) => q.eq("platform", "meta").eq("pageOrCommittee", pageName))
+      .collect();
+    let attributed = 0;
+    let resolvedTasks = 0;
+    for (const ad of ads) {
+      if (ad.candidateSlug !== undefined) continue;
+      await ctx.db.patch(ad._id, { candidateSlug, raceId, matchConfidence: 0.98 });
+      attributed++;
+      const tasks = await ctx.db
+        .query("review_tasks")
+        .withIndex("by_status_ref", (q) => q.eq("status", "open").eq("refId", ad._id))
+        .collect();
+      for (const task of tasks) {
+        await ctx.db.patch(task._id, { status: "resolved", resolvedAt: Date.now() });
+        resolvedTasks++;
+      }
+      await logAudit(ctx, { action: "ad:attributed", refTable: "ads", refId: ad._id, detail: `${candidateSlug} (certified page "${pageName}")` });
+    }
+    return { attributed, resolvedTasks };
+  },
+});
+
+/** One-time (and safe to repeat): attach stored ads from every certified page. */
+export const applyTrackedMetaPages = internalAction({
+  args: {},
+  handler: async (ctx): Promise<{ pages: number; attributed: number; resolvedTasks: number }> => {
+    let attributed = 0;
+    let resolvedTasks = 0;
+    for (const p of TRACKED_META_PAGES) {
+      const r = await ctx.runMutation(internal.ads.attributeTrackedPage, {
+        pageName: p.pageName,
+        candidateSlug: p.candidateSlug,
+        raceId: p.raceId,
+      });
+      attributed += r.attributed;
+      resolvedTasks += r.resolvedTasks;
+    }
+    return { pages: TRACKED_META_PAGES.length, attributed, resolvedTasks };
   },
 });
 
@@ -616,7 +671,7 @@ export const syncMetaAds = internalAction({
     const date = todayISO(Date.now());
     const base = args.apiBase ?? GRAPH_API_BASE;
     const logUrl = `${base}/ads_archive`;
-    const trackedEntities: TrackedEntity[] = args.trackedEntities ?? [];
+    const trackedEntities: TrackedEntity[] = args.trackedEntities ?? TRACKED_META_PAGES;
     const token = args.token ?? process.env.META_ADS_ACCESS_TOKEN;
 
     const candidates: MatchCandidate[] = await ctx.runQuery(
@@ -646,7 +701,10 @@ export const syncMetaAds = internalAction({
       const terms = args.searchTerms ?? metaSearchTerms(candidates);
       const queries: AdQuery[] = terms.map((t) => ({ searchTerms: t }));
       if (trackedEntities.length > 0) {
-        queries.push({ searchPageIds: trackedEntities.map((t) => t.entityId) });
+        // Batches of 10: the Ad Library caps search_page_ids per request.
+        for (let i = 0; i < trackedEntities.length; i += 10) {
+          queries.push({ searchPageIds: trackedEntities.slice(i, i + 10).map((t) => t.entityId) });
+        }
       }
       const seen = new Map<string, MetaAdArchiveEntry>();
       for (const q of queries) {
