@@ -463,7 +463,8 @@ export default defineSchema({
     lastSeenAt: v.number(),
   })
     .index("by_platform_ad", ["platform", "platformAdId"])
-    .index("by_candidate", ["raceId", "candidateSlug"]),
+    .index("by_candidate", ["raceId", "candidateSlug"])
+    .index("by_platform_and_pageOrCommittee", ["platform", "pageOrCommittee"]),
 
   ad_metrics_daily: defineTable({
     platform: v.union(v.literal("meta"), v.literal("google")),
