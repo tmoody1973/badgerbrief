@@ -354,8 +354,11 @@ async function downloadDocs(fileManagerIds: string[]): Promise<Record<string, Ui
   const out: Record<string, Uint8Array> = {};
   for (const id of fileManagerIds) {
     try {
-      const res = await fetch(`${DOWNLOAD_HOST}/${id}.pdf`);
-      if (res.ok) out[id] = new Uint8Array(await res.arrayBuffer());
+      const res = await fetch(`${DOWNLOAD_HOST}/${id}.pdf`, { signal: AbortSignal.timeout(30_000) });
+      if (!res.ok) continue;
+      const bytes = new Uint8Array(await res.arrayBuffer());
+      // "%PDF": anything else is a block or error page, not worth an AI read.
+      if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) out[id] = bytes;
     } catch {
       // one bad download skips that doc, not the station
     }
@@ -554,6 +557,7 @@ export const syncTvAds = internalAction({
 
           // Many issue-ad docs are PDF portfolios wrapping the real order AND a
           // NAB disclosure form. Unwrap → a unit per embedded page; else the doc.
+          const ingestedBefore = totals.ingested;
           const embedded = await unwrapPortfolio(bytes);
           const units = embedded
             ? embedded.map((b, i) => ({ bytes: b, idSuffix: `#${i}`, isEmbedded: true }))
@@ -599,6 +603,12 @@ export const syncTvAds = internalAction({
               disclosure,
             });
             totals.ingested++;
+          }
+          if (totals.ingested === ingestedBefore) {
+            await ctx.runMutation(internal.ads.markTvDocSkipped, {
+              fileManagerId: d.fileManagerId,
+              reason: "no order could be read from the file",
+            });
           }
           seen.add(d.fileManagerId);
         }

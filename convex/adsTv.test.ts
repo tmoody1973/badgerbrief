@@ -144,3 +144,19 @@ describe("ingestTvDoc", () => {
     expect(tasks[0].note).not.toContain("suggested:");
   });
 });
+
+describe("TV docs that never become an ad", () => {
+  test("a skipped doc counts as seen, so the 2-hour sync never re-reads it", async () => {
+    const t = convexTest(schema, modules);
+    await t.mutation(internal.ads.markTvDocSkipped, { fileManagerId: "abc-1", reason: "no order in file" });
+    expect(await t.query(internal.ads.existingTvIds, {})).toContain("abc-1");
+  });
+
+  test("marking the same doc twice keeps one record", async () => {
+    const t = convexTest(schema, modules);
+    await t.mutation(internal.ads.markTvDocSkipped, { fileManagerId: "abc-1", reason: "no order in file" });
+    await t.mutation(internal.ads.markTvDocSkipped, { fileManagerId: "abc-1", reason: "no order in file" });
+    const rows = await t.run((ctx) => ctx.db.query("tv_skipped_docs").collect());
+    expect(rows).toHaveLength(1);
+  });
+});
