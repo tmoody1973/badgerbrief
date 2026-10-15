@@ -24,7 +24,7 @@ export function RaceCard({
       href={`/races/${raceIdToSlug(race.raceId)}`}
       className="press block border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]"
     >
-      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
         {raceLevelLabel(race.level, locale)}
       </p>
       <h3 className="font-display mt-1 text-lg leading-tight">{race.office}</h3>
@@ -81,7 +81,7 @@ export function CandidateCard({
           {candidate.name}
         </h3>
         {candidate.incumbent && (
-          <span className="border border-border bg-secondary px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase">
+          <span className="border border-border bg-secondary px-1.5 py-0.5 font-mono text-xs font-bold uppercase">
             Incumbent
           </span>
         )}
@@ -114,7 +114,7 @@ export function GeneralCandidateCard({ candidate }: { candidate: Doc<"candidates
       <div className="mt-1.5 flex flex-wrap gap-1.5">
         <PartyBadge party={generalParty(candidate)} />
         {candidate.incumbent && (
-          <span className="border border-border bg-secondary px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase">
+          <span className="border border-border bg-secondary px-1.5 py-0.5 font-mono text-xs font-bold uppercase">
             Incumbent
           </span>
         )}

@@ -51,7 +51,7 @@ const AGGREGATORS: { name: string; url: string }[] = [
 const fmtRange = (start: string, end: string) =>
   start === end ? start : `${start} – ${end}`;
 
-const meta = "font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground";
+const meta = "font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground";
 
 function Poll({ poll }: { poll: RacePoll }) {
   return (
@@ -71,7 +71,7 @@ function Poll({ poll }: { poll: RacePoll }) {
       {!poll.scientific && (
         // A straw poll is real news but is not a poll of voters. Saying so
         // beside the number is the whole reason it can be shown at all.
-        <p className="mt-2 border-2 border-border bg-warning px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em]">
+        <p className="mt-2 border-2 border-border bg-warning px-2 py-1 font-mono text-xs uppercase tracking-[0.1em]">
           Not a scientific poll — self-selected participants
         </p>
       )}

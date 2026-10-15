@@ -10,7 +10,7 @@ const KIND_STYLES: Record<string, string> = {
 export function SourceTrustLabel({ kind }: { kind: string }) {
   return (
     <span
-      className={`inline-block border border-border px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider ${KIND_STYLES[kind] ?? KIND_STYLES.reference}`}
+      className={`inline-block border border-border px-1.5 py-0.5 font-mono text-xs font-bold uppercase tracking-wider ${KIND_STYLES[kind] ?? KIND_STYLES.reference}`}
     >
       {kind}
     </span>
@@ -50,7 +50,7 @@ export function StatusBadge({ status }: { status?: string }) {
   return (
     <span
       title={status}
-      className="inline-block border-2 border-border bg-muted px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+      className="inline-block border-2 border-border bg-muted px-2 py-0.5 font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground"
     >
       {label}
     </span>

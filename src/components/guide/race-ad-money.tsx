@@ -20,7 +20,7 @@ function SplitBar({ own, outside }: { own: number; outside: number }) {
         <div className="bg-secondary" style={{ width: `${ownPct}%` }} />
         <div className="bg-warning" style={{ width: `${100 - ownPct}%` }} />
       </div>
-      <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+      <p className="mt-1 font-mono text-xs uppercase tracking-widest text-muted-foreground">
         {usd(own)} own committee · {usd(outside)} outside <span className="italic">(estimated)</span>
       </p>
     </div>
@@ -34,22 +34,22 @@ function CandidateMoneyCard({ c }: { c: CandidateAdMoney }) {
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         <div>
           <p className="font-mono text-lg font-bold text-foreground">{usd(c.supportSpend)}</p>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Supporting</p>
+          <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Supporting</p>
         </div>
         <div>
           <p className="font-mono text-lg font-bold text-foreground">{usd(c.attackSpend)}</p>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Attacking</p>
+          <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Attacking</p>
         </div>
         <div>
           <p className="font-mono text-lg font-bold text-foreground">{compact(c.impressions)}</p>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Reach</p>
+          <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Reach</p>
         </div>
       </div>
       <div className="mt-3">
         <SplitBar own={c.ownSpend} outside={c.outsideSpend} />
       </div>
       {c.unclassifiedCount > 0 && (
-        <p className="mt-2 font-mono text-[10px] text-muted-foreground">
+        <p className="mt-2 font-mono text-xs text-muted-foreground">
           {c.unclassifiedCount} ad(s) not yet classified support/attack.
         </p>
       )}
