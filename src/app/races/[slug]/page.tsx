@@ -240,7 +240,7 @@ export default async function RacePage({ params }: Props) {
 
       {adMoney && <RaceAdMoney data={adMoney} />}
 
-      <RaceTvAds ads={tvAds} />
+      <RaceTvAds ads={tvAds} names={Object.fromEntries(onBallot.map((c) => [c.slug, c.name]))} />
 
       {/* After the money: published polls, figures as printed, never averaged.
           A no-predictions guide does not lead with them (Tarik, 2026-10-14). */}

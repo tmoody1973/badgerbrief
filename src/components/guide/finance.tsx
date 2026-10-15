@@ -12,14 +12,14 @@ const fmt = (n?: number) =>
 
 function SourceNote({ source }: { source: "openfec" | "sunshine" }) {
   return source === "openfec" ? (
-    <p className="mt-2 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+    <p className="mt-2 font-mono text-xs uppercase tracking-wide text-muted-foreground">
       Source:{" "}
       <a href="https://www.fec.gov/data/" className="underline" rel="noopener noreferrer" target="_blank">
         Federal Election Commission
       </a>
     </p>
   ) : (
-    <p className="mt-2 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+    <p className="mt-2 font-mono text-xs uppercase tracking-wide text-muted-foreground">
       Source:{" "}
       <a href="https://campaignfinance.wi.gov" className="underline" rel="noopener noreferrer" target="_blank">
         WI Ethics Commission (Sunshine)
@@ -36,7 +36,7 @@ function FundingTrace({
 }) {
   return (
     <details className="mt-1">
-      <summary className="mt-1 inline-block cursor-pointer border-2 border-border bg-warning px-2 py-1 font-mono text-[11px] font-bold uppercase tracking-widest text-foreground shadow-[var(--shadow-brutal)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none">
+      <summary className="mt-1 inline-block cursor-pointer border-2 border-border bg-warning px-2 py-1 font-mono text-xs font-bold uppercase tracking-widest text-foreground shadow-[var(--shadow-brutal)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none">
         ▸ Where this money comes from
       </summary>
       <div className="mt-2 border-2 border-dashed border-border bg-secondary/40 p-3">
@@ -54,7 +54,7 @@ function FundingTrace({
               <span>
                 {s.name}
                 {s.entityType && s.entityType !== "Individual" ? (
-                  <span className="ml-1 font-mono text-[10px] uppercase text-muted-foreground">
+                  <span className="ml-1 font-mono text-xs uppercase text-muted-foreground">
                     {s.entityType === "Registrant" ? "PAC/Committee" : s.entityType}
                   </span>
                 ) : null}
@@ -68,7 +68,7 @@ function FundingTrace({
           allows unlimited giving to party committees and unlimited party
           transfers to candidates.
         </p>
-        <p className="mt-2 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+        <p className="mt-2 font-mono text-xs uppercase tracking-wide text-muted-foreground">
           Source: {funding.sourceNote}
         </p>
       </div>
@@ -98,7 +98,7 @@ function OrgDonorList({
                 {c.contributorName}
                 {c.contributorLocation ? ` (${c.contributorLocation})` : ""}
                 {c.contributorType && c.contributorType !== "Business" ? (
-                  <span className="ml-1 font-mono text-[10px] uppercase text-muted-foreground">
+                  <span className="ml-1 font-mono text-xs uppercase text-muted-foreground">
                     {c.contributorType === "Registrant" ? "PAC/Committee" : c.contributorType}
                   </span>
                 ) : null}
@@ -153,26 +153,26 @@ export function FinanceSummary({
             }`}
           >
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 Raised
               </p>
               <p className="font-display text-xl">{fmt(t.receipts)}</p>
             </div>
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 Spent
               </p>
               <p className="font-display text-xl">{fmt(t.disbursements)}</p>
             </div>
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 Cash on hand
               </p>
               <p className="font-display text-xl">{fmt(t.cashOnHand)}</p>
             </div>
             {t.debts !== undefined && (
               <div>
-                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
                   Debts
                 </p>
                 <p className="font-display text-xl">{fmt(t.debts)}</p>
@@ -240,7 +240,7 @@ export function FinanceDetail({
               </ul>
               {ranked.length > 5 && (
                 <details className="mt-2">
-                  <summary className="cursor-pointer font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <summary className="cursor-pointer font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     Show {Math.min(ranked.length, 10) - 5} more
                   </summary>
                   <ul className="mt-2 space-y-1 text-sm">
@@ -270,7 +270,7 @@ export function FinanceDetail({
                 />
                 {orgs.length > 5 && (
                   <details className="mt-2">
-                    <summary className="cursor-pointer font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <summary className="cursor-pointer font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       Show {orgs.length - 5} more
                     </summary>
                     <OrgDonorList

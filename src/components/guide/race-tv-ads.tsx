@@ -1,6 +1,9 @@
 import { getTvAdsForRace } from "@/lib/data";
+import { groupTvAds, type TvSponsorGroup } from "@/lib/tv-ads";
 
 type TvAd = Awaited<ReturnType<typeof getTvAdsForRace>>[number];
+
+const STAMP = "font-mono text-xs uppercase tracking-widest";
 
 function usd(n: number | undefined): string {
   if (!n) return "—";
@@ -9,63 +12,23 @@ function usd(n: number | undefined): string {
   return `$${Math.round(n)}`;
 }
 
-function flight(a: TvAd): string | null {
-  if (!a.flightStart) return null;
-  const fmt = (d: string) =>
-    new Date(d + "T00:00:00").toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  return a.flightEnd
-    ? `${fmt(a.flightStart)}–${fmt(a.flightEnd)}`
-    : fmt(a.flightStart);
+const day = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+function span(start?: string | null, end?: string | null): string | null {
+  if (!start) return null;
+  return end && end !== start ? `${day(start)}–${day(end)}` : day(start);
 }
 
-function StanceTag({ stance }: { stance?: "support" | "oppose" }) {
+/** "Attack on Tom Tiffany" / "Support for …". Charcoal on alert yellow: readable on white. */
+function StanceTag({ stance, target }: { stance?: "support" | "oppose"; target?: string }) {
   if (!stance) return null;
+  const text = stance === "oppose" ? `Attack${target ? ` on ${target}` : ""}` : `Support${target ? ` for ${target}` : ""}`;
   return (
     <span
-      className={`font-mono text-[10px] uppercase tracking-widest ${
-        stance === "oppose" ? "text-warning" : "text-secondary-foreground"
-      }`}
+      className={`border-2 border-border px-1.5 py-0.5 ${STAMP} font-bold ${stance === "oppose" ? "bg-warning text-foreground" : "bg-secondary text-secondary-foreground"}`}
     >
-      {stance === "oppose" ? "Attack" : "Support"}
+      {text}
     </span>
-  );
-}
-
-function TvAdRow({ a }: { a: TvAd }) {
-  const f = flight(a);
-  return (
-    <div className="border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <div className="min-w-0">
-          <div className="flex items-baseline gap-2">
-            <span className="font-bold">{a.sponsor}</span>
-            <StanceTag stance={a.stance} />
-          </div>
-          <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-            {[a.station, a.dma].filter(Boolean).join(" · ")}
-            {a.spotCount ? ` · ${a.spotCount} spots` : ""}
-            {f ? ` · ${f}` : ""}
-          </p>
-        </div>
-        <div className="flex items-baseline gap-3">
-          <span className="font-mono text-lg font-bold">{usd(a.spend)}</span>
-          {a.pdfUrl && (
-            <a
-              href={a.pdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="press border-2 border-border bg-background px-2 py-1 font-mono text-[10px] uppercase tracking-widest"
-            >
-              FCC order ↗
-            </a>
-          )}
-        </div>
-      </div>
-      {a.sponsorProfile && <SponsorExplainer p={a.sponsorProfile} />}
-    </div>
   );
 }
 
@@ -81,37 +44,27 @@ function LeanTag({ lean }: { lean?: string }) {
             ? "Issue advocacy"
             : null;
   if (!label) return null;
-  return (
-    <span className="border-2 border-border bg-secondary px-1.5 font-mono text-[10px] uppercase tracking-widest text-secondary-foreground">
-      {label}
-    </span>
-  );
+  return <span className={`border-2 border-border bg-secondary px-1.5 ${STAMP} text-secondary-foreground`}>{label}</span>;
 }
 
 /** "Who is this sponsor" disclosure — reviewer-approved, sourced. Native
  * <details> so it works without client JS on the server-rendered race page. */
-function SponsorExplainer({
-  p,
-}: {
-  p: NonNullable<TvAd["sponsorProfile"]>;
-}) {
+function SponsorExplainer({ p }: { p: NonNullable<TvAd["sponsorProfile"]> }) {
   return (
-    <details className="mt-2 border-t-2 border-dashed border-border pt-2">
-      <summary className="cursor-pointer font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+    <details className="mt-3">
+      <summary className={`cursor-pointer font-bold ${STAMP} text-muted-foreground`}>
         Who is this? {p.kind ? `· ${p.kind}` : ""}
       </summary>
       <div className="mt-2 space-y-2">
         <div className="flex flex-wrap gap-1.5">
           <LeanTag lean={p.lean} />
           {p.disclosesDonors === false && (
-            <span className="border-2 border-border bg-warning px-1.5 font-mono text-[10px] uppercase tracking-widest text-foreground">
-              Dark money · donors not disclosed
-            </span>
+            <span className={`border-2 border-border bg-warning px-1.5 ${STAMP} text-foreground`}>Dark money · donors not disclosed</span>
           )}
         </div>
         {p.summary && <p className="text-sm">{p.summary}</p>}
         {p.topDonors && p.topDonors.length > 0 && (
-          <p className="font-mono text-[11px] text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Top donors:{" "}
             {p.topDonors
               .slice(0, 3)
@@ -120,17 +73,12 @@ function SponsorExplainer({
           </p>
         )}
         {p.sources.length > 0 && (
-          <p className="font-mono text-[10px] text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Sources:{" "}
             {p.sources.map((s, i) => (
               <span key={s.url}>
                 {i > 0 && " · "}
-                <a
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline decoration-2 underline-offset-2"
-                >
+                <a href={s.url} target="_blank" rel="noopener noreferrer" className="underline decoration-2 underline-offset-2">
                   {s.label}
                 </a>
               </span>
@@ -142,23 +90,78 @@ function SponsorExplainer({
   );
 }
 
-/** Race-page broadcast-TV activity: reviewer-approved FCC political-file orders.
- * TV spend is EXACT (stated on the order), framed "reported on FCC orders." */
-export function RaceTvAds({ ads }: { ads: TvAd[] }) {
+function SponsorRow({ g, names }: { g: TvSponsorGroup<TvAd>; names: Record<string, string> }) {
+  const dates = span(g.flightStart, g.flightEnd);
+  const profile = g.orders.find((o) => o.sponsorProfile)?.sponsorProfile;
+  return (
+    <li className="border-b-2 border-dashed border-border py-4 last:border-b-0">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+        <div className="min-w-0">
+          <h3 className="font-bold leading-snug">{g.sponsor}</h3>
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <StanceTag stance={g.stance} target={g.candidateSlug ? names[g.candidateSlug] : undefined} />
+            <span className={`${STAMP} text-muted-foreground`}>
+              {g.orders.length} order{g.orders.length === 1 ? "" : "s"}
+              {dates ? ` · ${dates}` : ""}
+            </span>
+          </div>
+        </div>
+        <span className="font-mono text-xl font-bold">{usd(g.total)}</span>
+      </div>
+      {profile && <SponsorExplainer p={profile} />}
+      <details className="mt-3">
+        <summary className={`cursor-pointer ${STAMP} font-bold text-muted-foreground`}>
+          See the {g.orders.length} FCC order{g.orders.length === 1 ? "" : "s"}
+        </summary>
+        <ul className="mt-2 space-y-1.5 text-sm">
+          {g.orders.map((o) => {
+            const label = [o.station, o.dma].filter(Boolean).join(", ") || "FCC filing";
+            const when = span(o.flightStart, o.flightEnd);
+            return (
+              <li key={o.id} className="flex flex-wrap items-baseline justify-between gap-x-3">
+                <span>
+                  {label}
+                  {o.spotCount ? ` · ${o.spotCount} spots` : ""}
+                  {when ? ` · ${when}` : ""}
+                </span>
+                <span className="flex items-baseline gap-3">
+                  <span className="font-mono">{usd(o.spend)}</span>
+                  {o.pdfUrl && (
+                    <a href={o.pdfUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center font-bold underline decoration-2 underline-offset-2">
+                      FCC order: {o.station ?? "filing"}
+                      {when ? <span className="sr-only">, {when}</span> : null}
+                      <span aria-hidden="true"> ↗</span>
+                    </a>
+                  )}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </details>
+    </li>
+  );
+}
+
+/** Race-page broadcast-TV activity: reviewer-approved FCC political-file orders,
+ * one row per sponsor. TV spend is EXACT (stated on the order), framed
+ * "reported on FCC orders." */
+export function RaceTvAds({ ads, names = {} }: { ads: TvAd[]; names?: Record<string, string> }) {
   if (ads.length === 0) return null;
-  const total = ads.reduce((s, a) => s + (a.spend ?? 0), 0);
+  const groups = groupTvAds(ads);
+  const total = groups.reduce((s, g) => s + g.total, 0);
   return (
     <section id="tv-ads" className="mt-8 scroll-mt-16">
       <h2 className="font-display text-2xl">Broadcast TV ads</h2>
-      <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-        {usd(total)} across {ads.length} order{ads.length === 1 ? "" : "s"} ·
-        reported on FCC orders
+      <p className={`mt-1 ${STAMP} text-muted-foreground`}>
+        {usd(total)} from {groups.length} sponsor{groups.length === 1 ? "" : "s"} across {ads.length} order
+        {ads.length === 1 ? "" : "s"} · reported on FCC orders
       </p>
-      <div className="mt-3 space-y-2">
-        {ads.map((a) => (
-          <TvAdRow key={a.id} a={a} />
+      <ul className="mt-3 border-y-2 border-border">
+        {groups.map((g) => (
+          <SponsorRow key={g.key} g={g} names={names} />
         ))}
-      </div>
+      </ul>
     </section>
   );
 }
