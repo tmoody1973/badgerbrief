@@ -833,6 +833,23 @@ export default defineSchema({
     .index("by_pollKey", ["pollKey"])
     .index("by_race", ["raceId"]),
 
+  // City of Milwaukee voting wards and their Election Day polling places, a
+  // nightly copy of the city's map service (convex/mkeWards.ts). Matched
+  // against a voter's map point here so the point never goes to the city.
+  mke_wards: defineTable({
+    ward: v.string(),
+    pollingPlaceId: v.number(),
+    pollingPlace: v.string(),
+    address: v.string(),
+    mainEntrance: v.optional(v.string()),
+    accessibleEntrance: v.optional(v.string()),
+    mainParking: v.optional(v.string()),
+    accessibleParking: v.optional(v.string()),
+    bbox: v.array(v.number()), // [minLon, minLat, maxLon, maxLat]
+    rings: v.array(v.array(v.array(v.number()))), // [lon, lat]; first ring outline, rest holes
+    syncedAt: v.number(),
+  }).index("by_ward", ["ward"]),
+
   // Per-bill LRB analysis cache. summary is the first analysis sentence, or null
   // when the bill/resolution has no LRB analysis. Keyed by session+billNumber
   // (bill numbers reset each biennium, so session is part of the key).

@@ -191,3 +191,24 @@ describe("hasStateSenateRace", () => {
     expect(hasStateSenateRace([{ raceId: "WI-US-SENATE-2026" }])).toBe(false);
   });
 });
+
+describe("parseGeocoderResponse: the polling-place lookup", () => {
+  const inMilwaukee = (place: string) => {
+    const copy = structuredClone(mke) as typeof mke & { result: { addressMatches: Record<string, unknown>[] } };
+    const match = copy.result.addressMatches[0] as { coordinates?: unknown; geographies: Record<string, unknown> };
+    match.coordinates = { x: -87.9097, y: 43.0411 };
+    match.geographies["Incorporated Places"] = [{ BASENAME: place, NAME: `${place} city`, STATE: "55" }];
+    return copy;
+  };
+
+  it("keeps the map point of an address in the City of Milwaukee, for the server's ward lookup", () => {
+    const r = parseGeocoderResponse(inMilwaukee("Milwaukee"));
+    expect(r).toMatchObject({ ok: true, point: { lat: 43.0411, lon: -87.9097 } });
+  });
+
+  it("keeps no map point for an address outside the City of Milwaukee", () => {
+    const r = parseGeocoderResponse(inMilwaukee("Wauwatosa"));
+    expect(r).toMatchObject({ ok: true });
+    expect(r).not.toHaveProperty("point");
+  });
+});
