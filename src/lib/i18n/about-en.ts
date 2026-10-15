@@ -53,7 +53,7 @@ export const aboutEn: AboutDict = {
   meta: {
     title: "About BadgerBrief",
     description:
-      "BadgerBrief is an independent, non-partisan Wisconsin voter guide. No funding, no ads, no party or campaign affiliation — every claim links to its official source.",
+      "BadgerBrief is an independent, non-partisan Wisconsin voter guide. No ads, no sponsors, no party or campaign money — every claim links to its official source.",
   },
   crumbs: { home: "Home", about: "About" },
   h1: "About BadgerBrief",
@@ -61,9 +61,9 @@ export const aboutEn: AboutDict = {
     "BadgerBrief is an independent, non-partisan guide to Wisconsin’s 2026 elections. It exists to answer one question as plainly as possible: who is on your ballot, and what have they actually done?",
   reportMistake: "See a mistake? Report an error →",
   independent: {
-    heading: "Independent, and unfunded",
+    heading: "Independent, with no political money",
     fundingLabel: "Funding",
-    fundingBody: "Self-funded — no advertising, sponsorships, donations, grants, or party/PAC money.",
+    fundingBody: "Self-funded, with small reader contributions on Ko-fi. No advertising, sponsorships, grants, or party, campaign or PAC money.",
     affiliationLabel: "Affiliation",
     affiliationBody: "No party, campaign, PAC or advocacy group. Nobody has editorial input.",
     endorsementsLabel: "Endorsements",
