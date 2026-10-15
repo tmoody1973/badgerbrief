@@ -134,6 +134,15 @@ crons.daily(
   {},
 );
 
+// 10:40 UTC (5:40 AM Central) — City of Milwaukee wards and Election Day
+// polling places; the city refreshes its copy overnight.
+crons.daily(
+  "sync Milwaukee wards",
+  { hourUTC: 10, minuteUTC: 40 },
+  internal.mkeWards.syncWards,
+  {},
+);
+
 // 14:10 UTC — published Wisconsin polls from VoteHub's API (CC BY 4.0).
 // Verbatim figures only, never averaged; see convex/lib/votehub.ts.
 crons.daily(

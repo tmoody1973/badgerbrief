@@ -13,6 +13,8 @@ import { ballotPlaces, byAttention, numbered, voterBallot, type BallotData } fro
 import { BallotLookup } from "./ballot-lookup";
 import { ContestCard, OneNameStrip } from "./contest";
 import { ShareBallot } from "./share-ballot";
+import { PollingPlaceCard } from "./polling-place";
+import type { PollingPlace } from "@/lib/districts";
 
 /**
  * My Ballot, in the browser. The server hands over one list for every voter;
@@ -87,10 +89,13 @@ export function MyBallot({
   const leaveLink = () => forgetLinkedBallot();
 
   const [countyPick, setCountyPick] = useState("");
+  // From the visitor's own lookup only, and only for this visit: never part of a shared link.
+  const [pollingPlace, setPollingPlace] = useState<PollingPlace | null>(null);
 
   /** The visitor's own districts: kept on this device, and with their account when signed in. */
-  const keepDistricts = (districts: Districts, matchedAddress?: string) => {
+  const keepDistricts = (districts: Districts, matchedAddress?: string, place?: PollingPlace) => {
     showNext.current = true;
+    setPollingPlace(place ?? null);
     storeDistricts(districts);
     leaveLink();
     if (isAuthenticated) {
@@ -208,6 +213,8 @@ export function MyBallot({
           </p>
         )}
       </section>
+
+      {pollingPlace && shown.from !== "link" && <PollingPlaceCard place={pollingPlace} />}
 
       {ballot.county.status !== "ok" && (
         <section className="mt-5 border-2 border-border bg-card p-4">

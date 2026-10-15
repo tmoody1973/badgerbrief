@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { track } from "@/lib/analytics";
-import type { Districts, GeocodeResult } from "@/lib/districts";
+import type { Districts, GeocodeResult, PollingPlace } from "@/lib/districts";
 
 /**
  * The site's address lookup. The address goes to the lookup in the request
@@ -36,7 +36,7 @@ export function BallotLookup({
   onFound,
 }: {
   counties: readonly { key: string; name: string }[];
-  onFound: (districts: Districts, matchedAddress?: string) => void;
+  onFound: (districts: Districts, matchedAddress?: string, pollingPlace?: PollingPlace) => void;
 }) {
   const [address, setAddress] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -65,6 +65,7 @@ export function BallotLookup({
         onFound(
           { congressional: result.congressional, senate: result.senate, assembly: result.assembly, ...(result.county ? { county: result.county } : {}) },
           result.matchedAddress,
+          result.pollingPlace,
         );
         return;
       }

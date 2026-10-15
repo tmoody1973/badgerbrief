@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parseGeocoderResponse } from "@/lib/districts";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "../../../../convex/_generated/api";
+import { parseGeocoderResponse, type GeocodeResult } from "@/lib/districts";
 import { createLimiter } from "@/lib/rate-limit";
 
 /**
@@ -42,9 +44,27 @@ async function lookup(rawAddress: string, who: string) {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) return reply({ ok: false, error: "upstream" }, 502);
-    return reply(parseGeocoderResponse(await res.json()));
+    return reply(await withPollingPlace(parseGeocoderResponse(await res.json())));
   } catch {
     return reply({ ok: false, error: "upstream" }, 502);
+  }
+}
+
+/**
+ * For an address in the City of Milwaukee, add its Election Day polling place
+ * from our nightly copy of the city's wards. The address's map point is used
+ * here and dropped: it never reaches the browser. A failed lookup costs only
+ * the polling place, never the districts.
+ */
+async function withPollingPlace(result: GeocodeResult): Promise<GeocodeResult> {
+  if (!result.ok) return result;
+  const { point, ...rest } = result;
+  if (!point) return rest;
+  try {
+    const pollingPlace = await fetchQuery(api.mkeWards.pollingPlaceAt, point);
+    return pollingPlace ? { ...rest, pollingPlace } : rest;
+  } catch {
+    return rest;
   }
 }
 

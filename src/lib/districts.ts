@@ -15,8 +15,26 @@ export type Districts = {
   county?: string;
 };
 
+/** A City of Milwaukee Election Day polling place (convex/mkeWards.ts). */
+export type PollingPlace = {
+  ward: string;
+  pollingPlace: string;
+  address: string;
+  mainEntrance?: string;
+  accessibleEntrance?: string;
+  mainParking?: string;
+  accessibleParking?: string;
+  syncedAt: number;
+};
+
 export type GeocodeResult =
-  | ({ ok: true; matchedAddress: string } & Districts)
+  | ({
+      ok: true;
+      matchedAddress: string;
+      /** Server-side only, for the ward lookup: the lookup route never sends it to the browser. */
+      point?: { lat: number; lon: number };
+      pollingPlace?: PollingPlace;
+    } & Districts)
   | { ok: false; error: "no_match" | "not_wisconsin" }
   // From the lookup route, never from the parser: the federal service failed, or this visitor has looked up too often.
   | { ok: false; error: "upstream" | "rate_limited" };
@@ -24,6 +42,7 @@ export type GeocodeResult =
 type GeographyEntry = { NAME?: string; BASENAME?: string; STATE?: string };
 type AddressMatch = {
   matchedAddress?: string;
+  coordinates?: { x?: number; y?: number };
   geographies?: Record<string, GeographyEntry[]>;
 };
 
@@ -55,6 +74,10 @@ export function parseGeocoderResponse(payload: unknown): GeocodeResult {
   if (!congressional || !senate || !assembly) return { ok: false, error: "no_match" };
 
   const countyName = geographies["Counties"]?.[0]?.BASENAME;
+  // Only the City of Milwaukee publishes its wards; elsewhere there is nothing to look up.
+  const inMilwaukee = geographies["Incorporated Places"]?.some((p) => p.BASENAME === "Milwaukee");
+  const { x: lon, y: lat } = match.coordinates ?? {};
+  const point = inMilwaukee && typeof lat === "number" && typeof lon === "number" ? { point: { lat, lon } } : {};
 
   return {
     ok: true,
@@ -63,6 +86,7 @@ export function parseGeocoderResponse(payload: unknown): GeocodeResult {
     senate,
     assembly,
     ...(countyName ? { county: countyKey(countyName) } : {}),
+    ...point,
   };
 }
 
