@@ -15,5 +15,7 @@ describe("candidate-order", () => {
     expect(labelForSlug("gun-policy")).toBe("Gun Policy");
     expect(labelForSlug("abortion")).toBe("Abortion");
     expect(labelForSlug("economy_jobs")).toBe("Economy Jobs");
+    expect(labelForSlug("economy-jobs")).toBe("Economy & jobs");
+    expect(labelForSlug("public-safety")).toBe("Public safety");
   });
 });

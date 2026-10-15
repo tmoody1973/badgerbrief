@@ -44,7 +44,8 @@ export function BallotContest({
   compare,
 }: {
   candidates: readonly Doc<"candidates">[];
-  holds: Record<string, Holds>;
+  /** Omitted where the holds links' targets (#money, …) are not on the page. */
+  holds?: Record<string, Holds>;
   compare?: { href: string; label: string };
 }) {
   return (
@@ -69,7 +70,7 @@ export function BallotContest({
               {c.currentOccupation && c.currentOccupation !== "Unknown" && (
                 <p className="mt-2 text-sm text-muted-foreground">{c.currentOccupation}</p>
               )}
-              <HoldsLine holds={holds[c.slug]} />
+              {holds && <HoldsLine holds={holds[c.slug]} />}
             </div>
           </li>
         ))}
