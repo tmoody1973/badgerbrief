@@ -102,7 +102,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function Quote({ quote }: { quote: Doc<"quote_published"> }) {
   return (
-    <blockquote className="border-l-4 border-primary bg-card p-3">
+    <blockquote className="border-l-2 border-border pl-4">
       <p className="max-w-[54ch] text-sm">&ldquo;{quote.text}&rdquo;</p>
       <footer className="mt-2 font-mono text-xs text-muted-foreground">
         {/* A campaign-site quote often has no publication date. Show the
@@ -145,19 +145,18 @@ export default async function CandidatePage({ params }: Props) {
   const shownQuotes = otherQuotes.slice(0, VISIBLE_QUOTES);
   const foldedQuotes = otherQuotes.slice(VISIBLE_QUOTES);
 
+  // In page order. The ballot, background and priorities sit on the first
+  // screens, so they need no chip (Phase 1b critique: 12 chips, out of order).
   const navSections: NavSection[] = [
-    ...(race ? [{ id: "ballot", label: "The ballot" }] : []),
-    ...(candidate.background ? [{ id: "bio", label: "Background" }] : []),
-    ...(candidate.keyPriorities?.length
-      ? [{ id: "priorities", label: "Priorities" }]
-      : []),
     ...(finance.length > 0 ? [{ id: "money", label: "The money" }] : []),
-    ...(ads.length > 0 ? [{ id: "ads", label: "The ads", count: ads.length }] : []),
     ...(positions.length > 0
       ? [{ id: "positions", label: "Issues", count: positions.length }]
       : []),
     ...(interviewQuotes.length > 0
       ? [{ id: "interview", label: "The interview", count: interviewQuotes.length }]
+      : []),
+    ...(votingRecordSummary
+      ? [{ id: "votes", label: "Voting record", count: votingRecordSummary.total }]
       : []),
     ...(questionnaireRows(candidate.raceId, [candidate]).length > 0
       ? [{ id: "questionnaire", label: "Questionnaire" }]
@@ -165,14 +164,13 @@ export default async function CandidatePage({ params }: Props) {
     ...(otherQuotes.length > 0
       ? [{ id: "quotes", label: "Quotes", count: otherQuotes.length }]
       : []),
-    ...(votingRecordSummary
-      ? [{ id: "votes", label: "Voting record", count: votingRecordSummary.total }]
-      : []),
+    ...(ads.length > 0 ? [{ id: "ads", label: "The ads", count: ads.length }] : []),
     ...(inTheNews.length > 0
       ? [{ id: "news", label: "In the news", count: inTheNews.length }]
       : []),
     { id: "sources", label: "Sources" },
   ];
+
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10 lg:max-w-6xl">
@@ -196,25 +194,42 @@ export default async function CandidatePage({ params }: Props) {
         ]}
       />
 
-      {race && (
-        <Link
-          href={`/races/${raceIdToSlug(race.raceId)}`}
-          className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground underline-offset-2 hover:underline"
-        >
-          ← {race.office}
-        </Link>
-      )}
-      <div className="mt-2 flex items-start gap-4">
-        <CandidatePhoto
-          photoUrl={candidate.photoUrl}
-          photoSource={candidate.photoSource}
-          name={candidate.name}
-        />
+      {/* Stamp line, as on the race page: where this sits and the state's file. */}
+      <p className="flex flex-wrap items-center gap-x-5 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        {race && (
+          <Link
+            href={`/races/${raceIdToSlug(race.raceId)}`}
+            className="inline-flex min-h-11 items-center underline decoration-2 underline-offset-4 hover:text-foreground"
+          >
+            <span aria-hidden="true">←&nbsp;</span>
+            {race.office}
+          </Link>
+        )}
+        {candidate.general && (
+          <>
+            <a
+              href={candidate.general.source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center underline decoration-2 underline-offset-4 hover:text-foreground"
+            >
+              Certified ballot<span aria-hidden="true">&nbsp;↗</span>
+            </a>
+          </>
+        )}
+      </p>
+      <div className="mt-1 flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display text-3xl leading-tight sm:text-4xl">
-              {candidate.name}
-            </h1>
+          <h1 className="font-display text-[clamp(2.25rem,8vw,3.5rem)] leading-[1.05] [text-wrap:balance]">
+            {candidate.name}
+          </h1>
+          {/* A governor ticket prints both names; say so where the name is. */}
+          {candidate.general?.ballotName && candidate.general.ballotName !== candidate.name && (
+            <p className="mt-2 text-lg">
+              On the ballot as <strong>{candidate.general.ballotName}</strong>
+            </p>
+          )}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <PartyBadge party={candidate.party} />
             <StatusBadge status={candidate.status} />
             {!isOnGeneralBallot(candidate) && (
@@ -228,18 +243,22 @@ export default async function CandidatePage({ params }: Props) {
               </span>
             )}
           </div>
-          {candidate.currentOccupation &&
-            candidate.currentOccupation !== "Unknown" && (
-              <p className="mt-1 text-lg text-muted-foreground">
-                {candidate.currentOccupation}
-              </p>
-            )}
-          {candidate.party && <WhatThisMeans topic="party-labels" />}
+          {candidate.currentOccupation && candidate.currentOccupation !== "Unknown" && (
+            <p className="mt-2 text-muted-foreground">{candidate.currentOccupation}</p>
+          )}
         </div>
+        <CandidatePhoto
+          photoUrl={candidate.photoUrl}
+          photoSource={candidate.photoSource}
+          name={candidate.name}
+        />
       </div>
 
-      <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-        <div className="flex flex-col min-w-0 lg:col-span-8">
+      {/* Reading order = visual order at every width: the ballot, then the
+          quick facts (money, priorities), then the record. On a laptop the
+          facts become a sticky rail beside the record. */}
+      <div className="lg:grid lg:grid-cols-12 lg:gap-x-8">
+        <div className="min-w-0 lg:col-span-8 lg:row-start-1">
         {race && (
           <BallotContext
             candidateSlug={candidate.slug}
@@ -252,10 +271,60 @@ export default async function CandidatePage({ params }: Props) {
             opponents={field}
           />
         )}
+        {candidate.party && <WhatThisMeans topic="party-labels" />}
+        </div>
+
+        <aside className="lg:col-span-4 lg:col-start-9 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-20 lg:self-start">
+          <FinanceSummary
+            totals={finance}
+            candidateName={candidate.name}
+            layout="rail"
+          />
+        {candidate.keyPriorities && candidate.keyPriorities.length > 0 && (
+          <section id="priorities" className="mt-6 scroll-mt-16">
+            <h2 className="font-display text-xl">
+              What does {candidate.name} say their priorities are?
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              As stated by the campaign — these are candidate claims, not
+              BadgerBrief analysis.
+            </p>
+            <ul className="mt-3 border-y-2 border-border">
+              {candidate.keyPriorities.map((p) => (
+                <li
+                  key={p}
+                  className="border-b-2 border-dashed border-border py-2 text-sm font-medium last:border-b-0"
+                >
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {candidate.notableEndorsements &&
+          candidate.notableEndorsements.length > 0 && (
+            <section className="mt-6">
+              <h2 className="font-display text-xl">Notable endorsements</h2>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {candidate.notableEndorsements.map((e) => (
+                  <li
+                    key={e}
+                    className="border border-border bg-card px-2 py-1 text-sm"
+                  >
+                    {e}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </aside>
+
+        <div className="flex min-w-0 flex-col lg:col-span-8 lg:row-start-2">
 
         {candidate.background && (
-          <section id="bio" className="mt-6 scroll-mt-16 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
-            <h2 className="font-display text-xl">
+          <section id="bio" className="mt-8 scroll-mt-16">
+            <h2 className="font-display text-2xl">
               Who is {candidate.name}?
             </h2>
             <p className="mt-2 max-w-[54ch]">{candidate.background}</p>
@@ -268,12 +337,10 @@ export default async function CandidatePage({ params }: Props) {
         )}
 
         {positions.length > 0 && (
-          <section id="positions" className="order-first mt-6 scroll-mt-16 sm:order-none">
-            <h2 className="font-display text-xl">
+          <section id="positions" className="mt-8 scroll-mt-16">
+            <h2 className="font-display text-2xl">
               Where does {candidate.name} stand on the issues?
             </h2>
-            <WhatThisMeans topic="stance-labels" />
-            <WhatThisMeans topic="sourced-position-vs-claim" />
             <div className="mt-3 grid gap-3 xl:grid-cols-2">
               {positions.map((p) => (
                 <div
@@ -284,7 +351,7 @@ export default async function CandidatePage({ params }: Props) {
                     <span className="font-mono text-xs font-bold uppercase tracking-widest">
                       {p.issueSlug}
                     </span>
-                    <span className="border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase">
+                    <span className="border border-border bg-muted px-1.5 py-0.5 font-mono text-xs font-bold uppercase">
                       {p.stance}
                     </span>
                   </div>
@@ -293,6 +360,8 @@ export default async function CandidatePage({ params }: Props) {
                 </div>
               ))}
             </div>
+            <WhatThisMeans topic="stance-labels" className="mt-3" />
+            <WhatThisMeans topic="sourced-position-vs-claim" />
           </section>
         )}
 
@@ -314,7 +383,7 @@ export default async function CandidatePage({ params }: Props) {
 
         {otherQuotes.length > 0 && (
           <section id="quotes" className="mt-6 scroll-mt-16">
-            <h2 className="font-display text-xl">In their own words</h2>
+            <h2 className="font-display text-2xl">In their own words</h2>
             <div className="mt-3 space-y-3">
               {shownQuotes.map((q) => (
                 <Quote key={q._id} quote={q} />
@@ -384,53 +453,6 @@ export default async function CandidatePage({ params }: Props) {
           </div>
         </div>
 
-        {/* Reference rail (MOO-331): at-a-glance facts that otherwise
-            interrupt the reading flow. Sticky below the section nav. */}
-        <aside className="lg:col-span-4 lg:sticky lg:top-20 lg:self-start">
-          <FinanceSummary
-            totals={finance}
-            candidateName={candidate.name}
-            layout="rail"
-          />
-        {candidate.keyPriorities && candidate.keyPriorities.length > 0 && (
-          <section id="priorities" className="mt-6 scroll-mt-16">
-            <h2 className="font-display text-xl">
-              What does {candidate.name} say their priorities are?
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              As stated by the campaign — these are candidate claims, not
-              BadgerBrief analysis.
-            </p>
-            <ul className="mt-3 space-y-2">
-              {candidate.keyPriorities.map((p) => (
-                <li
-                  key={p}
-                  className="border-2 border-border bg-secondary p-2 text-sm font-medium"
-                >
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {candidate.notableEndorsements &&
-          candidate.notableEndorsements.length > 0 && (
-            <section className="mt-6">
-              <h2 className="font-display text-xl">Notable endorsements</h2>
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {candidate.notableEndorsements.map((e) => (
-                  <li
-                    key={e}
-                    className="border border-border bg-card px-2 py-1 text-sm"
-                  >
-                    {e}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </aside>
       </div>
 
     </main>

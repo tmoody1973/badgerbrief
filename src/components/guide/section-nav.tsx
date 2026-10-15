@@ -58,7 +58,7 @@ export function SectionNav({
               <a
                 href={`#${s.id}`}
                 aria-current={isActive ? "true" : undefined}
-                className={`press inline-block whitespace-nowrap border-2 border-border px-3 py-1 text-sm font-bold shadow-[var(--shadow-brutal)] ${
+                className={`press inline-flex min-h-11 items-center whitespace-nowrap border-2 border-border px-3 py-1 text-sm font-bold shadow-[var(--shadow-brutal)] ${
                   isActive ? "bg-foreground text-background" : "bg-card"
                 }`}
               >

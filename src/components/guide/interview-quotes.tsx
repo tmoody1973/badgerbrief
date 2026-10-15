@@ -1,6 +1,9 @@
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { formatTimestamp, timestampSeconds } from "@/lib/interview-quote";
 
+/** Answers shown before the fold; each carries a video clip, so they are tall. */
+const FIRST_ANSWERS = 3;
+
 /**
  * WisconsinEye interview answers, rendered as a transcript excerpt.
  *
@@ -38,29 +41,7 @@ export function InterviewQuotes({
   const programUrl = ordered[0].sourceUrl.split("?")[0];
   const date = ordered[0].date;
 
-  return (
-    <section id="interview" className="mt-6 scroll-mt-16">
-      <h2 className="font-display text-xl">The interview</h2>
-      <p className="mt-1 max-w-[60ch] text-sm text-muted-foreground">
-        {candidateName} sat down with WisconsinEye and WisPolitics for a half-hour
-        interview. Every candidate in this race sat for the same interview, so these
-        answers are directly comparable. Each is transcribed verbatim, timestamped to
-        the recording.
-      </p>
-
-      <div className="mt-3 border-2 border-border bg-card shadow-[var(--shadow-brutal)]">
-        {/* Provenance stamp — the source is stated before any of its content. */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-border bg-secondary/40 px-4 py-2">
-          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
-            WisconsinEye · Campaign 2026
-          </span>
-          <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-            Recorded {date}
-          </span>
-        </div>
-
-        <ol className="divide-y-2 divide-dashed divide-border">
-          {ordered.map((q) => {
+  const answer = (q: (typeof ordered)[number]) => {
             const seconds = timestampSeconds(q.sourceUrl);
             return (
               <li key={q._id} className="px-4 py-4">
@@ -68,8 +49,8 @@ export function InterviewQuotes({
                     attempts at reconstructing it from the diarized turns gave
                     confidently wrong pairs, and a question above a quote is a
                     claim about what the candidate was responding to. */}
-                <blockquote className="border-l-4 border-accent pl-3">
-                  <p className="max-w-[58ch] text-[0.95rem] leading-relaxed">
+                <blockquote className="border-l-2 border-border pl-4">
+                  <p className="max-w-[58ch] text-base leading-relaxed">
                     &ldquo;{q.text}&rdquo;
                   </p>
                 </blockquote>
@@ -94,7 +75,7 @@ export function InterviewQuotes({
                     <a href={q.sourceUrl}>Watch it on WisconsinEye</a>.
                   </video>
                 )}
-                <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                <p className="mt-2 font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
                   {/* The timestamp is shown as text, not only buried in the href:
                       it has to stay useful even if wiseye.org ignores ?t=. */}
                   {seconds !== null && <span>At {formatTimestamp(seconds)} · </span>}
@@ -109,8 +90,42 @@ export function InterviewQuotes({
                 </p>
               </li>
             );
-          })}
+  };
+
+  return (
+    <section id="interview" className="mt-6 scroll-mt-16">
+      <h2 className="font-display text-xl">The interview</h2>
+      <p className="mt-1 max-w-[60ch] text-sm text-muted-foreground">
+        {candidateName} sat down with WisconsinEye and WisPolitics for a half-hour
+        interview. Every candidate in this race sat for the same interview, so these
+        answers are directly comparable. Each is transcribed verbatim, timestamped to
+        the recording.
+      </p>
+
+      <div className="mt-3 border-2 border-border bg-card shadow-[var(--shadow-brutal)]">
+        {/* Provenance stamp — the source is stated before any of its content. */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-border bg-secondary/40 px-4 py-2">
+          <span className="font-mono text-xs font-bold uppercase tracking-[0.1em]">
+            WisconsinEye · Campaign 2026
+          </span>
+          <span className="font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
+            Recorded {date}
+          </span>
+        </div>
+
+        <ol className="divide-y-2 divide-dashed divide-border">
+          {ordered.slice(0, FIRST_ANSWERS).map(answer)}
         </ol>
+        {ordered.length > FIRST_ANSWERS && (
+          <details className="border-t-2 border-dashed border-border">
+            <summary className="flex min-h-12 cursor-pointer items-center px-4 font-mono text-xs font-bold uppercase tracking-[0.1em]">
+              All {ordered.length} answers
+            </summary>
+            <ol className="divide-y-2 divide-dashed divide-border border-t-2 border-dashed border-border">
+              {ordered.slice(FIRST_ANSWERS).map(answer)}
+            </ol>
+          </details>
+        )}
 
         <div className="border-t-2 border-dashed border-border px-4 py-3">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -118,7 +133,7 @@ export function InterviewQuotes({
               href={programUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-[11px] uppercase tracking-[0.1em] underline decoration-2 underline-offset-2"
+              className="font-mono text-xs uppercase tracking-[0.1em] underline decoration-2 underline-offset-2"
             >
               Full program on wiseye.org ↗
             </a>
@@ -130,7 +145,7 @@ export function InterviewQuotes({
               href="https://wiseye.org/donate/"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-[11px] uppercase tracking-[0.1em] underline decoration-2 underline-offset-2"
+              className="font-mono text-xs uppercase tracking-[0.1em] underline decoration-2 underline-offset-2"
             >
               Support WisconsinEye ↗
             </a>

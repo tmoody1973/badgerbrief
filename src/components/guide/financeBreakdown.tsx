@@ -53,7 +53,7 @@ function FundingMixBar({ categories }: { categories: BreakdownCategory[] }) {
             }`}
           >
             {s.pct >= 12 && (
-              <span className="px-1 font-mono text-[10px] font-bold" style={{ color: s.text }}>
+              <span className="px-1 font-mono text-xs font-bold" style={{ color: s.text }}>
                 {s.pct}%
               </span>
             )}
@@ -67,7 +67,7 @@ function FundingMixBar({ categories }: { categories: BreakdownCategory[] }) {
             type="button"
             aria-expanded={open === s.key}
             onClick={() => setOpen(open === s.key ? null : s.key)}
-            className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-muted-foreground"
+            className="flex items-center gap-1 font-mono text-xs uppercase tracking-wide text-muted-foreground"
           >
             <span
               className="inline-block h-2.5 w-2.5 border border-border"
@@ -156,7 +156,7 @@ function SizeGeoTiles({ breakdown }: { breakdown: Doc<"finance_breakdowns"> }) {
               </li>
             ))}
           </ul>
-          <p className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">
+          <p className="mt-1 font-mono text-xs uppercase text-muted-foreground">
             Individual donors only, grouped by each donor&apos;s total
           </p>
         </details>
@@ -185,7 +185,7 @@ function SizeGeoTiles({ breakdown }: { breakdown: Doc<"finance_breakdowns"> }) {
               </li>
             ))}
           </ul>
-          <p className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">
+          <p className="mt-1 font-mono text-xs uppercase text-muted-foreground">
             Individuals and businesses; committees excluded
           </p>
         </details>
@@ -212,7 +212,7 @@ function MomentumBars({ monthly }: { monthly: { month: string; receipts: number 
               style={{ height: `${Math.max(4, Math.round((100 * m.receipts) / max))}%` }}
             className={`w-full border border-border ${m.month === latest ? "bg-foreground" : "bg-muted-foreground/40"}`}
             />
-            <span className="font-mono text-[9px] uppercase text-muted-foreground">
+            <span className="font-mono text-xs uppercase text-muted-foreground">
               {monthLabel(m.month)}
             </span>
           </div>
@@ -258,7 +258,7 @@ export function MixLegend({ keys }: { keys: string[] }) {
   return (
     <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
       {segments.map((s) => (
-        <span key={s.key} className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+        <span key={s.key} className="flex items-center gap-1 font-mono text-xs uppercase tracking-wide text-muted-foreground">
           <span className="inline-block h-2.5 w-2.5 border border-border" style={{ backgroundColor: s.color }} />
           {s.label}
         </span>
@@ -284,7 +284,7 @@ export function FinanceBreakdownSection({
       <SizeGeoTiles breakdown={breakdown} />
       <MomentumBars monthly={breakdown.monthly} />
       {breakdown.coverageEndDate && (
-        <p className="mt-2 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+        <p className="mt-2 font-mono text-xs uppercase tracking-wide text-muted-foreground">
           Itemized contributions, {breakdown.coverageEndDate} · Source: WI Ethics Commission
           (Sunshine)
         </p>

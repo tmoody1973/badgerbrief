@@ -22,7 +22,7 @@ function DonorRow({ d }: { d: Doc<"donor_totals"> }) {
         </Link>
         {d.location ? <span className="text-muted-foreground"> ({d.location})</span> : null}
         {meta && (
-          <span className="ml-1 inline-flex items-center gap-1 font-mono text-[10px] uppercase text-muted-foreground">
+          <span className="ml-1 inline-flex items-center gap-1 font-mono text-xs uppercase text-muted-foreground">
             <span className="inline-block h-2 w-2 border border-border" style={{ backgroundColor: meta.color }} />
             {meta.label}
           </span>
@@ -30,7 +30,7 @@ function DonorRow({ d }: { d: Doc<"donor_totals"> }) {
       </span>
       <span className="shrink-0 font-mono">
         {fmt(d.total)}
-        <span className="ml-1 text-[10px] text-muted-foreground">·{d.giftCount}</span>
+        <span className="ml-1 text-xs text-muted-foreground">·{d.giftCount}</span>
       </span>
     </li>
   );
@@ -70,7 +70,7 @@ function RosterBody({ raceId, candidateSlug }: { raceId: string; candidateSlug: 
             type="button"
             aria-pressed={category === key}
             onClick={() => setCategory(category === key ? null : key)}
-            className={`flex items-center gap-1 border border-border px-1.5 py-0.5 font-mono text-[10px] uppercase ${
+            className={`flex items-center gap-1 border border-border px-1.5 py-0.5 font-mono text-xs uppercase ${
               category === key ? "bg-foreground text-background" : "text-muted-foreground"
             }`}
           >
@@ -99,12 +99,12 @@ function RosterBody({ raceId, candidateSlug }: { raceId: string; candidateSlug: 
         <button
           type="button"
           onClick={() => paged.loadMore(200)}
-          className="mt-3 border-2 border-border bg-warning px-2 py-1 font-mono text-[11px] font-bold uppercase tracking-widest shadow-[var(--shadow-brutal)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+          className="mt-3 border-2 border-border bg-warning px-2 py-1 font-mono text-xs font-bold uppercase tracking-widest shadow-[var(--shadow-brutal)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
         >
           Load more donors
         </button>
       )}
-      <p className="mt-3 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+      <p className="mt-3 font-mono text-xs uppercase tracking-wide text-muted-foreground">
         {coverage ? `Itemized contributions, ${coverage} · ` : ""}
         <a href={`/api/donors?race=${raceId}&candidate=${candidateSlug}`} className="underline">
           Download CSV
