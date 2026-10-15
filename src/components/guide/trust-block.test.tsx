@@ -33,7 +33,7 @@ describe("TrustBlock", () => {
   });
 
   test("says where sources live when the page has no list of its own", () => {
-    expect(render({ sources: [] })).toContain("Each entry above links its own source");
+    expect(render({ sources: [] })).toContain("Each sourced entry on this page links its own source");
   });
 
   test("says what the guide does not do, and sends local contests to MyVote", () => {
