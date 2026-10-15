@@ -55,7 +55,7 @@ function FilterStrip({
 }) {
   if (options.length < 2) return null;
   const chip = (active: boolean) =>
-    `-ml-0.5 shrink-0 whitespace-nowrap border-2 border-border px-2 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] ${
+    `-ml-0.5 min-h-11 shrink-0 whitespace-nowrap border-2 border-border px-2 py-1.5 font-mono text-xs uppercase tracking-[0.1em] ${
       active ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"
     }`;
   return (

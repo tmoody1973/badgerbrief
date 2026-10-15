@@ -105,7 +105,7 @@ export function HomeGuide({
       <section className="mt-8 border-2 border-border bg-card p-5 shadow-[var(--shadow-brutal)] sm:p-6">
         <h2 className="font-display text-2xl">{dict.doorway.heading}</h2>
         <p className="mt-2 max-w-2xl">{dict.doorway.body}</p>
-        <Link href="/ballot" className="mt-4 inline-block font-bold underline decoration-2 underline-offset-4">
+        <Link href="/ballot" className="mt-2 inline-flex min-h-11 items-center font-bold underline decoration-2 underline-offset-4">
           {dict.doorway.cta}
         </Link>
       </section>
@@ -141,11 +141,11 @@ export function HomeGuide({
               // bury everything below it. Collapsed behind <details> on
               // mobile; the links stay in the DOM either way (SEO).
               <>
-                <details className="mt-2 border-2 border-border bg-card p-3 sm:hidden">
-                  <summary className="cursor-pointer font-bold">
+                <details className="mt-2 border-2 border-border bg-card px-3 sm:hidden">
+                  <summary className="cursor-pointer py-2.5 font-bold">
                     {dict.races.districtRacesSummary(group.length)}
                   </summary>
-                  <div className="mt-3">
+                  <div className="pb-3">
                     <DistrictRaces races={group} />
                   </div>
                 </details>

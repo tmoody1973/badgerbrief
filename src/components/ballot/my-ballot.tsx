@@ -131,7 +131,7 @@ export function MyBallot({
   const certified = data.ballotSource.url ? (
     <p className="mt-2 font-mono text-xs uppercase tracking-wide">
       Names and order from{" "}
-      <a href={data.ballotSource.url} target="_blank" rel="noopener noreferrer" className={LINK}>
+      <a href={data.ballotSource.url} target="_blank" rel="noopener noreferrer" className={`tap ${LINK}`}>
         the state’s certified list, dated {formatIsoDate(data.ballotSource.documentDate)}
       </a>
     </p>
@@ -373,7 +373,7 @@ function LocalAndSpanish() {
         site.
       </p>
       <p>
-        <a href="/es/vote" lang="es" className={LINK}>
+        <a href="/es/vote" lang="es" className={`inline-flex min-h-11 items-center ${LINK}`}>
           Información para votar en español
         </a>
       </p>

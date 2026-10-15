@@ -134,7 +134,7 @@ export function DonorRosterSection({
         type="button"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className="border-2 border-border bg-card px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest shadow-[var(--shadow-brutal)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+        className="tap border-2 border-border bg-card px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest shadow-[var(--shadow-brutal)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
       >
         {open ? "▾" : "▸"} See all {donorCount.toLocaleString("en-US")} donors
       </button>

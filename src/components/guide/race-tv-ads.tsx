@@ -51,8 +51,8 @@ function LeanTag({ lean }: { lean?: string }) {
  * <details> so it works without client JS on the server-rendered race page. */
 function SponsorExplainer({ p }: { p: NonNullable<TvAd["sponsorProfile"]> }) {
   return (
-    <details className="mt-3">
-      <summary className={`cursor-pointer font-bold ${STAMP} text-muted-foreground`}>
+    <details className="mt-0.5">
+      <summary className={`cursor-pointer py-3.5 font-bold ${STAMP} text-muted-foreground`}>
         Who is this? {p.kind ? `· ${p.kind}` : ""}
       </summary>
       <div className="mt-2 space-y-2">
@@ -109,8 +109,8 @@ function SponsorRow({ g, names }: { g: TvSponsorGroup<TvAd>; names: Record<strin
         <span className="font-mono text-xl font-bold">{usd(g.total)}</span>
       </div>
       {profile && <SponsorExplainer p={profile} />}
-      <details className="mt-3">
-        <summary className={`cursor-pointer ${STAMP} font-bold text-muted-foreground`}>
+      <details className="mt-0.5">
+        <summary className={`cursor-pointer py-3.5 ${STAMP} font-bold text-muted-foreground`}>
           See the {g.orders.length} FCC order{g.orders.length === 1 ? "" : "s"}
         </summary>
         <ul className="mt-2 space-y-1.5 text-sm">

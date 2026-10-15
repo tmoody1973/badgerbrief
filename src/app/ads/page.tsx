@@ -85,7 +85,7 @@ export default async function AdsPage({
               key={t.view}
               href={t.href}
               aria-current={active ? "page" : undefined}
-              className={`press border-2 border-border px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-widest shadow-[var(--shadow-brutal)] ${
+              className={`press inline-flex min-h-11 items-center border-2 border-border px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-widest shadow-[var(--shadow-brutal)] ${
                 active
                   ? "bg-primary text-primary-foreground"
                   : "bg-card text-foreground"
@@ -106,7 +106,7 @@ export default async function AdsPage({
       {/* Trust note condensed to a details so it stops eating ~90px above the
           fold on every tab; the full text is one tap away. */}
       <details className="mt-3 border-2 border-border bg-warning text-foreground shadow-[var(--shadow-brutal)]">
-        <summary className="cursor-pointer px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest">
+        <summary className="cursor-pointer px-4 py-3.5 font-mono text-xs font-bold uppercase tracking-widest">
           How to read this — a sponsor name is not an endorsement
         </summary>
         <p className="px-4 pb-4 text-sm">

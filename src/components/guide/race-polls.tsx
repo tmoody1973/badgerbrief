@@ -81,12 +81,12 @@ function Poll({ poll }: { poll: RacePoll }) {
           {g.label && <p className={meta}>{g.label}</p>}
           <ul className="mt-1 divide-y divide-dashed divide-border">
             {g.rows.map((r) => (
-              <li key={r.label} className="flex justify-between gap-4 py-1 text-sm">
+              <li key={r.label} className="flex min-h-11 items-center justify-between gap-4 text-sm">
                 <span>
                   {r.candidateSlug ? (
                     <Link
                       href={`/candidates/${r.candidateSlug}`}
-                      className="underline decoration-2 underline-offset-2"
+                      className="inline-flex min-h-11 items-center underline decoration-2 underline-offset-2"
                     >
                       {r.label}
                     </Link>
@@ -105,14 +105,14 @@ function Poll({ poll }: { poll: RacePoll }) {
       {poll.notes && (
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">{poll.notes}</p>
       )}
-      <p className="mt-2 flex flex-wrap gap-x-3">
+      <p className="mt-1 flex flex-wrap gap-x-3">
         {poll.sources.map((s) => (
           <a
             key={s.url}
             href={s.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${meta} underline decoration-2 underline-offset-2`}
+            className={`${meta} inline-flex min-h-11 items-center underline decoration-2 underline-offset-2`}
           >
             {s.name} →
           </a>
@@ -151,14 +151,14 @@ export function RacePolls({ polls, raceName, archive = false }: { polls: RacePol
 
       <div className="mt-3 border-2 border-dashed border-border p-3">
         <p className={meta}>Poll trackers &amp; averages</p>
-        <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+        <ul className="mt-1 flex flex-wrap gap-x-4">
           {aggregators.map((a) => (
             <li key={a.url}>
               <a
                 href={a.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm underline decoration-2 underline-offset-2"
+                className="inline-flex min-h-11 items-center text-sm underline decoration-2 underline-offset-2"
               >
                 {a.name} →
               </a>

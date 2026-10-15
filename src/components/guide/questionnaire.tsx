@@ -76,7 +76,7 @@ function Status({ row }: { row: QuestionnaireRow }) {
 function AskVoterHelp({ question }: { question: string }) {
   return (
     <p className="mt-3 text-sm">
-      <a href={`/chat?${new URLSearchParams({ q: question })}`} className={INLINE_LINK}>
+      <a href={`/chat?${new URLSearchParams({ q: question })}`} className={`tap ${INLINE_LINK}`}>
         Ask Voter Help: “{question}” →
       </a>
     </p>

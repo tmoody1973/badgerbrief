@@ -23,7 +23,7 @@ export function SponsorLink({
   return (
     <Link
       href={`/sponsors/${sponsorKeyToSlug(key)}`}
-      className={`${className} underline decoration-2 underline-offset-2 hover:text-accent`.trim()}
+      className={`${className} tap underline decoration-2 underline-offset-2 hover:text-accent`.trim()}
     >
       {name}
     </Link>

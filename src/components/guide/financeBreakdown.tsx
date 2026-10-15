@@ -38,7 +38,7 @@ function FundingMixBar({ categories }: { categories: BreakdownCategory[] }) {
       <h3 className="font-mono text-xs font-bold uppercase tracking-widest">
         Where the money comes from
       </h3>
-      <div className="mt-2 flex h-9 w-full overflow-hidden border-2 border-border shadow-[var(--shadow-brutal)]">
+      <div className="mt-2 flex h-12 w-full overflow-hidden border-2 border-border shadow-[var(--shadow-brutal)]">
         {segments.map((s) => (
           <button
             key={s.key}
@@ -60,14 +60,14 @@ function FundingMixBar({ categories }: { categories: BreakdownCategory[] }) {
           </button>
         ))}
       </div>
-      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+      <div className="flex flex-wrap gap-x-3">
         {segments.map((s) => (
           <button
             key={s.key}
             type="button"
             aria-expanded={open === s.key}
             onClick={() => setOpen(open === s.key ? null : s.key)}
-            className="flex items-center gap-1 font-mono text-xs uppercase tracking-wide text-muted-foreground"
+            className="flex min-h-11 items-center gap-1 font-mono text-xs uppercase tracking-wide text-muted-foreground"
           >
             <span
               className="inline-block h-2.5 w-2.5 border border-border"
@@ -137,8 +137,8 @@ function SizeGeoTiles({ breakdown }: { breakdown: Doc<"finance_breakdowns"> }) {
   return (
     <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
       {sizeTotal > 0 && (
-        <details className="border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]">
-          <summary className="cursor-pointer">
+        <details className="border-2 border-border bg-card px-3 py-1.5 shadow-[var(--shadow-brutal)]">
+          <summary className="cursor-pointer py-2">
             <span className="font-display text-xl">
               {Math.round((100 * small.amount) / sizeTotal)}%
             </span>{" "}
@@ -162,8 +162,8 @@ function SizeGeoTiles({ breakdown }: { breakdown: Doc<"finance_breakdowns"> }) {
         </details>
       )}
       {geoKnown > 0 && (
-        <details className="border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]">
-          <summary className="cursor-pointer">
+        <details className="border-2 border-border bg-card px-3 py-1.5 shadow-[var(--shadow-brutal)]">
+          <summary className="cursor-pointer py-2">
             <span className="font-display text-xl">
               {Math.round((100 * geo.inState.amount) / geoKnown)}%
             </span>{" "}

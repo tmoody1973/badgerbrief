@@ -170,3 +170,20 @@ body:has([data-chat-screen]) > footer {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
+
+/* A 44px touch area around a control that looks smaller (Phase 1b brief §7).
+   The visible box keeps its size; an invisible ::after, centered on it, takes
+   the tap. For isolated controls only: on rows packed tighter than 44px the
+   zones would overlap and the later control would win the tap. */
+@utility tap {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+}

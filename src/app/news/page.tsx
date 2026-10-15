@@ -73,7 +73,7 @@ export default async function NewsPage() {
       )}
       {archivedCount > 0 && (
         <p className="mt-8 text-sm">
-          <Link href={`${PRIMARY_ARCHIVE.path}/news`} className="font-bold underline decoration-2 underline-offset-2">
+          <Link href={`${PRIMARY_ARCHIVE.path}/news`} className="tap font-bold underline decoration-2 underline-offset-2">
             Coverage from the {PRIMARY_ARCHIVE.label} season ({archivedCount}{archivedCount >= HUB_FETCH_LIMIT ? "+" : ""}) →
           </Link>
         </p>

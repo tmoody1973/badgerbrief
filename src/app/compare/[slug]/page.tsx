@@ -89,7 +89,7 @@ export default async function ComparePage({ params }: Props) {
       <p className="mt-3">
         <Link
           href="/match"
-          className="font-mono text-xs font-bold uppercase tracking-widest underline underline-offset-2"
+          className="inline-flex min-h-11 items-center font-mono text-xs font-bold uppercase tracking-widest underline underline-offset-2"
         >
           Or start from the issues you care about →
         </Link>
@@ -104,7 +104,7 @@ export default async function ComparePage({ params }: Props) {
           </p>
           <Link
             href={`/races/${slug}`}
-            className="mt-4 inline-block font-mono text-xs font-bold uppercase tracking-widest underline underline-offset-2"
+            className="mt-2 inline-flex min-h-11 items-center font-mono text-xs font-bold uppercase tracking-widest underline underline-offset-2"
           >
             ← Back to {race.office}
           </Link>
@@ -125,18 +125,18 @@ export default async function ComparePage({ params }: Props) {
                     <div className="flex flex-wrap items-center gap-2">
                       <Link
                         href={`/candidates/${candidate.slug}`}
-                        className="font-bold underline decoration-2 underline-offset-2"
+                        className="tap font-bold underline decoration-2 underline-offset-2"
                       >
                         {generalPersonName(candidate)}
                       </Link>
                       <PartyBadge party={generalParty(candidate)} />
                       {candidate.incumbent && (
-                        <span className="border border-border bg-secondary px-1 font-mono text-[10px] font-bold uppercase">
+                        <span className="border border-border bg-secondary px-1 font-mono text-xs font-bold uppercase">
                           Inc.
                         </span>
                       )}
                     </div>
-                    <span className="mt-2 w-fit border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase">
+                    <span className="mt-2 w-fit border border-border bg-muted px-1.5 py-0.5 font-mono text-xs font-bold uppercase">
                       {position.stance}
                     </span>
                     <p className="mt-2 max-w-[54ch] text-sm">{position.summary}</p>
@@ -178,7 +178,7 @@ function NoRecordLine({
       {i > 0 ? ", " : ""}
       <Link
         href={`/candidates/${c.slug}`}
-        className="underline underline-offset-2 hover:decoration-2"
+        className="tap underline underline-offset-2 hover:decoration-2"
       >
         {c.name}
       </Link>
@@ -198,8 +198,8 @@ function NoRecordLine({
   // (plain text so the summary click toggles rather than following a link);
   // the expanded body lists every name as a link.
   return (
-    <details className="mt-3">
-      <summary className="cursor-pointer font-mono text-xs text-muted-foreground">
+    <details className="mt-1">
+      <summary className="cursor-pointer py-3.5 font-mono text-xs text-muted-foreground">
         No position on record: {candidates.slice(0, HEAD).map((c) => c.name).join(", ")}, +{rest.length} more
       </summary>
       <p className="mt-2 font-mono text-xs text-muted-foreground">{links}</p>
