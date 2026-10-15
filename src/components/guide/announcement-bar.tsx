@@ -73,7 +73,8 @@ export function AnnouncementBar({
   if (dismissed === id) return null;
 
   return (
-    <div className="border-b-2 border-border bg-secondary text-secondary-foreground">
+    // English on every page, Spanish ones included; lang keeps its pronunciation right there.
+    <div lang="en" className="border-b-2 border-border bg-secondary text-secondary-foreground">
       <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-2">
         <Link
           href={href}
