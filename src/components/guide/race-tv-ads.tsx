@@ -20,7 +20,7 @@ function span(start?: string | null, end?: string | null): string | null {
 }
 
 /** "Attack on Tom Tiffany" / "Support for …". Charcoal on alert yellow: readable on white. */
-function StanceTag({ stance, target }: { stance?: "support" | "oppose"; target?: string }) {
+export function StanceTag({ stance, target }: { stance?: "support" | "oppose"; target?: string }) {
   if (!stance) return null;
   const text = stance === "oppose" ? `Attack${target ? ` on ${target}` : ""}` : `Support${target ? ` for ${target}` : ""}`;
   return (

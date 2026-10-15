@@ -16,7 +16,7 @@ export function StatTile({
       <p className="break-words font-mono text-2xl font-bold leading-tight text-foreground">
         {value}
       </p>
-      <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+      <p className="mt-1 font-mono text-xs uppercase tracking-widest text-muted-foreground">
         {label}
       </p>
       {note && <p className="mt-1 text-xs text-muted-foreground">{note}</p>}

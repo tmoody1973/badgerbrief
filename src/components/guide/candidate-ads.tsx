@@ -1,29 +1,25 @@
 import { SponsorLink } from "@/components/guide/sponsor-link";
+import { StanceTag } from "@/components/guide/race-tv-ads";
+import { groupCandidateAds } from "@/lib/candidate-ads";
 import type { Doc } from "../../../convex/_generated/dataModel";
 
 /**
- * Ads a human confirmed are about this candidate (MOO-309) — shown on the
- * candidate page, split by whether they support or attack. Only attributed ads
- * (candidateSlug set) reach here, so nothing unverified appears.
+ * Ads a human confirmed are about this candidate (MOO-309), one row per
+ * sponsor as the race page groups TV orders (Phase 1b: Tiffany's page had 95
+ * ad cards). Only attributed ads (candidateSlug set) reach here, so nothing
+ * unverified appears. Stance tags match the race page: no red, no blue.
  */
 
-function mid(l?: number, u?: number): number {
-  if (l !== undefined && u !== undefined) return (l + u) / 2;
-  return l ?? u ?? 0;
-}
+const STAMP = "font-mono text-xs uppercase tracking-widest";
 
-function usd(n: number): string {
-  if (n >= 1000) return `$${Math.round(n / 1000)}k`;
-  return `$${Math.round(n)}`;
-}
+/** Biggest sponsors shown before the fold. */
+const FIRST_SPONSORS = 5;
 
-function spendRange(ad: Doc<"ads">): string {
-  const lo = ad.spendLower;
-  const hi = ad.spendUpper;
-  if (lo === undefined && hi === undefined) return "spend n/a";
-  const f = (n: number) => `$${n.toLocaleString()}`;
-  if (lo !== undefined && hi !== undefined)
-    return lo === hi ? f(lo) : `${f(lo)}–${f(hi)}`;
+const f = (n: number) => `$${n.toLocaleString()}`;
+
+function spendRange(lo?: number, hi?: number): string {
+  if (lo === undefined && hi === undefined) return "spend not disclosed";
+  if (lo !== undefined && hi !== undefined) return lo === hi ? f(lo) : `${f(lo)}–${f(hi)}`;
   return hi !== undefined ? `up to ${f(hi)}` : `${f(lo!)}+`;
 }
 
@@ -37,79 +33,69 @@ export function CandidateAds({
   enrichedKeys: string[];
 }) {
   if (ads.length === 0) return null;
-  const support = ads.filter((a) => a.stance === "support");
-  const attack = ads.filter((a) => a.stance === "oppose");
-  const supportSpend = support.reduce((s, a) => s + mid(a.spendLower, a.spendUpper), 0);
-  const attackSpend = attack.reduce((s, a) => s + mid(a.spendLower, a.spendUpper), 0);
-  const sorted = [...ads].sort((a, b) => (b.spendUpper ?? 0) - (a.spendUpper ?? 0));
+  const groups = groupCandidateAds(ads);
+  const row = (g: (typeof groups)[number]) => (
+          <li key={g.key} className="border-b-2 border-dashed border-border py-4 last:border-b-0">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+              <div className="min-w-0">
+                <h3 className="font-bold leading-snug">
+                  <SponsorLink name={g.sponsor} enrichedKeys={enrichedKeys} />
+                </h3>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <StanceTag stance={g.stance} target={candidateName} />
+                  <span className={`${STAMP} text-muted-foreground`}>
+                    {g.ads.length} ad{g.ads.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+              </div>
+              <span className="font-mono font-bold">{spendRange(g.spendLower, g.spendUpper)}</span>
+            </div>
+            <details className="mt-3">
+              <summary className={`flex min-h-11 cursor-pointer items-center ${STAMP} font-bold text-muted-foreground`}>
+                See the {g.ads.length} ad{g.ads.length === 1 ? "" : "s"}
+              </summary>
+              <ul className="mt-2 space-y-3 text-sm">
+                {g.ads.map((ad) => (
+                  <li key={ad._id}>
+                    {ad.creativeText && <p className="line-clamp-3 max-w-[60ch]">{ad.creativeText}</p>}
+                    <p className="mt-1 flex flex-wrap items-center gap-x-3 font-mono text-xs text-muted-foreground">
+                      {g.stance === undefined && ad.stance && <span>{ad.stance === "oppose" ? "Attack" : "Support"}</span>}
+                      <span>{spendRange(ad.spendLower, ad.spendUpper)}</span>
+                      {ad.fundingEntity && ad.fundingEntity !== ad.pageOrCommittee && <span>Paid for by {ad.fundingEntity}</span>}
+                      {ad.snapshotUrl && (
+                        <a href={ad.snapshotUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center font-bold text-foreground underline decoration-2 underline-offset-2">
+                          View ad on Meta<span aria-hidden="true"> ↗</span>
+                        </a>
+                      )}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </li>
+
+  );
 
   return (
-    <section id="ads" className="mt-6 scroll-mt-16">
-      <h2 className="font-display text-xl">Political ads about {candidateName}</h2>
+    <section id="ads" className="mt-8 scroll-mt-16">
+      <h2 className="font-display text-2xl">Political ads about {candidateName}</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Ads a BadgerBrief editor confirmed are about {candidateName}, from the
-        Meta Ad Library. Spend is the range Meta discloses.
+        Ads a BadgerBrief editor confirmed are about {candidateName}, from the Meta Ad Library. Spend is the
+        range Meta discloses.
+      </p>
+      <p className={`mt-2 ${STAMP} text-muted-foreground`}>
+        {ads.length} ad{ads.length === 1 ? "" : "s"} from {groups.length} sponsor{groups.length === 1 ? "" : "s"}
       </p>
 
-      <div className="mt-3 flex flex-wrap gap-2 font-mono text-xs font-bold">
-        {support.length > 0 && (
-          <span className="border-2 border-border bg-accent px-2 py-1 text-accent-foreground">
-            Supporting ~{usd(supportSpend)} · {support.length} ad
-            {support.length === 1 ? "" : "s"}
-          </span>
-        )}
-        {attack.length > 0 && (
-          <span className="border-2 border-border bg-primary px-2 py-1 text-primary-foreground">
-            Attacking ~{usd(attackSpend)} · {attack.length} ad
-            {attack.length === 1 ? "" : "s"}
-          </span>
-        )}
-      </div>
-
-      <ul className="mt-4 space-y-3">
-        {sorted.map((ad) => (
-          <li
-            key={ad._id}
-            className="border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span
-                className={`border-2 border-border px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest ${
-                  ad.stance === "oppose"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-accent text-accent-foreground"
-                }`}
-              >
-                {ad.stance === "oppose" ? "Attack" : "Support"}
-              </span>
-              <span className="font-mono text-xs text-muted-foreground">
-                {spendRange(ad)}
-              </span>
-            </div>
-            <p className="mt-2">
-              <SponsorLink name={ad.pageOrCommittee} enrichedKeys={enrichedKeys} className="font-bold" />
-            </p>
-            {ad.fundingEntity && ad.fundingEntity !== ad.pageOrCommittee && (
-              <p className="text-xs text-muted-foreground">
-                Paid for by {ad.fundingEntity}
-              </p>
-            )}
-            {ad.creativeText && (
-              <p className="mt-1 line-clamp-3 text-sm">{ad.creativeText}</p>
-            )}
-            {ad.snapshotUrl && (
-              <a
-                href={ad.snapshotUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-1 inline-block font-mono text-xs underline decoration-2 underline-offset-2"
-              >
-                View ad on Meta ↗
-              </a>
-            )}
-          </li>
-        ))}
-      </ul>
+      <ul className="mt-3 border-y-2 border-border">{groups.slice(0, FIRST_SPONSORS).map(row)}</ul>
+      {groups.length > FIRST_SPONSORS && (
+        <details className="mt-1">
+          <summary className={`flex min-h-11 cursor-pointer items-center ${STAMP} font-bold text-muted-foreground`}>
+            All {groups.length} sponsors
+          </summary>
+          <ul className="border-b-2 border-border">{groups.slice(FIRST_SPONSORS).map(row)}</ul>
+        </details>
+      )}
     </section>
   );
 }

@@ -29,12 +29,12 @@ const STEP = 25;
 const nf = new Intl.NumberFormat("en-US");
 
 const chip = (active: boolean) =>
-  `shrink-0 whitespace-nowrap border-2 border-border px-2 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] ${
-    active ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"
+  `shrink-0 whitespace-nowrap border-2 border-border px-2 py-1.5 font-mono text-xs uppercase tracking-[0.1em] ${
+    active ? "bg-foreground text-background" : "bg-card text-muted-foreground"
   }`;
 
 const linkCls =
-  "font-mono text-[11px] uppercase tracking-[0.1em] underline decoration-2 underline-offset-2";
+  "font-mono text-xs uppercase tracking-[0.1em] underline decoration-2 underline-offset-2";
 
 /** "119" -> "119th Congress"; "2023" -> "2023 session". A Congress is not a
  * session and labelling it one misstates the record's own timeframe. */
@@ -51,7 +51,7 @@ export function periodLabel(session: string, federal: boolean): string {
 export function VotingRecordSessions({
   candidateSlug, sessions, federal = false,
 }: { candidateSlug: string; sessions: SessionCount[]; federal?: boolean }) {
-  const [openSession, setOpenSession] = useState<string | null>(sessions[0]?.session ?? null);
+  const [openSession, setOpenSession] = useState<string | null>(null);
   return (
     <ol className="mt-3 divide-y-2 divide-border border-2 border-border bg-card shadow-[var(--shadow-brutal)]">
       {sessions.map((s) => (
@@ -101,10 +101,10 @@ function SessionGroup({
         aria-expanded={open}
         className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-secondary/40"
       >
-        <span className="font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
+        <span className="font-mono text-xs font-bold uppercase tracking-[0.1em]">
           <span aria-hidden="true">{open ? "▾" : "▸"}</span> {periodLabel(session, federal)}
         </span>
-        <span className="font-mono text-[11px] text-muted-foreground">{nf.format(count)} votes</span>
+        <span className="font-mono text-xs text-muted-foreground">{nf.format(count)} votes</span>
       </button>
 
       {open && (
@@ -129,7 +129,7 @@ function SessionGroup({
           </div>
 
           {data === undefined ? (
-            <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">Loading…</p>
+            <p className="mt-3 font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">Loading…</p>
           ) : data.rows.length === 0 ? (
             <p className="mt-3 text-sm text-muted-foreground">No votes match.</p>
           ) : (
@@ -138,13 +138,13 @@ function SessionGroup({
                 {data.rows.map((v) => <Row key={v.sourceUrl} v={v} />)}
               </ol>
               <div className="mt-3 flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                <span className="font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
                   Showing {nf.format(data.rows.length)} of {nf.format(data.total)}
                 </span>
                 {data.hasMore && (
                   <button
                     onClick={() => setLimit((l) => l + STEP)}
-                    className="border-2 border-border px-2 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] hover:bg-secondary/40"
+                    className="border-2 border-border px-2 py-1.5 font-mono text-xs font-bold uppercase tracking-[0.1em] hover:bg-secondary/40"
                   >
                     Load {Math.min(STEP, data.total - data.rows.length)} more
                   </button>
@@ -162,7 +162,7 @@ function Row({ v }: { v: PageRow }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <li className="py-3">
-      <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+      <p className="font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
         {v.billNumber} · {v.voteType} · {v.votedOn}
       </p>
       <p className="mt-1 max-w-[62ch] text-sm">{v.billTitle}</p>
@@ -180,14 +180,14 @@ function Row({ v }: { v: PageRow }) {
           <button
             onClick={() => setExpanded((e) => !e)}
             aria-expanded={expanded}
-            className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground underline decoration-dotted underline-offset-2"
+            className="font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground underline decoration-dotted underline-offset-2"
           >
             {expanded ? "Hide summary" : "What this bill does"}
           </button>
           {expanded && (
             <p className="mt-1 max-w-[62ch] text-sm text-muted-foreground">
               &ldquo;{v.summary}&rdquo;{" "}
-              <span className="font-mono text-[10px] uppercase tracking-[0.1em]">— LRB analysis</span>
+              <span className="font-mono text-xs uppercase tracking-[0.1em]">— LRB analysis</span>
             </p>
           )}
         </div>

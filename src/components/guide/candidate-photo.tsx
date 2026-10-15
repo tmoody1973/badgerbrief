@@ -32,7 +32,7 @@ export function CandidatePhoto({
         />
       </div>
       {photoSource && (
-        <p className="mt-1 max-w-24 font-mono text-[10px] uppercase tracking-wide text-muted-foreground sm:max-w-32">
+        <p className="mt-1 max-w-24 font-mono text-xs uppercase tracking-wide text-muted-foreground sm:max-w-32">
           Photo: {photoSource}
         </p>
       )}
