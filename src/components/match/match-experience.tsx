@@ -9,7 +9,7 @@ import { track } from "@/lib/analytics";
 import { SITE_URL } from "@/lib/site";
 import { buildIssueMatch, type RaceInput } from "@/lib/issue-match";
 import { relevantRaces, type Districts } from "@/lib/districts";
-import { BallotControl } from "./ballot-control";
+import { useMyDistricts } from "@/lib/my-districts";
 import { IssuePicker } from "./issue-picker";
 import { MatchResults } from "./match-results";
 import { ShareButton } from "@/components/contribute/share-button";
@@ -53,7 +53,8 @@ export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
     [selected, setSelected],
   );
 
-  const [districts, setDistricts] = useState<Districts | null>(null);
+  // From My Ballot, the one address lookup on the site.
+  const districts = useMyDistricts();
 
   // Statewide always; when the voter adds an address, relevantRaces returns
   // their full personalized set (statewide + U.S. House + legislative).
@@ -88,7 +89,25 @@ export function MatchExperience({ raceMeta }: { raceMeta: RaceMeta[] }) {
   return (
     <>
       <IssuePicker selected={selected} onToggle={toggle} />
-      <BallotControl onFound={(d) => setDistricts(d)} />
+      <p className="mt-6 border-2 border-border bg-card p-4 text-sm shadow-[var(--shadow-brutal)]">
+        {districts ? (
+          <>
+            Showing statewide races plus your U.S. House and legislative races, from{" "}
+            <Link href="/ballot" className="font-bold underline decoration-2 underline-offset-2">
+              My Ballot
+            </Link>
+            .
+          </>
+        ) : (
+          <>
+            Statewide races only.{" "}
+            <Link href="/ballot" className="font-bold underline decoration-2 underline-offset-2">
+              Find my ballot first
+            </Link>{" "}
+            to add your U.S. House and legislative races.
+          </>
+        )}
+      </p>
 
       {selected.length === 0 ? (
         <p className="mt-8 border-2 border-dashed border-border bg-card p-6 text-sm text-muted-foreground">

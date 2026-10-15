@@ -8,7 +8,9 @@ export type HomeDict = {
   introAfterDate: string;
   electionDateFallback: string;
   howToVoteCta: string;
-  governorsRaceCta: string;
+  myBallotCta: string;
+  /** The doorway to My Ballot, the one address lookup on the site. */
+  doorway: { heading: string; body: string; cta: string };
   matchCta: string;
   startHereCta?: string;
   deadlines: {
@@ -50,7 +52,12 @@ export const homeEn: HomeDict = {
     ". This is a non-partisan, source-linked guide to every statewide and congressional race on it — who's running, what they say, and exactly how to vote.",
   electionDateFallback: "November 3, 2026",
   howToVoteCta: "How to vote →",
-  governorsRaceCta: "Governor's race",
+  myBallotCta: "See my ballot →",
+  doorway: {
+    heading: "Your ballot, in order",
+    body: "Enter your address once on My Ballot. It shows your contests as the state prints them and, in the City of Milwaukee, where you vote on Nov. 3. Your address never goes into a link.",
+    cta: "See my ballot →",
+  },
   matchCta: "What matters to you? →",
   startHereCta: "New here? Start here →",
   deadlines: {

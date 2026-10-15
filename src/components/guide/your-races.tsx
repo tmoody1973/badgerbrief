@@ -1,9 +1,8 @@
 // src/components/guide/your-races.tsx
 "use client";
 
-import { useQuery } from "convex/react";
-import { useState } from "react";
-import { api } from "../../../convex/_generated/api";
+import Link from "next/link";
+import { useMyDistricts } from "@/lib/my-districts";
 import { relevantRaces, type Districts } from "@/lib/districts";
 import { RaceMoneyCard } from "@/components/guide/ads-overview";
 import type { getAdMoneyOverview } from "@/lib/data";
@@ -24,46 +23,10 @@ export function pick(races: RaceCard[], districts: Districts): RaceCard[] {
 }
 
 export function YourRaces({ races }: { races: RaceCard[] }) {
-  const prefs = useQuery(api.preferences.getMine, {});
-  const [entered, setEntered] = useState<Districts | null>(null);
-  const [address, setAddress] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const districts: Districts | null =
-    entered ??
-    (prefs?.congressionalDistrict
-      ? {
-          congressional: Number(prefs.congressionalDistrict),
-          senate: Number(prefs.stateSenateDistrict),
-          assembly: Number(prefs.stateAssemblyDistrict),
-        }
-      : null);
+  // From My Ballot, the one address lookup on the site.
+  const districts = useMyDistricts();
 
   const mine = districts ? pick(races, districts) : [];
-
-  const lookup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/geocode", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setEntered({ congressional: data.congressional, senate: data.senate, assembly: data.assembly });
-      } else {
-        setError("We couldn't match that address. Try the street, city, and ZIP.");
-      }
-    } catch {
-      setError("Address lookup is unavailable right now.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (districts && mine.length > 0) {
     return (
@@ -87,22 +50,11 @@ export function YourRaces({ races }: { races: RaceCard[] }) {
     <section className="mt-8 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
       <h2 className="font-display text-xl">See the ad money in your races</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Enter your address to highlight the races on your ballot. We only use it to look up your
-        districts — we never store the address for anonymous visitors.
+        <Link href="/ballot" className="font-bold text-foreground underline decoration-2 underline-offset-2">
+          Find my ballot first
+        </Link>{" "}
+        to highlight the races on your ballot. My Ballot looks up your districts once and remembers them on this device.
       </p>
-      <form onSubmit={lookup} className="mt-3 flex flex-wrap gap-2">
-        <input
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="123 Main St, Madison, WI"
-          className="min-w-0 flex-1 border-2 border-border bg-background px-3 py-2"
-          aria-label="Your address"
-        />
-        <button type="submit" className="press border-2 border-border bg-secondary px-4 py-2 font-bold shadow-[var(--shadow-brutal)]">
-          {loading ? "Looking up…" : "Find my races"}
-        </button>
-      </form>
-      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
       {districts && mine.length === 0 && (
         <p className="mt-2 text-sm text-muted-foreground">No tracked ads in your races yet.</p>
       )}
