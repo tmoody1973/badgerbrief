@@ -86,9 +86,7 @@ export function MyBallot({
     lookup.current.open = true;
     lookup.current.querySelector("input")?.focus();
   };
-  useEffect(() => {
-    if (window.location.hash === "#lookup") openLookup();
-  }, []);
+
   useEffect(() => {
     if (!showNext.current) return;
     showNext.current = false;
@@ -122,6 +120,19 @@ export function MyBallot({
   };
 
   const ballot = useMemo(() => (shown.from === "none" ? null : voterBallot(data, shown.districts)), [data, shown]);
+  // The fold-out exists only once a ballot is drawn, which can be after the
+  // first render (remembered districts load from storage), so check again then,
+  // and on a same-page jump to #lookup.
+  const hasBallot = ballot !== null;
+  useEffect(() => {
+    if (!hasBallot) return;
+    const openFromHash = () => {
+      if (window.location.hash === "#lookup") openLookup();
+    };
+    openFromHash();
+    window.addEventListener("hashchange", openFromHash);
+    return () => window.removeEventListener("hashchange", openFromHash);
+  }, [hasBallot]);
   const numbers = useMemo(() => numbered(ballot?.contests ?? []), [ballot]);
   const { decisions, oneName } = useMemo(() => byAttention(ballot?.contests ?? []), [ballot]);
 
