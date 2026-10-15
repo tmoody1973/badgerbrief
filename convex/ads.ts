@@ -181,7 +181,20 @@ export const existingTvIds = internalQuery({
       .query("ads")
       .withIndex("by_platform_ad", (q) => q.eq("platform", "tv"))
       .collect();
-    return rows.map((r) => r.platformAdId);
+    const skipped = await ctx.db.query("tv_skipped_docs").collect();
+    return [...rows.map((r) => r.platformAdId), ...skipped.map((s) => s.fileManagerId)];
+  },
+});
+
+/** Remember a TV doc that yielded no ad, so later syncs skip it. Idempotent. */
+export const markTvDocSkipped = internalMutation({
+  args: { fileManagerId: v.string(), reason: v.string() },
+  handler: async (ctx, { fileManagerId, reason }) => {
+    const existing = await ctx.db
+      .query("tv_skipped_docs")
+      .withIndex("by_fileManagerId", (q) => q.eq("fileManagerId", fileManagerId))
+      .unique();
+    if (!existing) await ctx.db.insert("tv_skipped_docs", { fileManagerId, reason, skippedAt: Date.now() });
   },
 });
 

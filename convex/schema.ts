@@ -656,6 +656,14 @@ export default defineSchema({
     // ad matches): the scan hit the 32,000-read limit on long sources.
     .index("by_status_ref", ["status", "refId"]),
 
+  // FCC TV docs downloaded but never turned into an ad (no order inside, not a
+  // PDF). Remembered so the 2-hour feed sync does not pay to re-read them.
+  tv_skipped_docs: defineTable({
+    fileManagerId: v.string(),
+    reason: v.string(),
+    skippedAt: v.number(),
+  }).index("by_fileManagerId", ["fileManagerId"]),
+
   source_fetch_logs: defineTable({
     url: v.string(),
     status: v.union(v.literal("ok"), v.literal("error")),
