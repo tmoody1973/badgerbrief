@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { isAllowedImage } from "@/lib/image-hosts";
 
 /**
  * The publisher's own og:image, or a typographic stand-in when there is none.
@@ -90,7 +91,8 @@ export function ArticleThumb({
   // Remember WHICH image failed, not just that one did: this component is
   // reused when the feed is filtered, and the next image deserves its own try.
   const [failedSrc, setFailedSrc] = useState<string>();
-  if (src && failedSrc !== src) {
+  // An unreviewed host would fail in next/image anyway (and throw in dev).
+  if (src && failedSrc !== src && isAllowedImage(src)) {
     return (
       <div className={`${BOX[size]} overflow-hidden border-2 border-border bg-card`}>
         <Image src={src} alt="" aria-hidden="true" fill sizes={SIZES[size]} className="object-cover" onError={() => setFailedSrc(src)} />
