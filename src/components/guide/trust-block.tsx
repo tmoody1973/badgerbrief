@@ -39,7 +39,7 @@ export function TrustBlock({
     ],
     [
       "Sources",
-      sources.length > 0 ? <SourceItems sources={sources} /> : <>Each entry above links its own source.</>,
+      sources.length > 0 ? <SourceItems sources={sources} /> : <>Each sourced entry on this page links its own source.</>,
     ],
     ["Last updated", <time key="t">{updated}</time>],
     [
