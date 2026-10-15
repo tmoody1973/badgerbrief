@@ -78,6 +78,17 @@ export function MyBallot({
   // screen reader hears nothing.
   const headline = useRef<HTMLHeadingElement>(null);
   const showNext = useRef(false);
+  // The address form folds out at the top, right above the ballot it changes
+  // (Tarik, 2026-10-15). /ballot#lookup (the brief's "Change address") opens it.
+  const lookup = useRef<HTMLDetailsElement>(null);
+  const openLookup = () => {
+    if (!lookup.current) return;
+    lookup.current.open = true;
+    lookup.current.querySelector("input")?.focus();
+  };
+  useEffect(() => {
+    if (window.location.hash === "#lookup") openLookup();
+  }, []);
   useEffect(() => {
     if (!showNext.current) return;
     showNext.current = false;
@@ -95,6 +106,7 @@ export function MyBallot({
   /** The visitor's own districts: kept on this device, and with their account when signed in. */
   const keepDistricts = (districts: Districts, matchedAddress?: string, place?: PollingPlace) => {
     showNext.current = true;
+    if (lookup.current) lookup.current.open = false;
     setPollingPlace(place ?? null);
     storeDistricts(districts);
     leaveLink();
@@ -193,9 +205,9 @@ export function MyBallot({
         {shown.from === "link" && (
           <p className="mt-4 border-t-2 border-dashed border-border pt-4">
             Showing the ballot for these districts. Yours may differ.{" "}
-            <a href="#lookup" className={LINK}>
+            <button type="button" onClick={openLookup} className={`min-h-11 ${LINK}`}>
               Enter my address
-            </a>
+            </button>
             {own && (
               <>
                 {" or "}
@@ -213,6 +225,14 @@ export function MyBallot({
             )}
           </p>
         )}
+        <details id="lookup" ref={lookup} className="mt-3 scroll-mt-16 border-t-2 border-dashed border-border pt-1">
+          <summary className={`inline-flex min-h-11 cursor-pointer items-center ${LINK}`}>
+            {shown.from === "link" ? "See your own ballot" : "Change address"}
+          </summary>
+          <div className="pb-2 pt-2">
+            <BallotLookup counties={countyChoices} onFound={keepDistricts} />
+          </div>
+        </details>
       </section>
 
       {pollingPlace && shown.from !== "link" && <PollingPlaceCard place={pollingPlace} />}
@@ -346,20 +366,16 @@ export function MyBallot({
         <ShareBallot districts={districts} />
       </section>
 
-      <section id="lookup" className="mt-10 scroll-mt-16 border-t-2 border-border pt-6">
-        <h2 className="font-display text-2xl">{shown.from === "link" ? "See your own ballot" : "Use a different address"}</h2>
-        <div className="mt-4">
-          <BallotLookup counties={countyChoices} onFound={keepDistricts} />
-        </div>
-        {shown.from === "device" && (
-          <p className="mt-4 text-sm">
+      {shown.from === "device" && (
+        <section className="mt-10 border-t-2 border-border pt-6">
+          <p className="text-sm">
             Your districts are remembered on this device only.{" "}
             <button type="button" onClick={clearStoredDistricts} className={`min-h-11 ${LINK}`}>
               Forget them
             </button>
           </p>
-        )}
-      </section>
+        </section>
+      )}
     </div>
   );
 }
