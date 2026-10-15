@@ -104,6 +104,7 @@ export function MyBallot({
         congressionalDistrict: String(districts.congressional),
         stateSenateDistrict: String(districts.senate),
         stateAssemblyDistrict: String(districts.assembly),
+        ...(place ? { ward: place.ward } : {}),
       });
     }
   };

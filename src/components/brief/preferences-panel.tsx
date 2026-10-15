@@ -5,6 +5,7 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { relevantRaces, type Districts } from "@/lib/districts";
 import { BallotFinder } from "@/components/guide/ballot-finder";
+import { PollingPlaceCard } from "@/components/ballot/polling-place";
 import { briefStartError } from "@/lib/brief/start-error";
 
 const DETAIL_LEVELS = [
@@ -21,6 +22,7 @@ export function PreferencesPanel() {
   const prefs = useQuery(api.preferences.getMine, {});
   const races = useQuery(api.public.listRaces, {});
   const issueSlugs = useQuery(api.public.listIssueSlugs, {});
+  const pollingPlace = useQuery(api.preferences.myPollingPlace, {});
   const savePrefs = useMutation(api.preferences.savePrefs);
   const generate = useMutation(api.briefs.generate);
   const [generateError, setGenerateError] = useState<string | null>(null);
@@ -54,6 +56,7 @@ export function PreferencesPanel() {
             CD {districts.congressional} · Senate {districts.senate} · Assembly {districts.assembly}
             {prefs?.address ? ` · ${prefs.address}` : ""}
           </p>
+          {pollingPlace && <PollingPlaceCard place={pollingPlace} />}
           <fieldset className="mt-4">
             <legend className="text-sm font-bold">Star the races you care about most</legend>
             <div className="mt-2 flex flex-wrap gap-2">
