@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Doc } from "../../../convex/_generated/dataModel";
-import { BallotFinder } from "@/components/guide/ballot-finder";
 import { RaceCard } from "@/components/guide/cards";
 import { DistrictRaces } from "@/components/guide/district-races";
 import { raceLevelLabel } from "@/lib/i18n/race-card-dict";
@@ -54,28 +53,23 @@ export function HomeGuide({
           {dict.introAfterDate}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
+          {/* The one red thing on Home: the ballot (Phase 1b brief). */}
           <Link
-            href={lang === "es" ? "/es/vote" : "/vote"}
+            href="/ballot"
             className="border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)] press"
           >
+            {dict.myBallotCta}
+          </Link>
+          <Link href={lang === "es" ? "/es/vote" : "/vote"} className="border-2 border-border bg-card px-4 py-2 font-bold shadow-[var(--shadow-brutal)] press hover:bg-secondary">
             {dict.howToVoteCta}
           </Link>
-          <Link
-            href="/races/wi-gov-2026"
-            className="border-2 border-border bg-secondary px-4 py-2 font-bold shadow-[var(--shadow-brutal)] press"
-          >
-            {dict.governorsRaceCta}
-          </Link>
-          <Link
-            href="/match"
-            className="border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)] press"
-          >
+          <Link href="/match" className="border-2 border-border bg-card px-4 py-2 font-bold shadow-[var(--shadow-brutal)] press hover:bg-secondary">
             {dict.matchCta}
           </Link>
           {lang !== "es" && dict.startHereCta && (
             <Link
               href="/start"
-              className="border-2 border-border bg-secondary px-4 py-2 font-bold shadow-[var(--shadow-brutal)] press"
+              className="border-2 border-border bg-card px-4 py-2 font-bold shadow-[var(--shadow-brutal)] press hover:bg-secondary"
             >
               {dict.startHereCta}
             </Link>
@@ -102,13 +96,19 @@ export function HomeGuide({
           href="https://ko-fi.com/tarikmoody"
           target="_blank"
           rel="noopener noreferrer"
-          className="press mt-4 inline-block border-2 border-border bg-primary px-4 py-2 font-bold text-primary-foreground shadow-[var(--shadow-brutal)]"
+          className="press mt-4 inline-block border-2 border-border bg-card px-4 py-2 font-bold shadow-[var(--shadow-brutal)] hover:bg-secondary"
         >
           {dict.support.cta}
         </a>
       </section>
 
-      <BallotFinder races={novemberRaces(races)} />
+      <section className="mt-8 border-2 border-border bg-card p-5 shadow-[var(--shadow-brutal)] sm:p-6">
+        <h2 className="font-display text-2xl">{dict.doorway.heading}</h2>
+        <p className="mt-2 max-w-2xl">{dict.doorway.body}</p>
+        <Link href="/ballot" className="mt-4 inline-block font-bold underline decoration-2 underline-offset-4">
+          {dict.doorway.cta}
+        </Link>
+      </section>
 
       {votingInfo && (
         <section className="mt-8 border-2 border-border bg-warning p-4 shadow-[var(--shadow-brutal)]">

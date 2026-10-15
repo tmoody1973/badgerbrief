@@ -16,7 +16,12 @@ export const homeEs: HomeDict = {
     ". Esta es una guía no partidista y con fuentes verificables para cada contienda estatal y del Congreso en ella — quién se postula, qué dicen y exactamente cómo votar.",
   electionDateFallback: "3 de noviembre de 2026",
   howToVoteCta: "Cómo votar →",
-  governorsRaceCta: "Contienda por gobernador",
+  myBallotCta: "Ver mi boleta (en inglés) →",
+  doorway: {
+    heading: "Su boleta, en orden",
+    body: "Escriba su dirección una vez en My Ballot. Muestra sus contiendas tal como las imprime el estado y, en la ciudad de Milwaukee, dónde votar el 3 de noviembre. La página está en inglés por ahora.",
+    cta: "Ver mi boleta (en inglés) →",
+  },
   matchCta: "¿Qué te importa? →",
   // ponytail: guided path is EN-only v1 (home-guide.tsx gates lang !== "es"),
   // so this never renders — kept only to satisfy the ES-key-parity test.

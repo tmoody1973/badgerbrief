@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { relevantRaces, type Districts } from "@/lib/districts";
-import { BallotFinder } from "@/components/guide/ballot-finder";
+import Link from "next/link";
 import { PollingPlaceCard } from "@/components/ballot/polling-place";
 import { briefStartError } from "@/lib/brief/start-error";
 
@@ -14,7 +14,7 @@ const DETAIL_LEVELS = [
   ["deep", "Deep — quotes and money too"],
 ] as const;
 
-/** MOO-311 preferences: address→districts (BallotFinder), starred races, issues, detail level. */
+/** MOO-311 preferences: districts (from My Ballot), starred races, issues, detail level. */
 export function PreferencesPanel() {
   // Repo convention (review-queue.tsx, store-user.tsx): gate on useConvexAuth,
   // not Clerk's <SignedIn> — this panel is only meaningful for signed-in users.
@@ -49,7 +49,14 @@ export function PreferencesPanel() {
   return (
     <section className="mb-8 border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)] print:hidden">
       <h2 className="font-display text-2xl">Your brief, your ballot</h2>
-      {!districts && <BallotFinder races={races} />}
+      {!districts && (
+        <p className="mt-2">
+          <Link href="/ballot" className="font-bold underline decoration-2 underline-offset-2">
+            Find my ballot first
+          </Link>{" "}
+          — when you are signed in, My Ballot saves your districts here and your brief follows them.
+        </p>
+      )}
       {districts && (
         <>
           <p className="mt-1 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
