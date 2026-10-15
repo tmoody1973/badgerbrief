@@ -44,3 +44,18 @@ export function pollingPlacePayload(result: GeocodeResult, place: PollingPlace |
     official,
   };
 }
+
+/**
+ * Extra fields for handoffOfficialLink. A bare "where is my polling place?"
+ * must still hand off to MyVote first; this lets the answer then offer the
+ * Milwaukee lookup from a tool result rather than from memory, which the
+ * gate's citation judge otherwise reads as an unsupported claim.
+ */
+export function handoffExtras(topic: string): { alsoOffer?: string } {
+  return topic === "pollingPlace"
+    ? {
+        alsoOffer:
+          "After giving this link, offer: if the voter types their address, BadgerBrief can look up their districts and, for an address in the City of Milwaukee, their Election Day polling place.",
+      }
+    : {};
+}
