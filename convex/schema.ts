@@ -651,7 +651,10 @@ export default defineSchema({
     createdAt: v.number(),
     resolvedAt: v.optional(v.number()),
     traceId: v.optional(v.string()), // Arize trace of the run that produced the draft (MOO-313)
-  }).index("by_status", ["status"]),
+  }).index("by_status", ["status"])
+    // One draft's open task, without scanning every open task (thousands of
+    // ad matches): the scan hit the 32,000-read limit on long sources.
+    .index("by_status_ref", ["status", "refId"]),
 
   source_fetch_logs: defineTable({
     url: v.string(),

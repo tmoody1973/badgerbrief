@@ -334,8 +334,7 @@ export const saveExtraction = internalMutation({
 
       const openTask = await ctx.db
         .query("review_tasks")
-        .withIndex("by_status", (q) => q.eq("status", "open"))
-        .filter((q) => q.eq(q.field("refId"), draftId))
+        .withIndex("by_status_ref", (q) => q.eq("status", "open").eq("refId", draftId))
         .first();
       if (!openTask) {
         await ctx.db.insert("review_tasks", {
