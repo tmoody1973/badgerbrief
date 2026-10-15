@@ -13,7 +13,7 @@ import { PartyBadge } from "./labels";
 export type Holds = { questionnaire: boolean; money: boolean; ads: boolean };
 
 const STAMP = "font-mono text-xs font-bold uppercase tracking-widest";
-const HOLD_LINK = "underline decoration-2 underline-offset-4 hover:text-primary";
+const HOLD_LINK = "tap underline decoration-2 underline-offset-4 hover:text-primary";
 
 function HoldsLine({ holds }: { holds?: Holds }) {
   const items = [

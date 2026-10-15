@@ -99,7 +99,7 @@ function SessionGroup({
       <button
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-secondary/40"
+        className="flex min-h-11 w-full items-center justify-between px-4 py-3 text-left hover:bg-secondary/40"
       >
         <span className="font-mono text-xs font-bold uppercase tracking-[0.1em]">
           <span aria-hidden="true">{open ? "▾" : "▸"}</span> {periodLabel(session, federal)}

@@ -45,7 +45,7 @@ function Chamber({
   );
   return (
     <details className="mt-3 border-2 border-border bg-card shadow-[var(--shadow-brutal)]">
-      <summary className="cursor-pointer px-4 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
+      <summary className="cursor-pointer px-4 py-3.5 font-mono text-xs font-bold uppercase tracking-[0.1em]">
         {label}{" "}
         <span className="font-normal text-muted-foreground">
           · {sorted.length} districts

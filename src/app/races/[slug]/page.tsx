@@ -229,7 +229,7 @@ export default async function RacePage({ params }: Props) {
 
       {ballot.hadPrimary && (
         <p className="mt-6 text-sm">
-          <Link href={archiveHref} className={linkClass}>
+          <Link href={archiveHref} className={`inline-flex min-h-11 items-center ${linkClass}`}>
             See everyone who ran in the {PRIMARY_ARCHIVE.label} →
           </Link>
         </p>
@@ -253,7 +253,7 @@ export default async function RacePage({ params }: Props) {
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t-2 border-border pt-4">
         <p className="font-mono text-xs text-muted-foreground">
-          <Link href={`/contribute?kind=data_gap&ref=${slug}`} className="underline-offset-2 hover:underline">
+          <Link href={`/contribute?kind=data_gap&ref=${slug}`} className="tap underline-offset-2 hover:underline">
             Flag a gap
           </Link>
         </p>

@@ -5,7 +5,7 @@ import { track } from "@/lib/analytics";
 
 const buttonClass =
   "press border-2 border-border bg-card px-4 py-2 font-bold text-foreground shadow-[var(--shadow-brutal)] hover:bg-secondary";
-const linkClass = "text-sm underline decoration-2 underline-offset-2";
+const linkClass = "tap text-sm underline decoration-2 underline-offset-2";
 
 type Surface = "race" | "candidate" | "compare" | "brief" | "match" | "ballot";
 type Method = "web_share" | "copy" | "x" | "facebook" | "email" | "bluesky";

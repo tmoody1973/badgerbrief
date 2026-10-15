@@ -431,14 +431,14 @@ export default async function CandidatePage({ params }: Props) {
             <p className="font-mono text-xs text-muted-foreground">
               <Link
                 href={`/contribute?kind=suggest_source&ref=${candidate.slug}`}
-                className="underline-offset-2 hover:underline"
+                className="tap underline-offset-2 hover:underline"
               >
                 Suggest a source
               </Link>
               {" · "}
               <Link
                 href={`/contribute?kind=data_gap&ref=${candidate.slug}`}
-                className="underline-offset-2 hover:underline"
+                className="tap underline-offset-2 hover:underline"
               >
                 Flag a gap
               </Link>

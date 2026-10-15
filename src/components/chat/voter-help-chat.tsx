@@ -31,9 +31,9 @@ const EXAMPLES = [
 /** What the chat can look up, and how to ask about candidates' own answers. */
 function WhatItChecks() {
   return (
-    <details className="mt-3 border-2 border-border bg-card p-3 text-sm">
-      <summary className="cursor-pointer font-bold">What Voter Help can check</summary>
-      <p className="mt-2">
+    <details className="mt-3 border-2 border-border bg-card px-3 text-sm">
+      <summary className="cursor-pointer py-3 font-bold">What Voter Help can check</summary>
+      <p>
         <strong>Candidates in their own words.</strong> Wisconsin Watch asked candidates for state and federal offices
         the same questions. Ask about one candidate, one office or one topic, for example “What did the candidates for
         attorney general tell Wisconsin Watch?” or “What did the candidates for governor say about taxes?” Voter Help quotes the
@@ -55,7 +55,7 @@ function WhatItChecks() {
       <p className="mt-2">
         Each answer starts with a “Checked” line naming the sources it looked at. Those sources are:
       </p>
-      <ul className="mt-2 list-disc space-y-1 pl-5">
+      <ul className="mt-2 list-disc space-y-1 pb-3 pl-5">
         {Object.values(SOURCES).map(({ label, about }) => (
           <li key={label}>
             <strong>{label}</strong>: {about}.
@@ -415,7 +415,7 @@ export function VoterHelpChat() {
           <button
             type="button"
             onClick={() => scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight, behavior: "smooth" })}
-            className="press absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider shadow-[var(--shadow-brutal)] hover:bg-secondary"
+            className="press absolute bottom-3 left-1/2 flex min-h-11 -translate-x-1/2 items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider shadow-[var(--shadow-brutal)] hover:bg-secondary"
           >
             <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M8 3v10M3.5 8.5 8 13l4.5-4.5" />

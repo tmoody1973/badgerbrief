@@ -25,7 +25,7 @@ export function IssuePicker({
             type="button"
             aria-pressed={on}
             onClick={() => onToggle(slug)}
-            className={`press border-2 border-border px-3 py-1.5 text-sm font-bold shadow-[var(--shadow-brutal)] ${
+            className={`press min-h-11 border-2 border-border px-3 py-1.5 text-sm font-bold shadow-[var(--shadow-brutal)] ${
               on ? "bg-foreground text-background" : "bg-card"
             }`}
           >

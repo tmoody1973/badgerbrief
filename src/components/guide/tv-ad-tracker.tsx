@@ -81,7 +81,7 @@ function SponsorCard({ s, enrichedKeys }: { s: Sponsor; enrichedKeys: string[] }
               href={s.pdfUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="press border-2 border-border bg-background px-2 py-1 font-mono text-[10px] uppercase tracking-widest"
+              className="press tap border-2 border-border bg-background px-2 py-1 font-mono text-xs uppercase tracking-widest"
             >
               FCC order ↗
             </a>

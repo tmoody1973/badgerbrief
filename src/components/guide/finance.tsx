@@ -1,4 +1,5 @@
 import type { Doc } from "../../../convex/_generated/dataModel";
+import { coverageLine } from "@/lib/coverage-line";
 import { MixBarMini, MixLegend } from "./financeBreakdown";
 
 const fmt = (n?: number) =>
@@ -36,7 +37,7 @@ function FundingTrace({
 }) {
   return (
     <details className="mt-1">
-      <summary className="mt-1 inline-block cursor-pointer border-2 border-border bg-warning px-2 py-1 font-mono text-xs font-bold uppercase tracking-widest text-foreground shadow-[var(--shadow-brutal)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none">
+      <summary className="tap mt-1 inline-block cursor-pointer border-2 border-border bg-warning px-2 py-1 font-mono text-xs font-bold uppercase tracking-widest text-foreground shadow-[var(--shadow-brutal)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none">
         ▸ Where this money comes from
       </summary>
       <div className="mt-2 border-2 border-dashed border-border bg-secondary/40 p-3">
@@ -181,7 +182,7 @@ export function FinanceSummary({
           </div>
           {t.coverageEndDate && (
             <p className="mt-3 text-center font-mono text-xs text-muted-foreground">
-              through {t.coverageEndDate}
+              {coverageLine(t.coverageEndDate)}
             </p>
           )}
           <SourceNote source={t.source} />
@@ -239,8 +240,8 @@ export function FinanceDetail({
                 ))}
               </ul>
               {ranked.length > 5 && (
-                <details className="mt-2">
-                  <summary className="cursor-pointer font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                <details>
+                  <summary className="cursor-pointer py-3.5 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     Show {Math.min(ranked.length, 10) - 5} more
                   </summary>
                   <ul className="mt-2 space-y-1 text-sm">
@@ -269,8 +270,8 @@ export function FinanceDetail({
                   qualifiesForTrace={qualifiesForTrace}
                 />
                 {orgs.length > 5 && (
-                  <details className="mt-2">
-                    <summary className="cursor-pointer font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <details>
+                    <summary className="cursor-pointer py-3.5 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       Show {orgs.length - 5} more
                     </summary>
                     <OrgDonorList

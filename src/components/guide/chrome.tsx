@@ -33,7 +33,7 @@ export function SiteHeader() {
     <header className="border-b-2 border-border bg-card">
       <div className="mx-auto w-full max-w-5xl px-4 py-3">
         <div className="flex items-center justify-between gap-4">
-          <Link href={localizeHref("/", locale)} className="font-display text-2xl tracking-tight">
+          <Link href={localizeHref("/", locale)} className="tap font-display text-2xl tracking-tight">
             Badger<span className="text-primary">Brief</span>
           </Link>
           <div className="flex items-center gap-3">

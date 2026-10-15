@@ -28,7 +28,7 @@ export function LangToggle() {
       lang={label === "Español" ? "es" : "en"}
       hrefLang={href.startsWith("/es") ? "es" : "en"}
       aria-label={`Cambiar idioma / switch language: ${label}`}
-      className="whitespace-nowrap border-2 border-border bg-card px-2 py-1 font-mono text-xs font-bold uppercase tracking-wider shadow-[var(--shadow-brutal)] hover:bg-secondary"
+      className="tap whitespace-nowrap border-2 border-border bg-card px-2 py-1 font-mono text-xs font-bold uppercase tracking-wider shadow-[var(--shadow-brutal)] hover:bg-secondary"
     >
       {label}
     </Link>

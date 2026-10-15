@@ -73,7 +73,7 @@ export function VoteGuide({
 
       <Link
         href={dict.toggle.href}
-        className="inline-block border-2 border-border bg-card px-2 py-1 font-mono text-xs font-bold uppercase tracking-widest shadow-[var(--shadow-brutal)]"
+        className="tap inline-block border-2 border-border bg-card px-2 py-1 font-mono text-xs font-bold uppercase tracking-widest shadow-[var(--shadow-brutal)]"
       >
         {dict.toggle.label}
       </Link>
@@ -87,7 +87,7 @@ export function VoteGuide({
         <p className="mt-3 font-mono text-xs text-muted-foreground">
           <Link
             href={dict.ballotBasics.href}
-            className="underline-offset-2 hover:underline"
+            className="inline-flex min-h-11 items-center underline-offset-2 hover:underline"
           >
             {dict.ballotBasics.text} → Ballot basics
           </Link>
@@ -157,16 +157,16 @@ export function VoteGuide({
               return (
                 <details
                   key={row.key}
-                  className="border-2 border-border bg-card p-3"
+                  className="border-2 border-border bg-card px-3 pb-0.5"
                 >
-                  <summary className="cursor-pointer font-bold">
+                  <summary className="cursor-pointer py-2.5 font-bold">
                     {t.title}
                   </summary>
-                  <p className="mt-2 max-w-[60ch] text-sm">{t.summary}</p>
+                  <p className="max-w-[60ch] text-sm">{t.summary}</p>
                   <p className="mt-2 max-w-[60ch] text-sm whitespace-pre-line">
                     {t.details}
                   </p>
-                  <div className="mt-3">
+                  <div className="mt-3 pb-2">
                     <SourceList sources={row.sources} />
                   </div>
                 </details>

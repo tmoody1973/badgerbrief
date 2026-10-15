@@ -85,7 +85,7 @@ export function AnnouncementBar({
           type="button"
           aria-label="Dismiss this announcement"
           onClick={dismiss}
-          className="shrink-0 border-2 border-border px-2 py-0.5 font-mono text-[11px] font-bold leading-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+          className="tap shrink-0 border-2 border-border px-2 py-0.5 font-mono text-xs font-bold leading-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
         >
           ✕
         </button>
