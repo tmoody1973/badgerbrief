@@ -13,6 +13,9 @@ export type IssueGroup = {
   label: string;
   onRecord: { candidate: CompareCandidate; position: ComparePosition }[];
   noRecord: CompareCandidate[];
+  /** One slot per candidate, in the order the caller passed them (ballot
+   * order on /compare), so a column always belongs to the same candidate. */
+  cells: { candidate: CompareCandidate; position: ComparePosition | null }[];
 };
 
 export function buildIssueComparison(
@@ -36,12 +39,13 @@ export function buildIssueComparison(
       .sort((a, b) => byLastName(a.candidate, b.candidate));
     const onSet = new Set(byCand.keys());
     const noRecord = candidates.filter((c) => !onSet.has(c.slug)).sort(byLastName);
-    return { issueSlug, label: labelForSlug(issueSlug), onRecord, noRecord };
+    const cells = candidates.map((candidate) => ({ candidate, position: byCand.get(candidate.slug) ?? null }));
+    return { issueSlug, label: labelForSlug(issueSlug), onRecord, noRecord, cells };
   });
 
-  issues.sort(
-    (a, b) => b.onRecord.length - a.onRecord.length || a.label.localeCompare(b.label),
-  );
+  // Alphabetical (Tarik, 2026-10-15): ordering by coverage put an issue lower
+  // because one side had not published on it.
+  issues.sort((a, b) => a.label.localeCompare(b.label));
 
   const totalOnRecord = issues.reduce((n, i) => n + i.onRecord.length, 0);
   return { issues, totalOnRecord };

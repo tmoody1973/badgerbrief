@@ -44,4 +44,11 @@ describe("BallotContest", () => {
     expect(thin).toContain("No questionnaire, money or ads on record");
     expect(thin).not.toContain("bg-primary");
   });
+
+  test("leaves the holds line off pages whose sections it would point to do not exist", () => {
+    const html = renderToStaticMarkup(<BallotContest candidates={[crowley]} />);
+    expect(html).toContain("Crowley");
+    expect(html).not.toContain("on record");
+    expect(html).not.toContain("#money");
+  });
 });

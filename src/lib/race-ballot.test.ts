@@ -165,6 +165,9 @@ describe("what the compare page and share cards say", () => {
 
   test("a real contest is counted", () => {
     expect(compareIntro(two)).toMatch(/^The 2 candidates on the November 3, 2026 ballot, side by side/);
+    expect(compareIntro(two, 0)).toBe(
+      "The 2 candidates on the November 3, 2026 ballot, as printed. None has a position on record that the guide could source yet.",
+    );
     expect(compareDescription("Governor of Wisconsin", two)).toBe(
       "Where the 2 candidates on the November 3, 2026 ballot for Governor of Wisconsin stand, issue by issue — every stance linked to its source.",
     );

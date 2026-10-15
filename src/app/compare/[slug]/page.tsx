@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PartyBadge } from "@/components/guide/labels";
+import { BallotContest } from "@/components/guide/ballot-contest";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
 import { TrustBlock } from "@/components/guide/trust-block";
@@ -12,11 +12,17 @@ import { buildIssueComparison } from "@/lib/compare";
 import { getRace, listRaces } from "@/lib/data";
 import { JsonLd, breadcrumbNode, organizationNode } from "@/lib/jsonld";
 import { SITE_URL, raceIdToSlug, slugToRaceId } from "@/lib/site";
-import { generalParty, generalPersonName } from "../../../../convex/lib/ballot";
+import { generalPersonName } from "../../../../convex/lib/ballot";
 import { PRIMARY_ARCHIVE } from "@/lib/election";
 import { buildRaceBallot, compareDescription, compareIntro } from "@/lib/race-ballot";
 
 export const revalidate = 300;
+
+/** Side by side only while the columns stay readable; 4+ stack in ballot order. */
+const COLS: Record<number, string> = {
+  2: "sm:grid-cols-2 sm:divide-x-2 sm:divide-y-0",
+  3: "lg:grid-cols-3 lg:divide-x-2 lg:divide-y-0",
+};
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -49,6 +55,8 @@ export default async function ComparePage({ params }: Props) {
   const positions = data.positions.filter((p) => onBallot.has(p.candidateSlug));
   const { issues, totalOnRecord } = buildIssueComparison(candidates, positions);
 
+  const orderOf = new Map(candidates.map((c, i) => [c.slug, c.general?.ballotOrder ?? i + 1]));
+
   const navSections: NavSection[] = issues.map((i) => ({
     id: i.issueSlug,
     label: i.label,
@@ -56,7 +64,7 @@ export default async function ComparePage({ params }: Props) {
   }));
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-10">
+    <main className="mx-auto w-full max-w-5xl px-4 pt-4 pb-10">
       <JsonLd
         nodes={[
           organizationNode(),
@@ -70,139 +78,89 @@ export default async function ComparePage({ params }: Props) {
 
       {navSections.length > 0 && <SectionNav sections={navSections} />}
 
-      <Link
-        href={`/races/${slug}`}
-        className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground underline-offset-2 hover:underline"
-      >
-        ← {race.office}
-      </Link>
-      <h1 className="font-display mt-2 text-3xl leading-tight">
-        How do the {race.office} candidates compare?
-      </h1>
-      <p className="mt-2 max-w-2xl">
-        {compareIntro(ballot)}{" "}
-        <Link href={`${PRIMARY_ARCHIVE.path}/races/${slug}`} className="underline decoration-2 underline-offset-2">
-          See the August primary field
+      {/* Stamp line, as on the race and candidate pages. */}
+      <p className="mt-5 flex flex-wrap gap-x-5 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <Link href={`/races/${slug}`} className="inline-flex min-h-11 items-center underline-offset-4 hover:text-foreground hover:underline">
+          ← Race page
         </Link>
-        .
+        {race.general && (
+          <a href={race.general.source.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center underline decoration-2 underline-offset-4 hover:text-foreground">
+            Certified ballot ↗
+          </a>
+        )}
       </p>
-      <p className="mt-3">
-        <Link
-          href="/match"
-          className="inline-flex min-h-11 items-center font-mono text-xs font-bold uppercase tracking-widest underline underline-offset-2"
-        >
+      <h1 className="font-display mt-1 text-[clamp(2.25rem,8vw,3.5rem)] leading-[1.05] [text-wrap:balance]">
+        {race.office}
+      </h1>
+      <p className="mt-3 max-w-2xl">{compareIntro(ballot, totalOnRecord)}</p>
+      <p>
+        <Link href="/match" className="inline-flex min-h-11 items-center font-mono text-xs font-bold uppercase tracking-widest underline underline-offset-2">
           Or start from the issues you care about →
         </Link>
       </p>
 
-      {candidates.length < 2 ? null : totalOnRecord === 0 ? (
-        <div className="mt-6 border-2 border-border bg-card p-6 shadow-[var(--shadow-brutal)]">
-          <p className="font-display text-lg">No sourced positions on record yet for these candidates.</p>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            When candidates publish positions we can source, they’ll appear here issue by issue. In the meantime,
-            see each candidate’s page for background, finance, and coverage.
-          </p>
-          <Link
-            href={`/races/${slug}`}
-            className="mt-2 inline-flex min-h-11 items-center font-mono text-xs font-bold uppercase tracking-widest underline underline-offset-2"
-          >
-            ← Back to {race.office}
+      {/* The contest as printed: names the field even when nobody has a
+          position on record, and its numbers key the columns below. */}
+      {candidates.length > 0 && <BallotContest candidates={candidates} />}
+      {ballot.hadPrimary && (
+        <p className="mt-2 text-sm">
+          <Link href={`${PRIMARY_ARCHIVE.path}/races/${slug}`} className="inline-flex min-h-11 items-center underline decoration-2 underline-offset-2">
+            See everyone who ran in the {PRIMARY_ARCHIVE.label} →
           </Link>
-        </div>
-      ) : (
-        <div className="mt-6 space-y-10">
-          <WhatThisMeans topic="stance-labels" />
-          <WhatThisMeans topic="sourced-position-vs-claim" />
+        </p>
+      )}
+
+      {candidates.length > 1 && totalOnRecord > 0 && (
+        <div className="mt-10 space-y-10">
           {issues.map((issue) => (
             <section key={issue.issueSlug} id={issue.issueSlug} className="scroll-mt-16">
               <h2 className="font-display text-2xl">{issue.label}</h2>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {issue.onRecord.map(({ candidate, position }) => (
-                  <div
-                    key={candidate.slug}
-                    className="flex flex-col border-2 border-border bg-card p-3 shadow-[var(--shadow-brutal)]"
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Link
-                        href={`/candidates/${candidate.slug}`}
-                        className="tap font-bold underline decoration-2 underline-offset-2"
-                      >
+              {/* One unit per issue. Each candidate keeps the same slot in
+                  ballot order, filled or not, so a column never changes owner. */}
+              <div className={`mt-3 grid divide-y-2 divide-dashed divide-border border-2 border-border bg-card shadow-[var(--shadow-brutal)] ${COLS[issue.cells.length] ?? ""}`}>
+                {issue.cells.map(({ candidate, position }) => (
+                  <div key={candidate.slug} className="flex flex-col px-4 py-3">
+                    <p className="flex items-baseline gap-2">
+                      <span aria-hidden="true" className="font-display w-5 text-xl leading-none text-muted-foreground tabular-nums">
+                        {orderOf.get(candidate.slug)}
+                      </span>
+                      <Link href={`/candidates/${candidate.slug}`} className="tap font-bold underline decoration-2 underline-offset-2">
                         {generalPersonName(candidate)}
                       </Link>
-                      <PartyBadge party={generalParty(candidate)} />
-                      {candidate.incumbent && (
-                        <span className="border border-border bg-secondary px-1 font-mono text-xs font-bold uppercase">
-                          Inc.
-                        </span>
-                      )}
-                    </div>
-                    <span className="mt-2 w-fit border border-border bg-muted px-1.5 py-0.5 font-mono text-xs font-bold uppercase">
-                      {position.stance}
-                    </span>
-                    <p className="mt-2 max-w-[54ch] text-sm">{position.summary}</p>
-                    <div className="mt-auto pt-2">
-                      <SourceList sources={position.sources} title="Position sources" collapsible />
-                    </div>
+                    </p>
+                    {position ? (
+                      <>
+                        <p className="mt-2 font-mono text-xs font-bold uppercase tracking-widest">Stance · {position.stance}</p>
+                        <p className="mt-1 max-w-[54ch] text-sm leading-relaxed">{position.summary}</p>
+                        <div className="mt-auto pt-2">
+                          <SourceList sources={position.sources} title="Position sources" collapsible />
+                        </div>
+                      </>
+                    ) : (
+                      <p className="mt-2 text-sm text-muted-foreground">No sourced position on record.</p>
+                    )}
                   </div>
                 ))}
               </div>
-              {issue.noRecord.length > 0 && (
-                <NoRecordLine candidates={issue.noRecord} />
-              )}
             </section>
           ))}
+          <div>
+            <WhatThisMeans topic="stance-labels" />
+            <WhatThisMeans topic="sourced-position-vs-claim" />
+          </div>
         </div>
       )}
 
       <TrustBlock sources={candidateSources([], race.general)} updated={pageUpdated(race.general, race.dataAsOf)} />
 
-      <div className="mt-6 flex flex-col gap-4">
-        <ShareButton
-          url={`${SITE_URL}/compare/${slug}`}
-          title={`Compare the ${race.office} candidates — BadgerBrief`}
-        />
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t-2 border-border pt-4">
+        <p className="font-mono text-xs text-muted-foreground">
+          <Link href={`/contribute?kind=data_gap&ref=${slug}`} className="tap underline-offset-2 hover:underline">
+            Flag a gap
+          </Link>
+        </p>
+        <ShareButton url={`${SITE_URL}/compare/${slug}`} title={`Compare the ${race.office} candidates — BadgerBrief`} />
       </div>
     </main>
-  );
-}
-
-function NoRecordLine({
-  candidates,
-}: {
-  candidates: { slug: string; name: string }[];
-}) {
-  const HEAD = 3;
-  const rest = candidates.slice(HEAD);
-  const links = candidates.map((c, i) => (
-    <span key={c.slug}>
-      {i > 0 ? ", " : ""}
-      <Link
-        href={`/candidates/${c.slug}`}
-        className="tap underline underline-offset-2 hover:decoration-2"
-      >
-        {c.name}
-      </Link>
-    </span>
-  ));
-
-  // ≤3 names: no fold needed — show them inline, all linked.
-  if (rest.length === 0) {
-    return (
-      <p className="mt-3 font-mono text-xs text-muted-foreground">
-        No position on record: {links}
-      </p>
-    );
-  }
-
-  // >3: summary shows the first 3 names as plain text plus a "+N more" toggle
-  // (plain text so the summary click toggles rather than following a link);
-  // the expanded body lists every name as a link.
-  return (
-    <details className="mt-1">
-      <summary className="cursor-pointer py-3.5 font-mono text-xs text-muted-foreground">
-        No position on record: {candidates.slice(0, HEAD).map((c) => c.name).join(", ")}, +{rest.length} more
-      </summary>
-      <p className="mt-2 font-mono text-xs text-muted-foreground">{links}</p>
-    </details>
   );
 }

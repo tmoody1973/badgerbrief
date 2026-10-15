@@ -12,13 +12,27 @@ const pos = (candidateSlug: string, issueSlug: string): ComparePosition => ({
 });
 
 describe("buildIssueComparison", () => {
-  it("sorts issues by coverage desc, then label asc; candidates alpha by last name", () => {
+  it("lists issues alphabetically, so coverage never decides what comes first", () => {
+    const positions = [pos("smith", "taxes-budget"), pos("barnes", "taxes-budget"), pos("lee", "abortion")];
+    const { issues } = buildIssueComparison(cands, positions);
+    expect(issues.map((i) => i.label)).toEqual(["Abortion", "Taxes & budget"]);
+  });
+
+  it("gives every candidate a fixed slot per issue, in the order passed, empty when off record", () => {
+    const { issues } = buildIssueComparison(cands, [pos("lee", "abortion")]);
+    expect(issues[0].cells.map((c) => [c.candidate.slug, c.position?.summary ?? null])).toEqual([
+      ["smith", null],
+      ["barnes", null],
+      ["lee", "lee on abortion"],
+    ]);
+  });
+
+  it("candidates on record alpha by last name; the rest are no-record", () => {
     const positions = [
       pos("smith", "education"),                          // education: 1
       pos("smith", "abortion"), pos("barnes", "abortion"), // abortion: 2
     ];
     const { issues, totalOnRecord } = buildIssueComparison(cands, positions);
-    expect(issues.map((i) => i.issueSlug)).toEqual(["abortion", "education"]); // coverage 2 before 1
     expect(issues[0].label).toBe("Abortion");
     // abortion onRecord alpha by last name: Barnes, Smith
     expect(issues[0].onRecord.map((r) => r.candidate.slug)).toEqual(["barnes", "smith"]);

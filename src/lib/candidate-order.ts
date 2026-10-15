@@ -7,7 +7,17 @@ export const byLastName = <T extends { name: string }>(a: T, b: T) =>
 
 // ponytail: slug -> Title Case; acronym-blind. Upgrade to a label map only if an
 // issue slug reads wrong on the page.
+/** Plain-English issue names, matching ISSUE_LABEL in convex/votesQueries.ts
+ * (kept as a copy so the website ships without a database deploy). */
+const ISSUE_LABEL: Record<string, string> = {
+  healthcare: "Healthcare", education: "Education", "public-safety": "Public safety",
+  "taxes-budget": "Taxes & budget", abortion: "Abortion", housing: "Housing", immigration: "Immigration",
+  "environment-energy": "Environment & energy", "economy-jobs": "Economy & jobs",
+  "elections-democracy": "Elections & democracy", agriculture: "Agriculture",
+};
+
 export const labelForSlug = (slug: string) =>
+  ISSUE_LABEL[slug] ??
   slug
     .split(/[-_]/)
     .filter(Boolean)

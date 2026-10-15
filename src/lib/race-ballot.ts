@@ -133,13 +133,14 @@ const ON_NOV_3 = `on the ${CURRENT_ELECTION.longDate} ballot`;
 const NOT_LOADED = `The ${CURRENT_ELECTION.longDate} ballot for this office has not been loaded into the guide yet.`;
 
 /** The compare page's opening line. Running mates are not a contest to compare. */
-export function compareIntro<C>(ballot: RaceBallot<C>): string {
+export function compareIntro<C>(ballot: RaceBallot<C>, onRecord?: number): string {
   if (ballot.kind === "no-contest") return ballot.note;
   if (ballot.kind === "not-loaded") return NOT_LOADED;
   const n = ballot.onBallot.length;
   if (n === 0) return `No candidates are ${ON_NOV_3} for this office.`;
   if (n === 1) return `One candidate is ${ON_NOV_3} for this office, so there is nothing to compare.`;
-  return `The ${n} candidates ${ON_NOV_3}, side by side, issue by issue. Every stance is a sourced summary — follow the source links to read it in context. This is not a ranking or endorsement.`;
+  if (onRecord === 0) return `The ${n} candidates ${ON_NOV_3}, as printed. None has a position on record that the guide could source yet.`;
+  return `The ${n} candidates ${ON_NOV_3}, side by side, issue by issue. Each stance is a sourced summary, not a ranking or endorsement.`;
 }
 
 export function compareDescription<C extends CandidateLike>(office: string, ballot: RaceBallot<C>): string {
