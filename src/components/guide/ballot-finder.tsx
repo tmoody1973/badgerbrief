@@ -71,7 +71,7 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
     });
   }, [prefs, status.kind]);
 
-  const applyDistricts = (districts: Districts, matchedAddress?: string) => {
+  const applyDistricts = (districts: Districts, matchedAddress?: string, ward?: string) => {
     setStatus({ kind: "found", districts, matchedAddress });
     if (isAuthenticated) {
       void save({
@@ -79,6 +79,7 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
         congressionalDistrict: String(districts.congressional),
         stateSenateDistrict: String(districts.senate),
         stateAssemblyDistrict: String(districts.assembly),
+        ...(ward ? { ward } : {}),
       });
     }
   };
@@ -98,6 +99,7 @@ export function BallotFinder({ races }: { races: Doc<"races">[] }) {
         applyDistricts(
           { congressional: data.congressional, senate: data.senate, assembly: data.assembly },
           data.matchedAddress,
+          data.pollingPlace?.ward,
         );
       } else if (data.error === "not_wisconsin") {
         track("ballot_lookup", { status: "no_match" });

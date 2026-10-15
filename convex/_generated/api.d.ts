@@ -91,6 +91,7 @@ import type * as outletEnrich from "../outletEnrich.js";
 import type * as outlets from "../outlets.js";
 import type * as pollsQueries from "../pollsQueries.js";
 import type * as preferences from "../preferences.js";
+import type * as preferencesBackfill from "../preferencesBackfill.js";
 import type * as public_ from "../public.js";
 import type * as publish from "../publish.js";
 import type * as publishedDateSync from "../publishedDateSync.js";
@@ -205,6 +206,7 @@ declare const fullApi: ApiFromModules<{
   outlets: typeof outlets;
   pollsQueries: typeof pollsQueries;
   preferences: typeof preferences;
+  preferencesBackfill: typeof preferencesBackfill;
   public: typeof public_;
   publish: typeof publish;
   publishedDateSync: typeof publishedDateSync;

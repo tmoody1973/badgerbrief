@@ -70,6 +70,9 @@ export default defineSchema({
     congressionalDistrict: v.optional(v.string()),
     stateSenateDistrict: v.optional(v.string()),
     stateAssemblyDistrict: v.optional(v.string()),
+    // City of Milwaukee ward, so the brief can show the Election Day polling
+    // place (mke_wards). Absent outside the city.
+    ward: v.optional(v.string()),
     savedRaceIds: v.array(v.string()),
     savedIssues: v.array(v.string()),
     detailLevel: v.union(
