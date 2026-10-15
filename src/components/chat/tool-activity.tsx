@@ -10,6 +10,7 @@ export const SOURCES: Record<string, { label: string; about: string }> = {
   getVotingInfo: { label: "Voting dates and rules", about: "registration and absentee deadlines, early voting, poll hours and voter ID, from official sources" },
   getVoterAccess: { label: "Voter access info", about: "the rules for situations such as a name change, a disability, homelessness or a past felony conviction" },
   getMyBallot: { label: "Your ballot", about: "the races for the address you saved, when you are signed in" },
+  findPollingPlace: { label: "Address lookup", about: "your districts for an address you type, and in the City of Milwaukee your Election Day polling place" },
   matchBallotByIssues: { label: "Positions by issue", about: "which candidates on your ballot have a published position on the issues you name" },
   getRaceInfo: { label: "Race records", about: "who is on the November 3 ballot for an office, from the state’s certified list, with positions and campaign money" },
   getCandidateInfo: { label: "Candidate records", about: "a candidate’s published positions and quotes, each with its source, and campaign money" },

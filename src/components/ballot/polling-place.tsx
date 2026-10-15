@@ -25,7 +25,7 @@ export function PollingPlaceCard({ place }: { place: PollingPlace }) {
   return (
     <section aria-labelledby="polling-place" className="mt-5 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)] sm:p-6">
       <h2 id="polling-place" className="font-display text-2xl">
-        Where you vote on Nov 3
+        Where you vote on Nov{" "}3
       </h2>
       <p className="mt-3 text-lg font-bold leading-snug">{place.pollingPlace}</p>
       <p className="mt-1">

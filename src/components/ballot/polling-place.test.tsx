@@ -18,7 +18,8 @@ describe("PollingPlaceCard", () => {
   const html = renderToStaticMarkup(<PollingPlaceCard place={ward141} />);
 
   test("names the building, its address and the ward", () => {
-    expect(html).toContain("Where you vote on Nov 3");
+    // Non-breaking space: "Nov 3" never splits across lines on a phone.
+    expect(html).toContain("Where you vote on Nov\u00a03");
     expect(html).toContain("Zeidler, Frank P. Municipal Building");
     expect(html).toContain("841 N Broadway");
     expect(html).toContain("Ward 141");

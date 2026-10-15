@@ -447,6 +447,7 @@ export function VoterHelpChat() {
         <p className="mt-2 text-xs text-muted-foreground">
           For official actions (registering, absentee, polling place), MyVote
           Wisconsin is always the authoritative source.
+          {" "}Addresses you type are saved with this conversation; New conversation starts over.
           {!isAuthenticated && " Sign in to save this conversation across devices."}
         </p>
       </div>
