@@ -1,10 +1,16 @@
 "use node";
 /**
  * MOO-318 Task 5: Broadcast-TV ad sync. For each curated Wisconsin station,
- * drive a Browserbase browser to enumerate its FCC 2026 political-file folders
- * (the API is Akamai-blocked to plain requests — verified 2026-07-21), download
- * the in-scope order PDFs, extract each with Sonnet (Task 4), and land them as
- * human-reviewed `ads` rows (platform:"tv"). Idempotent by fileManagerId.
+ * find its new in-scope FCC 2026 political-file orders, download them, extract
+ * each with Sonnet (Task 4), and land them as human-reviewed `ads` rows
+ * (platform:"tv"). Idempotent by fileManagerId.
+ *
+ * Finding orders (2026-10-15): by default from the station's Atom feed, which
+ * is not Akamai-blocked (see lib/tvFeed.ts). The feed holds only the 10 newest
+ * uploads, so the cron polls every 2 hours. `source: "browser"` still walks the
+ * full folder tree in a real browser (Browserbase, or a TinyFish session via
+ * `cdpUrl`), for a one-time backfill. Either way
+ * the PDFs come from files.fcc.gov/download by plain fetch.
  *
  * Trust posture (inviolable): TV name matches cap below the public threshold, so
  * nothing auto-attributes — every ingested order routes to a review task (with a
@@ -26,6 +32,7 @@ import {
 } from "./lib/adsMatch";
 import { toAdWrite, buildDisclosure, type TvAdExtraction } from "./lib/tvExtract";
 import { onBallotOnly } from "./lib/jobScope";
+import { categoryScope, categorySlug, parseStationFeed, type EnumeratedDoc } from "./lib/tvFeed";
 
 const YEAR = 2026;
 const FCC_BASE = "https://publicfiles.fcc.gov";
@@ -55,19 +62,6 @@ const TV_STATIONS: Station[] = [
   { callSign: "WCWF", dma: "Green Bay-Appleton", network: "CW" },
   { callSign: "WACY-TV", dma: "Green Bay-Appleton", network: "Independent" },
 ];
-
-// In-scope FCC political-file categories. State/Federal are filtered to tracked
-// candidates (by surname in the folder name); issue ads are all included.
-const CANDIDATE_CATEGORIES = ["state", "federal"];
-const ISSUE_CATEGORY_MATCH = /non.?candidate|issue/i;
-const SKIP_CATEGORIES = ["local", "terms"];
-
-type EnumeratedDoc = {
-  name: string;
-  fileManagerId: string;
-  fccDocUrl: string;
-  category: string;
-};
 
 // ---------- ingest core (testable, no network) ----------
 
@@ -141,31 +135,29 @@ export const ingestTvDoc = internalAction({
   },
 });
 
-// ---------- Browserbase enumeration + download (network) ----------
+// ---------- browser enumeration + download (network) ----------
 
 type BbPage = any; // playwright Page — typed `any` to keep the import dynamic.
 
-/** session create → connectOverCDP → download behavior → fn(page, sessionId) → close. */
-async function withBrowserbase<T>(
-  fn: (page: BbPage, sessionId: string) => Promise<T>,
-): Promise<T> {
-  const { Browserbase } = await import("@browserbasehq/sdk");
+/**
+ * A real browser page for walking the folder tree (downloads no longer need
+ * one). `cdpUrl` connects to a session opened elsewhere, e.g. TinyFish
+ * (`tinyfish browser session create --browser-profile stealth`), which passed
+ * the FCC block on 2026-10-15; without it, a Browserbase session is opened.
+ */
+async function withBrowser<T>(fn: (page: BbPage) => Promise<T>, cdpUrl?: string): Promise<T> {
   const { chromium } = await import("playwright-core");
-  const bb = new Browserbase({ apiKey: process.env.BROWSERBASE_API_KEY! });
-  const session = await bb.sessions.create({
-    projectId: process.env.BROWSERBASE_PROJECT_ID!,
-  });
-  const browser = await chromium.connectOverCDP(session.connectUrl);
+  let connectUrl = cdpUrl;
+  if (!connectUrl) {
+    const { Browserbase } = await import("@browserbasehq/sdk");
+    const bb = new Browserbase({ apiKey: process.env.BROWSERBASE_API_KEY! });
+    connectUrl = (await bb.sessions.create({ projectId: process.env.BROWSERBASE_PROJECT_ID! })).connectUrl;
+  }
+  const browser = await chromium.connectOverCDP(connectUrl);
   try {
-    const ctx = browser.contexts()[0];
+    const ctx = browser.contexts()[0] ?? (await browser.newContext());
     const page = ctx.pages()[0] ?? (await ctx.newPage());
-    const cdp = await ctx.newCDPSession(page);
-    await cdp.send("Browser.setDownloadBehavior", {
-      behavior: "allow",
-      downloadPath: "downloads",
-      eventsEnabled: true,
-    });
-    return await fn(page, session.id);
+    return await fn(page);
   } finally {
     await browser.close();
   }
@@ -271,11 +263,11 @@ async function enumerateStation(
   const seenFolders = new Set<string>();
 
   for (const cat of categories) {
-    const slug = normalizeText(cat.name).replace(/\s+/g, "-");
-    if (SKIP_CATEGORIES.some((s) => slug.includes(s))) continue;
-    const isIssue = ISSUE_CATEGORY_MATCH.test(cat.name);
-    const isCandidate = CANDIDATE_CATEGORIES.some((c) => slug.includes(c));
-    if (!isIssue && !isCandidate) continue;
+    const slug = categorySlug(cat.name);
+    const scope = categoryScope(cat.name);
+    if (!scope) continue;
+    const isIssue = scope === "issue";
+    const isCandidate = scope === "candidate";
     if (seenFolders.has(cat.href)) continue;
     seenFolders.add(cat.href);
 
@@ -357,57 +349,15 @@ async function unwrapPortfolio(
   }
 }
 
-const slugify = (s: string) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-
-/**
- * Download each doc via the alternate host, then retrieve the session ZIP and
- * unzip. Browserbase names zip entries after the PDF's *suggested filename*
- * (not the fileManagerId), so we capture each download's suggestedFilename at
- * trigger time and correlate to zip entries by slug prefix. Returns id → bytes.
- */
-async function downloadDocs(
-  page: BbPage,
-  sessionId: string,
-  fileManagerIds: string[],
-): Promise<Record<string, Uint8Array>> {
-  if (fileManagerIds.length === 0) return {};
-  const idBySlug: { id: string; slug: string }[] = [];
-  for (const id of fileManagerIds) {
-    const [download] = await Promise.all([
-      page.waitForEvent("download", { timeout: 15000 }).catch(() => null),
-      page.goto(`${DOWNLOAD_HOST}/${id}.pdf`).catch(() => null),
-    ]);
-    if (download) {
-      const suggested = download.suggestedFilename?.() ?? "";
-      idBySlug.push({ id, slug: slugify(suggested.replace(/\.pdf$/i, "")) });
-    }
-  }
-  await page.waitForTimeout(3000); // let Browserbase persist the files
-  const res = await fetch(
-    `https://api.browserbase.com/v1/sessions/${sessionId}/downloads`,
-    { headers: { "X-BB-API-Key": process.env.BROWSERBASE_API_KEY! } },
-  );
-  if (!res.ok) throw new Error(`downloads retrieve HTTP ${res.status}`);
-  const zipBuf = new Uint8Array(await res.arrayBuffer());
-  const { unzipSync } = await import("fflate");
-  const files = unzipSync(zipBuf);
-  const entries = Object.entries(files).map(([name, bytes]) => ({
-    key: slugify(name.split("/").pop()!.replace(/\.pdf$/i, "")),
-    bytes,
-  }));
-
-  // Correlate by slug prefix (the zip key = slug + "-" + browserbase timestamp).
+/** Download each doc from files.fcc.gov, which serves plain fetch. id → bytes; a failed doc is left out. */
+async function downloadDocs(fileManagerIds: string[]): Promise<Record<string, Uint8Array>> {
   const out: Record<string, Uint8Array> = {};
-  const used = new Set<number>();
-  for (const { id, slug } of idBySlug) {
-    if (!slug) continue;
-    const idx = entries.findIndex(
-      (e, i) => !used.has(i) && e.key.startsWith(slug),
-    );
-    if (idx >= 0) {
-      used.add(idx);
-      out[id] = entries[idx].bytes;
+  for (const id of fileManagerIds) {
+    try {
+      const res = await fetch(`${DOWNLOAD_HOST}/${id}.pdf`);
+      if (res.ok) out[id] = new Uint8Array(await res.arrayBuffer());
+    } catch {
+      // one bad download skips that doc, not the station
     }
   }
   return out;
@@ -507,16 +457,16 @@ export const backfillTvDisclosure = internalAction({
 // ---------- orchestration ----------
 
 /**
- * Cron entry: fan out one bounded worker per station, staggered ~90s apart so
- * concurrent Browserbase sessions stay within the project's concurrency cap (3)
- * and each worker action stays well within Convex's time limit. A full
- * all-stations sweep in one action would time out.
+ * Cron entry: fan out one bounded worker per station, staggered 15s apart, so
+ * each worker action stays well within Convex's time limit. A full
+ * all-stations sweep in one action would time out. (The feed needs no
+ * browser; the old 90s stagger kept Browserbase under 3 concurrent sessions.)
  */
 export const syncTvAdsDispatch = internalAction({
   args: {},
   handler: async (ctx): Promise<{ scheduled: number }> => {
     for (let i = 0; i < TV_STATIONS.length; i++) {
-      await ctx.scheduler.runAfter(i * 90_000, internal.adsTv.syncTvAds, {
+      await ctx.scheduler.runAfter(i * 15_000, internal.adsTv.syncTvAds, {
         callSigns: [TV_STATIONS[i].callSign],
       });
     }
@@ -531,10 +481,14 @@ export const syncTvAds = internalAction({
     callSigns: v.optional(v.array(v.string())),
     stationLimit: v.optional(v.number()),
     docLimit: v.optional(v.number()),
+    /** "feed" (default, free, newest 10 uploads) or "browser" (full history). */
+    source: v.optional(v.union(v.literal("feed"), v.literal("browser"))),
+    /** With source "browser": an already-open remote browser (TinyFish) instead of Browserbase. */
+    cdpUrl: v.optional(v.string()),
   },
   handler: async (
     ctx,
-    { callSigns, stationLimit, docLimit },
+    { callSigns, stationLimit, docLimit, source = "feed", cdpUrl },
   ): Promise<{
     stations: number;
     enumerated: number;
@@ -579,24 +533,21 @@ export const syncTvAds = internalAction({
     for (const station of stations) {
       const stationUrl = `${FCC_BASE}/tv-profile/${station.callSign}/political-files/${YEAR}`;
       try {
-        const { docs, files } = await withBrowserbase(async (page, sid) => {
-          const all = await enumerateStation(page, station, trackedSurnames);
-          const fresh = all
-            .filter((d) => !seen.has(d.fileManagerId))
-            .slice(0, perDocCap);
-          const files = await downloadDocs(
-            page,
-            sid,
-            fresh.map((d) => d.fileManagerId),
-          );
-          return { docs: all, fresh, files } as any;
-        });
+        let docs: EnumeratedDoc[];
+        if (source === "browser") {
+          docs = await withBrowser((page) => enumerateStation(page, station, trackedSurnames), cdpUrl);
+        } else {
+          const res = await fetch(`${FCC_BASE}/tv-profile/${station.callSign}/rss`);
+          if (!res.ok) throw new Error(`feed HTTP ${res.status}`);
+          docs = parseStationFeed(await res.text(), { year: YEAR, trackedSurnames });
+        }
+        const files = await downloadDocs(
+          docs.filter((d) => !seen.has(d.fileManagerId)).slice(0, perDocCap).map((d) => d.fileManagerId),
+        );
         totals.enumerated += docs.length;
 
         // `files` keyed by fileManagerId; ingest each downloaded doc.
-        const fresh = docs.filter(
-          (d: EnumeratedDoc) => files[d.fileManagerId],
-        );
+        const fresh = docs.filter((d) => files[d.fileManagerId]);
         for (const d of fresh) {
           const bytes = files[d.fileManagerId];
           totals.downloaded++;
@@ -635,7 +586,7 @@ export const syncTvAds = internalAction({
             // Store our own copy of the readable order PDF (never hits FCC's
             // blocked host).
             const pdfStorageId = await ctx.storage.store(
-              new Blob([u.bytes], { type: "application/pdf" }),
+              new Blob([Buffer.from(u.bytes)], { type: "application/pdf" }),
             );
             // TV orders don't carry the market; stamp it from the station.
             const withDma = { ...ex, station: station.callSign, dma: station.dma };

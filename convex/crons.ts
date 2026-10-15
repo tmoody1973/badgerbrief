@@ -124,15 +124,12 @@ crons.daily(
   {},
 );
 
-// 13:30 UTC — broadcast-TV political-file orders via Browserbase + FCC (MOO-318).
-// Drives a hosted browser (Convex can't), unwraps PDF portfolios, Sonnet-extracts,
-// lands human-reviewed platform:tv ads. One station's failure alerts + continues.
-crons.daily(
-  "sync TV ads",
-  { hourUTC: 13, minuteUTC: 30 },
-  internal.adsTv.syncTvAdsDispatch,
-  {},
-);
+// Broadcast-TV political-file orders from the FCC (MOO-318): finds new orders
+// in each station's feed, unwraps PDF portfolios, Sonnet-extracts, lands
+// human-reviewed platform:tv ads. One station's failure alerts + continues.
+// Every 2 hours since 2026-10-15: discovery now reads each station's feed,
+// which holds only its 10 newest uploads, so a daily read could miss orders.
+crons.interval("sync TV ads", { hours: 2 }, internal.adsTv.syncTvAdsDispatch, {});
 
 // 10:40 UTC (5:40 AM Central) — City of Milwaukee wards and Election Day
 // polling places; the city refreshes its copy overnight.
