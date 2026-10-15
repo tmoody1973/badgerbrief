@@ -23,6 +23,7 @@ import { CandidateQuestionnaire, questionnaireRows } from "@/components/guide/qu
 import { isInterviewQuote } from "@/lib/interview-quote";
 import { SectionNav, type NavSection } from "@/components/guide/section-nav";
 import { SourceList } from "@/components/guide/sources";
+import { candidateSources } from "@/lib/candidate-sources";
 import { ShareButton } from "@/components/contribute/share-button";
 import {
   getCandidateBySlug,
@@ -356,7 +357,7 @@ export default async function CandidatePage({ params }: Props) {
           <InTheNews items={inTheNews} heading={`In the news about ${candidate.name}`} />
 
           <section id="sources" className="mt-10 scroll-mt-16 space-y-3">
-            <SourceList sources={candidate.sources} />
+            <SourceList sources={candidateSources(candidate.sources, candidate.general)} />
             <LastUpdated date={candidate.dataAsOf} />
           </section>
 
