@@ -1,15 +1,12 @@
 "use client";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { voteSummarySource } from "@/lib/vote-summary-source";
 
 export function VotingRecordByIssue({ candidateSlug, raceId }: { candidateSlug: string; raceId: string }) {
   const groups = useQuery(api.votesQueries.votingRecordByIssue, { candidateSlug, raceId });
   if (!groups || groups.length === 0) return null;
-  // Federal (U.S. House) bill outcomes come from the nonpartisan Congressional
-  // Research Service; Wisconsin ones from the Legislative Reference Bureau.
-  const summarySource = raceId.includes("US-HOUSE")
-    ? "Congressional Research Service"
-    : "Legislative Reference Bureau";
+  const summarySource = voteSummarySource(groups.flatMap((g) => g.votes.map((v) => v.session)));
   return (
     <section className="mt-8">
       <h3 className="font-display text-lg">How they voted, by issue</h3>
