@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { GeneralCandidateCard } from "@/components/guide/cards";
+import { BallotContest, type Holds } from "@/components/guide/ballot-contest";
 import { RaceQuestionnaire, questionnaireRows } from "@/components/guide/questionnaire";
 import { RaceFinanceTable } from "@/components/guide/finance";
 import { InTheNews } from "@/components/guide/in-the-news";
@@ -97,6 +97,15 @@ export default async function RacePage({ params }: Props) {
   const inTheNews = inTheNewsAll.filter((r) => !r.article.archive);
   const polls = splitPolls(pollsAll, slugs).november;
 
+  // What the guide holds on each candidate, shown on their row in the contest.
+  const answered = new Set(questionnaireRows(raceId, questionnaireField).filter((r) => r.status.status === "answered").map((r) => r.slug));
+  const withMoney = new Set(raceFinance.map((f) => f.candidateSlug));
+  const withAds = new Set([...(adMoney?.candidates ?? []).map((c) => c.slug), ...tvAds.flatMap((t) => (t.candidateSlug ? [t.candidateSlug] : []))]);
+  const holds: Record<string, Holds> = Object.fromEntries(
+    onBallot.map((c) => [c.slug, { questionnaire: answered.has(c.slug), money: withMoney.has(c.slug), ads: withAds.has(c.slug) }]),
+  );
+  const compareNoun = onBallot.some((c) => (c.general?.ballotName ?? "").includes("/")) ? "tickets" : "candidates";
+
   const navSections: NavSection[] = [
     ...(onBallot.length > 0 ? [{ id: "candidates", label: "On the ballot", count: onBallot.length }] : []),
     ...(hasQuestionnaire ? [{ id: "questionnaire", label: "Questionnaire" }] : []),
@@ -113,7 +122,7 @@ export default async function RacePage({ params }: Props) {
     : race.sources;
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10">
+    <main className="mx-auto w-full max-w-5xl px-4 pt-4 pb-10">
       <SectionNav sections={navSections} />
       <JsonLd
         nodes={[
@@ -129,15 +138,21 @@ export default async function RacePage({ params }: Props) {
         ]}
       />
 
-      <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
-        {race.level} · {CURRENT_ELECTION.name} · {CURRENT_ELECTION.shortDate}
+      <p className="mt-5 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        {race.level} · {CURRENT_ELECTION.shortDate}
+        {race.general && (
+          <>
+            {" · "}
+            <a href={race.general.source.url} target="_blank" rel="noopener noreferrer" className="underline decoration-2 underline-offset-4 hover:text-foreground">
+              Certified ballot ↗
+            </a>
+          </>
+        )}
       </p>
 
       {ballot.kind === "contest" && (
         <>
-          <h1 className="font-display mt-2 text-3xl leading-tight sm:text-4xl">
-            Who is on the ballot for {race.office} on November 3?
-          </h1>
+          <h1 className="font-display mt-2 text-[clamp(2.25rem,8vw,3.5rem)] leading-[1.05] [text-wrap:balance]">{race.office}</h1>
           <p className="mt-3 max-w-2xl text-lg">
             {countSentence(onBallot.length)}
             {ballot.uncontested && " No other candidate is on the ballot for this office."}{" "}
@@ -149,7 +164,7 @@ export default async function RacePage({ params }: Props) {
 
       {ballot.kind === "no-contest" && (
         <>
-          <h1 className="font-display mt-2 text-3xl leading-tight sm:text-4xl">{race.office}</h1>
+          <h1 className="font-display mt-2 text-[clamp(2.25rem,8vw,3.5rem)] leading-[1.05] [text-wrap:balance]">{race.office}</h1>
           <p className="mt-3 max-w-2xl text-lg">{ballot.note}</p>
           {ballot.runningMates.length > 0 && (
             <div className="mt-4 max-w-2xl">
@@ -177,7 +192,7 @@ export default async function RacePage({ params }: Props) {
 
       {ballot.kind === "not-loaded" && (
         <>
-          <h1 className="font-display mt-2 text-3xl leading-tight sm:text-4xl">{race.office}</h1>
+          <h1 className="font-display mt-2 text-[clamp(2.25rem,8vw,3.5rem)] leading-[1.05] [text-wrap:balance]">{race.office}</h1>
           <p className="mt-3 max-w-2xl text-lg">
             The {CURRENT_ELECTION.longDate} ballot for this office has not been loaded into the guide yet. For
             your own ballot, use{" "}
@@ -189,28 +204,25 @@ export default async function RacePage({ params }: Props) {
         </>
       )}
 
+
+      {onBallot.length > 0 && (
+        <>
+          <BallotContest
+            candidates={onBallot}
+            holds={holds}
+            compare={onBallot.length > 1 ? { href: `/compare/${slug}`, label: `Compare these ${onBallot.length} ${compareNoun}` } : undefined}
+          />
+          <WhatThisMeans topic="party-labels" />
+        </>
+      )}
+
       {(race.officeDescription || race.districtDescription || notes) && (
-        <div className="mt-6 border-2 border-border bg-card p-4 shadow-[var(--shadow-brutal)]">
+        <div className="mt-8 max-w-2xl">
           <h2 className="font-display text-xl">Why this race matters</h2>
           {race.officeDescription && <p className="mt-2">{race.officeDescription}</p>}
           {race.districtDescription && <p className="mt-2">{race.districtDescription}</p>}
           {notes && <p className="mt-2">{notes}</p>}
         </div>
-      )}
-
-      {onBallot.length > 0 && (
-        <section id="candidates" className="mt-8 scroll-mt-16">
-          <h2 className="font-display text-2xl">On the November 3 ballot</h2>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">
-            In the order the state lists them. Names and parties as printed on the ballot.
-          </p>
-          <WhatThisMeans topic="party-labels" />
-          <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-3">
-            {onBallot.map((c) => (
-              <GeneralCandidateCard key={c.slug} candidate={c} />
-            ))}
-          </div>
-        </section>
       )}
 
       <RaceQuestionnaire raceId={raceId} office={race.office} candidates={questionnaireField} />
@@ -223,9 +235,6 @@ export default async function RacePage({ params }: Props) {
         </p>
       )}
 
-      {/* After the candidates, before the money: polls are about the same
-          people the reader has just met. */}
-      <RacePolls polls={polls} raceName={race.office} />
 
       <RaceFinanceTable finance={raceFinance} candidates={onBallot} breakdowns={raceBreakdowns} />
 
@@ -233,18 +242,12 @@ export default async function RacePage({ params }: Props) {
 
       <RaceTvAds ads={tvAds} />
 
+      {/* After the money: published polls, figures as printed, never averaged.
+          A no-predictions guide does not lead with them (Tarik, 2026-10-14). */}
+      <RacePolls polls={polls} raceName={race.office} />
+
       <InTheNews items={inTheNews} heading={`In the news about the ${race.office} race`} />
 
-      {onBallot.length > 1 && (
-        <div className="mt-8">
-          <Link
-            href={`/compare/${slug}`}
-            className="press inline-block border-2 border-border bg-secondary px-4 py-2 font-bold shadow-[var(--shadow-brutal)]"
-          >
-            Compare the {race.office} candidates →
-          </Link>
-        </div>
-      )}
 
       <section id="sources" className="mt-10 scroll-mt-16 space-y-3">
         <SourceList sources={sources} />

@@ -40,7 +40,7 @@ export function SiteHeader() {
             <div className="hidden items-center gap-2 font-mono text-sm font-bold uppercase tracking-wider sm:flex">
               <Link
                 href={localizeHref("/vote", locale)}
-                className="whitespace-nowrap border-2 border-border bg-primary px-2 py-1 text-primary-foreground shadow-[var(--shadow-brutal)]"
+                className="whitespace-nowrap border-2 border-border bg-card px-2 py-1 text-foreground shadow-[var(--shadow-brutal)] hover:bg-secondary"
               >
                 {dict.ctaElectionDay}
               </Link>
