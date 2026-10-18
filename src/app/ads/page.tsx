@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   title: "Ad Tracker",
   description:
     "Who is paying to reach Wisconsin voters — political ad spend from the Meta Ad Library, Google political ads, and broadcast-TV FCC filings, sponsor by sponsor.",
+  alternates: { canonical: "/ads" },
 };
 
 type View = "your-ballot" | "statewide" | "browse";

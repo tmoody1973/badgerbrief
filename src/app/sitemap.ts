@@ -4,6 +4,7 @@ import {
   listRaces,
 } from "@/lib/data";
 import { SITE_URL, raceIdToSlug } from "@/lib/site";
+import { listDebateSlugs } from "@/lib/debates";
 import { hadAugustPrimary } from "@/lib/ballot-status";
 import { archiveEntries } from "@/lib/sitemap-archive";
 
@@ -60,6 +61,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/start`, lastModified: fallback, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/ballot-basics`, lastModified: fallback, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/feedback`, lastModified: fallback, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${SITE_URL}/match`, lastModified: fallback, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/ads`, lastModified: fallback, changeFrequency: "daily", priority: 0.6 },
+    { url: `${SITE_URL}/forecast`, lastModified: fallback, changeFrequency: "daily", priority: 0.5 },
+    ...listDebateSlugs().map((slug) => ({
+      url: `${SITE_URL}/debate/${slug}`,
+      lastModified: fallback,
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
+    })),
     ...races.map((r) => ({
       url: `${SITE_URL}/races/${raceIdToSlug(r.raceId)}`,
       lastModified: asDate(r.dataAsOf, fallback),

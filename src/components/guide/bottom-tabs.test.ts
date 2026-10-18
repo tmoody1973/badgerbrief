@@ -28,7 +28,7 @@ describe("the phone tabs", () => {
   });
 
   test("Races is no longer a tab, so it moves to More", () => {
-    expect(moreLinks(NAV_LINKS).map((l) => l.href)).toContain("/races/wi-gov-2026");
+    expect(moreLinks(NAV_LINKS).map((l) => l.href)).toContain("/races");
   });
 
   test("My Ballot is in the site navigation", () => {

@@ -1,7 +1,7 @@
 /** Single source of truth for site navigation (desktop row + mobile menu). */
 export const NAV_LINKS = [
   { href: "/ballot", label: "My Ballot" },
-  { href: "/races/wi-gov-2026", label: "Races" },
+  { href: "/races", label: "Races" },
   { href: "/match", label: "What Matters" },
   { href: "/ads", label: "Ad Tracker" },
   { href: "/news", label: "News" },

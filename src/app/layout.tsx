@@ -15,7 +15,8 @@ import { HtmlLang } from "@/components/guide/html-lang";
 import { SkipLink } from "@/components/guide/skip-link";
 import { SiteFooter, SiteHeader } from "@/components/guide/chrome";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { CURRENT_ELECTION } from "@/lib/election";
 
 const displayFont = Archivo_Black({
   variable: "--font-archivo-black",
@@ -36,10 +37,11 @@ const monoFont = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — Wisconsin Voter Guide 2026`,
+    // Lead with the words people search; brand last (it's the part Google truncates).
+    default: `Wisconsin Voter Guide: ${CURRENT_ELECTION.shortDate} Ballot — ${SITE_NAME}`,
     template: `%s — ${SITE_NAME}`,
   },
-  description: SITE_DESCRIPTION,
+  description: `Non-partisan Wisconsin voter guide for ${CURRENT_ELECTION.shortDate}: see your ballot, compare the candidates and their money, and learn exactly how and where to vote.`,
   openGraph: {
     siteName: SITE_NAME,
     type: "website",

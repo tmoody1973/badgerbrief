@@ -9,7 +9,7 @@ import { raceIdToSlug } from "@/lib/site";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Follow the money — Wisconsin 2026 | BadgerBrief",
+  title: "Follow the money — Wisconsin 2026",
   description:
     "Who funds Wisconsin's 2026 campaigns — every reported donor, searchable, with funding breakdowns for each state race.",
   alternates: { canonical: "/money" },
