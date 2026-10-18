@@ -54,7 +54,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // "Wisconsin State Assembly — District 1" already says Wisconsin; the layout
   // appends the brand, so the page supplies only what distinguishes it.
   const office = data.race.office;
-  const title = /wisconsin/i.test(office) ? `${office} — 2026` : `${office} — Wisconsin 2026`;
+  // "… 2026 Candidates" matches how voters search ("wisconsin governor candidates 2026").
+  const title = /wisconsin/i.test(office) ? `${office} 2026 Candidates` : `${office}, Wisconsin 2026 Candidates`;
   const description = raceDescription(office, buildRaceBallot(data.race, data.candidates));
   return {
     title,

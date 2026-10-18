@@ -1,0 +1,33 @@
+# BadgerBrief
+
+> Non-partisan, source-linked Wisconsin voter guide for the November 3, 2026 general election: what is on each voter's ballot, who the candidates are, who funds them, and exactly how and where to vote. BadgerBrief does not endorse candidates; every claim links to its source.
+
+## Start here
+
+- [Home](https://badgerbrief.org/): the November 3, 2026 ballot at a glance
+- [My Ballot](https://badgerbrief.org/ballot): enter a Wisconsin address to see every race on that ballot
+- [How to vote](https://badgerbrief.org/vote): registration, absentee and early voting, deadlines, and what to bring
+- [Ballot basics](https://badgerbrief.org/ballot-basics): what each office does
+
+## Races and candidates
+
+- [All 2026 races](https://badgerbrief.org/races): statewide, congressional, and every state legislative district
+- [Governor of Wisconsin](https://badgerbrief.org/races/wi-gov-2026)
+- [All candidates](https://badgerbrief.org/candidates): profiles with positions, voting records where they exist, and sources
+- [Compare candidates](https://badgerbrief.org/compare/wi-gov-2026): side-by-side positions for a race
+
+## Money and ads
+
+- [Follow the money](https://badgerbrief.org/money): reported campaign donors and funding breakdowns
+- [Ad Tracker](https://badgerbrief.org/ads): political ad spending aimed at Wisconsin voters, sponsor by sponsor
+
+## How the guide works
+
+- [Methodology](https://badgerbrief.org/methodology): data sources, how information is verified, and the corrections policy
+- [About](https://badgerbrief.org/about)
+
+## Optional
+
+- [Guía en español](https://badgerbrief.org/es): Spanish-language guide
+- [Cómo votar](https://badgerbrief.org/es/vote)
+- [News](https://badgerbrief.org/news): election coverage from Wisconsin outlets

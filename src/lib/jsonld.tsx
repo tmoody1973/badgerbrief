@@ -54,8 +54,15 @@ export function electionEventNode(e: { generalDate: string }): JsonLdNode {
     "@id": `${SITE_URL}/#election-2026-general`,
     name: CURRENT_ELECTION.eventName,
     startDate: CURRENT_ELECTION.isoDate,
+    endDate: CURRENT_ELECTION.isoDate,
     eventStatus: "https://schema.org/EventScheduled",
-    location: { "@type": "State", name: "Wisconsin" },
+    image: `${SITE_URL}/opengraph-image`,
+    // Google's Event rich result wants a Place with an address, not a bare State.
+    location: {
+      "@type": "Place",
+      name: "Wisconsin",
+      address: { "@type": "PostalAddress", addressRegion: "WI", addressCountry: "US" },
+    },
     description: `Wisconsin general election (${e.generalDate}).`,
     organizer: { "@id": `${SITE_URL}/#org` },
   };

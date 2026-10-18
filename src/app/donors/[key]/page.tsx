@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const profile = await fetchQuery(api.donors.profile, { donorKey: safeDecode(key) });
   return {
     title: profile
-      ? `${profile.donors[0].donorName} — campaign giving | BadgerBrief`
-      : "Donor not found | BadgerBrief",
+      ? `${profile.donors[0].donorName} — campaign giving`
+      : "Donor not found",
     robots: { index: false, follow: false }, // public record on-site, not Google-surfaced (spec)
   };
 }
