@@ -11,9 +11,11 @@ export default clerkMiddleware(async (auth, req) => {
   }
 });
 
+// Only run Clerk where server-side auth is used (src/app/admin, src/app/api).
+// On the development instance, running it on public pages sends any cookieless
+// browser-style request (incl. Googlebot) on a 307 to Clerk's handshake, which
+// answers `x-robots-tag: noindex` — Google dropped every page from search.
+// Public pages read auth client-side via <ClerkProvider>, which needs no middleware.
 export const config = {
-  matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api|trpc)(.*)",
-  ],
+  matcher: ["/admin(.*)", "/(api|trpc)(.*)"],
 };
